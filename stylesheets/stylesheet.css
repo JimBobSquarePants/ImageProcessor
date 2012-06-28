@@ -149,13 +149,14 @@ img {
   max-width: 739px;
   padding: 5px;
   margin: 10px 0 10px 0;
-  border: 1px solid #ebebeb;
+  border: 1px solid #fff;
+  background: #fff;
 
-  box-shadow: 0 0 5px #ebebeb;
-  -webkit-box-shadow: 0 0 5px #ebebeb;
-  -moz-box-shadow: 0 0 5px #ebebeb;
-  -o-box-shadow: 0 0 5px #ebebeb;
-  -ms-box-shadow: 0 0 5px #ebebeb;
+  box-shadow: 0 0 5px #555;
+  -webkit-box-shadow: 0 0 5px #555;
+  -moz-box-shadow: 0 0 5px #555;
+  -o-box-shadow: 0 0 5px #555;
+  -ms-box-shadow: 0 0 5px #555;
 }
 
 pre, code {
@@ -177,14 +178,14 @@ pre, code {
 pre {
   width: 100%;
   padding: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,.1);
+  box-shadow: 0 0 10px rgba(0,0,0,.3);
   overflow: auto;
 }
 
 code {
   padding: 3px;
   margin: 0 3px;
-  box-shadow: 0 0 10px rgba(0,0,0,.1);
+  box-shadow: 0 0 10px rgba(0,0,0,.3);
 }
 
 pre code {
@@ -257,10 +258,10 @@ form {
   padding: 20px;
 }
 
-img {
+/*img {
   width: 100%;
   max-width: 100%;
-}
+}*/
 
 /*******************************************************************************
 Full-Width Styles
@@ -272,7 +273,7 @@ Full-Width Styles
 
 .inner {
   position: relative;
-  max-width: 640px;
+  max-width: 840px;
   padding: 20px 10px;
   margin: 0 auto;
 }
@@ -374,7 +375,14 @@ Full-Width Styles
   background: #212121;
 }
 
+/* Contain floats: h5bp.com/q */
+.fc:before, .fc:after { content: ""; display: table; }
+.fc:after { clear: both; }
+.fc { *zoom: 1; }
 
+/* Floats */
+.fl { float: left;}
+.fr { float: right;}
 
 /*******************************************************************************
 Small Device Styles

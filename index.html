@@ -1,62 +1,97 @@
 <!DOCTYPE html>
 <html>
 
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Imageprocessor : A library for on-the-fly processing of image files with Asp.NET" />
+<head>
+  <meta charset='utf-8' />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+  <meta name="description" content="Imageprocessor : A library for on-the-fly processing of image files with Asp.NET" />
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+  <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>Imageprocessor</title>
-  </head>
+  <title>Imageprocessor</title>
+</head>
 
-  <body>
+<body>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/JimBobSquarePants/ImageProcessor">View on GitHub</a>
+  <!-- HEADER -->
+  <div id="header_wrap" class="outer">
+    <header class="inner">
+      <a id="forkme_banner" href="https://github.com/JimBobSquarePants/ImageProcessor">View on GitHub</a>
 
-          <h1 id="project_title">Imageprocessor</h1>
-          <h2 id="project_tagline">A library for on-the-fly processing of image files with Asp.NET</h2>
+      <h1 id="project_title">Imageprocessor</h1>
+      <h2 id="project_tagline">A library for on-the-fly processing of image files with Asp.NET</h2>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/JimBobSquarePants/ImageProcessor/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/JimBobSquarePants/ImageProcessor/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
+      <section id="downloads">
+        <a class="zip_download_link" href="https://github.com/JimBobSquarePants/ImageProcessor/zipball/master">Download this project as a .zip file</a>
+        <a class="tar_download_link" href="https://github.com/JimBobSquarePants/ImageProcessor/tarball/master">Download this project as a tar.gz file</a>
+      </section>
+    </header>
+  </div>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>Welcome to GitHub Pages.</h3>
+  <!-- MAIN CONTENT -->
+  <div id="main_content_wrap" class="outer">
+    <section id="main_content" class="inner">
+      <p>Imageprocessor is a lightweight library written in C# that allows you to manipulate images on-the-fly using Asp.NET 4.0.</p>
+      <p>
+        It comes in two flavours: </p>
+        <ul>
+          <li><strong>ImageProcessor.dll</strong> which contains the raw fluent api for manipulating images</li>
+          <li><strong>ImageProcessor.Web.dll</strong> which contains a HttpModule for intercepting image requests and processes and caches them based on the given querystring parameters.</li>
+        </ul>
+        <h3>Resizing</h3>
+        <p>Resizing an image is easy. Simply add the parameter <code>?width=yourvalue</code> to the end of the image path and the image will be served at the given width. Unless instructed otherwise with a <code>height=yourvalue</code> parameter this image will automatically maintain the aspect ratio of the original image.</p>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+        <p>e.g. An image processed with a given width of 650px. [ 77.7kb ]</p>
+        <img src="images/demo/size/penguins-650.jpg" alt="penguins at 650px wide.">
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+        <div class="fc">
+          <div class="fl">  <p>The same image processed with a given<br/> width of 250px. [ 14.8kb ]</p>
+            <img src="images/demo/size/penguins-250.jpg" alt="penguins at 250px wide.">
+          </div>       
+          <div class="fr">  <p>And again with a given width of 150px. [ 6.74kb ]</p>
+            <img src="images/demo/size/penguins-150.jpg" alt="penguins at 150px wide.">
+          </div>
+        </div>
+        <p>As you can see the images retain excellent sharpness whilst maintaining a low file size. This was the product of a lot of experimentation with the <code>System.Drawing.Graphics</code> object.</p>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+        <h3>Filters</h3>
 
-<h3>Designer Templates</h3>
+        <p>The processing library contains a few filters to change the appearance of images.</p>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+        <div class="fc">
+          <div class="fl">  <p>BlackWhite <code>filter=blackwhite</code></p>
+            <img src="images/demo/filter/penguins-blackwhite.jpg" alt="penguins in blackwhite.">
+          </div>       
+          <div class="fr">  <p>Greyscale <code>filter=greyscale</code></p>
+            <img src="images/demo/filter/penguins-greyscale.jpg" alt="penguins in greyscale.">
+          </div>
+        </div>
+        <div class="fc">
+          <div class="fl">  <p>Comic <code>filter=comic</code></p>
+            <img src="images/demo/filter/penguins-comic.jpg" alt="penguins in comic.">
+          </div>       
+          <div class="fr">  <p>Sepia <code>filter=sepia</code></p>
+            <img src="images/demo/filter/penguins-sepia.jpg" alt="penguins in sepia.">
+          </div>
+        </div>
+        <p>The next two filters copy popular camera effects. An additional parameter has been added to produce vignetting.</p>
+        <div class="fc">
+          <div class="fl">  <p>Polaroid <code>filter=polaroid&vignette=true</code></p>
+            <img src="images/demo/filter/penguins-polaroid.jpg" alt="penguins in polaroid.">
+          </div>       
+          <div class="fr">  <p>Lomograph <code>filter=lomograph&vignette=true</code></p>
+            <img src="images/demo/filter/penguins-lomograph.jpg" alt="penguins in lomograph.">
+          </div>
+        </div>
+        <h3>Installing</h3>
+        <p>Installation is simple. Download the zip file from <a href="https://github.com/downloads/JimBobSquarePants/ImageProcessor/imageprocessor.zip">here</a> and copy the two binaries into your bin folder. Then copy the example configuration values from the <code>config.txt</code> into your web.config to enable the processor. A Nuget package will be created once I've read the manual to allow simpler installation in the future.</p>
 
-<h3>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+        <h3>TODO:</h3>
+        <ul>
+          <li>Add remote image example documentation</li>
+          <li>Add cropping example documentation</li>
+          <li>More stuff!</li>
+        </ul>
       </section>
     </div>
 
@@ -67,8 +102,5 @@ $ git checkout gh-pages
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-
-    
-
   </body>
-</html>
+  </html>
