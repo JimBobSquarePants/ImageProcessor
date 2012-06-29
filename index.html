@@ -1,106 +1,120 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset='utf-8' />
   <meta http-equiv="X-UA-Compatible" content="chrome=1" />
   <meta name="description" content="Imageprocessor : A library for on-the-fly processing of image files with Asp.NET" />
 
-  <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
+  <link rel="stylesheet" type="text/css" media="screen" href="css/normalise.css">
+  <link rel="stylesheet" type="text/css" media="screen" href="css/style.css">
+  <link rel="stylesheet" type="text/css" media="screen" href="css/helpers.css">
   <title>Imageprocessor</title>
 </head>
 
 <body>
-
-  <!-- HEADER -->
-  <div id="header_wrap" class="outer">
-    <header class="inner">
-      <a id="forkme_banner" href="https://github.com/JimBobSquarePants/ImageProcessor">View on GitHub</a>
-
-      <h1 id="project_title">Imageprocessor</h1>
-      <h2 id="project_tagline">A library for on-the-fly processing of image files with Asp.NET</h2>
-
-      <section id="downloads">
-        <a class="zip_download_link" href="https://github.com/JimBobSquarePants/ImageProcessor/zipball/master">Download this project as a .zip file</a>
-        <a class="tar_download_link" href="https://github.com/JimBobSquarePants/ImageProcessor/tarball/master">Download this project as a tar.gz file</a>
-      </section>
+  <div class="container">
+    <header class="g1 clearfix">
+      <div class="fl">
+        <h1 class="logo">Imageprocessor</h1>
+        <h2>A library for on-the-fly processing of image files with Asp.NET</h2>
+      </div>
+      <div class="fl g2">
+        <div class="clearfix">
+        <a href="https://github.com/JimBobSquarePants/ImageProcessor/tarball/master" class="tar-dl-link fl ir">Download this project as a tar.gz file</a>
+        <a href="https://github.com/JimBobSquarePants/ImageProcessor/zipball/master" class="zip-dl-link fl ir">Download this project as a .zip file</a>
+        </div>
+      </div>
+      <a href="#" class="forkme">fork me on github</a>
     </header>
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <div id="main_content_wrap" class="outer">
-    <section id="main_content" class="inner">
-      <p>Imageprocessor is a lightweight library written in C# that allows you to manipulate images on-the-fly using Asp.NET 4.0.</p>
-      <p>
-        It comes in two flavours: </p>
-        <ul>
-          <li><strong>ImageProcessor.dll</strong> which contains the raw fluent api for manipulating images</li>
-          <li><strong>ImageProcessor.Web.dll</strong> which contains a HttpModule for intercepting image requests and processes and caches them based on the given querystring parameters.</li>
-        </ul>
-        <h3>Resizing</h3>
-        <p>Resizing an image is easy. Simply add the parameter <code>?width=yourvalue</code> to the end of the image path and the image will be served at the given width. Unless instructed otherwise with a <code>height=yourvalue</code> parameter this image will automatically maintain the aspect ratio of the original image.</p>
-
-        <p>e.g. An image processed with a given width of 650px. [ 77.7kb ]</p>
-        <img src="images/demo/size/penguins-650.jpg" alt="penguins at 650px wide.">
-
-        <div class="fc">
-          <div class="fl">  <p>The same image processed with a given<br/> width of 250px. [ 14.8kb ]</p>
-            <img src="images/demo/size/penguins-250.jpg" alt="penguins at 250px wide.">
-          </div>       
-          <div class="fr">  <p>And again with a given width of 150px. [ 6.74kb ]</p>
-            <img src="images/demo/size/penguins-150.jpg" alt="penguins at 150px wide.">
-          </div>
+    <article role="main">
+      <section class="clearfix">
+        <div class="fl g2">
+          <h1>What is it?</h1>
+          <p>
+            Imageprocessor is a lightweight library written in C# that allows you to manipulate images on-the-fly using Asp.NET 4.0.
+          </p>
+          <p>
+            It's fast, extensible, easy to use, comes bundled with some great features and is fully open source.
+          </p>
         </div>
-        <p>As you can see the images retain excellent sharpness whilst maintaining a low file size. This was the product of a lot of experimentation with the <code>System.Drawing.Graphics</code> object.</p>
-
-        <h3>Filters</h3>
-
-        <p>The processing library contains a few filters to change the appearance of images.</p>
-
-        <div class="fc">
-          <div class="fl">  <p>BlackWhite <code>filter=blackwhite</code></p>
-            <img src="images/demo/filter/penguins-blackwhite.jpg" alt="penguins in blackwhite.">
-          </div>       
-          <div class="fr">  <p>Greyscale <code>filter=greyscale</code></p>
-            <img src="images/demo/filter/penguins-greyscale.jpg" alt="penguins in greyscale.">
-          </div>
+        <img src="images/demo/penguins-all.jpg" alt="penguins all" class="fl"/>
+      </section>
+      <section class="clearfix cs1">
+        <img src="images/demo/computer.gif" alt="computer" class="fl"/>
+        <div class="fl g2">
+          <h1>Installation</h1>
+          <p>Installation is simple. Download the zip file from <a href="https://github.com/downloads/JimBobSquarePants/ImageProcessor/imageprocessor.zip">here</a> and copy the two binaries into your bin folder. Then copy the example configuration values from the <code>config.txt</code> into your web.config to enable the processor. A Nuget package will be created once I've read the manual to allow simpler installation in the future.</p>
         </div>
-        <div class="fc">
-          <div class="fl">  <p>Comic <code>filter=comic</code></p>
-            <img src="images/demo/filter/penguins-comic.jpg" alt="penguins in comic.">
-          </div>       
-          <div class="fr">  <p>Sepia <code>filter=sepia</code></p>
-            <img src="images/demo/filter/penguins-sepia.jpg" alt="penguins in sepia.">
-          </div>
+      </section>
+      <section class="clearfix">        
+        <div class="fl g2">
+          <h1>Features</h1>
+          <p>Imageprocessor has lots of cool features that make it a great choice for developers like intelligent caching, a fluent, easy to use api and much more.</p><p>All these features can be combined and called in any order due to regex based parsing and have an easy to remember syntax.</p><p>Here's a few examples:</p>
         </div>
-        <p>The next two filters copy popular camera effects. An additional parameter has been added to produce vignetting.</p>
-        <div class="fc">
-          <div class="fl">  <p>Polaroid <code>filter=polaroid&vignette=true</code></p>
-            <img src="images/demo/filter/penguins-polaroid.jpg" alt="penguins in polaroid.">
-          </div>       
-          <div class="fr">  <p>Lomograph <code>filter=lomograph&vignette=true</code></p>
-            <img src="images/demo/filter/penguins-lomograph.jpg" alt="penguins in lomograph.">
-          </div>
-        </div>
-        <h3>Installing</h3>
-        <p>Installation is simple. Download the zip file from <a href="https://github.com/downloads/JimBobSquarePants/ImageProcessor/imageprocessor.zip">here</a> and copy the two binaries into your bin folder. Then copy the example configuration values from the <code>config.txt</code> into your web.config to enable the processor. A Nuget package will be created once I've read the manual to allow simpler installation in the future.</p>
-
-        <h3>TODO:</h3>
-        <ul>
-          <li>Add remote image example documentation</li>
-          <li>Add cropping example documentation</li>
-          <li>More stuff!</li>
+        <ul class="fl g2 tick-list">
+          <li>caching</li>
+          <li>resizing</li>
+          <li>cropping</li>
+          <li>alpha transparency</li>
+          <li>filter effects</li>
         </ul>
       </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Imageprocessor maintained by <a href="https://github.com/JimBobSquarePants">JimBobSquarePants</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-  </body>
-  </html>
+      <section class="clearfix cs2">
+        <img src="images/demo/cache.gif" alt="cache" class="fl"/>
+        <div class="fl g2">
+          <h1>Caching</h1>
+          <p>Imageprocessor caches any processed image both in the browser and on the server for a length of your choosing. The server cache intelligently stores up to 8000 images and silently updates itself should the original image change or the cache expires.</p><p>This saves massive amounts of processing power and bandwidth that help to keep your snappy.</p>
+        </div>
+      </section>
+      <section class="clearfix">        
+        <div class="fl g2">
+          <h1>Resizing</h1>
+          <p>Imageprocessor can resize bmps, jpegs, pngs and gifs (gifs require full trust) up or down producing the highest quality output at the lowest possible filesize.</p><p>Images passed only a width parameter will automatically maintain their aspect ratio.</p><p>The library also protects you from denial of service attacks by ignoring requests to generate images larger than a maximum value you set.</p>
+          <p>Requests are passed thus:<br/><code>http://yourimage?width=yourwidth</code></p>
+        </div>
+        <img src="images/demo/resize.jpg" alt="resize" class="fl"/>
+      </section>
+      <section class="clearfix cs3">
+        <img src="images/demo/crop.jpg" alt="crop" class="fl"/>
+        <div class="fl g2">
+          <h1>Cropping</h1>
+          <p>Imageprocessor can crop a given image and serve only the part you want. Simply pass the top-left and bottom-right coordinates and the processor will work out the rest.</p>        
+          <p>Requests are passed thus:<br/><code>http://yourimage?crop=x-y-x2-y2</code></p>
+        </div>
+      </section>
+      <section class="clearfix">        
+        <div class="fl g2">
+          <h1>Alpha</h1>
+          <p>Imageprocessor can adjust the alpha transparency of png images. Simply pass the desired percentage value (without the '%') to the processor.</p>
+          <p>Requests are passed thus:<br/><code>http://yourimage?alpha=percentage</code></p>
+        </div>
+        <img src="images/demo/alpha.jpg" alt="alpha" class="fl"/>
+      </section>
+      <section class="clearfix cs5">
+        <img src="images/demo/filters.jpg" alt="filters" class="fl"/>
+        <div class="fl g2">
+          <h1>Filters</h1>
+          <p>Everybody loves adding filter effects to photgraphs so we've baked some popular ones into Imageprocessor.</p>
+          <p>Filters starting from top-left and going across each row are:</p>        
+          <ul>
+            <li>blackwhite</li>
+            <li>comic</li>
+            <li>lomograph</li>
+            <li>greyscale</li>
+            <li>polaroid</li>
+            <li>sepia</li>
+            <li>gotham</li>
+            <li>hisatch</li>
+            <li>losatch</li>
+          </ul>
+          <p>Requests are passed thus:<br/><code>http://yourimage?filter=name</code></p>
+        </div>
+      </section>
+    </article>
+    <footer class="g1">
+      <p class="copyright">Imageprocessor maintained by <a href="https://github.com/JimBobSquarePants">JimBobSquarePants</a></p>
+      <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+    </footer>
+  </div>
+</body>
+</html>

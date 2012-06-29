@@ -1,0 +1,186 @@
+/* ==|== primary styles =====================================================
+   Author: James South
+   ========================================================================== */
+
+/* =============================================================================
+   Base Elements
+   ========================================================================== */
+html, body
+{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+body
+{
+    font-size: 16px;
+    font-family: "Segoe UI Light" , "Segoe UI" ,Tahoma,Arial,Verdana,Sans-Serif;
+    color: #454545;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6
+{
+    font-weight: lighter!important;
+}
+
+h1, .h1
+{
+    font-size: 3em;
+}
+
+header, section, footer
+{
+    padding: 0 50px;
+}
+
+section
+{
+    padding: 32px 50px;
+}
+
+section h1, .h1
+{
+    margin-bottom: 0;
+    margin-top: .335em;
+}
+
+code
+{
+    background-color: #434343;
+    color: #fff;
+}
+
+/* =============================================================================
+   Grid
+   ========================================================================== */
+.g1
+{
+    width:98%;
+    margin: 0 1%;
+}
+
+.g2
+{
+    width:31.333%;
+    margin: 0 1%;
+}
+
+.g3
+{
+    width:48%;
+    margin: 0 1%;
+}
+
+/* =============================================================================
+   Colour schemes
+   ========================================================================== */
+
+.cs1
+{
+    background-color: #00a9ec;
+    color:#fff;
+}
+
+.cs2
+{
+    background-color: #e43a06;
+    color: #fff;
+}
+
+.cs3
+{
+    background-color: #72a61a;
+    color: #fff;
+}
+
+.cs4
+{
+    background-color: #00a94f;
+    color: #fff;
+}
+
+.cs5
+{
+    background-color: #517fb1;
+    color: #fff;
+}
+
+
+
+
+
+/* =============================================================================
+   Classes
+   ========================================================================== */
+
+.container
+{
+    min-height: 100%;
+    /*margin: 0 50px;*/
+    position: relative;
+    max-width: 1920px;
+    box-sizing: border-box;
+    overflow-x:hidden; 
+}
+
+.logo
+{
+    font-size: 3em;
+    margin-top: 0;
+    padding-top: 0.67em;
+}
+
+.tick-list li
+{
+    font-size: 24px;
+    position: relative;
+    padding-left:36px;
+    padding-top:3px;
+    list-style: none;
+}
+
+.tick-list li:before
+{
+    position: absolute;
+    content: "\2714";
+    font-size: 36px;
+    left: 0;
+    top: -6px;
+}
+
+.forkme,.forkme:visited 
+{
+  display: block;
+  position: absolute;
+  top:0;
+  right: 10px;
+  z-index: 10;
+  padding: 10px 50px 10px 10px;
+  color: #fff;
+  background: url('../images/blacktocat.png') #00A9EC no-repeat 95% 50%;
+}
+
+.forkme:hover
+{
+    color: #ebebeb;
+}
+
+.tar-dl-link
+{
+    background: url('../images/demo/downloads-tar.gif');
+    height: 64px;
+    width: 64px;
+    margin-top: 110px;
+    margin-left: 50px;
+}
+
+.zip-dl-link
+{
+    background: url('../images/demo/downloads-zip.gif');
+    height: 64px;
+    width: 64px;
+    margin-left: 2%;
+    margin-top: 110px;
+}
