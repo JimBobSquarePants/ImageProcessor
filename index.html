@@ -20,8 +20,8 @@
       </div>
       <div class="fl g2">
         <div class="clearfix">
-        <a href="https://github.com/JimBobSquarePants/ImageProcessor/tarball/master" class="tar-dl-link fl ir">Download this project as a tar.gz file</a>
-        <a href="https://github.com/JimBobSquarePants/ImageProcessor/zipball/master" class="zip-dl-link fl ir">Download this project as a .zip file</a>
+          <a href="https://github.com/JimBobSquarePants/ImageProcessor/tarball/master" class="tar-dl-link fl ir">Download this project as a tar.gz file</a>
+          <a href="https://github.com/JimBobSquarePants/ImageProcessor/zipball/master" class="zip-dl-link fl ir">Download this project as a .zip file</a>
         </div>
       </div>
       <a href="https://github.com/JimBobSquarePants/ImageProcessor" class="forkme">fork me on github</a>
@@ -57,6 +57,7 @@
           <li>cropping</li>
           <li>alpha transparency</li>
           <li>filter effects</li>
+          <li>watermark</li>
         </ul>
       </section>
       <section class="clearfix cs2">
@@ -110,6 +111,25 @@
           <p>Requests are passed thus:<br/><code>http://yourimage?filter=name</code></p>
         </div>
       </section>
+      <section>  
+        <div class=clearfix>   
+          <div class="fl g2">
+            <h1>Watermark</h1>
+            <p>Imageprocessor can add watermark text to your images with a wide range of options:</p>
+            <ul>
+              <li>text</li>
+              <li>size (px)</li>
+              <li>font (any installed font)</li>
+              <li>opacity (1-100)</li>
+              <li>style (bold|italic|regular|strikeout|underline)</li>
+              <li>shadow</li>
+              <li>position (x,y)</li>
+            </ul>          
+          </div>
+          <img src="images/demo/watermark.jpg" alt="watermark" class="fl"/>
+        </div>   
+        <p>Requests are passed thus:<br/><code>http://yourimage?watermark=text-test text|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code></p>
+      </section>
     </article>
     <footer class="g1">
       <p class="copyright">Imageprocessor maintained by <a href="https://github.com/JimBobSquarePants">JimBobSquarePants</a></p>
@@ -117,12 +137,12 @@
     </footer>
   </div>
       <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
-         mathiasbynens.be/notes/async-analytics-snippet -->
-    <script>
-        var _gaq=[['_setAccount','UA-33038042-1'],['_trackPageview']];
-        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+      mathiasbynens.be/notes/async-analytics-snippet -->
+      <script>
+      var _gaq=[['_setAccount','UA-33038042-1'],['_trackPageview']];
+      (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
         g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
         s.parentNode.insertBefore(g,s)}(document,'script'));
-    </script>
-</body>
-</html>
+      </script>
+    </body>
+    </html>
