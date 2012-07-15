@@ -68,13 +68,16 @@
           <p>Imageprocessor caches any processed image both in the browser and on the server for a length of your choosing. The server cache intelligently stores up to 8000 images and silently updates itself should the original image change or the cache expires.</p><p>This saves massive amounts of processing power and bandwidth that help to keep your snappy.</p>
         </div>
       </section>
-      <section class="clearfix">        
-        <div class="fl g2">
-          <h1>Resizing</h1>
-          <p>Imageprocessor can resize bmps, jpegs, pngs and gifs (gifs require full trust) up or down producing the highest quality output at the lowest possible filesize.</p><p>Images passed only a width parameter will automatically maintain their aspect ratio.</p><p>The library also protects you from denial of service attacks by ignoring requests to generate images larger than a maximum value you set.</p>
-          <p>Requests are passed thus:<br/><code>http://yourimage?width=yourwidth</code></p>
+      <section>
+        <div class="clearfix">
+          <div class="fl g2">
+            <h1>Resizing</h1>
+            <p>Imageprocessor can resize bmps, jpegs, pngs and gifs (gifs require full trust) up or down producing the highest quality output at the lowest possible filesize.</p><p>Images passed only a width parameter will automatically maintain their aspect ratio.</p><p>The library also protects you from denial of service attacks by ignoring requests to generate images larger than a maximum value you set.</p>
+            <p>Requests are passed thus:<br/><code>http://yourimage?width=yourwidth</code><br/></p>
+          </div>
+          <img src="images/demo/resize.jpg" alt="resize" class="fl"/>
         </div>
-        <img src="images/demo/resize.jpg" alt="resize" class="fl"/>
+        <code>http://yourimage?resize=width-yourwidth|height-yourheight</code>
       </section>
       <section class="clearfix cs3">
         <img src="images/demo/crop.jpg" alt="crop" class="fl"/>
