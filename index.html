@@ -1,167 +1,213 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset='utf-8' />
-  <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-  <meta name="description" content="Imageprocessor : A C# library for on-the-fly processing of image files with Asp.NET. Imageprocessor can resize, crop, watermark and add Instagram style filters to images." />
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Imageprocessor : A C# library for on-the-fly processing of image files with Asp.NET. Imageprocessor can resize, rotate, crop, watermark and add Instagram style filters to images." />
 
-  <link rel="stylesheet" type="text/css" media="screen" href="css/normalise.css">
-  <link rel="stylesheet" type="text/css" media="screen" href="css/style.css">
-  <link rel="stylesheet" type="text/css" media="screen" href="css/helpers.css">
-  <title>Imageprocessor</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/normalise.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/style.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/helpers.css">
+    <title>Imageprocessor</title>
 </head>
 
 <body>
-  <div class="container">
-    <header class="g1 clearfix">
-      <div class="fl">
-        <h1 class="logo">Imageprocessor</h1>
-        <h2>A library for on-the-fly processing of image files with Asp.NET</h2>
-      </div>
-      <div class="fl g2">
-        <div class="clearfix">
-          <a href="https://github.com/JimBobSquarePants/ImageProcessor/tarball/master" class="tar-dl-link fl ir">Download this project as a tar.gz file</a>
-          <a href="https://github.com/JimBobSquarePants/ImageProcessor/zipball/master" class="zip-dl-link fl ir">Download this project as a .zip file</a>
-        </div>
-      </div>
-      <a href="https://github.com/JimBobSquarePants/ImageProcessor" class="forkme">fork me on github</a>
-    </header>
-    <article role="main">
-      <section class="clearfix">
-        <div class="fl g2">
-          <h1>What is it?</h1>
-          <p>
-            Imageprocessor is a lightweight library written in C# that allows you to manipulate images on-the-fly using Asp.NET 4.0.
-          </p>
-          <p>
-            It's fast, extensible, easy to use, comes bundled with some great features and is fully open source.
-          </p>
-        </div>
-        <img src="images/demo/penguins-all.jpg" alt="penguins all" class="fl"/>
-      </section>
-      <section class="clearfix cs1">
-        <img src="images/demo/computer.gif" alt="computer" class="fl"/>
-        <div class="fl g2">
-          <h1>Installation</h1>
-          <p>Installation is simple. Download the zip file from <a href="https://github.com/downloads/JimBobSquarePants/ImageProcessor/imageprocessor.zip">here</a> and copy the two binaries into your bin folder. Then copy the example configuration values from the <code>config.txt</code> into your web.config to enable the processor. A Nuget package will be created once I've read the manual to allow simpler installation in the future.</p>
-        </div>
-      </section>
-      <section class="clearfix">        
-        <div class="fl g2">
-          <h1>Features</h1>
-          <p>Imageprocessor has lots of cool features that make it a great choice for developers like intelligent caching, a fluent, easy to use api and much more.</p><p>All these features can be combined and called in any order due to regex based parsing and have an easy to remember syntax.</p><p>Here's a few examples:</p>
-        </div>
-        <ul class="fl g2 tick-list">
-          <li>caching</li>
-          <li>resizing</li>
-          <li>cropping</li>
-          <li>alpha transparency</li>
-          <li>filter effects</li>
-          <li>watermark</li>
-          <li>format</li>
-        </ul>
-      </section>
-      <section class="clearfix cs2">
-        <img src="images/demo/cache.gif" alt="cache" class="fl"/>
-        <div class="fl g2">
-          <h1>Caching</h1>
-          <p>Imageprocessor caches any processed image both in the browser and on the server for a length of your choosing. The server cache intelligently stores up to 8000 images and silently updates itself should the original image change or the cache expires.</p><p>This saves massive amounts of processing power and bandwidth that help to keep your snappy.</p>
-        </div>
-      </section>
-      <section>
-        <div class="clearfix">
-          <div class="fl g2">
-            <h1>Resizing</h1>
-            <p>Imageprocessor can resize bmps, jpegs, pngs and gifs (gifs require full trust) up or down producing the highest quality output at the lowest possible filesize.</p><p>Images passed only a width parameter will automatically maintain their aspect ratio.</p><p>The library also protects you from denial of service attacks by ignoring requests to generate images larger than a maximum value you set.</p>
-            <p>Requests are passed thus:<br/><code>http://yourimage?width=yourwidth</code><br/></p>
-          </div>
-          <img src="images/demo/resize.jpg" alt="resize" class="fl"/>
-        </div>
-        <code>http://yourimage?resize=width-yourwidth|height-yourheight</code>
-      </section>
-      <section class="clearfix cs3">
-        <img src="images/demo/crop.jpg" alt="crop" class="fl"/>
-        <div class="fl g2">
-          <h1>Cropping</h1>
-          <p>Imageprocessor can crop a given image and serve only the part you want. Simply pass the top-left and bottom-right coordinates and the processor will work out the rest.</p>        
-          <p>Requests are passed thus:<br/><code>http://yourimage?crop=x-y-x2-y2</code></p>
-        </div>
-      </section>
-      <section class="clearfix">        
-        <div class="fl g2">
-          <h1>Alpha</h1>
-          <p>Imageprocessor can adjust the alpha transparency of png images. Simply pass the desired percentage value (without the '%') to the processor.</p>
-          <p>Requests are passed thus:<br/><code>http://yourimage?alpha=percentage</code></p>
-        </div>
-        <img src="images/demo/alpha.jpg" alt="alpha" class="fl"/>
-      </section>
-      <section class="clearfix cs5">
-        <img src="images/demo/filters.jpg" alt="filters" class="fl"/>
-        <div class="fl g2">
-          <h1>Filters</h1>
-          <p>Everybody loves adding filter effects to photgraphs so we've baked some popular ones into Imageprocessor.</p>
-          <p>Filters starting from top-left and going across each row are:</p>        
-          <ul>
-            <li>blackwhite</li>
-            <li>comic</li>
-            <li>lomograph</li>
-            <li>greyscale</li>
-            <li>polaroid</li>
-            <li>sepia</li>
-            <li>gotham</li>
-            <li>hisatch</li>
-            <li>losatch</li>
-          </ul>
-          <p>Requests are passed thus:<br/><code>http://yourimage?filter=name</code></p>
-        </div>
-      </section>
-      <section>  
-        <div class=clearfix>   
-          <div class="fl g2">
-            <h1>Watermark</h1>
-            <p>Imageprocessor can add watermark text to your images with a wide range of options:</p>
-            <ul>
-              <li>text</li>
-              <li>size (px)</li>
-              <li>font (any installed font)</li>
-              <li>opacity (1-100)</li>
-              <li>style (bold|italic|regular|strikeout|underline)</li>
-              <li>shadow</li>
-              <li>position (x,y)</li>
-            </ul>          
-          </div>
-          <img src="images/demo/watermark.jpg" alt="watermark" class="fl"/>
-        </div>   
-        <p>Requests are passed thus:<br/><code>http://yourimage?watermark=text-test text|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code></p>
-      </section>
-      <section class="clearfix cs6">
-        <img src="images/demo/format.jpg" alt="format" class="fl"/>
-        <div class="fl g2">
-          <h1>Format</h1>
-          <p>Imageprocessor allows you to change the format of image on-the-fly.</p>
-          <p>Supported file format just now are:</p>        
-          <ul>
-            <li>jpg</li>
-            <li>bmp</li>
-            <li>png</li>
-            <li>gif</li>
-          </ul>
-          <p>Requests are passed thus:<br/><code>http://yourimage?format=chosen format</code></p>
-        </div>
-      </section>
-    </article>
-    <footer class="g1">
-      <p class="copyright">Imageprocessor maintained by <a href="https://github.com/JimBobSquarePants">JimBobSquarePants</a></p>
-      <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-    </footer>
-  </div>
-      <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
+    <div class="container">
+        <header class="g1 clearfix">
+            <div class="fl">
+                <h1 class="logo">Imageprocessor</h1>
+                <h2>A library for on-the-fly processing of image files with Asp.NET</h2>
+            </div>
+            <div class="fl g2">
+                <div class="clearfix">
+                    <a href="https://github.com/JimBobSquarePants/ImageProcessor/tarball/master" class="tar-dl-link fl ir">Download this project as a tar.gz file</a>
+                    <a href="https://github.com/JimBobSquarePants/ImageProcessor/zipball/master" class="zip-dl-link fl ir">Download this project as a .zip file</a>
+                </div>
+            </div>
+            <a href="https://github.com/JimBobSquarePants/ImageProcessor" class="forkme">fork me on github</a>
+        </header>
+        <article role="main">
+            <section class="clearfix">
+                <div class="fl g2">
+                    <h1>What is it?</h1>
+                    <p>
+                        Imageprocessor is a lightweight library written in C# that allows you to manipulate images on-the-fly using Asp.NET 4.0.
+                    </p>
+                    <p>
+                        It's fast, extensible, easy to use, comes bundled with some great features and is fully open source.
+                    </p>
+                </div>
+                <img src="images/demo/penguins-all.jpg" alt="penguins all" class="fl" />
+            </section>
+            <section class="clearfix cs1">
+                <img src="images/demo/computer.gif" alt="computer" class="fl" />
+                <div class="fl g2">
+                    <h1>Installation</h1>
+                    <p>Installation is simple. Download the zip file from <a href="https://github.com/downloads/JimBobSquarePants/ImageProcessor/imageprocessor.zip">here</a> and copy the two binaries into your bin folder. Then copy the example configuration values from the <code>config.txt</code> into your web.config to enable the processor. A Nuget package will be created once I've read the manual to allow simpler installation in the future.</p>
+                </div>
+            </section>
+            <section class="clearfix">
+                <div class="fl g2">
+                    <h1>Features</h1>
+                    <p>Imageprocessor has lots of cool features that make it a great choice for developers like intelligent caching, a fluent, easy to use api and much more.</p>
+                    <p>All these features can be combined and called in any order due to regex based parsing and have an easy to remember syntax.</p>
+                    <p>Here's a few examples:</p>
+                </div>
+                <ul class="fl g2 tick-list">
+                    <li>caching</li>
+                    <li>resizing</li>
+                    <li>cropping</li>
+                    <li>alpha transparency</li>
+                    <li>filter effects</li>
+                    <li>watermark</li>
+                    <li>format</li>
+                </ul>
+            </section>
+            <section class="clearfix cs2">
+                <img src="images/demo/cache.gif" alt="cache" class="fl" />
+                <div class="fl g2">
+                    <h1>Caching</h1>
+                    <p>Imageprocessor caches any processed image both in the browser and on the server for a length of your choosing. The server cache intelligently stores up to 8000 images and silently updates itself should the original image change or the cache expires.</p>
+                    <p>This saves massive amounts of processing power and bandwidth that help to keep your snappy.</p>
+                </div>
+            </section>
+            <section>
+                <div class="clearfix">
+                    <div class="fl g2">
+                        <h1>Resizing</h1>
+                        <p>Imageprocessor can resize bmps, jpegs, pngs and gifs (gifs require full trust) up or down producing the highest quality output at the lowest possible filesize.</p>
+                        <p>Images passed only a width parameter will automatically maintain their aspect ratio.</p>
+                        <p>The library also protects you from denial of service attacks by ignoring requests to generate images larger than a maximum value you set.</p>
+                        <p>
+                            Requests are passed thus:<br />
+                            <code>http://yourimage?width=yourwidth</code><br />
+                        </p>
+                    </div>
+                    <img src="images/demo/resize.jpg" alt="resize" class="fl" />
+                </div>
+                <code>http://yourimage?width=yourwidth&height=yourheight</code>
+                <p>older syntax</p>
+                <code>http://yourimage?resize=width-yourwidth|height-yourheight</code>
+            </section>
+            <section class="clearfix cs3">
+                <img src="images/demo/crop.jpg" alt="crop" class="fl" />
+                <div class="fl g2">
+                    <h1>Cropping</h1>
+                    <p>Imageprocessor can crop a given image and serve only the part you want. Simply pass the top-left and bottom-right coordinates and the processor will work out the rest.</p>
+                    <p>
+                        Requests are passed thus:<br />
+                        <code>http://yourimage?crop=x-y-x2-y2</code>
+                    </p>
+                </div>
+            </section>
+            <section class="clearfix">
+                <div class="fl g2">
+                    <h1>Alpha</h1>
+                    <p>Imageprocessor can adjust the alpha transparency of png images. Simply pass the desired percentage value (without the '%') to the processor.</p>
+                    <p>
+                        Requests are passed thus:<br />
+                        <code>http://yourimage?alpha=percentage</code>
+                    </p>
+                </div>
+                <img src="images/demo/alpha.jpg" alt="alpha" class="fl" />
+            </section>
+            <section class="clearfix cs5">
+                <img src="images/demo/filters.jpg" alt="filters" class="fl" />
+                <div class="fl g2">
+                    <h1>Filters</h1>
+                    <p>Everybody loves adding filter effects to photgraphs so we've baked some popular ones into Imageprocessor.</p>
+                    <p>Filters starting from top-left and going across each row are:</p>
+                    <ul>
+                        <li>blackwhite</li>
+                        <li>comic</li>
+                        <li>lomograph</li>
+                        <li>greyscale</li>
+                        <li>polaroid</li>
+                        <li>sepia</li>
+                        <li>gotham</li>
+                        <li>hisatch</li>
+                        <li>losatch</li>
+                    </ul>
+                    <p>
+                        Requests are passed thus:<br />
+                        <code>http://yourimage?filter=name</code>
+                    </p>
+                </div>
+            </section>
+            <section>
+                <div class="clearfix">
+                    <div class="fl g2">
+                        <h1>Watermark</h1>
+                        <p>Imageprocessor can add watermark text to your images with a wide range of options:</p>
+                        <ul>
+                            <li>text</li>
+                            <li>size (px)</li>
+                            <li>font (any installed font)</li>
+                            <li>opacity (1-100)</li>
+                            <li>style (bold|italic|regular|strikeout|underline)</li>
+                            <li>shadow</li>
+                            <li>position (x,y)</li>
+                        </ul>
+                    </div>
+                    <img src="images/demo/watermark.jpg" alt="watermark" class="fl" />
+                </div>
+                <p>
+                    Requests are passed thus:<br />
+                    <code>http://yourimage?watermark=text-test text|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code>
+                </p>
+            </section>
+            <section class="clearfix cs6">
+                <img src="images/demo/format.jpg" alt="format" class="fl" />
+                <div class="fl g2">
+                    <h1>Format</h1>
+                    <p>Imageprocessor allows you to change the format of image on-the-fly.</p>
+                    <p>Supported file format just now are:</p>
+                    <ul>
+                        <li>jpg</li>
+                        <li>bmp</li>
+                        <li>png</li>
+                        <li>gif</li>
+                    </ul>
+                    <p>
+                        Requests are passed thus:<br />
+                        <code>http://yourimage?format=chosen format</code>
+                    </p>
+                </div>
+            </section>
+            <section>
+                <div class="clearfix">
+                    <div class="fl g2">
+                        <h1>Rotate</h1>
+                        <p>
+                            Imageprocessor can rotate your images without clipping. You can also optionally fill the background color for image types without transparency.
+                        </p>
+                    </div>
+                    <img src="images/demo/rotate.png" alt="rotate" class="fl" />
+                </div>
+                <p>
+                    Requests are passed thus:<br />
+                    <code>http://yourimage?rotate=angle</code>
+                </p>
+                <p>
+                    Color syntax<br />
+                    <code>http://yourimage?rotate=angle-your angle|bgcolor-fff</code>
+                </p>
+            </section>
+        </article>
+        <footer class="g1">
+            <p class="copyright">Imageprocessor maintained by <a href="https://github.com/JimBobSquarePants">JimBobSquarePants</a></p>
+            <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+        </footer>
+    </div>
+    <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
       mathiasbynens.be/notes/async-analytics-snippet -->
-      <script>
-      var _gaq=[['_setAccount','UA-33038042-1'],['_trackPageview']];
-      (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-        s.parentNode.insertBefore(g,s)}(document,'script'));
-      </script>
-    </body>
-    </html>
+    <script>
+        var _gaq = [['_setAccount', 'UA-33038042-1'], ['_trackPageview']];
+        (function (d, t) {
+            var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+            g.src = ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g, s)
+        }(document, 'script'));
+    </script>
+</body>
+</html>
