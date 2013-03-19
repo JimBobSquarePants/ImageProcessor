@@ -89,6 +89,7 @@
                     <li>format</li>
                     <li>rotate</li>
                     <li>quality</li>
+                    <li>flip</li>
                 </ul>
             </section>
             <section class="cs2">
@@ -100,7 +101,7 @@
                         <h1>Caching</h1>
                         <p>
                             Imageprocessor caches any processed image both in the browser and on the server for a length of your choosing. The server cache intelligently stores up 
-                            to 8000 images and silently updates itself should the original image change or the cache expires.
+                            to 360,000 images and silently updates itself should the original image change or the cache expires.
                         </p>
                         <p>This saves massive amounts of processing power and bandwidth that help to keep your website snappy.</p>
                     </div>
@@ -176,6 +177,7 @@
                             <li>gotham</li>
                             <li>hisatch</li>
                             <li>losatch</li>
+                            <li>invert</li>
                         </ul>
                         <p>
                             Requests are passed thus:
@@ -276,6 +278,24 @@
                     </div>
                     <div class="clmn2">
                         <img src="images/demo/vignette.jpg" alt="vignette" />
+                    </div>
+                </div>
+            </section>
+            <section class="cs8">
+                <div class="container">
+                    <div class="clmn2">
+                        <img src="images/demo/flip.jpg" alt="flip" />
+                    </div>
+                    <div class="clmn2">
+                        <h1>Flip</h1>
+                        <p>Imageprocessor can flip you images both horizontally and vertically.</p>
+                        <p>
+                            Requests are passed thus:
+                        <pre>
+<code>http://yourimage?flip=horizontal</code>
+<code>http://yourimage?flip=vertical</code>
+                        </pre>
+                        </p>
                     </div>
                 </div>
             </section>
