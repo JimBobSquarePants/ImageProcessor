@@ -93,6 +93,7 @@
                     <li>format</li>
                     <li>vignette</li>
                     <li>quality</li>
+                    <li>flip</li>
                 </ul>
             </section>
             <section class="red">
@@ -180,6 +181,7 @@
                             <li>gotham</li>
                             <li>hisatch</li>
                             <li>losatch</li>
+                            <li>invert</li>
                         </ul>
                         <p>
                             Requests are passed thus:
@@ -332,7 +334,15 @@ http://yourimage?saturation=-20
                     <p>Imageprocessor can also add a vignette effect to images.</p>
                     <p>
                         Requests are passed thus:
+<<<<<<< HEAD
                         <pre><code>http://yourimage?vignette=true</code></pre>
+=======
+                        <pre><code>http://yourimage?rotate=26</code></pre>
+                    </p>
+                    <p>
+                        Color syntax:
+                        <pre><code>http://yourimage?rotate=angle-54|bgcolor-fff</code></pre>
+>>>>>>> 0d6e18da4c2189a03434e22e795af15acbdc1895
                     </p>
                 </div>
                 <div class="clmn2">
@@ -367,6 +377,24 @@ http://yourimage?saturation=-20
                 </div>
                 <div class="clmn2">
                     <img src="images/demo/flip.png" alt="flip">
+                </div>
+            </section>
+            <section class="cs8">
+                <div class="container">
+                    <div class="clmn2">
+                        <img src="images/demo/flip.jpg" alt="flip" />
+                    </div>
+                    <div class="clmn2">
+                        <h1>Flip</h1>
+                        <p>Imageprocessor can flip you images both horizontally and vertically.</p>
+                        <p>
+                            Requests are passed thus:
+                        <pre>
+<code>http://yourimage?flip=horizontal</code>
+<code>http://yourimage?flip=vertical</code>
+                        </pre>
+                        </p>
+                    </div>
                 </div>
             </section>
         </article>
