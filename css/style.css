@@ -33,6 +33,14 @@ h1 {
     }
 }
 
+a {
+    color: #dc582e;
+}
+
+a.alt {
+    color: #ff9000;
+}
+
 img {
     max-width: 100%;
 }
@@ -66,38 +74,43 @@ code {
    Colour schemes
    ========================================================================== */
 
-.cs1 {
+.blue {
     background-color: #00a9ec;
     color: #fff;
 }
 
-.cs2 {
+.red {
     background-color: #ED1C24;
     color: #fff;
 }
 
-.cs3 {
+.green {
     background-color: #72a61a;
     color: #fff;
 }
 
-.cs4 {
+.emerald {
     background-color: #00a94f;
     color: #fff;
 }
 
-.cs5 {
+.dark-violet {
     background-color: #211054;
     color: #fff;
 }
 
-.cs6 {
+.orange {
     background-color: #ff9000;
     color: #fff;
 }
 
-.cs7 {
+.magenta {
     background-color: #ec008c;
+    color: #fff;
+}
+
+.purple {
+    background-color: #a700af;
     color: #fff;
 }
 

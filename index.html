@@ -15,11 +15,11 @@
         <link rel="stylesheet" type="text/css" href="css/normalize.css">
         <link rel="stylesheet" type="text/css" href="css/flexo-legacy.css">
         <link rel="stylesheet" type="text/css" href="css/style.css">
+        <script src="scripts/html5shiv.js"></script>
     <![endif]-->
     <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/normalize.css">
     <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/flexo.css">
     <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/style.css">
-    <script src="scripts/html5shiv.js"></script>
     <title>Imageprocessor</title>
 </head>
 
@@ -53,7 +53,7 @@
                     <img src="images/demo/penguins-all.jpg" alt="penguins all" />
                 </div>
             </section>
-            <section class="cs1">
+            <section class="blue">
                 <div class="container">
                     <div class="clmn2">
                         <img src="images/demo/computer.gif" alt="computer" />
@@ -61,11 +61,11 @@
                     <div class="clmn2">
                         <h1>Installation</h1>
                         <p>
-                            Installation is simple. A Nuget package is available <a href="https://nuget.org/packages/ImageProcessor.Web/" rel="external">here</a> which makes it possible to 
+                            Installation is simple. A Nuget package is available <a class="alt" href="https://nuget.org/packages/ImageProcessor.Web/" rel="external">here</a> which makes it possible to 
                             install and configure straight from Visual Studio.
                         </p>
                         <p>
-                            Alternatively, download the zip file from <a href="https://github.com/JimBobSquarePants/ImageProcessor/archive/master.zip" rel="external">here</a>
+                            Alternatively, download the zip file from <a class="alt" href="https://github.com/JimBobSquarePants/ImageProcessor/archive/master.zip" rel="external">here</a>
                             and copy the two binaries into your bin folder. Then copy the example configuration values from the web.config in the testing website from within the solution
                             into your web.config to enable the processor. 
                         </p>
@@ -85,13 +85,17 @@
                     <li>cropping</li>
                     <li>alpha transparency</li>
                     <li>filter effects</li>
+                    <li>brightness</li>
+                    <li>contrast</li>
+                    <li>saturation</li>
                     <li>watermark</li>
-                    <li>format</li>
                     <li>rotate</li>
+                    <li>format</li>
+                    <li>vignette</li>
                     <li>quality</li>
                 </ul>
             </section>
-            <section class="cs2">
+            <section class="red">
                 <div class="container">
                     <div class="clmn2">
                         <img src="images/demo/cache.gif" alt="cache" />
@@ -100,7 +104,7 @@
                         <h1>Caching</h1>
                         <p>
                             Imageprocessor caches any processed image both in the browser and on the server for a length of your choosing. The server cache intelligently stores up 
-                            to 8000 images and silently updates itself should the original image change or the cache expires.
+                            to <strong>12,960,000</strong> images and silently updates itself should the original image change or the cache expires.
                         </p>
                         <p>This saves massive amounts of processing power and bandwidth that help to keep your website snappy.</p>
                     </div>
@@ -126,7 +130,7 @@
                 </div>
 
             </section>
-            <section class="cs3">
+            <section class="green">
                 <div class="container">
                     <div class="clmn2">
                         <img src="images/demo/crop.jpg" alt="crop" class="fl" />
@@ -157,7 +161,7 @@
                     <img src="images/demo/alpha.jpg" alt="alpha" />
                 </div>
             </section>
-            <section class="cs5">
+            <section class="dark-violet">
                 <div class="container">
                     <div class="clmn2">
                         <img src="images/demo/filters.jpg" alt="filters" />
@@ -185,30 +189,122 @@
                 </div>
             </section>
             <section class="container">
-                <div class="row1">
+                <div class="clmn2">
+                    <h1>Brightness</h1>
+                    <p>Imageprocessor can adjust the brightness of images. Simply pass the desired percentage value (without the '%') to the processor.</p>
+                    <p>
+                        Requests are passed thus:
+                       
+                    </p>
+                    <pre>
+<code>
+// Increasing
+http://yourimage?brightness=20
+</code>
+<code>
+// Decreasing
+http://yourimage?brightness=-20
+</code>
+                        </pre>
+                </div>
+                <div class="clmn2">
+                    <img src="images/demo/watermark.jpg" alt="watermark" />
+                </div>
+            </section>
+            <section class="purple">
+                <div class="container">
                     <div class="clmn2">
-                        <h1>Watermark</h1>
-                        <p>Imageprocessor can add watermark text to your images with a wide range of options:</p>
-                        <ul class="no-padd">
-                            <li>text</li>
-                            <li>size (px)</li>
-                            <li>font (any installed font)</li>
-                            <li>opacity (1-100)</li>
-                            <li>style (bold|italic|regular|strikeout|underline)</li>
-                            <li>shadow</li>
-                            <li>position (x,y)</li>
-                        </ul>
+                        <img src="images/demo/format.jpg" alt="format" />
                     </div>
                     <div class="clmn2">
-                        <img src="images/demo/watermark.jpg" alt="watermark" />
+                        <h1>Contrast</h1>
+                        <p>Imageprocessor can adjust the contrast of images. Simply pass the desired percentage value (without the '%') to the processor.</p>
+                        <p>
+                            Requests are passed thus:
+                       
+                        </p>
+                        <pre>
+<code>
+// Increasing
+http://yourimage?contrast=20
+</code>
+<code>
+// Decreasing
+http://yourimage?contrast=-20
+</code>
+                        </pre>
                     </div>
                 </div>
-                <p>
-                    Requests are passed thus: Each parameter is optional.
-                    <pre><code>http://yourimage?watermark=text-testing|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code></pre>
-                </p>
             </section>
-            <section class="cs6">
+            <section class="container">
+                <div class="clmn2">
+                    <h1>Saturation</h1>
+                    <p>Imageprocessor can adjust the saturation of images. Simply pass the desired percentage value (without the '%') to the processor.</p>
+                    <p>
+                        Requests are passed thus:
+                       
+                    </p>
+                    <pre>
+<code>
+// Increasing
+http://yourimage?saturation=20
+</code>
+<code>
+// Decreasing
+http://yourimage?saturation=-20
+</code>
+                        </pre>
+                </div>
+                <div class="clmn2">
+                    <img src="images/demo/watermark.jpg" alt="watermark" />
+                </div>
+            </section>
+            <section class="emerald">
+                <div class="container">
+                    <div class="row">
+                        <div class="clmn2">
+                            <img src="images/demo/watermark.jpg" alt="watermark" />
+                        </div>
+                        <div class="clmn2">
+                            <h1>Watermark</h1>
+                            <p>Imageprocessor can add watermark text to your images with a wide range of options:</p>
+                            <ul class="no-padd">
+                                <li>text</li>
+                                <li>size (px)</li>
+                                <li>font (any installed font)</li>
+                                <li>opacity (1-100)</li>
+                                <li>style (bold|italic|regular|strikeout|underline)</li>
+                                <li>shadow</li>
+                                <li>position (x,y)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p>
+                        Requests are passed thus: Each parameter is optional.
+                    <pre><code>http://yourimage?watermark=text-testing|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code></pre>
+                    </p>
+                </div>
+            </section>
+            <section class="container">
+                <div class="clmn2">
+                    <h1>Rotate</h1>
+                    <p>
+                        Imageprocessor can rotate your images without clipping. You can also optionally fill the background color for image types without transparency.
+                    </p>
+                    <p>
+                        Requests are passed thus:
+                        <pre><code>http://yourimage?rotate=26</code></pre>
+                    </p>
+                    <p>
+                        Color syntax:
+                        <pre><code>http://yourimage?rotate=54|bgcolor-fff</code></pre>
+                    </p>
+                </div>
+                <div class="clmn2">
+                    <img src="images/demo/rotate.png" alt="rotate" />
+                </div>
+            </section>
+            <section class="orange">
                 <div class="container">
                     <div class="clmn2">
                         <img src="images/demo/format.jpg" alt="format" />
@@ -232,24 +328,18 @@
             </section>
             <section class="container">
                 <div class="clmn2">
-                    <h1>Rotate</h1>
-                    <p>
-                        Imageprocessor can rotate your images without clipping. You can also optionally fill the background color for image types without transparency.
-                    </p>
+                    <h1>Vignette</h1>
+                    <p>Imageprocessor can also add a vignette effect to images.</p>
                     <p>
                         Requests are passed thus:
-                        <pre><code>http://yourimage?rotate=26</code></pre>
-                    </p>
-                    <p>
-                        Color syntax:
-                        <pre><code>http://yourimage?rotate=54|bgcolor-fff</code></pre>
+                        <pre><code>http://yourimage?vignette=true</code></pre>
                     </p>
                 </div>
                 <div class="clmn2">
-                    <img src="images/demo/rotate.png" alt="rotate" />
+                    <img src="images/demo/vignette.jpg" alt="vignette" />
                 </div>
             </section>
-            <section class="cs7">
+            <section class="magenta">
                 <div class="container">
                     <div class="clmn2">
                         <img src="images/demo/quality.jpg" alt="quality" />
@@ -264,19 +354,19 @@
                     </div>
                 </div>
             </section>
-            <section>
-                <div class="container">
-                    <div class="clmn2">
-                        <h1>Vignette</h1>
-                        <p>Imageprocessor can also add a vignette effect to images.</p>
-                        <p>
-                            Requests are passed thus:
-                        <pre><code>http://yourimage?vignette=true</code></pre>
-                        </p>
-                    </div>
-                    <div class="clmn2">
-                        <img src="images/demo/vignette.jpg" alt="vignette" />
-                    </div>
+            <section class="container">
+                <div class="clmn2">
+                    <h1>Flip</h1>
+                    <p>Imageprocessor can flip you images both horizontally and vertically.</p>
+                    <p>
+                        Requests are passed thus:
+                    </p>
+                    <pre><code>http://yourimage?flip=horizontal</code>
+<code>http://yourimage?flip=vertical</code>
+                        </pre>
+                </div>
+                <div class="clmn2">
+                    <img src="images/demo/flip.png" alt="flip">
                 </div>
             </section>
         </article>
