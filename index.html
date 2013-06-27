@@ -1,46 +1,41 @@
 <!doctype html>
-<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="lt-ie9" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!-->
 <html lang='en'>
-<!--<![endif]-->
+
 <head>
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
     <meta name="description" content="Imageprocessor : A C# library for on-the-fly processing of image files with ASP.NET. Imageprocessor can resize, rotate, crop, watermark and add Instagram style filters to images." />
     <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/responsive.min.css">
+    <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/style.css">
     <!-- Old browsers -->
-    <!--[if lt IE 9]>
-        <link rel="stylesheet" type="text/css" href="css/normalize.css">
-        <link rel="stylesheet" type="text/css" href="css/flexo-legacy.css">
+    <!--[if lt IE 9 &!(IEMobile)]>
+        <link rel="stylesheet" type="text/css" href="css/responsive-legacy.min.css">
         <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" type="text/css" href="css/style-legacy.css">
         <script src="scripts/html5shiv.js"></script>
     <![endif]-->
-    <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/normalize.css">
-    <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/flexo.css">
-    <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/style.css">
     <title>Imageprocessor</title>
 </head>
-
 <body>
-    <div class="page no-box">
-        <header>
-            <section class="container">
-                <div class="clmn2">
+    <header>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1 class="logo">Imageprocessor</h1>
                     <h2>A .NET library for on-the-fly processing of image files.</h2>
-                </div>
-                <div class="clmn2">
                     <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://jimbobsquarepants.github.com/ImageProcessor/" data-text="Imageprocessor - A .NET library for on-the-fly processing of image files." data-via="James_M_South" data-hashtags="imageprocessor,asp,resize">Tweet</a>
                     <script>!function (d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (!d.getElementById(id)) { js = d.createElement(s); js.id = id; js.src = "//platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs); } }(document, "script", "twitter-wjs");</script>
+
                 </div>
-            </section>
-            <a href="https://github.com/JimBobSquarePants/ImageProcessor" class="forkme">fork me on github</a>
-        </header>
-        <article role="main">
-            <section class="container">
-                <div class="clmn2">
+            </div>
+        </section>
+        <a href="https://github.com/JimBobSquarePants/ImageProcessor" class="forkme">fork me on github</a>
+    </header>
+    <article role="main">
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>What is it?</h1>
                     <p>
                         Imageprocessor is a lightweight library written in C# that allows you to manipulate images on-the-fly using ASP.NET 4.0.
@@ -49,16 +44,18 @@
                         It's fast, extensible, easy to use, comes bundled with some great features and is fully open source.
                     </p>
                 </div>
-                <div class="clmn2">
+                <div class="column-6">
                     <img src="images/demo/penguins-all.jpg" alt="penguins all" />
                 </div>
-            </section>
-            <section class="blue">
-                <div class="container">
-                    <div class="clmn2">
-                        <img src="images/demo/computer.gif" alt="computer" />
+            </div>
+        </section>
+        <section class="blue">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
+                        <img src="images/demo/computer.png" alt="computer" />
                     </div>
-                    <div class="clmn2">
+                    <div class="column-6">
                         <h1>Installation</h1>
                         <p>
                             Installation is simple. A Nuget package is available <a class="alt" href="https://nuget.org/packages/ImageProcessor.Web/" rel="external" target="_blank">here</a> which makes it possible to 
@@ -71,15 +68,17 @@
                         </p>
                     </div>
                 </div>
-            </section>
-            <section class="container">
-                <div class="clmn2">
+            </div>
+        </section>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>Features</h1>
                     <p>Imageprocessor has lots of cool features that make it a great choice for developers like intelligent caching, a fluent, easy to use API and much more.</p>
                     <p>All these features can be combined and called in any order due to regex based parsing and have an easy to remember syntax.</p>
                     <p>Here's a few examples:</p>
                 </div>
-                <ul class="clmn2 tick-list">
+                <ul class="column-6 tick-list">
                     <li>caching</li>
                     <li>resizing</li>
                     <li>cropping</li>
@@ -93,14 +92,17 @@
                     <li>format</li>
                     <li>vignette</li>
                     <li>quality</li>
+                    <li>rounded corners</li>
                 </ul>
-            </section>
-            <section class="red">
-                <div class="container">
-                    <div class="clmn2">
+            </div>
+        </section>
+        <section class="red">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
                         <img src="images/demo/cache.gif" alt="cache" />
                     </div>
-                    <div class="clmn2">
+                    <div class="column-6">
                         <h1>Caching</h1>
                         <p>
                             Imageprocessor caches any processed image both in the browser and on the server for a length of your choosing. The server cache intelligently stores up 
@@ -109,9 +111,11 @@
                         <p>This saves massive amounts of processing power and bandwidth that help to keep your website snappy.</p>
                     </div>
                 </div>
-            </section>
-            <section class="container">
-                <div class="clmn2">
+            </div>
+        </section>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>Resizing</h1>
                     <p>Imageprocessor can resize bmps, jpegs, pngs and gifs (gifs require full trust) up or down producing the highest quality output at the lowest possible filesize.</p>
                     <p>Images passed only one parameter will automatically maintain their aspect ratio.</p>
@@ -125,17 +129,18 @@
                         </pre>
                     </p>
                 </div>
-                <div class="clmn2">
+                <div class="column-6">
                     <img src="images/demo/resize.jpg" alt="resize" />
                 </div>
-
-            </section>
-            <section class="green">
-                <div class="container">
-                    <div class="clmn2">
+            </div>
+        </section>
+        <section class="green">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
                         <img src="images/demo/crop.jpg" alt="crop" class="fl" />
                     </div>
-                    <div class="clmn2">
+                    <div class="column-6">
                         <h1>Cropping</h1>
                         <p>
                             Imageprocessor can crop a given image and serve only the part you want. Simply pass the bottom-left and 
@@ -147,9 +152,11 @@
                         </p>
                     </div>
                 </div>
-            </section>
-            <section class="container">
-                <div class="clmn2">
+            </div>
+        </section>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>Alpha</h1>
                     <p>Imageprocessor can adjust the alpha transparency of png images. Simply pass the desired percentage value (without the '%') to the processor.</p>
                     <p>
@@ -157,16 +164,18 @@
                         <pre><code>http://yourimage?alpha=75</code></pre>
                     </p>
                 </div>
-                <div class="clmn2">
+                <div class="column-6">
                     <img src="images/demo/alpha.jpg" alt="alpha" />
                 </div>
-            </section>
-            <section class="dark-violet">
-                <div class="container">
-                    <div class="clmn2">
+            </div>
+        </section>
+        <section class="dark-violet">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
                         <img src="images/demo/filters.jpg" alt="filters" />
                     </div>
-                    <div class="clmn2">
+                    <div class="column-6">
                         <h1>Filters</h1>
                         <p>Everybody loves adding filter effects to photographs so we've baked some popular ones into Imageprocessor.</p>
                         <p>Filters starting from top-left and going across each row are:</p>
@@ -188,9 +197,11 @@
                         </p>
                     </div>
                 </div>
-            </section>
-            <section class="container">
-                <div class="clmn2">
+            </div>
+        </section>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>Brightness</h1>
                     <p>Imageprocessor can adjust the brightness of images. Simply pass the desired percentage value (without the '%') to the processor.</p>
                     <p>
@@ -208,16 +219,18 @@ http://yourimage?brightness=-20
 </code>
                         </pre>
                 </div>
-                <div class="clmn2">
+                <div class="column-6">
                     <img src="images/demo/brightness.jpg" alt="brightness" />
                 </div>
-            </section>
-            <section class="purple">
-                <div class="container">
-                    <div class="clmn2">
+            </div>
+        </section>
+        <section class="purple">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
                         <img src="images/demo/contrast.jpg" alt="contrast" />
                     </div>
-                    <div class="clmn2">
+                    <div class="column-6">
                         <h1>Contrast</h1>
                         <p>Imageprocessor can adjust the contrast of images. Simply pass the desired percentage value (without the '%') to the processor.</p>
                         <p>
@@ -236,9 +249,11 @@ http://yourimage?contrast=-20
                         </pre>
                     </div>
                 </div>
-            </section>
-            <section class="container">
-                <div class="clmn2">
+            </div>
+        </section>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>Saturation</h1>
                     <p>Imageprocessor can adjust the saturation of images. Simply pass the desired percentage value (without the '%') to the processor.</p>
                     <p>
@@ -256,38 +271,40 @@ http://yourimage?saturation=-20
 </code>
                         </pre>
                 </div>
-                <div class="clmn2">
+                <div class="column-6">
                     <img src="images/demo/saturation.jpg" alt="saturation" />
                 </div>
-            </section>
-            <section class="emerald">
-                <div class="container">
-                    <div class="row">
-                        <div class="clmn2">
-                            <img src="images/demo/watermark.jpg" alt="watermark" />
-                        </div>
-                        <div class="clmn2">
-                            <h1>Watermark</h1>
-                            <p>Imageprocessor can add watermark text to your images with a wide range of options:</p>
-                            <ul class="no-padd">
-                                <li>text</li>
-                                <li>size (px)</li>
-                                <li>font (any installed font)</li>
-                                <li>opacity (1-100)</li>
-                                <li>style (bold|italic|regular|strikeout|underline)</li>
-                                <li>shadow</li>
-                                <li>position (x,y)</li>
-                            </ul>
-                        </div>
+            </div>
+        </section>
+        <section class="emerald">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
+                        <img src="images/demo/watermark.jpg" alt="watermark" />
                     </div>
-                    <p>
-                        Requests are passed thus: Each parameter is optional.
-                    <pre><code>http://yourimage?watermark=text-testing|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code></pre>
-                    </p>
+                    <div class="column-6">
+                        <h1>Watermark</h1>
+                        <p>Imageprocessor can add watermark text to your images with a wide range of options:</p>
+                        <ul class="no-padd">
+                            <li>text</li>
+                            <li>size (px)</li>
+                            <li>font (any installed font)</li>
+                            <li>opacity (1-100)</li>
+                            <li>style (bold|italic|regular|strikeout|underline)</li>
+                            <li>shadow</li>
+                            <li>position (x,y)</li>
+                        </ul>
+                    </div>
                 </div>
-            </section>
-            <section class="container">
-                <div class="clmn2">
+                <p>
+                    Requests are passed thus: Each parameter is optional.
+                    <pre><code>http://yourimage?watermark=text-testing|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code></pre>
+                </p>
+            </div>
+        </section>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>Rotate</h1>
                     <p>
                         Imageprocessor can rotate your images without clipping. You can also optionally fill the background color for image types without transparency.
@@ -298,19 +315,21 @@ http://yourimage?saturation=-20
                     </p>
                     <p>
                         Color syntax:
-                        <pre><code>http://yourimage?rotate=54|bgcolor-fff</code></pre>
+                        <pre><code>http://yourimage?rotate=angle-54|bgcolor-fff</code></pre>
                     </p>
                 </div>
-                <div class="clmn2">
+                <div class="column-6">
                     <img src="images/demo/rotate.png" alt="rotate" />
                 </div>
-            </section>
-            <section class="orange">
-                <div class="container">
-                    <div class="clmn2">
+            </div>
+        </section>
+        <section class="orange">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
                         <img src="images/demo/format.jpg" alt="format" />
                     </div>
-                    <div class="clmn2">
+                    <div class="column-6">
                         <h1>Format</h1>
                         <p>Imageprocessor allows you to change the format of image on-the-fly.</p>
                         <p>Supported file formats are:</p>
@@ -326,9 +345,11 @@ http://yourimage?saturation=-20
                         </p>
                     </div>
                 </div>
-            </section>
-            <section class="container">
-                <div class="clmn2">
+            </div>
+        </section>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>Vignette</h1>
                     <p>Imageprocessor can also add a vignette effect to images.</p>
                     <p>
@@ -336,16 +357,18 @@ http://yourimage?saturation=-20
                         <pre><code>http://yourimage?vignette=true</code></pre>
                     </p>
                 </div>
-                <div class="clmn2">
+                <div class="column-6">
                     <img src="images/demo/vignette.jpg" alt="vignette" />
                 </div>
-            </section>
-            <section class="magenta">
-                <div class="container">
-                    <div class="clmn2">
+            </div>
+        </section>
+        <section class="magenta">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
                         <img src="images/demo/quality.jpg" alt="quality" />
                     </div>
-                    <div class="clmn2">
+                    <div class="column-6">
                         <h1>Quality</h1>
                         <p>Whilst Imageprocessor delivers an excellent quality/filesize ratio it also allows you to change the quality of jpegs on-the-fly.</p>
                         <p>
@@ -354,9 +377,11 @@ http://yourimage?saturation=-20
                         </p>
                     </div>
                 </div>
-            </section>
-            <section class="container">
-                <div class="clmn2">
+            </div>
+        </section>
+        <section class="container">
+            <div class="row">
+                <div class="column-6">
                     <h1>Flip</h1>
                     <p>Imageprocessor can flip you images both horizontally and vertically.</p>
                     <p>
@@ -366,19 +391,46 @@ http://yourimage?saturation=-20
 <code>http://yourimage?flip=vertical</code>
                         </pre>
                 </div>
-                <div class="clmn2">
+                <div class="column-6">
                     <img src="images/demo/flip.png" alt="flip">
                 </div>
-            </section>
-        </article>
-        <div class="page-push"></div>
-    </div>
+            </div>
+        </section>
+        <section class="dark-orange">
+            <div class="container">
+                <div class="row">
+                    <div class="column-6">
+                        <h1>Rounded Corners</h1>
+                        <img src="images/demo/rounded.png" alt="rounded" />
+                    </div>
+                    <div class="column-6">
+                        <p>
+                            Imageprocessor can round the corners of your images. You can also optionally fill the background color for image types without transparency
+                            and choose which corners to round.
+                        </p>
+                        <p>
+                            Requests are passed thus:
+                        <pre><code>http://yourimage?roundedcorners=26</code></pre>
+                        </p>
+                        <p>
+                            Color syntax:
+                        <pre><code>http://yourimage?roundedcorners=radius-26|bgcolor-fff</code></pre>
+                        </p>
+                        <p>
+                            Independent Corners syntax:
+                        <pre><code>http://yourimage?roundedcorners=radius-26|tl-true|tr-false|bl-true|br-false</code></pre>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </article>
     <footer class="page-footer">
         <div class="container">
             <p class="copyright">
-                Imageprocessor is maintained by <a href="https://github.com/JimBobSquarePants" rel="author" target="_blank">JimBobSquarePants</a>.
+                Imageprocessor was built for your benefit by <a href="https://github.com/JimBobSquarePants" rel="author" target="_blank">JimBobSquarePants</a>.
                 <br />
-                You can also find him on twitter <a href="https://twitter.com/James_M_South" rel="author" target="_blank">@James_M_South</a>
+                You can find him on twitter <a href="https://twitter.com/James_M_South" rel="author" target="_blank">@James_M_South</a>
             </p>
             <p>Code licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0" rel="license" target="_blank">Apache License v2.0</a></p>
         </div>

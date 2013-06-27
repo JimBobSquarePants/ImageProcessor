@@ -20,16 +20,17 @@ body {
 h1, h2, h3 {
     font-family: "Segoe UI Light", "Segoe UI",Tahoma,Arial,Verdana,Sans-Serif;
     font-weight: 400;
-} 
-
-h1 {
-    margin-top: 0;
-    font-size: 3em;
 }
 
-@media only screen and (max-width: 480px) {
+h1 {
+    font-size: 1.8em;
+}
+
+
+@media only screen and (min-width: 768px) {
     h1 {
-        font-size: 2.5em;
+        margin-top: 0;
+        font-size: 3em;
     }
 }
 
@@ -37,13 +38,9 @@ a {
     color: #dc582e;
 }
 
-a.alt {
-    color: #ff9000;
-}
-
-img {
-    max-width: 100%;
-}
+    a.alt {
+        color: #ff0;
+    }
 
 section {
     padding: 2em 0;
@@ -51,22 +48,29 @@ section {
 
 pre, code {
     font-family: Consolas, monospace, serif;
+    background-color: #333;
+    color: #e74f76;
 }
 
 pre {
-    background-color: #333;
-    color: #fff;
     border-radius: 2px;
     padding: 1em .5em;
 }
 
+@media only screen and (max-width: 479px) {
+    pre {
+        overflow-x: scroll;
+    }
+}
+
 code {
     margin: .5em 0;
+    -webkit-text-shadow: 1px 1px 2px #111;
+    text-shadow: 1px 1px 2px #111;
 }
 
 .page-footer {
-    padding-top: 16px;
-    height: 134px;
+    padding: 1em 0;
     background-color: #ddd;
 }
 
@@ -114,11 +118,28 @@ code {
     color: #fff;
 }
 
+.dark-orange {
+    background-color: #DC582E;
+    color: #fff;
+}
+
 /* =============================================================================
    Classes
    ========================================================================== */
 .logo {
-    padding-top: 0.67em;
+    background: url(imageprocessor.64.png) no-repeat;
+    height: 64px;
+    padding-left: 74px;
+    padding-top: 10px;
+}
+
+@media only screen and (min-width: 768px) {
+    .logo {
+        padding-top: 0.67em;
+        background: url(imageprocessor.128.png) no-repeat;
+        height: 128px;
+        padding-left: 144px;
+    }
 }
 
 .tick-list li {
