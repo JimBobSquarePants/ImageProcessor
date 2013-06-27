@@ -158,12 +158,17 @@ code {
         top: -6px;
     }
 
+.tick-list a {
+    color: inherit;
+}
+
 .twitter-share-button {
     margin-top: 4em;
     display: inline-block;
 }
 
-.forkme, .forkme:visited {
+.forkme, .forkme:visited,
+.back, .back:visited {
     display: block;
     position: absolute;
     top: 0;
@@ -175,9 +180,18 @@ code {
     text-transform: uppercase;
 }
 
-    .forkme:hover {
+    .forkme:hover,
+    .back:hover {
         background-color: #444;
     }
+
+.back {
+    background-image: none;
+    position: fixed;
+    padding-right: 10px;
+    top: auto;
+    bottom: 0;
+}
 
 @media only screen and (max-width: 480px) {
     .no-padd {
