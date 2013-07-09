@@ -4,7 +4,8 @@
 <head>
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Imageprocessor : A C# library for on-the-fly processing of image files with ASP.NET. Imageprocessor can resize, rotate, crop, watermark and add Instagram style filters to images." />
+    <meta name="description" content="Imageprocessor : A C# library for on-the-fly processing of image files with ASP.NET. Imageprocessor can resize, rotate, crop, flip, fade, watermark and add Instagram style filters to images." />
+    <meta name="keywords" content="Image, Imaging, ASP, NET, Performance, Processing, HttpModule, Cache, Resize, Resizing, Rotate, RoundedCorners, Flip, Crop, Filter, Effects, Quality, Watermark, Alpha, Vignette, Saturation, Brightness, Contrast, Gif, Jpg, Jpeg, Bitmap, Png, Fluent, GDI, C#" />
     <meta name="viewport" content="width=device-width" />
     <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/responsive.min.css">
     <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/style.css">
@@ -32,11 +33,10 @@
                     <h2>A .NET library for on-the-fly processing of image files.</h2>
                     <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://jimbobsquarepants.github.io/ImageProcessor/" data-text="#Imageprocessor - A .NET library for on-the-fly processing of image files." data-via="James_M_South" data-hashtags="webperf">Tweet</a>
                     <script>!function (d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (!d.getElementById(id)) { js = d.createElement(s); js.id = id; js.src = "//platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs); } }(document, "script", "twitter-wjs");</script>
-
                 </div>
             </div>
         </section>
-        <a href="https://github.com/JimBobSquarePants/ImageProcessor" class="forkme">fork me on github</a>
+        <a href="https://github.com/JimBobSquarePants/ImageProcessor" class="forkme" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="Github Project">fork me on github</a>
     </header>
     <article role="main">
         <section class="container">
@@ -64,11 +64,11 @@
                     <div class="column-6">
                         <h1>Installation</h1>
                         <p>
-                            Installation is simple. A Nuget package is available <a class="alt" href="https://nuget.org/packages/ImageProcessor.Web/" rel="external" target="_blank">here</a> which makes it possible to 
+                            Installation is simple. A Nuget package is available <a class="alt" href="https://nuget.org/packages/ImageProcessor.Web/" rel="external" target="_blank" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="Nuget Link">here</a> which makes it possible to 
                             install and configure straight from Visual Studio.
                         </p>
                         <p>
-                            Alternatively, download the zip file from <a class="alt" href="https://github.com/JimBobSquarePants/ImageProcessor/archive/master.zip" rel="external">here</a>
+                            Alternatively, download the zip file from <a class="alt" href="https://github.com/JimBobSquarePants/ImageProcessor/archive/master.zip" rel="external" data-ga-category="Home Actions" data-ga-action="Github Download" data-ga-label="Framework Download">here</a>
                             and copy the two binaries into your bin folder. Then copy the example configuration values from the web.config in the testing website from within the solution
                             into your web.config to enable the processor. 
                         </p>
@@ -81,7 +81,11 @@
                 <div class="column-6">
                     <h1>Features</h1>
                     <p>Imageprocessor has lots of cool features that make it a great choice for developers like intelligent caching, a fluent, easy to use API and much more.</p>
-                    <p>All these features can be combined and called in any order due to regex based parsing and have an easy to remember syntax.</p>
+                    <p>
+                        All these features can be combined and called in any order due to regex based parsing and have an easy to remember syntax. 
+                        You can even use it on remote images just add the prefix <code>/remote.axd?</code> to your image request.
+
+                    </p>
                     <p>Here's a few examples:</p>
                 </div>
                 <ul class="column-6 tick-list">
@@ -453,5 +457,7 @@ http://yourimage?saturation=-20
             s.parentNode.insertBefore(g, s)
         }(document, 'script'));
     </script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="scripts/jquery.googleanalytics.min.js"></script>
 </body>
 </html>
