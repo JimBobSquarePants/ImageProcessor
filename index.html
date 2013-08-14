@@ -4,7 +4,7 @@
 <head>
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Imageprocessor : A C# library for on-the-fly processing of image files with ASP.NET. Imageprocessor can resize, rotate, crop, flip, fade, watermark and add Instagram style filters to images." />
+    <meta name="description" content="A C# library for the dynamic processing of image files with ASP.NET. Imageprocessor can resize, rotate, crop, flip, fade, watermark and add Instagram style filters to images." />
     <meta name="keywords" content="Image, Imaging, ASP, NET, Performance, Processing, HttpModule, Cache, Resize, Resizing, Rotate, RoundedCorners, Flip, Crop, Filter, Effects, Quality, Watermark, Alpha, Vignette, Saturation, Brightness, Contrast, Gif, Jpg, Jpeg, Bitmap, Png, Fluent, GDI, C#" />
     <meta name="viewport" content="width=device-width" />
     <link rel="stylesheet" type="text/css" media="all and (min-width: 1em)" href="css/responsive.min.css">
@@ -22,7 +22,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72.png">
     <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-57x57.png">
-    <title>Imageprocessor</title>
+    <title>Imageprocessor :: Fast dynamic image resizing for websites.</title>
 </head>
 <body>
     <header>
@@ -87,7 +87,6 @@
                     <p>
                         All these features can be combined and called in any order due to regex based parsing and have an easy to remember syntax. 
                         You can even use it on remote images just add the prefix <code>/remote.axd?</code> to your image request.
-
                     </p>
                     <p>Here's a few examples:</p>
                 </div>
@@ -138,8 +137,8 @@
                     <p>
                         Requests are passed thus:
                         <pre>
-<code>http://yourimage?width=250</code>
-<code>http://yourimage?height=180</code>
+<code>http://your-image?width=250</code>
+<code>http://your-image?height=180</code>
                         </pre>
                     </p>
                 </div>
@@ -162,7 +161,7 @@
                         </p>
                         <p>
                             Requests are passed thus:
-                            <pre><code>http://yourimage?crop=x-y-x2-y2</code></pre>
+                            <pre><code>http://your-image?crop=x-y-x2-y2</code></pre>
                         </p>
                     </div>
                 </div>
@@ -175,7 +174,7 @@
                     <p>Imageprocessor can adjust the alpha transparency of png images. Simply pass the desired percentage value (without the '%') to the processor.</p>
                     <p>
                         Requests are passed thus:
-                        <pre><code>http://yourimage?alpha=75</code></pre>
+                        <pre><code>http://your-image?alpha=75</code></pre>
                     </p>
                 </div>
                 <div class="column-6">
@@ -207,7 +206,7 @@
                         </ul>
                         <p>
                             Requests are passed thus:
-                            <pre><code>http://yourimage?filter=comic</code></pre>
+                            <pre><code>http://your-image?filter=comic</code></pre>
                         </p>
                     </div>
                 </div>
@@ -225,11 +224,11 @@
                     <pre>
 <code>
 // Increasing
-http://yourimage?brightness=20
+http://your-image?brightness=20
 </code>
 <code>
 // Decreasing
-http://yourimage?brightness=-20
+http://your-image?brightness=-20
 </code>
                         </pre>
                 </div>
@@ -254,11 +253,11 @@ http://yourimage?brightness=-20
                         <pre>
 <code>
 // Increasing
-http://yourimage?contrast=20
+http://your-image?contrast=20
 </code>
 <code>
 // Decreasing
-http://yourimage?contrast=-20
+http://your-image?contrast=-20
 </code>
                         </pre>
                     </div>
@@ -277,11 +276,11 @@ http://yourimage?contrast=-20
                     <pre>
 <code>
 // Increasing
-http://yourimage?saturation=20
+http://your-image?saturation=20
 </code>
 <code>
 // Decreasing
-http://yourimage?saturation=-20
+http://your-image?saturation=-20
 </code>
                         </pre>
                 </div>
@@ -312,7 +311,7 @@ http://yourimage?saturation=-20
                 </div>
                 <p>
                     Requests are passed thus: Each parameter is optional.
-                    <pre><code>http://yourimage?watermark=text-testing|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code></pre>
+                    <pre><code>http://your-image?watermark=text-testing|color-fff|size-36|style-italic|opacity-80|position-30-150|shadow-true|font-arial</code></pre>
                 </p>
             </div>
         </section>
@@ -325,11 +324,11 @@ http://yourimage?saturation=-20
                     </p>
                     <p>
                         Requests are passed thus:
-                        <pre><code>http://yourimage?rotate=26</code></pre>
+                        <pre><code>http://your-image?rotate=26</code></pre>
                     </p>
                     <p>
                         Color syntax:
-                        <pre><code>http://yourimage?rotate=angle-54|bgcolor-fff</code></pre>
+                        <pre><code>http://your-image?rotate=angle-54|bgcolor-fff</code></pre>
                     </p>
                 </div>
                 <div class="column-6">
@@ -357,7 +356,7 @@ http://yourimage?saturation=-20
                         </ul>
                         <p>
                             Requests are passed thus:
-                        <pre><code>http://yourimage?format=png8</code></pre>
+                        <pre><code>http://your-image?format=png8</code></pre>
                         </p>
                     </div>
                 </div>
@@ -370,7 +369,7 @@ http://yourimage?saturation=-20
                     <p>Imageprocessor can also add a vignette effect to images.</p>
                     <p>
                         Requests are passed thus:
-                        <pre><code>http://yourimage?vignette=true</code></pre>
+                        <pre><code>http://your-image?vignette=true</code></pre>
                     </p>
                 </div>
                 <div class="column-6">
@@ -389,7 +388,7 @@ http://yourimage?saturation=-20
                         <p>Whilst Imageprocessor delivers an excellent quality/filesize ratio it also allows you to change the quality of jpegs on-the-fly.</p>
                         <p>
                             Requests are passed thus:
-                        <pre><code>http://yourimage?quality=65</code></pre>
+                        <pre><code>http://your-image?quality=65</code></pre>
                         </p>
                     </div>
                 </div>
@@ -403,8 +402,8 @@ http://yourimage?saturation=-20
                     <p>
                         Requests are passed thus:
                     </p>
-                    <pre><code>http://yourimage?flip=horizontal</code>
-<code>http://yourimage?flip=vertical</code>
+                    <pre><code>http://your-image?flip=horizontal</code>
+<code>http://your-image?flip=vertical</code>
                         </pre>
                 </div>
                 <div class="column-6">
@@ -426,15 +425,15 @@ http://yourimage?saturation=-20
                         </p>
                         <p>
                             Requests are passed thus:
-                        <pre><code>http://yourimage?roundedcorners=26</code></pre>
+                        <pre><code>http://your-image?roundedcorners=26</code></pre>
                         </p>
                         <p>
                             Color syntax:
-                        <pre><code>http://yourimage?roundedcorners=radius-26|bgcolor-fff</code></pre>
+                        <pre><code>http://your-image?roundedcorners=radius-26|bgcolor-fff</code></pre>
                         </p>
                         <p>
                             Independent Corners syntax:
-                        <pre><code>http://yourimage?roundedcorners=radius-26|tl-true|tr-false|bl-true|br-false</code></pre>
+                        <pre><code>http://your-image?roundedcorners=radius-26|tl-true|tr-false|bl-true|br-false</code></pre>
                         </p>
                     </div>
                 </div>
