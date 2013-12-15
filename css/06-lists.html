@@ -1,0 +1,146 @@
+---
+permalink: lists.html
+layout: subpage
+group: css
+title: Lists
+heading: Lists
+subheading: Normalized lists that scale with the viewport.
+sublinks: ["#standard|Standard","#description|Description"]
+---
+<section>
+    <h1>List Elements</h1>
+    <p>Responsive lists whose padding and margin scale with the base font size. CSS styling is minimal, simply there to normalize behaviour and provide styling hooks for further development.</p>
+    <hr />
+    <section id="standard">
+        <h1>Basic Lists</h1>
+        <div class="row">
+            <div class="col-s-4">
+                <h2>Standard</h2>
+                <ul>
+                    <li>first</li>
+                    <li>second</li>
+                    <li>third
+                        <ul>
+                            <li>alpha</li>
+                            <li>beta</li>
+                            <li>gamma</li>
+                            <li>delta</li>
+                        </ul>
+                    </li>
+                    <li>fourth</li>
+                </ul>
+
+                <ol>
+                    <li>first</li>
+                    <li>second</li>
+                    <li>third
+                        <ol>
+                            <li>alpha</li>
+                            <li>beta</li>
+                            <li>gamma</li>
+                            <li>delta</li>
+                        </ol>
+                    </li>
+                    <li>fourth</li>
+                </ol>
+            </div>
+            <div class="col-s-4">
+                <h2>No bullets</h2>
+                <p>Add class <code>.no-bullets</code></p>
+                <ul class="no-bullets">
+                    <li>first</li>
+                    <li>second</li>
+                    <li>third
+                        <ul>
+                            <li>alpha</li>
+                            <li>beta</li>
+                            <li>gamma</li>
+                            <li>delta</li>
+                        </ul>
+                    </li>
+                    <li>fourth</li>
+                </ul>
+
+                <ol class="no-bullets">
+                    <li>first</li>
+                    <li>second</li>
+                    <li>third
+                        <ol>
+                            <li>alpha</li>
+                            <li>beta</li>
+                            <li>gamma</li>
+                            <li>delta</li>
+                        </ol>
+                    </li>
+                    <li>fourth</li>
+                </ol>
+            </div>
+            <div class="col-s-4">
+                <h2>Coloured</h2>
+                <p>Add class <code>.colored</code></p>
+                <ul class="colored">
+                    <li>first</li>
+                    <li>second</li>
+                    <li>third
+                        <ul>
+                            <li>alpha</li>
+                            <li>beta</li>
+                            <li>gamma</li>
+                            <li>delta</li>
+                        </ul>
+                    </li>
+                    <li>fourth</li>
+                </ul>
+
+                <ol class="colored">
+                    <li>first</li>
+                    <li>second</li>
+                    <li>third
+                        <ol>
+                            <li>alpha</li>
+                            <li>beta</li>
+                            <li>gamma</li>
+                            <li>delta</li>
+                        </ol>
+                    </li>
+                    <li>fourth</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+    <hr />
+    <section id="description">
+        <div class="row">
+            <h1>Description Lists</h1>
+            <div class="col-s-6">
+                <h2>Standard</h2>
+                <dl>
+                    <dt>Description list</dt>
+                    <dd>A group of terms and their definitions.</dd>
+                    <dt>Name of the term</dt>
+                    <dd>Description of the term.</dd>
+                    <dd>Secondary description of the term.</dd>
+                    <dt>Name of the term</dt>
+                    <dd>Description of the term with lots of copy. Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                        Phasellus vitae nibh justo. Integer a ligula vel enim ultricies mollis ut ac tortor.
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-s-6">
+                <h2>Horizontal Layout</h2>
+                <p>Add class <code>.dl-horizontal</code></p>
+                <dl class="dl-horizontal">
+                    <dt>Description list</dt>
+                    <dd>A group of terms and their definitions.</dd>
+                    <dt>Name of the term</dt>
+                    <dd>Description of the term.</dd>
+                    <dd>Secondary description of the term.</dd>
+                    <dt>Name of the term</dt>
+                    <dd>Description of the term with lots of copy. Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                        Phasellus vitae nibh justo. Integer a ligula vel enim ultricies mollis ut ac tortor.
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </section>
+</section>

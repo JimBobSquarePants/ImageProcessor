@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% if page.title %} {{ page.title }} :: {% endif %} {{ site.name }}</title>
+    <meta name="description" content="{% if page.subheading %} {{ page.subheading }} {% else %} {{ site.description }} {% endif %}" />
+
+    <link href="{{ site.baseurl }}/assets/css/responsive.css" rel="stylesheet" />
+    <link href="{{ site.baseurl }}/assets/css/docs.css" rel="stylesheet" />
+    <link href="{{ site.baseurl }}/assets/css/vendor/prism.min.css" rel="stylesheet" />
+    <link href="{{ site.baseurl }}/assets/css/vendor/font-awesome-4.0.3/css/font-awesome.min.css" rel="stylesheet" />
+
+    <!--[if lt IE 9 &!(IEMobile)]>
+        <script src="{{ site.baseurl }}/assets/js/vendor/html5shiv.min.js"></script>
+        <script src="{{ site.baseurl }}/assets/js/vendor/respond.min.js"></script>
+    <![endif]-->
+    
+    <link rel="shortcut icon" href="{{ site.baseurl }}/favicon.ico" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ site.baseurl }}/assets/ico/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="{{ site.baseurl }}/assets/ico/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ site.baseurl }}/assets/ico/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ site.baseurl }}/assets/ico/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon-precomposed" href="{{ site.baseurl }}/assets/ico/apple-touch-icon-57x57.png" />
+</head>
+<body>
+    <nav role="navigation">
+        <div class="container">
+            <div class="row">
+                <a href="{{ site.baseurl }}/" rel="home">ImageProcessor</a>
+                <button data-dropdown-target="#navigation" class="visible-xs"><span class="visuallyhidden">Toggle Navigation</span></button>
+                <div id="navigation" class="collapse"><a href="{{ site.baseurl }}/getting-started.html">Getting Started</a><a href="{{ site.baseurl }}/css.html">ImageProcessor</a><a href="{{ site.baseurl }}/javascript.html">ImageProcessor.Web</a></div>
+            </div>
+        </div>
+    </nav>

@@ -1,0 +1,340 @@
+---
+permalink: tables.html
+layout: subpage
+group: css
+title: Tables
+heading: Tables
+subheading: Responsive tables for cross-device presentation.
+sublinks: ["#basic|Basic Layout","#responsive|Responsive","#overflow|Example : Overflow","#tablelist|Example : TableList"]
+---
+<section>
+    <h1>Table Elements</h1>
+    <p>Responsive provides tables with three basic styles with the minimum of css. Simple to hook into to edit for your needs.</p>
+    <hr />
+    <section id="basic">
+        <h1>Basic Layout</h1>
+        <p>The basic table has no classes added to it. We've just used the defaults as set in Normalize.css and added a few properties to make it better fit fluid layouts.</p>
+        <div class="row">
+            <div class="col-s-6">
+                <h2>Standard Table</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Header</th>
+                            <th>Header</th>
+                            <th>Header</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-s-6">
+                <h2>Bordered Table</h2>
+                <p>Add the class <code>.table-bordered</code> to the table.</p>
+                <table class="table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Header</th>
+                            <th>Header</th>
+                            <th>Header</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-s-6">
+                <h2>Striped Table</h2>
+                <p>Add the class <code>.table-striped</code> to the table. If IE8 support is required, add class <code>.table-row-alt</code> to the appropriate table row.</p>
+                <table class="table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Header</th>
+                            <th>Header</th>
+                            <th>Header</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-s-6">
+                <h2>Combined Styles</h2>
+                <p>The table styles can be easily combined.</p>
+                <table class="table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Header</th>
+                            <th>Header</th>
+                            <th>Header</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Data</th>
+                            <td>Data</td>
+                            <td>Data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <aside>
+            <h3>Markup</h3>
+            <pre class="language-markup"><code>&lt;table&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th scope="col"&gt;Header&lt;/th&gt;
+            &lt;th&gt;Header&lt;/th&gt;
+            &lt;th&gt;Header&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;th scope="row"&gt;Data&lt;/th&gt;
+            &lt;td&gt;Data&lt;/td&gt;
+            &lt;td&gt;Data&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th scope="row"&gt;Data&lt;/th&gt;
+            &lt;td&gt;Data&lt;/td&gt;
+            &lt;td&gt;Data&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th scope="row"&gt;Data&lt;/th&gt;
+            &lt;td&gt;Data&lt;/td&gt;
+            &lt;td&gt;Data&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+        </aside>
+    </section>
+    <hr />
+    <section>
+        <section id="responsive">
+            <h1>Responsive Tables</h1>
+            <p>
+                Two further types of responsive table are available in the framework. A simple type that adds a horizontal scrollbar to your table on smaller viewports and a more flexible type
+                that grows from a list on smaller viewports.
+            </p>
+            <section id="overflow">
+                <div class="row">
+                    <h2>Table with overflow wrapper</h2>
+                    <p>Wrap the table in a container with the class <code>.table-scrollable</code>.</p>
+                    <div class="col-s-6">
+                        <div class="table-scrollable">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Header1</th>
+                                        <th>Header2</th>
+                                        <th>Header3</th>
+                                        <th>Header4</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th scope="col">Header1</th>
+                                        <th>Header2</th>
+                                        <th>Header3</th>
+                                        <th>Header4</th>
+                                    </tr>
+                                </tfoot>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Data1</th>
+                                        <td>Data2</td>
+                                        <td>Data3</td>
+                                        <td>Data4</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Data1</th>
+                                        <td>Data2</td>
+                                        <td>Data3</td>
+                                        <td>Data4</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Data1</th>
+                                        <td>Data2</td>
+                                        <td>Data3</td>
+                                        <td>Data4</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Data1</th>
+                                        <td>Data2</td>
+                                        <td>Data3</td>
+                                        <td>Data4</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="tablelist">
+                <h2>TableList</h2>
+                <p>
+                    TableList requires a little bit more markup to render correctly on smaller devices using data attributes <code>data-thead</code> and <code>data-tfoot</code>
+                    but offers much more flexibility in display making it much easier to read the data. Adding the attribute <code>data-table-list</code> will automate that for you
+                    using the <a href="{{ site.baseurl }}/javascript/tablelist.html">JavaScript Data API</a>.
+                </p>
+                <div class="row">
+                    <div class="column-6">
+                        <table class="table-list table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Header1</th>
+                                    <th>Header2</th>
+                                    <th>Header3</th>
+                                    <th>Header4</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th scope="col">Footer1</th>
+                                    <th>Footer2</th>
+                                    <th>Footer3</th>
+                                    <th>Footer4</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                <tr>
+                                    <th scope="row" data-thead="Header1" data-tfoot="Footer1">Data1</th>
+                                    <td data-thead="Header2" data-tfoot="Footer2">Data2 with a larger amount of copy to demonstrate what happens when we drop down the display width to less than 48em.</td>
+                                    <td data-thead="Header3" data-tfoot="Footer3">Data3</td>
+                                    <td data-thead="Header4" data-tfoot="Footer4">Data4</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" data-thead="Header1" data-tfoot="Footer1">Data1</th>
+                                    <td data-thead="Header2" data-tfoot="Footer2">Data2</td>
+                                    <td data-thead="Header3" data-tfoot="Footer3">Data3</td>
+                                    <td data-thead="Header4" data-tfoot="Footer4">Data4</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" data-thead="Header1" data-tfoot="Footer1">Data1</th>
+                                    <td data-thead="Header2" data-tfoot="Footer2">Data2</td>
+                                    <td data-thead="Header3" data-tfoot="Footer3">Data3</td>
+                                    <td data-thead="Header4" data-tfoot="Footer4">Data4</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" data-thead="Header1" data-tfoot="Footer1">Data1</th>
+                                    <td data-thead="Header2" data-tfoot="Footer2">Data2</td>
+                                    <td data-thead="Header3" data-tfoot="Footer3">Data3</td>
+                                    <td data-thead="Header4" data-tfoot="Footer4">Data4</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <aside>
+                <h3>Markup</h3>
+                <pre class="language-markup"><code>&lt;table class="table-list table-striped table-bordered"&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th scope="col"&gt;Header1&lt;/th&gt;
+            &lt;th&gt;Header2&lt;/th&gt;
+            &lt;th&gt;Header3&lt;/th&gt;
+            &lt;th&gt;Header4&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tfoot&gt;
+        &lt;tr&gt;
+            &lt;th scope="col"&gt;Footer1&lt;/th&gt;
+            &lt;th&gt;Footer2&lt;/th&gt;
+            &lt;th&gt;Footer3&lt;/th&gt;
+            &lt;th&gt;Footer4&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/tfoot&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;th scope="row" data-thead="Header1" data-tfoot="Footer1"&gt;Data1&lt;/th&gt;
+            &lt;td data-thead="Header2" data-tfoot="Footer2"&gt;
+                Data2 with a larger amount of copy to demonstrate what happens 
+                when we drop down the display width to less than 48em.
+            &lt;/td&gt;
+            &lt;td data-thead="Header3" data-tfoot="Footer3"&gt;Data3&lt;/td&gt;
+            &lt;td data-thead="Header4" data-tfoot="Footer4"&gt;Data4&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th scope="row" data-thead="Header1" data-tfoot="Footer1"&gt;Data1&lt;/th&gt;
+            &lt;td data-thead="Header2" data-tfoot="Footer2"&gt;Data2&lt;/td&gt;
+            &lt;td data-thead="Header3" data-tfoot="Footer3"&gt;Data3&lt;/td&gt;
+            &lt;td data-thead="Header4" data-tfoot="Footer4"&gt;Data4&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th scope="row" data-thead="Header1" data-tfoot="Footer1"&gt;Data1&lt;/th&gt;
+            &lt;td data-thead="Header2" data-tfoot="Footer2"&gt;Data2&lt;/td&gt;
+            &lt;td data-thead="Header3" data-tfoot="Footer3"&gt;Data3&lt;/td&gt;
+            &lt;td data-thead="Header4" data-tfoot="Footer4"&gt;Data4&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th scope="row" data-thead="Header1" data-tfoot="Footer1"&gt;Data1&lt;/th&gt;
+            &lt;td data-thead="Header2" data-tfoot="Footer2"&gt;Data2&lt;/td&gt;
+            &lt;td data-thead="Header3" data-tfoot="Footer3"&gt;Data3&lt;/td&gt;
+            &lt;td data-thead="Header4" data-tfoot="Footer4"&gt;Data4&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+            </aside>
+        </section>
+    </section>
+</section>

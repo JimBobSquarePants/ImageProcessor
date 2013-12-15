@@ -1,0 +1,458 @@
+---
+permalink: grid.html
+layout: subpage
+group: css
+title: Grid
+heading: The Grid
+subheading: Flexible grid layouts across all devices.
+sublinks: ["#mediaqueries|Media Queries",
+            "#basic|Example : Basic",
+            "#nogutter|Example : No Gutter",
+            "#fixed|Example : Fixed",
+            "#nested|Example : Nested",
+            "#resizing|Example : Resizing",
+            "#offsetting|Example : Offsetting",
+            "#ordering|Example : Ordering",
+            "#resetting|Example : Resetting"]
+---
+<h1>The Grid System</h1>
+<p>
+    Responsive comes, not with one but with 4 tiers of 12 column fluid grids in two variants that allow for granular control over layout across all 
+    devices. The system has been written from an <strong>entirely mobile first</strong> perspective with each level overwriting the previous one as the viewport width 
+    scales up.
+</p>
+<p>
+    By standard all grids are wrapped in a div with the class <code>.container</code> which constrains the grid to 95% of the viewport width up to a maximum of 1140px.
+</p>
+<div class="alert alert-info">
+    <p>Adding class <code>.fixed</code> to the container and using <code>.col-xs-{number}</code> on the columns will force the grid into a non-responsive layout.</p>
+</div>
+<hr />
+<section id="mediaqueries">
+    <h1>Media Queries</h1>
+    <p>The media queries specifying breakpoints are as follows:</p>
+    <table class="table-list table-striped table-bordered" data-table-list="">
+        <thead>
+            <tr>
+                <th scope="col">Level</th>
+                <th>Selector</th>
+                <th>Width</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Extra small (initial)</td>
+                <td><code>.col-xs-{number}</code></td>
+                <td>Up to 48em <small>(768px at 16px/1em)</small></td>
+            </tr>
+            <tr>
+                <td>Small</td>
+                <td><code>.col-s-{number}</code></td>
+                <td>48em to 62em <small>(768px to 992px at 16px/1em)</small> </td>
+            </tr>
+            <tr>
+                <td>Medium</td>
+                <td><code>.col-m-{number}</code></td>
+                <td>62em to 75em <small>(992px to 1200px at 16px/1em)</small> </td>
+            </tr>
+            <tr>
+                <td>Large</td>
+                <td><code>.col-l-{number}</code></td>
+                <td>75em and over <small>(1200px at 16px/1em)</small> </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+<hr />
+<section id="examples">
+    <h1>Examples</h1>
+    <section id="basic">
+        <h3>Basic</h3>
+        <p>
+            Here is a very basic example of the grid system. In this example the columns are styled using the <code>.col-s-{number}</code> tier meaning that on viewport widths 
+            below 48em <small>(768px at 16px/1em)</small> the columns will collapse to a horizontal layout.
+        </p>
+        <div class="grid-demo">
+            <div class="row">
+                <div class="col-s-12">
+                    12
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-11">
+                    11
+                </div>
+                <div class="col-s-1">
+                    1
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-10">
+                    10
+                </div>
+                <div class="col-s-2">
+                    2
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-9">
+                    9
+                </div>
+                <div class="col-s-3">
+                    3
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-8">
+                    8
+                </div>
+                <div class="col-s-4">
+                    4
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-7">
+                    7
+                </div>
+                <div class="col-s-5">
+                    5
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-6">
+                    6
+                </div>
+                <div class="col-s-6">
+                    6
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-5">
+                    5
+                </div>
+                <div class="col-s-7">
+                    7
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-4">
+                    4
+                </div>
+                <div class="col-s-8">
+                    8
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-3">
+                    3
+                </div>
+                <div class="col-s-9">
+                    9
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-2">
+                    2
+                </div>
+                <div class="col-s-10">
+                    10
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-s-1">
+                    1
+                </div>
+                <div class="col-s-11">
+                    11
+                </div>
+            </div>
+        </div>
+        <pre class="language-markup"><code>&lt;div class="row"&gt;
+    &lt;div class="col-s-12"&gt;
+        12
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-s-11"&gt;
+        11
+    &lt;/div&gt;
+    &lt;div class="col-s-1"&gt;
+        1
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <section id="nogutter">
+        <h3>No Gutter</h3>
+        <p>
+            Adding the class <code>.no-gutter</code> to a row triggers the gutterless column layout.
+        </p>
+        <div class="grid-demo">
+            <div class="row no-gutter">
+                <div class="col-s-12">
+                    12
+                </div>
+            </div>
+            <div class="row no-gutter">
+                <div class="col-s-11">
+                    11
+                </div>
+                <div class="col-s-1">
+                    1
+                </div>
+            </div>
+            <div class="row no-gutter">
+                <div class="col-s-10">
+                    10
+                </div>
+                <div class="col-s-2">
+                    2
+                </div>
+            </div>
+            <div class="row no-gutter">
+                <div class="col-s-9">
+                    9
+                </div>
+                <div class="col-s-3">
+                    3
+                </div>
+            </div>
+            <div class="row no-gutter">
+                <div class="col-s-8">
+                    8
+                </div>
+                <div class="col-s-4">
+                    4
+                </div>
+            </div>
+            <div class="row no-gutter">
+                <div class="col-s-7">
+                    7
+                </div>
+                <div class="col-s-5">
+                    5
+                </div>
+            </div>
+            <div class="row no-gutter">
+                <div class="col-s-6">
+                    6
+                </div>
+                <div class="col-s-6">
+                    6
+                </div>
+            </div>
+        </div>
+        <pre class="language-markup"><code>&lt;div class="row no-gutter"&gt;
+    &lt;div class="col-s-12"&gt;
+        12
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-s-11"&gt;
+        11
+    &lt;/div&gt;
+    &lt;div class="col-s-1"&gt;
+        1
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <section id="fixed">
+        <h3>Fixed</h3>
+        <p>In this example the columns will persist their width from the base view all the way up. This is performed using the <code>.col-xs-{number}</code> tier system.</p>
+        <div class="grid-demo">
+            <div class="row">
+                <div class="col-xs-6">
+                    6
+                </div>
+                <div class="col-xs-6">
+                    6
+                </div>
+            </div>
+        </div>
+        <pre class="language-markup"><code>&lt;div class="row"&gt;
+    &lt;div class="col-xs-6"&gt;
+        6
+    &lt;/div&gt;
+    &lt;div class="col-xs-6"&gt;
+        6
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <section id="nested">
+        <h3>Nesting</h3>
+        <p>Nesting, of course, is supported. Just add a new <code>.row</code> class to a div to designate a new level.</p>
+        <div class="grid-demo">
+            <div class="row">
+                <div class="col-s-6">
+                    6
+                               
+               
+
+                    <div class="row">
+                        <div class="col-s-6">
+                            6
+                                   
+                   
+                        </div>
+                        <div class="col-s-6">
+                            6
+                                   
+                   
+                        </div>
+                    </div>
+                </div>
+                <div class="col-s-6">
+                    6
+                               
+               
+
+                    <div class="row">
+                        <div class="col-s-6">
+                            6
+                                   
+                   
+                        </div>
+                        <div class="col-s-6">
+                            6
+                                   
+                   
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <pre class="language-markup"><code>&lt;div class="row"&gt;
+    &lt;div class="col-s-6"&gt;
+        6
+        &lt;div class="row"&gt;
+            &lt;div class="col-s-6"&gt;
+                6
+            &lt;/div&gt;
+            &lt;div class="col-s-6"&gt;
+                6
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-s-6"&gt;
+        6
+        &lt;div class="row"&gt;
+            &lt;div class="col-s-6"&gt;
+                6
+            &lt;/div&gt;
+            &lt;div class="col-s-6"&gt;
+                6
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <section id="resizing">
+        <h3>Resizing</h3>
+        <p>In this example the grid from each tier is being overwritten as the viewport scales up.</p>
+        <div class="grid-demo">
+            <div class="row">
+                <div class="col-xs-6 col-s-4">
+                    <div class="visible-xs">6</div>
+                    <div class="hidden-xs ">4</div>
+                </div>
+                <div class="col-xs-6 col-s-4 push-xs-right">
+                    <div class="visible-xs">6</div>
+                    <div class="hidden-xs ">4</div>
+                </div>
+                <div class="col-s-4">
+                    <div class="visible-xs">12</div>
+                    <div class="hidden-xs">4</div>
+                </div>
+            </div>
+        </div>
+        <pre class="language-markup"><code>&lt;div class="row"&gt;
+    &lt;div class="col-xs-6 col-s-4"&gt;
+        6
+    &lt;/div&gt;
+    &lt;div class="col-xs-6 col-s-4 push-xs-right"&gt;
+        6
+    &lt;/div&gt;
+    &lt;div class="col-s-4"&gt;
+        6
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <section id="offsetting">
+        <h3>Offsetting Columns</h3>
+        <p>Columns can be offset by each column width.</p>
+        <p>
+            Use classes <code>.offset-[size]-[number]</code> to push by column width. 
+        </p>
+        <div class="grid-demo">
+            <div class="row">
+                <div class="col-xs-4">4</div>
+                <div class="col-xs-4 offset-xs-4">4</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4 offset-xs-4">4</div>
+            </div>
+        </div>
+        <pre class="language-markup"><code>&lt;div class="row"&gt;
+    &lt;div class="col-xs-4"&gt;4&lt;/div&gt;
+    &lt;div class="col-xs-4 offset-xs-4"&gt;4&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-xs-4 offset-xs-4"&gt;4&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <section id="ordering">
+        <h3>Ordering Columns</h3>
+        <p>The order of columns can be flipped by combining classes <code>.push-[size]-[number]</code> and <code>.pull-[size]-[number]</code>.</p>
+        <div class="grid-demo">
+            <div class="row">
+                <div class="col-xs-4 push-xs-8">4</div>
+                <div class="col-xs-8 pull-xs-4">8</div>
+            </div>
+        </div>
+        <pre class="language-markup"><code>&lt;div class="row"&gt;
+    &lt;div class="col-xs-4 push-xs-8"&gt;4&lt;/div&gt;
+    &lt;div class="col-xs-8 pull-xs-4"&gt;8&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <section id="resetting">
+        <h3>Resets</h3>
+        <p>
+            Each tier comes with a <code>.reset-[size]</code> and <code>.reset-[size]-only</code> class which allows you to reset the flow of the layout as the viewport scales. 
+            This allows you to perform more complicated layouts with relative ease.
+        </p>
+        <div class="grid-demo">
+            <div class="row">
+                <div class="col-s-3 col-m-6">
+                    <div class="visible-xs">12</div>
+                    <div class="visible-s">3</div>
+                    <div class="hidden-xs hidden-s">6</div>
+                </div>
+                <div class="col-s-3 col-m-6">
+                    <div class="visible-xs">12</div>
+                    <div class="visible-s">3</div>
+                    <div class="hidden-xs hidden-s">6</div>
+                </div>
+                <div class="col-s-3 col-m-6 reset-m">
+                    <div class="visible-xs">12</div>
+                    <div class="visible-s">3</div>
+                    <div class="hidden-xs hidden-s">6</div>
+                </div>
+                <div class="col-s-3 col-m-6">
+                    <div class="visible-xs">12</div>
+                    <div class="visible-s">3</div>
+                    <div class="hidden-xs hidden-s">6</div>
+                </div>
+            </div>
+        </div>
+        <pre class="language-markup"><code>&lt;div class="row"&gt;
+    &lt;div class="col-s-3 col-m-6"&gt;
+    &lt;/div&gt;
+    &lt;div class="col-s-3 col-m-6"&gt;
+    &lt;/div&gt;
+    &lt;div class="col-s-3 col-m-6 reset-m"&gt;
+    &lt;/div&gt;
+    &lt;div class="col-s-3 col-m-6"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+    </section>
+</section>

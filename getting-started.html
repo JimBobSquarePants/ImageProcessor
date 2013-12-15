@@ -1,0 +1,121 @@
+---
+layout: default
+title: Getting Started
+heading: Getting Started
+subheading: An introduction to ImageProcessor, how to use it, with installation instructions.
+---
+<div class="row">
+    <nav class="col-s-3" role="complementary">
+        <ul class="no-bullets">
+            <li><a href="#download">Download ImageProcessor</a></li>
+            <li><a href="#config">Configuration</a></li>
+        </ul>
+    </nav>
+    <article class="col-s-9">
+        <section id="download">
+            <h1>Download ImageProcessor</h1>
+            <p>
+                The simplest and fastest way to get the ImageProcessor libraries is to install them via Nuget.
+            </p>
+            <a href="https://nuget.org/packages/ImageProcessor/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Nuget Link"><i class="fa fa-download"></i>ImageProcessor</a>
+            <a href="https://nuget.org/packages/ImageProcessor.Web/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Web Nuget Link"><i class="fa fa-download"></i>ImageProcessor.Web</a>
+            <ul class="download-links">
+                <li>
+                    <a href="http://github.com/JimBobSquarePants/ImageProcessor" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="GitHub project" rel="external" target="_blank">GitHub project</a>
+                </li>
+                <li>Version {{site.version}}
+                </li>
+                <li>Web Version {{site.webversion}}
+                </li>
+            </ul>
+        </section>
+        <hr />
+        <section id="config">
+            <h1>Setting up your configuration</h1>
+            <p>
+                When installing ImageProcessor.Web you will find that the web.config will have been altered and additional configuration files will have been
+                added to the solution.
+            </p>
+            <p>
+                These are setup as follows.
+            </p>
+            <h2>The Web.Config</h2>
+            <pre class="language-markup"><code>&lt;configuration&gt;
+ &lt;!-- Custom configuration group --&gt;
+  &lt;configSections&gt;
+    &lt;sectionGroup name="imageProcessor"&gt;
+      &lt;section name="security" requirePermission="false" type="ImageProcessor.Web.Config.ImageSecuritySection, ImageProcessor.Web"/&gt;
+      &lt;section name="processing" requirePermission="false" type="ImageProcessor.Web.Config.ImageProcessingSection, ImageProcessor.Web"/&gt;
+      &lt;section name="cache" requirePermission="false" type="ImageProcessor.Web.Config.ImageCacheSection, ImageProcessor.Web"/&gt;
+    &lt;/sectionGroup&gt;
+  &lt;/configSections&gt;
+  &lt;imageProcessor &gt;
+    &lt;security configSource="config\imageprocessor\security.config"/&gt;
+    &lt;cache configSource="config\imageprocessor\cache.config"/&gt;
+    &lt;processing configSource="config\imageprocessor\processing.config"/&gt;
+  &lt;/imageProcessor&gt;
+
+ &lt;!-- HttpModule bindings --&gt;
+  &lt;system.web&gt;
+    &lt;httpModules&gt;
+      &lt;add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/&gt;
+    &lt;/httpModules&gt;
+  &lt;/system.web&gt;
+
+  &lt;system.webServer&gt;
+    &lt;modules&gt;
+      &lt;add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/&gt;
+    &lt;/modules&gt;
+  &lt;/system.webServer&gt;
+&lt;/configuration&gt;</code></pre>
+
+            <hr />
+
+            <h2>Addition Configuration</h2>
+            <p>
+                ImageProcessor.Web also install 3 additional configuration files under the path <code>\config\imageprocessor\</code> within your 
+                solution. These allow you to configure rules for caching, processing, and security.
+            </p>
+
+            <h3>Cache.config</h3>
+            <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;!-- Sets the default cache location and maximum number of days to store 
+     items in the cache --&gt;
+&lt;cache virtualPath="~/app_data/cache" maxDays="56"/&gt;</code></pre>
+
+            <h3>Security.config</h3>
+            <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+  &lt;!-- Whether to allow remote image requests, the timeout for a request in 
+       milliseconds and the prefix to use so that ImageProcessor can recognize 
+       a remote request. --&gt;
+  &lt;security allowRemoteDownloads="true" timeout="300000" maxBytes="524288" remotePrefix="/remote.axd"&gt;
+    &lt;!-- Sets allowable domains to process images from. --&gt;
+    &lt;whiteList&gt;
+      &lt;add url="http://images.mymovies.net"/&gt;
+      &lt;add url="http://maps.googleapis.com" extensionLess="true" imageFormat=".png"/&gt;
+    &lt;/whiteList&gt;
+  &lt;/security&gt;</code></pre>
+
+            <h3>Processing.config</h3>
+            <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+  &lt;processing&gt;
+    &lt;plugins&gt;
+      &lt;!-- Maximum height and width to allow images to be resized to. --&gt;
+      &lt;plugin name="Resize"&gt;
+        &lt;settings&gt;
+          &lt;setting key="MaxWidth" value="3000"/&gt;
+          &lt;setting key="MaxHeight" value="3000"/&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
+      &lt;!-- Presets that allow you to reduce code in your markup. 
+           Note the use of &#038; to escape ampersands. --&gt;
+      &lt;plugin name="Preset"&gt;
+        &lt;settings&gt;
+          &lt;setting key="presetname" value="width=300&#038;height=150"/&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/processing&gt;</code></pre>
+        </section>
+    </article>
+</div>

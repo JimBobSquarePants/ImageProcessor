@@ -1,0 +1,96 @@
+---
+permalink: dismiss.html
+layout: subpage
+group: javascript
+title: Dismiss
+heading: Dismiss
+subheading: Responsive content toggler.
+sublinks: ["#examples|Examples",
+            "#markup|Markup",
+            "#methods|Methods",
+            "#events|Events",
+            "#dataapi|Data API"]
+---
+<section id="normalize">
+    <h1>Dismiss</h1>
+    <p>A jQuery plugin that adds the functionality to hide to any parent element it targets. Uses CSS transitions to perform the animation.</p>
+    <p>
+        Comes with a markup API that allows running the plugin without writing a single line of JavaScript.
+        This is Responsive's first class API and should be your first consideration when using a plugin.
+    </p>
+    <hr />
+    <section id="examples">
+        <h1>Examples</h1>
+        <div class="alert alert-info">
+            <a data-dismiss-target=".alert" href="#" class="close">x</a>
+            <p>
+                <strong>Adding the plugin inside any element will hide the closest parent to the plugin matching the given selector on click.</strong>
+            </p>
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum justo leo, tincidunt at nulla sed, aliquam fermentum mauris.
+                Quisque laoreet, enim et volutpat faucibus, nisi ante gravida dolor, nec ornare libero sapien quis est. Curabitur nec aliquet
+                lacus, sed suscipit neque. Etiam ut sapien tempus, malesuada enim ut, semper diam. Aliquam erat volutpat. Donec eget posuere ligula.
+                Proin fermentum et turpis ut rutrum. Nunc vitae nunc fermentum, aliquam mauris ac, tincidunt dui.
+            </p>
+            <p>
+                Cras at laoreet enim. Etiam tincidunt mi ut mi tristique facilisis. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Cras sed nunc ut nisl laoreet adipiscing. Quisque a fermentum libero. Nam at facilisis neque, quis tempus purus. Quisque ultrices
+                est at augue ultricies, vitae rutrum nisl imperdiet. Nullam non erat non mauris eleifend laoreet. Ut nibh nisl, consequat id eleifend
+                nec, tristique quis mauris. Maecenas cursus mi nec lorem elementum pulvinar. Vestibulum eu sem quam.
+            </p>
+        </div>
+    </section>
+    <hr />
+    <section id="markup">
+        <h1>Markup</h1>
+        <pre class="language-markup"><code>/* Add inside any element. */
+&lt;a href="#" data-dismiss-target="YOUR_PARENT_SELECTOR"&gt;x&lt;/a&gt;</code></pre>
+    </section>
+    <hr />
+    <section id="methods">
+        <h1>Methods</h1>
+        <p>The dismiss plugin exposes the following method signatures.</p>
+        <dl>
+            <dt><strong>.dismiss(target)</strong>  </dt>
+            <dd>
+                Initialises the plugin with a
+                <var>target</var>
+                parameter. A jQuery selector indicating which target to hide.
+            </dd>
+        </dl>
+    </section>
+    <hr />
+    <section id="events">
+        <h1>Events</h1>
+        <p>The dismiss plugin exposes the following events allowing the developer to tap into its behaviour.</p>
+        <dl>
+            <dt><strong>dismiss.r.dismiss</strong></dt>
+            <dd>This event is fired immediately when the plugins <code>dismiss</code> instance method is invoked.</dd>
+            <dt><strong>dismissed.r.dismiss</strong></dt>
+            <dd>This event is fired when the plugins <code>dismissed</code> instance method is invoked once the target has completed the animation and is hidden.</dd>
+        </dl>
+    </section>
+    <hr />
+    <section id="dataapi">
+        <h1>Data API</h1>
+        <p>
+            The dismiss plugin's default behaviour is bound using a markup API that allows running the plugin without writing a single line of JavaScript.
+            If you need to override this behaviour the following code will allow you to do so.
+        </p>
+        <pre class="language-javascript"><code>// Override the default behaviour
+$(document.body).off("click.r.dismiss")
+                .on("click.r.dismiss", ":attrStart(data-dismiss)", function (event) {    
+                    // Your custom behaviour...
+                });
+                
+// Bind to the close event.
+$("YOUR_PARENT_SELECTOR").on("dismiss.r.dismiss", function(event) {
+    // Your custom behaviour...
+});
+                                               
+// Bind to the closed event.
+$("YOUR_PARENT_SELECTOR").on("dismissed.r.dismiss", function(event) {
+    // Your custom behaviour...
+});</code></pre>
+    </section>
+</section>

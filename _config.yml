@@ -1,0 +1,19 @@
+﻿# Allows the running of the site in a subdirectory on Github Pages
+# Note - if you enable this, and attempt to view your site locally you have to 
+# pass the  --baseurl parameter when serving as an empty string e.g jekyll serve --baseurl ''
+# http://jekyllrb.com/docs/github-pages/
+baseurl : /ImageProcessor
+
+relative_permalinks: true
+
+# Name of the website
+name: ImageProcessor
+
+# Short description (goes below the title)
+description: A C# library for the dynamic processing of image files with .NET. ImageProcessor can resize, rotate, crop, flip, fade, watermark and add Instagram style filters to images.
+
+# Your name, as you want it to appear underneath each post and in the footer
+author: James South
+
+version: "1.8.0"
+webversion: "3.0.0"

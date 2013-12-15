@@ -1,0 +1,117 @@
+---
+permalink: code.html
+layout: subpage
+group: css
+title: Code
+heading: Code
+subheading: Responsive, normalized code blocks.
+sublinks: ["#inline|Example : Inline","#pre|Example : Pre Blocks", "#nested|Example : Nested Inline", "#fixed|Example : Fixed Height", "#positioning|Example : Positioning"]
+---
+<section>
+    <h1>Code Blocks</h1>
+    <p>Coding elements have been normalized and styled with only the minimum CSS to allow for consistent behaviour easy overriding.</p>
+    <hr />
+    <section id="inline">
+        <h1>Inline Code</h1>
+        
+        <p>Wrap your inline con in a <code>&lt;code&gt;&lt;/code&gt;</code> block.</p>
+
+        <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. 
+                    Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et <code>mollis dolor</code>. Praesent et diam eget 
+                    libero egestas mattis sit amet vitae augue. Nam <code>tincidunt</code> congue enim, ut porta lorem lacinia consectetur. Donec ut
+                    libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut 
+                    gravida lorem. <code>Ut turpis felis</code>, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna 
+                    consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero 
+                    in urna <code>ultrices</code> accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis 
+                    natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi 
+                    at sem facilisis semper ac in est.
+        </p>
+    </section>
+    <section id="pre">
+        <h1>Pre Blocks</h1>
+        
+        <p>Wrap your block sample in a <code>&lt;pre&gt;&lt;/pre&gt;</code> block.</p>
+
+        <p>This is the <code>Panel</code> constructor:</p>
+        <pre><code>function Panel(element, canClose, closeHandler) {
+  this.element = element;
+  this.canClose = canClose;
+  this.closeHandler = function () { 
+    
+    if (closeHandler) {
+    
+        closeHandler(); 
+
+    }
+
+  };
+}</code></pre>
+    </section>
+    <hr />
+    <section id="nested">
+        <h1>Nested Inline Code</h1>
+        <p>
+            In the following snippet,
+                    <samp>samp</samp>
+            and <kbd>kbd</kbd> elements are mixed in the contents of a pre element to show a session of Zork I.
+        </p>
+
+        <pre><samp>You are in an open field west of a big white house with 
+a boarded front door.
+There is a small mailbox here.
+
+></samp> <kbd>open mailbox</kbd>
+
+<samp>Opening the mailbox reveals:
+A leaflet.
+
+></samp></pre>
+    </section>
+    <section id="fixed">
+        <h1>Fixed Height</h1>
+        <p>Add the class <code>.pre-scrollable</code>.</p>
+        <pre class="pre-scrollable"><code>pre, code, samp, kbd {
+    background-color: #f7f7f9;
+    border: 1px solid #e1e1e8;
+    color: #dd1144;
+    padding: .5em;
+}
+
+code {
+    padding: .067em .25em;
+    white-space: nowrap;
+}
+
+pre code,
+pre samp {
+    border: none;
+    padding: 0;
+    white-space: pre-wrap;
+}
+
+.pre-scrollable {
+    max-height: 20em;
+    overflow-y: scroll;
+}</code></pre>
+    </section>
+    <hr />
+    <section id="positioning">
+        <h1>Positioning</h1>
+        <p>The following shows a contemporary poem that uses the <code>pre</code> element to preserve its unusual formatting, which forms an intrinsic part of the poem itself.</p>
+        <pre>                maxling
+
+it is with a          heart
+               heavy
+
+that i admit loss of a feline
+        so           loved
+
+a friend lost to the
+        unknown
+                                (night)
+
+~cdr 11dec07</pre>
+        </div>
+    </section>
+</section>

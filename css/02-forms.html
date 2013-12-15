@@ -1,0 +1,255 @@
+---
+permalink: forms.html
+layout: subpage
+group: css
+title: Forms
+heading: Forms
+subheading: Cross browser, normalized, responsive forms.
+sublinks: ["#standard|Standard Layout",
+            "#horizontal|Horizontal Layout",
+            "#markup|The Markup",
+            "#ios|IOS"]
+---
+<section>
+    <h1>Form Elements</h1>
+    <p>Cross browser, normalized, responsive forms with minimal styling to allow easy overrides and lean CSS.</p>
+    <p>
+        All inputs are responsive with progressively enhanced fallbacks for unsupported types. A hook class <code>.no-edit</code> can be used to mimic non-editable inputs,
+        and all fields can be made to display inline by adding the class <code>.inline-block</code> or stretch to full width by adding the class <code>.full-width</code>.
+    </p>
+    <p>Smaller elements such as radio and checkbox inputs can be aligned by wrapping them in a div with the class <code>.input-group</code>.</p>
+    <hr />
+    <section id="standard">
+        <h1>Standard Layout</h1>
+        <form action="#">
+            <fieldset>
+                <legend>Standard Form</legend>
+                <div class="row">
+                    <div class="col-m-6">
+                        <label for="input1">Standard</label>
+                        <input type="text" id="input1" class="focus" value="standard input..." />
+                        <label for="input-disabled1">Disabled</label>
+                        <input type="text" id="input-disabled1" disabled value="disabled input..." />
+                        <p>Support text to help describe the input.</p>
+                        <label for="input-no-edit1">Non editable</label>
+                        <span id="input-no-edit1" class="no-edit">No edit</span>
+                        <label for="select-default1">Select</label>
+                        <select id="select-default1">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                        </select>
+                        <label for="input-file1">File upload</label>
+                        <input id="input-file1" type="file" />
+                        <label for="input-number1">Number</label>
+                        <input type="number" id="input-number1" />
+                        <label for="input-password1">Password</label>
+                        <input type="password" id="input-password1" />
+                        <label for="input-time1">Time</label>
+                        <input type="time" id="input-time1" />
+                        <label for="input-week1">Week</label>
+                        <input type="week" id="input-week1" />
+                        <label for="input-month1">Month</label>
+                        <input type="month" id="input-month1" />
+                        <label for="input-date1">Date</label>
+                        <input type="date" id="input-date1" />
+                    </div>
+                    <div class="col-m-6">
+                        <label for="input-datetime1">Datetime</label>
+                        <input type="datetime" id="input-datetime1" />
+                        <label for="input-datetime-local1">Datetime Local</label>
+                        <input type="datetime-local" id="input-datetime-local1" />
+                        <label for="input-search1">Search</label>
+                        <input type="search" id="input-search1" />
+                        <label for="input-color1">Color</label>
+                        <input type="color" id="input-color1" />
+                        <label for="input-range1">Range</label>
+                        <input type="range" id="input-range1" min="0" max="100" value="50" />
+                        <label for="input-email1">Email</label>
+                        <input type="email" id="input-email1" />
+                        <label for="check-disabled1">Disabled Checkbox</label>
+                        <div class="input-group">
+                            <input type="checkbox" id="check-disabled1" value="option1" disabled="" class="inline-block">
+                        </div>
+                        <label for="check1">Checkbox</label>
+                        <div class="input-group">
+                            <input type="checkbox" id="check1" value="option1" class="inline-block">
+                            <input type="checkbox" id="check2" value="option2" class="inline-block">
+                        </div>
+                        <label for="radio1">Radio</label>
+                        <div class="input-group">
+                            <input type="radio" id="radio1" name="radio" value="option1" class="inline-block">
+                            <input type="radio" id="radio2" name="radio" value="option2" class="inline-block">
+                        </div>
+                        <label for="textarea1">Textarea</label>
+                        <textarea id="textarea1"></textarea>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="form-actions">
+                <button type="submit">Save changes</button>
+                <button>Cancel</button>
+            </div>
+        </form>
+    </section>
+    <hr />
+    <section id="horizontal">
+        <h1>Horizontal Layout</h1>
+        <p>Add class <code>.form-horizontal</code> to the form.</p>
+        <form action="#" class="form-horizontal">
+            <fieldset>
+                <legend>Horizontal Form</legend>
+                <div class="row">
+                    <div class="col-l-6">
+                        <label for="input2">Standard</label>
+                        <input type="text" id="input2" class="focus" value="standard input..." />
+                        <label for="input-disabled2">Disabled</label>
+                        <input type="text" id="input-disabled2" disabled value="disabled input..." />
+                        <p>Support text to help describe the input.</p>
+                        <label for="input-no-edit2">Non editable</label>
+                        <span id="input-no-edit2" class="no-edit">No edit</span>
+                        <label for="select-default2">Select</label>
+                        <select id="select-default2">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                        </select>
+                        <label for="input-file2">File upload</label>
+                        <input id="input-file2" type="file" />
+                        <label for="input-number2">Number</label>
+                        <input type="number" id="input-number2" />
+                        <label for="input-password2">Password</label>
+                        <input type="password" id="input-password2" />
+                        <label for="input-time2">Time</label>
+                        <input type="time" id="input-time2" />
+                        <label for="input-week2">Week</label>
+                        <input type="week" id="input-week2" />
+                        <label for="input-month2">Month</label>
+                        <input type="month" id="input-month2" />
+                        <label for="input-date2">Date</label>
+                        <input type="date" id="input-date2" />
+                    </div>
+                    <div class="col-l-6">
+                        <label for="input-datetime2">Datetime</label>
+                        <input type="datetime" id="input-datetime2" />
+                        <label for="input-datetime-local2">Datetime Local</label>
+                        <input type="datetime-local" id="input-datetime-local2" />
+                        <label for="input-search2">Search</label>
+                        <input type="search" id="input-search2" />
+                        <label for="input-color2">Color</label>
+                        <input type="color" id="input-color2" />
+                        <label for="input-range2">Range</label>
+                        <input type="range" id="input-range2" min="0" max="100" value="50" />
+                        <label for="input-email2">Email</label>
+                        <input type="email" id="input-email2" />
+                        <label for="check-disabled2">Disabled Checkbox</label>
+                        <div class="input-group">
+                            <input type="checkbox" id="check-disabled2" value="option2" disabled="" class="inline-block">
+                        </div>
+                        <label for="check3">Checkbox</label>
+                        <div class="input-group">
+                            <input type="checkbox" id="check3" value="option1" class="inline-block">
+                            <input type="checkbox" id="check4" value="option2" class="inline-block">
+                        </div>
+                        <label for="radio3">Radio</label>
+                        <div class="input-group">
+                            <input type="radio" id="radio3" name="radio" value="option1" class="inline-block">
+                            <input type="radio" id="radio4" name="radio" value="option2" class="inline-block">
+                        </div>
+                        <label for="textarea2">Textarea</label>
+                        <textarea id="textarea2"></textarea>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="form-actions">
+                <button type="submit">Save changes</button>
+                <button>Cancel</button>
+            </div>
+        </form>
+    </section>
+    <hr />
+    <section id="markup">
+        <h1>The Markup</h1>
+        <p>The entire markup for the first form. Note the lack of extra elements required for styling and arranging inputs.</p>
+        <pre class="language-markup"><code>&lt;form action="#"&gt;
+    &lt;fieldset&gt;
+        &lt;legend&gt;Standard Form&lt;/legend&gt;
+        &lt;div class="row"&gt;
+            &lt;div class="col-m-6"&gt;
+                &lt;label for="input1"&gt;Standard&lt;/label&gt;
+                &lt;input type="text" id="input1" class="focus" value="standard input..." /&gt;
+                &lt;label for="input-disabled1"&gt;Disabled&lt;/label&gt;
+                &lt;input type="text" id="input-disabled1" disabled value="disabled input..." /&gt;
+                &lt;p&gt;Support text to help describe the input.&lt;/p&gt;
+                &lt;label for="input-no-edit1"&gt;Non editable&lt;/label&gt;
+                &lt;span id="input-no-edit1" class="no-edit"&gt;No edit&lt;/span&gt;
+                &lt;label for="select-default1"&gt;Select&lt;/label&gt;
+                &lt;select id="select-default1"&gt;
+                    &lt;option&gt;1&lt;/option&gt;
+                    &lt;option&gt;2&lt;/option&gt;
+                    &lt;option&gt;3&lt;/option&gt;
+                    &lt;option&gt;4&lt;/option&gt;
+                    &lt;option&gt;5&lt;/option&gt;
+                &lt;/select&gt;
+                &lt;label for="input-file1"&gt;File upload&lt;/label&gt;
+                &lt;input id="input-file1" type="file" /&gt;
+                &lt;label for="input-password1"&gt;Password&lt;/label&gt;
+                &lt;input type="password" id="input-password1" /&gt;
+                &lt;label for="input-time1"&gt;Time&lt;/label&gt;
+                &lt;input type="time" id="input-time1" /&gt;
+                &lt;label for="input-week1"&gt;Week&lt;/label&gt;
+                &lt;input type="week" id="input-week1" /&gt;
+                &lt;label for="input-month1"&gt;Month&lt;/label&gt;
+                &lt;input type="month" id="input-month1" /&gt;
+                &lt;label for="input-date1"&gt;Date&lt;/label&gt;
+                &lt;input type="date" id="input-date1" /&gt;
+            &lt;/div&gt;
+            &lt;div class="col-m-6"&gt;
+                &lt;label for="input-datetime1"&gt;Datetime&lt;/label&gt;
+                &lt;input type="datetime" id="input-datetime1" /&gt;
+                &lt;label for="input-datetime-local1"&gt;Datetime Local&lt;/label&gt;
+                &lt;input type="datetime-local" id="input-datetime-local1" /&gt;
+                &lt;label for="input-search1"&gt;Search&lt;/label&gt;
+                &lt;input type="search" id="input-search1" /&gt;
+                &lt;label for="input-color1"&gt;Color&lt;/label&gt;
+                &lt;input type="color" id="input-color1" /&gt;
+                &lt;label for="input-range1"&gt;Range&lt;/label&gt;
+                &lt;input type="range" id="input-range1" min="0" max="100" value="50" /&gt;
+                &lt;label for="input-email1"&gt;Email&lt;/label&gt;
+                &lt;input type="email" id="input-email1" /&gt;
+                &lt;label for="check-disabled1"&gt;Disabled Checkbox&lt;/label&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;input type="checkbox" id="check-disabled1" value="option1" disabled="" class="inline-block"&gt;
+                &lt;/div&gt;
+                &lt;label for="check1"&gt;Checkbox&lt;/label&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;input type="checkbox" id="check1" value="option1" class="inline-block"&gt;
+                    &lt;input type="checkbox" id="check2" value="option2" class="inline-block"&gt;
+                &lt;/div&gt;
+                &lt;label for="radio1"&gt;Radio&lt;/label&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;input type="radio" id="radio1" name="radio" value="option1" class="inline-block"&gt;
+                    &lt;input type="radio" id="radio2" name="radio" value="option2" class="inline-block"&gt;
+                &lt;/div&gt;
+                &lt;label for="textarea1"&gt;Textarea&lt;/label&gt;
+                &lt;textarea id="textarea1"&gt;&lt;/textarea&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/fieldset&gt;
+    &lt;div class="form-actions"&gt;
+        &lt;button type="submit"&gt;Save changes&lt;/button&gt;
+        &lt;button&gt;Cancel&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/form&gt;</code></pre>
+    </section>
+    <section id="ios">
+        <h1>IOS</h1>
+        <p>On IOS devices the OS chroma is stripped from select and certain input fields allowing them to be styled with the same flexibility of desktop browsers. As such the dropdown indicator needs to be replaced. This is done using a data encoded image embedded in the CSS.</p>
+        <p>The data for this image is as follows:</p>
+        <pre class="language-css"><code>background-image: url('data:image/png;base64,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');</code></pre>
+    </section>
+</section>

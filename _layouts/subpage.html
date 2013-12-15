@@ -1,0 +1,21 @@
+{% include header.html %}
+<article class="container" role="main">
+    <header role="banner">
+        <a href="{{ site.baseurl }}/{{page.group}}.html">&lt;&lt; Back</a>
+        <h1>
+            {{page.heading}}
+            <span>{{page.subheading}}</span>
+        </h1>
+    </header>
+    <hr />
+    <div class="row">
+        <nav class="col-s-3" role="complementary">
+            <h3>Contents</h3>
+            {% include subnav.html %}
+        </nav>
+        <article class="col-s-9">
+            {{ content }}
+        </article>
+    </div>
+</article>
+{% include footer.html %}

@@ -1,0 +1,162 @@
+---
+permalink: media.html
+layout: subpage
+group: css
+title: Media
+heading: Media
+subheading: Responsive media elements that scale with your browser.
+sublinks: ["#images|Images","#iframes|Iframes", "#video|Video"]
+---
+<section>
+    <h1>Media</h1>
+    <p>Responsive media elements that scale with your browser.</p>
+    <hr />
+    <section id="images">
+        <section>
+            <h2>Images</h2>
+            <p>Images are responsive by default ensuring they do not overflow the bounds of their container.</p>
+            <div class="row">
+                <div class="col-s-4">
+                    <img src="../assets/img/768x900.jpg" alt="responsive image" title="responsive image" />
+                </div>
+                <div class="col-s-4">
+                    <img src="../assets/img/768x600.jpg" alt="responsive image" title="responsive image" />
+                </div>
+                <div class="col-s-4">
+                    <img src="../assets/img/768x400.jpg" alt="responsive image" title="responsive image" />
+                </div>
+            </div>
+        </section>
+        <section>
+            <h2>Constrained Images</h2>
+            <p>Vertically and horizontally constrained and centered. Wrap the image in a container with the class <code>.media</code>.</p>
+            <div class="row">
+                <div class="col-s-4">
+                    <div class="media">
+                        <img src="../assets/img/768x900.jpg" alt="responsive image" title="responsive image" />
+                    </div>
+                </div>
+                <div class="col-s-4">
+                    <div class="media">
+                        <img src="../assets/img/768x600.jpg" alt="responsive image" title="responsive image" />
+                    </div>
+                </div>
+                <div class="col-s-4">
+                    <div class="media">
+                        <img src="../assets/img/768x400.jpg" alt="responsive image" title="responsive image" />
+                    </div>
+                </div>
+            </div>
+
+
+        </section>
+    </section>
+    <hr />
+    <section id="iframes">
+        <h1>Iframes</h1>
+        <p>We've provided responsive wrappers for iframe embeds from many popular sites.</p>
+        <div class="row">
+            <div class="col-s-6">
+                <h2>Youtube</h2>
+                <p>Add class <code>.media</code> to the media container.</p>
+                <div class="media">
+                    <iframe src="http://www.youtube.com/embed/eRW84aVCMWo" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="col-s-6">
+                <h2>Dailymotion</h2>
+                <p>Add class <code>.media</code> to the media container.</p>
+                <div class="media">
+                    <iframe src="http://www.dailymotion.com/embed/video/x10o8jk" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-s-6">
+                <h2>Google Maps</h2>
+                <p>Add classes <code>.media</code> to the media container.</p>
+                <div class="media">
+                    <iframe frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.co.uk/maps?q=glasgow&amp;ie=UTF8&amp;hq=&amp;hnear=Glasgow,+Glasgow+City,+United+Kingdom&amp;gl=uk&amp;t=m&amp;z=11&amp;iwloc=A&amp;output=embed"></iframe>
+                    <br />
+                    <small><a href="http://maps.google.co.uk/maps?q=glasgow&amp;ie=UTF8&amp;hq=&amp;hnear=Glasgow,+Glasgow+City,+United+Kingdom&amp;gl=uk&amp;t=m&amp;z=11&amp;iwloc=A&amp;source=embed" style="color: #0000FF; text-align: left">View Larger Map</a></small>
+                </div>
+            </div>
+            <div class="col-s-6">
+                <h2>Vimeo</h2>
+                <p>Add classes <code>.media</code> and <code>.vimeo</code> to the media container.</p>
+                <div class="media vimeo">
+                    <iframe src="http://player.vimeo.com/video/24954567" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-s-6">
+                <h2>Vine</h2>
+                <p>Add classes <code>.media</code> and <code>.vine</code> to the media container.</p>
+                <div class="media vine">
+                    <iframe src="https://vine.co/v/bYwPIluIipH/embed/simple" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
+                </div>
+            </div>
+            <div class="col-s-6">
+                <h2>Instagram</h2>
+                <p>Add classes <code>.media</code> and <code>.instagram</code> to the media container.</p>
+                <div class="media instagram">
+                    <iframe src="http://instagram.com/p/dJJvzMI4X8/embed/" frameborder="0" scrolling="no" allowtransparency="true"></iframe>
+                </div>
+            </div>
+        </div>
+        <p>Adding the class <code>.widescreen</code> sets up the media container for widescreen videos.</p>
+
+        <div class="alert alert-info">
+            <p>
+                Twitter, Facebook, SoundCloud, Storify, and Scribd (select 'Autosize') already provide responsive embed code.
+            </p>
+        </div>
+
+        <h2>Markup</h2>
+        <pre class="language-markup"><code>&lt;div class="media"&gt;
+    &lt;iframe src="http://www.youtube.com/embed/eRW84aVCMWo" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <hr />
+    <section id="video">
+        <h1>Video</h1>
+        <p>Wrap the video element in a container marked with classes <code>.media</code> and <code>.video</code>.</p>
+        <p>Embed code taken from <a href="http://camendesign.com/code/video_for_everybody" rel="external" target="_blank">"Video For Everybody"</a>.</p>
+        <div class="media video">
+            <!-- "Video For Everybody" http://camendesign.com/code/video_for_everybody -->
+            <video controls="controls" poster="http://sandbox.thewikies.com/vfe-generator/images/big-buck-bunny_poster.jpg" width="640" height="360">
+                <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" type="video/mp4" />
+                <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm" type="video/webm" />
+                <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
+                <object type="application/x-shockwave-flash" data="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" width="640" height="360">
+                    <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" />
+                    <param name="allowFullScreen" value="true" />
+                    <param name="wmode" value="transparent" />
+                    <param name="flashVars" value="config={'playlist':['http%3A%2F%2Fsandbox.thewikies.com%2Fvfe-generator%2Fimages%2Fbig-buck-bunny_poster.jpg',{'url':'http%3A%2F%2Fclips.vorwaerts-gmbh.de%2Fbig_buck_bunny.mp4','autoPlay':false}]}" />
+                    <img alt="Big Buck Bunny" src="http://sandbox.thewikies.com/vfe-generator/images/big-buck-bunny_poster.jpg" width="640" height="360" title="No video playback capabilities, please download the video below" />
+                </object>
+            </video>
+        </div>
+        <p>
+            <strong>Download video:</strong> <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4">MP4 format</a> | <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv">Ogg format</a> | <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm">WebM format</a>
+        </p>
+        <h2>Markup</h2>
+        <pre class="language-markup"><code>&lt;div class="media video"&gt;
+    &lt;!-- "Video For Everybody" http://camendesign.com/code/video_for_everybody --&gt;
+    &lt;video controls="controls" poster="http://sandbox.thewikies.com/vfe-generator/images/big-buck-bunny_poster.jpg" width="640" height="360"&gt;
+        &lt;source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" type="video/mp4" /&gt;
+        &lt;source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm" type="video/webm" /&gt;
+        &lt;source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" /&gt;
+        &lt;object type="application/x-shockwave-flash" data="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" width="640" height="360"&gt;
+            &lt;param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" /&gt;
+            &lt;param name="allowFullScreen" value="true" /&gt;
+            &lt;param name="wmode" value="transparent" /&gt;
+            &lt;param name="flashVars" value="config={'playlist':['http%3A%2F%2Fsandbox.thewikies.com%2Fvfe-generator%2Fimages%2Fbig-buck-bunny_poster.jpg',{'url':'http%3A%2F%2Fclips.vorwaerts-gmbh.de%2Fbig_buck_bunny.mp4','autoPlay':false}]}" /&gt;
+            &lt;img alt="Big Buck Bunny" src="http://sandbox.thewikies.com/vfe-generator/images/big-buck-bunny_poster.jpg" width="640" height="360" title="No video playback capabilities, please download the video below" /&gt;
+        &lt;/object&gt;
+    &lt;/video&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+</section>

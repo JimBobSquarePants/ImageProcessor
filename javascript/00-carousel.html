@@ -1,0 +1,235 @@
+---
+permalink: carousel.html
+layout: subpage
+group: javascript
+title: Carousel
+heading: Carousel
+subheading: A responsive carousel for cycling through objects.
+sublinks: ["#examples|Examples",
+            "#markup|Markup",
+            "#methods|Methods",
+            "#events|Events",
+            "#dataapi|Data API"]
+---
+<section id="normalize">
+    <h1>Carousel</h1>
+    <p>A jQuery plugin that creates a carousel for cycling through elements. Uses CSS transitions to perform the animation.</p>
+    <p>
+        The carousel comes in two modes: Slide and Fade, both animated via CSS3 transitions. On browsers that do not support transitions they simply change without special effects.
+        The carousel also supports touch events on browsers that support touch.
+    </p>
+    <p>
+        Comes with a markup API that allows running the plugin without writing a single line of JavaScript. 
+        This is Responsive's first class API and should be your first consideration when using a plugin.
+    </p>
+    <hr />
+    <section id="examples">
+        <h1>Examples</h1>
+        <div class="row">
+            <div class="col-s-6">
+                <h2>Slide Mode</h2>
+                <div id="carousel-1" class="carousel" data-carousel-interval="5000">
+                    <ol>
+                        <li data-carousel-target="#carousel-1" data-carousel-slide-to="0" class="active"></li>
+                        <li data-carousel-target="#carousel-1" data-carousel-slide-to="1"></li>
+                        <li data-carousel-target="#carousel-1" data-carousel-slide-to="2"></li>
+                    </ol>
+
+                    <figure class="carousel-active">
+                        <img src="../assets/img/hydrangeas.jpg" alt="hydrangeas">
+                        <figcaption>
+                            <h4>First Thumbnail label</h4>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.</p>
+                        </figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../assets/img/chrysanthemum.jpg" alt="chrysanthemum">
+                        <figcaption>
+                            <h4>Second Thumbnail label</h4>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.</p>
+                        </figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../assets/img/desert.jpg" alt="desert">
+                        <figcaption>
+                            <h4>Third Thumbnail label</h4>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.</p>
+                        </figcaption>
+                    </figure>
+
+                    <a class="left carousel-control" href="#carousel-1" data-carousel-slide="prev">&lt;</a>
+                    <a class="right carousel-control" href="#carousel-1" data-carousel-slide="next">&gt;</a>
+                </div>
+            </div>
+            <div class="col-s-6">
+                <h2>Fade Mode</h2>
+                <div id="carousel-2" class="carousel" data-carousel-mode="fade" data-carousel-interval="5000">
+                    <ol>
+                        <li data-carousel-target="#carousel-2" data-carousel-slide-to="0" class="active"></li>
+                        <li data-carousel-target="#carousel-2" data-carousel-slide-to="1"></li>
+                        <li data-carousel-target="#carousel-2" data-carousel-slide-to="2"></li>
+                    </ol>
+
+                    <figure class="carousel-active">
+                        <img src="../assets/img/hydrangeas.jpg" alt="hydrangeas">
+                        <figcaption>
+                            <h4>First Thumbnail label</h4>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.</p>
+                        </figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../assets/img/chrysanthemum.jpg" alt="chrysanthemum">
+                        <figcaption>
+                            <h4>Second Thumbnail label</h4>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.</p>
+                        </figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../assets/img/desert.jpg" alt="desert">
+                        <figcaption>
+                            <h4>Third Thumbnail label</h4>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.</p>
+                        </figcaption>
+                    </figure>
+
+                    <a class="left carousel-control" href="#carousel-2" data-carousel-slide="prev">&lt;</a>
+                    <a class="right carousel-control" href="#carousel-2" data-carousel-slide="next">&gt;</a>
+                </div>
+
+            </div>
+        </div>
+        <div class="alert alert-info">
+            <p>If running the plugin in fade mode without using the markup API, add the class <code>.carousel-fade</code> to the plugin to get the desired style behaviour.</p>
+        </div>
+    </section>
+    <hr />
+    <section id="markup">
+        <h1>Markup</h1>
+        <pre class="language-markup"><code>&lt;div id="carousel-2" class="carousel" data-carousel-mode="fade" data-carousel-interval="5000"&gt;
+    &lt;!-- Carousel Indicators--&gt;
+    &lt;ol&gt;
+        &lt;li data-carousel-target="#carousel-2" data-carousel-slide-to="0" class="active"&gt;&lt;/li&gt;
+        &lt;li data-carousel-target="#carousel-2" data-carousel-slide-to="1"&gt;&lt;/li&gt;
+        &lt;li data-carousel-target="#carousel-2" data-carousel-slide-to="2"&gt;&lt;/li&gt;
+    &lt;/ol&gt;
+
+    &lt;!-- Carousel Items--&gt;
+    &lt;figure class="carousel-active"&gt;
+        &lt;img src="../test-assets/img/hydrangeas.jpg" alt="hydrangeas"&gt;
+        &lt;figcaption&gt;
+            &lt;h4&gt;First Thumbnail label&lt;/h4&gt;
+            &lt;p&gt;Lorem ipsum dolor sit amet, consectetur ...&lt;/p&gt;
+        &lt;/figcaption&gt;
+    &lt;/figure&gt;
+    &lt;figure&gt;
+        &lt;img src="../test-assets/img/chrysanthemum.jpg" alt="chrysanthemum"&gt;
+        &lt;figcaption&gt;
+            &lt;h4&gt;Second Thumbnail label&lt;/h4&gt;
+            &lt;p&gt;Lorem ipsum dolor sit amet, consectetur ...&lt;/p&gt;
+        &lt;/figcaption&gt;
+    &lt;/figure&gt;
+    &lt;figure&gt;
+        &lt;img src="../test-assets/img/desert.jpg" alt="desert"&gt;
+        &lt;figcaption&gt;
+            &lt;h4&gt;Third Thumbnail label&lt;/h4&gt;
+            &lt;p&gt;Lorem ipsum dolor sit amet, consectetur ...&lt;/p&gt;
+        &lt;/figcaption&gt;
+    &lt;/figure&gt;
+
+    &lt;!-- Carousel Controls--&gt;
+    &lt;a class="left carousel-control" href="#carousel-2" data-carousel-slide="prev"&gt;&lt;&lt;/a&gt;
+    &lt;a class="right carousel-control" href="#carousel-2" data-carousel-slide="next"&gt;&gt;&lt;/a&gt;
+&lt;/div&gt;</code></pre>
+    </section>
+    <hr />
+    <section id="methods">
+        <h1>Methods</h1>
+        <p>The carousel exposes the following method signatures.</p>
+        <dl>
+            <dt><strong>.carousel(options)</strong>  </dt>
+            <dd>Initialises the plugin with an optional options <code>object</code>
+                <dl class="dl-horizontal">
+                    <dt><strong>options</strong></dt>
+                    <dd>Contains parameters to pass to the plugin.
+                        <dl>
+                            <dt><strong>mode</strong></dt>
+                            <dd>A string containing either the values
+                                <var>fade</var>
+                                or
+                                <var>slide</var>.</dd>
+                            <dt><strong>interval</strong></dt>
+                            <dd>The time in milliseconds between carousel transitions.</dd>
+                            <dt><strong>pause</strong></dt>
+                            <dd>The event to bind the pause behaviour to - defaults to
+                                <var>hover</var>.</dd>
+                            <dt><strong>wrap</strong></dt>
+                            <dd>Whether the carousel items should wrap - defaults to
+                                <var>true</var>.</dd>
+                            <dt><strong>enabletouch</strong></dt>
+                            <dd>Whether the carousel respond to touch events - defaults to
+                                <var>true</var>.</dd>
+                        </dl>
+                    </dd>
+                </dl>
+            </dd>
+            <dt><strong>.carousel("cycle")</strong></dt>
+            <dd>Cycles through the carousel instance items in a logical order.</dd>
+            <dt><strong>.carousel("pause")</strong></dt>
+            <dd>Triggers the pause event of the carousel instance stopping it cycling.</dd>
+            <dt><strong>.carousel("prev")</strong></dt>
+            <dd>Cycles the carousel instance to the previous item.</dd>
+            <dt><strong>.carousel("next")</strong></dt>
+            <dd>Cycles the carousel instance to the next item.</dd>
+            <dt><strong>.carousel(number)</strong></dt>
+            <dd>Cycles the carousel to a particular item with at the given index (zero based).</dd>
+        </dl>
+    </section>
+    <hr />
+    <section id="events">
+        <h1>Events</h1>
+        <p>The carousel exposes the following events allowing the developer to tap into its behaviour.</p>
+        <dl>
+            <dt><strong>slide.r.carousel</strong></dt>
+            <dd>This event is fired immediately when the plugins <code>slide</code> instance method is invoked. The event data contains two custom properties:
+                <dl>
+                    <dt><strong>relatedTarget</strong></dt>
+                    <dd>The carousel item that will be next in the logical order.</dd>
+                    <dt><strong>direction</strong></dt>
+                    <dd>The direction in which the carousel is transitioning.</dd>
+                </dl>
+            </dd>
+            <dt><strong>slid.r.carousel</strong></dt>
+            <dd>This event is fired when the plugins <code>slid</code> instance method is invoked once the carousel has completed sliding.
+            </dd>
+        </dl>
+    </section>
+    <hr />
+    <section id="dataapi">
+        <h1>Data API</h1>
+        <p>
+            The carousel's default behaviour is bound using a markup API that allows running the plugin without writing a single line of JavaScript.
+                If you need to override this behaviour the following code will allow you to do so.
+        </p>
+        <pre class="language-javascript"><code>// Override the default loading behaviour
+$(document).off("ready.r.carousel")
+           .on("ready.r.carousel", function () {
+             // Your custom behaviour...
+           }); 
+
+// Override the default carousel control click behaviour
+$("YOUR_SELECTOR").off("click.r.carousel")
+                  .on("click.r.carousel", "[data-carousel-slide], [data-carousel-slide-to]", function (event) {
+                      // Your custom behaviour...
+                  }); 
+
+// Bind to the slide event.
+$("YOUR_SELECTOR").on("slide.r.carousel", function(event) {
+    // Your custom behaviour...
+});
+                                               
+// Bind to the slid event.
+$("YOUR_SELECTOR").on("slid.r.carousel", function(event) {
+    // Your custom behaviour...
+});</code></pre>
+    </section>
+</section>

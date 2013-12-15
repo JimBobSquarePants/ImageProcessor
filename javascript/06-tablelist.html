@@ -1,0 +1,151 @@
+---
+permalink: tablelist.html
+layout: subpage
+group: javascript
+title: TableList
+heading: TableList
+subheading: Responsive table layout.
+sublinks: ["#examples|Examples",
+            "#markup|Markup",
+            "#methods|Methods",
+            "#events|Events",
+            "#dataapi|Data API"]
+---
+<section id="normalize">
+    <h1>TableList</h1>
+    <p>A jQuery plugin that populates a table with the necessary data attributes in order to display as a list on smaller viewports.</p>
+    <p>
+        Comes with a markup API that allows running the plugin without writing a single line of JavaScript.
+        This is Responsive's first class API and should be your first consideration when using a plugin.
+    </p>
+    <hr />
+    <section id="examples">
+        <h1>Examples</h1>
+        <table data-table-list="" class="table-list table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Header1</th>
+                    <th>Header2</th>
+                    <th>Header3</th>
+                    <th>Header4</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th scope="col">Footer1</th>
+                    <th>Footer2</th>
+                    <th>Footer3</th>
+                    <th>Footer4</th>
+                </tr>
+            </tfoot>
+            <tbody>
+                <tr>
+                    <th scope="row">Data1</th>
+                    <td>Data2 with a larger amount of copy to demonstrate what happens when we drop down the display width to less than 48em.</td>
+                    <td>Data3</td>
+                    <td>Data4</td>
+                </tr>
+                <tr>
+                    <th scope="row">Data1</th>
+                    <td data-thead="Header2" data-tfoot="Footer2">Data2</td>
+                    <td data-thead="Header3" data-tfoot="Footer3">Data3</td>
+                    <td data-thead="Header4" data-tfoot="Footer4">Data4</td>
+                </tr>
+                <tr>
+                    <th scope="row">Data1</th>
+                    <td>Data2</td>
+                    <td>Data3</td>
+                    <td>Data4</td>
+                </tr>
+                <tr>
+                    <th scope="row">Data1</th>
+                    <td>Data2</td>
+                    <td>Data3</td>
+                    <td>Data4</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    <hr />
+    <section id="markup">
+        <h1>Markup</h1>
+        <pre class="language-markup"><code>&lt;table data-table-list="" class="table-list table-striped table-bordered"&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th scope="col"&gt;Header1&lt;/th&gt;
+            &lt;th&gt;Header2&lt;/th&gt;
+            &lt;th&gt;Header3&lt;/th&gt;
+            &lt;th&gt;Header4&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tfoot&gt;
+        &lt;tr&gt;
+            &lt;th scope="col"&gt;Footer1&lt;/th&gt;
+            &lt;th&gt;Footer2&lt;/th&gt;
+            &lt;th&gt;Footer3&lt;/th&gt;
+            &lt;th&gt;Footer4&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/tfoot&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;th scope="row"&gt;Data1&lt;/th&gt;
+            &lt;td&gt;Data2 with a larger amount of copy to demonstrate what happens when we drop down the display width to less than 48em.&lt;/td&gt;
+            &lt;td&gt;Data3&lt;/td&gt;
+            &lt;td&gt;Data4&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th scope="row"&gt;Data1&lt;/th&gt;
+            &lt;td data-thead="Header2" data-tfoot="Footer2"&gt;Data2&lt;/td&gt;
+            &lt;td data-thead="Header3" data-tfoot="Footer3"&gt;Data3&lt;/td&gt;
+            &lt;td data-thead="Header4" data-tfoot="Footer4"&gt;Data4&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th scope="row"&gt;Data1&lt;/th&gt;
+            &lt;td&gt;Data2&lt;/td&gt;
+            &lt;td&gt;Data3&lt;/td&gt;
+            &lt;td&gt;Data4&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;th scope="row"&gt;Data1&lt;/th&gt;
+            &lt;td&gt;Data2&lt;/td&gt;
+            &lt;td&gt;Data3&lt;/td&gt;
+            &lt;td&gt;Data4&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+    </section>
+    <hr />
+    <section id="methods">
+        <h1>Methods</h1>
+        <p>The tablelist plugin exposes the following method signatures.</p>
+        <dl>
+            <dt><strong>.add()</strong></dt>
+            <dd>Initialises the plugin adding the necessary data attributes to the table.
+            </dd>
+        </dl>
+    </section>
+    <hr />
+    <section id="events">
+        <h1>Events</h1>
+        <p>The tablelist plugin exposes the following events allowing the developer to tap into its behaviour.</p>
+        <dl>
+            <dt><strong>add.r.table</strong></dt>
+            <dd>This event is fired immediately when the plugins <code>add</code> instance method is invoked.</dd>
+            <dt><strong>added.r.table</strong></dt>
+            <dd>This event is fired when the plugins <code>added</code> instance method is invoked once the target has had all the attributes added.</dd>
+        </dl>
+    </section>
+    <hr />
+    <section id="dataapi">
+        <h1>Data API</h1>
+        <p>
+            The tablelist's default behaviour is bound using a markup API that allows running the plugin without writing a single line of JavaScript.
+            If you need to override this behaviour the following code will allow you to do so.
+        </p>
+        <pre class="language-javascript"><code>// Override the default behaviour
+$(document).off("ready.r.table")
+           .on("ready.r.table", "[data-tablelist]", function (event) {    
+               // Your custom behaviour...
+           });</code></pre>
+    </section>
+</section>

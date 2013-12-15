@@ -1,0 +1,133 @@
+---
+permalink: buttons.html
+layout: subpage
+group: css
+title: Buttons
+heading: Buttons
+subheading: Cross browser buttons with easy styling.
+sublinks: ["#standard|Standard Layout","#disabled|Disabled","#inline|Inline","#grouped|Grouped"]
+---
+<section>
+    <h1>Button Elements</h1>
+    <p>Button styling in Responsive has, like everything else, been designed with the bare minimum of CSS. Styles have been normalized across all button states with no extra css classes added.</p>
+    <hr />
+    <section id="standard">
+        <h1>Default Button Styles</h1>
+        <p>All styles are attribute based with all four button states covered:</p>
+        <ul>
+            <li><code>:hover</code></li>
+            <li><code>:focus</code></li>
+            <li><code>:active</code></li>
+            <li><code>:disabled</code></li>
+        </ul>
+        <div class="row">
+            <div class="col-s-6">
+                <div>
+                    <h3>Button</h3>
+                    <p>Standard <code>button</code> element.</p>
+                    <button>button</button>
+                </div>
+                <div>
+                    <h3>Input : Button</h3>
+                    <p>Standard <code>input[type="button"]</code> element.</p>
+                    <input type="button" value="button">
+                </div>
+            </div>
+            <div class="col-s-6">
+                <div>
+                    <h3>Input : Submit </h3>
+                    <p>Standard <code>input[type="submit"]</code> element.</p>
+                    <input type="submit" value="button">
+                </div>
+                <div>
+                    <h3>Link</h3>
+                    <p>Standard <code>a[role="button]</code> element.</p>
+                    <a role="button" href="#">button</a>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info">
+            <p>
+                We strongly recommend using the <code>&lt;button&gt;&lt;/button&gt;</code> element over 
+                the <code>&lt;input /&gt;</code> element for all button style markup.
+            </p>
+        </div>
+    </section>
+    <hr />
+    <section id="disabled">
+        <h1>Disabled State</h1>
+        <p>Hyperlink disabled state are styled by adding the class <code>.disabled</code>. The developer would have to additionally use JavaScript to prevent the default behaviour.</p>
+        <div class="row">
+            <div class="col-s-6">
+                <div>
+                    <h3>Button</h3>
+                    <p>Standard <code>button</code> element.</p>
+                    <button disabled="">button</button>
+                </div>
+                <div>
+                    <h3>Input : Button</h3>
+                    <p>Standard <code>input[type="button"]</code> element.</p>
+                    <input value="button" disabled="" type="button">
+                </div>
+            </div>
+            <div class="col-s-6">
+                <div>
+                    <h3>Input : Submit</h3>
+                    <p>Standard <code>input[type="submit"]</code> element.</p>
+                    <input value="button" disabled="" type="submit">
+                </div>
+                <div>
+                    <h3>Link</h3>
+                    <p>Standard <code>a[role="button]</code> element.</p>
+                    <a href="#" role="button" class="disabled">button</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <hr />
+    <section id="inline">
+        <h1>Inline Buttons </h1>
+        <p>Add the class <code>.btn-inline</code> </p>
+        <div class="row">
+            <div class="col-s-6">
+                <div>
+                    <h3>Button</h3>
+                    <p>Standard <code>button</code> element.</p>
+                    <input type="text" class="inline-block">
+                    <button class="btn-inline">submit</button>
+                </div>
+                <div>
+                    <h3>Input : Button</h3>
+                    <p>Standard <code>input[type="button"]</code> element.</p>
+                    <input type="text" class="inline-block">
+                    <input type="button" class="btn-inline" value="submit">
+                </div>
+            </div>
+            <div class="col-s-6">
+                <div>
+                    <h3>Input : Submit</h3>
+                    <p>Standard <code>input[type="submit"]</code> element.</p>
+                    <input type="text" class="inline-block">
+                    <input type="submit" class="btn-inline" value="submit">
+                </div>
+                <div>
+                    <h3>Link</h3>
+                    <p>Standard <code>a[role="button]</code> element.</p>
+                    <input type="text" class="inline-block">
+                    <a class="btn-inline" role="button" href="#">submit</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <hr />
+    <section id="grouped">
+        <h1>Grouped Buttons</h1>
+        <p>Wrap the buttons in a div with class <code>.btn-group</code></p>
+        <div class="btn-group">
+            <a role="button" href="#">first</a>
+            <a role="button" href="#">second</a>
+            <a role="button" href="#">third</a>
+            <a role="button" href="#">fourth</a>
+        </div>
+    </section>
+</section>

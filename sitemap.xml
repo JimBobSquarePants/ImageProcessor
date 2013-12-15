@@ -1,0 +1,37 @@
+---
+layout: nil
+---
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://jimbobsquarepants.github.io{{ site.baseurl }}/</loc>
+    <lastmod>{{ site.time | date_to_xmlschema }}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  {% for page in site.pages %}
+  <url>
+    <loc>http://jimbobsquarepants.github.io{{ site.baseurl }}{{ page.url }}</loc>
+    {% if page.sitemap.lastmod %}
+    <lastmod>{{ page.sitemap.lastmod | date: "%Y-%m-%d" }}</lastmod>
+    {% elsif page.lastmod %}
+    <lastmod>{{ page.lastmod | date: "%Y-%m-%d" }}</lastmod>
+    {% elsif page.date %}
+    <lastmod>{{ page.date | date: "%Y-%m-%d" }}</lastmod>
+    {% else %}
+    <lastmod>{{ site.time | date: "%Y-%m-%d" }}</lastmod>
+    {% endif %}
+    {% if page.sitemap.changefreq %}
+    <changefreq>{{ page.sitemap.changefreq }}</changefreq>
+    {% else %}
+    <changefreq>monthly</changefreq>
+    {% endif %}
+    {% if page.sitemap.priority %}
+    <priority>{{ page.sitemap.priority }}</priority>
+    {% else %}
+    <priority>0.3</priority>
+    {% endif %}
+  </url>
+  {% endfor %}
+</urlset>

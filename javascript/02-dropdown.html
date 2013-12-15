@@ -1,0 +1,318 @@
+---
+permalink: dropdown.html
+layout: subpage
+group: javascript
+title: Dropdown
+heading: Dropdown
+subheading: Responsive visibility toggling.
+sublinks: ["#standard|Example : Standard",
+            "#accordion|Example : Accordion",
+            "#markup|Markup",
+            "#methods|Methods",
+            "#events|Events",
+            "#dataapi|Data API"]
+---
+<section id="normalize">
+    <h1>Dismiss</h1>
+    <p>A jQuery plugin that toggles the visibility of content. Uses CSS transitions to perform the animation. Useful for building accordion like widgets or hamburger menus.</p>
+    <p>
+        Comes with a markup API that allows running the plugin without writing a single line of JavaScript. 
+        This is Responsive's first class API and should be your first consideration when using a plugin.
+    </p>
+    <hr />
+    <section id="examples">
+        <h1>Examples</h1>
+        <section id="standard">
+            <div class="row">
+                <div class="col-s-6">
+                    <h2>Below</h2>
+                    <button data-dropdown-target="#collapse1" class="btn">Click me to toggle</button>
+                    <div class="collapse" id="collapse1">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                            deserunt mollit anim id est laborum.                              
+                        </p>
+                    </div>
+                </div>
+                <div class="col-s-6">
+                    <h2>Above</h2>
+                    <div class="collapse" id="collapse2">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                            deserunt mollit anim id est laborum.                              
+                        </p>
+                    </div>
+                    <button data-dropdown-target="#collapse2" class="btn">Click me to toggle</button>
+                </div>
+            </div>
+            <h2>Horizontal</h2>
+            <p>
+                This example toggles the horizontal visibility of an element. Adding the attribute <code>data-dropdown-dimension="width"</code> to your
+                trigger and the class <code>.width</code> to your target enables this behaviour.
+            </p>
+            <div class="alert alert-info">
+                <p>Note: To prevent word wrap fix the height and width of the item within your target container.</p>
+            </div>
+            <div class="row">
+                <div class="col-s-6">
+                    <button data-dropdown-target="#collapse3" data-dropdown-dimension="width" class="btn">Click me to toggle</button>
+                    <div id="collapse3" class="collapse width">
+                        <div class="dropdown-width-example">
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                                irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                                deserunt mollit anim id est laborum.                              
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="accordion">
+            <h2>Accordion</h2>
+            <p>
+                Here's an example of the dropdown being used in an accordion. The CSS for the accordion is built into the framework. 
+            As with this and other elements that you wish to hide using the plugin, add the class <code>.collapse</code> to the target.
+            If you want the toggle event to be animated when using the plugin in width mode, add the class <code>.width</code> to the target.
+            </p>
+            <div class="row">
+                <div class="col-s-6">
+                    <h1>Un-Grouped Accordion</h1>
+                    <div class="accordion">
+                        <div class="accordion-head">
+                            <a data-dropdown-target="#cllps1" href="#">Accordion group item 1                               
+                            </a>
+                        </div>
+                        <div class="accordion-body" id="cllps1">
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                            deserunt mollit anim id est laborum.                              
+                            </p>
+                        </div>
+                    </div>
+                    <div class="accordion">
+                        <div class="accordion-head">
+                            <a data-dropdown-target="#cllps2" href="#">Accordion group item 2                               
+                            </a>
+                        </div>
+                        <div class="accordion-body collapse" id="cllps2">
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                            deserunt mollit anim id est laborum.                              
+                            </p>
+                        </div>
+                    </div>
+                    <div class="accordion">
+                        <div class="accordion-head">
+                            <a data-dropdown-target="#cllps3" href="#">Accordion group item 3                               
+                            </a>
+                        </div>
+                        <div class="accordion-body collapse" id="cllps3">
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                            deserunt mollit anim id est laborum.                              
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-s-6">
+                    <h1>Grouped Accordion</h1>
+                    <p>Add <code>data-dropdown-parent="selector"</code> to the trigger and class <code>.dropdown-group</code> to each target.</p>
+                    <div class="accordion-group">
+                        <div class="accordion">
+                            <div class="accordion-head">
+                                <a data-dropdown-target="#cllps4" data-dropdown-parent=".accordion-group" href="#">Accordion group item 1                               
+                                </a>
+                            </div>
+                            <div class="accordion-body dropdown-group" id="cllps4">
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                                irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                                deserunt mollit anim id est laborum.                              
+                                </p>
+                            </div>
+                        </div>
+                        <div class="accordion">
+                            <div class="accordion-head">
+                                <a data-dropdown-target="#cllps5" data-dropdown-parent=".accordion-group" href="#">Accordion group item 2                               
+                                </a>
+                            </div>
+                            <div class="accordion-body dropdown-group collapse" id="cllps5">
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                                irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                                deserunt mollit anim id est laborum.                              
+                                </p>
+                            </div>
+                        </div>
+                        <div class="accordion">
+                            <div class="accordion-head">
+                                <a data-dropdown-target="#cllps6" data-dropdown-parent=".accordion-group" href="#">Accordion group item 3                               
+                                </a>
+                            </div>
+                            <div class="accordion-body dropdown-group collapse" id="cllps6">
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                                irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                                deserunt mollit anim id est laborum.                              
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </section>
+    </section>
+    <hr />
+    <section id="markup">
+        <h1>Markup</h1>
+        <section>
+            <h3>Standard</h3>
+            <pre class="language-markup"><code>&lt;button data-dropdown-target="#collapse3" data-dropdown-dimension="width"&gt;
+    Click me to toggle
+&lt;/button&gt;
+&lt;div id="collapse3" class="collapse width"&gt;
+    &lt;div class="dropdown-width-example"&gt;
+        &lt;p&gt;
+            Lorem ipsum dolor sit amet...                               
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </section>
+        <section>
+            <h3>Accordion</h3>
+            <pre class="language-markup"><code>&lt;div class="accordion"&gt;
+    &lt;div class="accordion-head"&gt;
+        &lt;a data-dropdown-target="#cllps1" href="#"&gt;
+            Accordion Header Trigger                               
+        &lt;/a&gt;
+    &lt;/div&gt;
+    &lt;div class="accordion-body" id="cllps1"&gt;
+        &lt;p&gt;
+            Lorem ipsum dolor sit amet...                              
+        &lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="accordion-head"&gt;
+        &lt;a data-dropdown-target="#cllps2" href="#"&gt;
+            Accordion Header Trigger                               
+        &lt;/a&gt;
+    &lt;/div&gt;
+    &lt;div class="accordion-body collapse" id="cllps2"&gt;
+        &lt;p&gt;
+            Lorem ipsum dolor sit amet...                              
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </section>
+    </section>
+    <hr />
+    <section id="methods">
+        <h1>Methods</h1>
+        <p>The dropdown exposes the following method signatures.</p>
+        <dl>
+            <dt><strong>.dropdown(options)</strong></dt>
+            <dd>Initialises the plugin with an optional options <code>object</code>
+                <dl class="dl-horizontal">
+                    <dt><strong>options</strong></dt>
+                    <dd>Contains parameters to pass to the plugin.
+                            <dl>
+                                <dt><strong>target</strong></dt>
+                                <dd>A jQuery selector indicating what target to toggle the visibility of.</dd>
+                                <dt><strong>parent</strong></dt>
+                                <dd>A jQuery selector indicating what parent of the dropdown trigger should force grouped mode.</dd>
+                            </dl>
+                    </dd>
+                </dl>
+            </dd>
+            <dt><strong>.dropdown("show")</strong></dt>
+            <dd>Shows a collapsed dropdown target.</dd>
+            <dt><strong>.dropdown("hide")</strong></dt>
+            <dd>Hides a collapsed dropdown target.</dd>
+            <dt><strong>.dropdown("toggle")</strong></dt>
+            <dd>Toggles the visibility of a collapsed dropdown target.</dd>
+        </dl>
+    </section>
+    <hr />
+    <section id="events">
+        <h1>Events</h1>
+        <p>The dropdown exposes the following events allowing the developer to tap into its behaviour.</p>
+        <dl>
+            <dt><strong>show.r.dropdown</strong></dt>
+            <dd>This event is fired immediately when the plugins <code>show</code> instance method is invoked.</dd>
+            <dt><strong>shown.r.dropdown</strong></dt>
+            <dd>This event is fired when the plugins <code>shown</code> instance method is invoked once the collapsed region of the given instance has been made visible to the user.</dd>
+            <dt><strong>hide.r.dropdown</strong></dt>
+            <dd>This event is fired immediately when the plugins <code>hide</code> instance method is invoked.</dd>
+            <dt><strong>hidden.r.dropdown</strong></dt>
+            <dd>This event is fired once when the plugins <code>hidden</code> instance method is invoked and the collapsed region of the given instance has been hidden from the user.</dd>
+        </dl>
+    </section>
+    <hr />
+    <section id="dataapi">
+        <h1>Data API</h1>
+        <p>
+            The dropdown's default behaviour is bound using a markup API that allows running the plugin without writing a single line of JavaScript.
+                    If you need to override this behaviour the following code will allow you to do so.
+        </p>
+        <pre class="language-javascript"><code>// Override the default behaviour
+$(document.body).off("click.r.dropdown")
+                .on("click.r.dropdown", ":attrStart(data-dropdown)", function (event) {
+                    // Your custom behaviour...
+                }); 
+
+// Bind to the show event.
+$("YOUR_TRIGGER_SELECTOR").on("show.r.dropdown", function(event) {
+    // Your custom behaviour...
+});
+                                               
+// Bind to the shown event.
+$("YOUR_TRIGGER_SELECTOR").on("shown.r.dropdown", function(event) {
+    // Your custom behaviour...
+});
+
+// Bind to the hide event.
+$("YOUR_TRIGGER_SELECTOR").on("hide.r.dropdown", function(event) {
+    // Your custom behaviour...
+});
+
+// Bind to the hidden event.
+$("YOUR_TRIGGER_SELECTOR").on("hidden.r.dropdown", function(event) {
+    // Your custom behaviour...
+});</code></pre>
+    </section>
+</section>
