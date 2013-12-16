@@ -1,19 +1,20 @@
 {% include header.html %}
-<article class="container" role="main">
+<main role="main">
     <header role="banner">
-        <h1>{{page.heading}}
-        <span>{{page.subheading}}</span>
-        </h1>
+        <div class="container">
+            <h1>{{page.heading}}
+            <span>{{page.subheading}}</span>
+            </h1>
+        </div>
     </header>
-    <hr />
-    <div class="row">
+    <div class="container row">
         <nav class="col-s-3" role="complementary">
-            <h3>Contents</h3>
+            <h3>Methods</h3>
             {% include rootnav.html param=page.root %}
         </nav>
         <article class="col-s-9">
             {{ content }}
         </article>
     </div>
-</article>
+</main>
 {% include footer.html %}

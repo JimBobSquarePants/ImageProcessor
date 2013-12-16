@@ -117,6 +117,10 @@ header[role="banner"] {
         margin-bottom: 0;
     }
 
+    header[role="banner"] a {
+        color: #fff;
+    }
+
     header[role="banner"] span {
         display: block;
         font-size: 55%;
@@ -125,7 +129,7 @@ header[role="banner"] {
     }
 
 footer[role="contentinfo"] {
-    background-color: #e7e7e7;
+    /*background-color: #e7e7e7;*/
     padding-bottom: 2em;
 }
 
@@ -147,28 +151,20 @@ footer[role="contentinfo"] {
             padding: 0 .5em;
         }
 
+
+
 /*
- * Grid
+ * Back
  */
-
-.grid-demo .row {
-    text-align: center;
-    background: #ebebeb;
+header[role="banner"].subpage {
+    margin-bottom: 0;
 }
 
-    .grid-demo .row + .row, .grid-test .row .row {
-        padding-top: .5em;
-    }
-
-.grid-demo [class*="col-"] {
-    line-height: 2em;
-    background-color: #3876a7;
-    color: #fff;
+.back {
+    background-color: #E7E7E7;
+    padding: 1em 0;
+    margin-bottom: 1em;
 }
-
-    .grid-demo [class*="col-"] [class*="col-"] {
-        background-color: #434343;
-    }
 
 /*
  * Helper examples.
@@ -206,10 +202,78 @@ footer[role="contentinfo"] {
  * Force the spans to break words on the pre tag
  */
 pre[class*="language-"] {
-    white-space: nowrap;
+    /*white-space: nowrap;
     -moz-word-break: break-all;
     -o-word-break: break-all;
     -ms-word-break: break-all;
     word-break: break-all;
-    overflow: hidden;
+    overflow: hidden;*/
+    white-space: pre;
+    width: 100%;
+    overflow-x: auto;
+}
+
+    pre[class*="language-"] code {
+        white-space: pre;
+        -ms-word-wrap: normal;
+        word-wrap: normal;
+    }
+
+code {
+    -ms-word-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/*
+ * Monokai-esque style form prism.
+ */
+pre[class*="language-"], code {
+    border-radius: 4px;
+}
+
+    pre[class*="language-"],
+    pre[class*="language-"] code,
+    pre[class*="language-"] samp,
+    pre[class*="language-"] kbd,
+    code,
+    samp,
+    kbd {
+        background-color: #272822;
+        -ms-text-shadow: none;
+        text-shadow: none;
+        color: #dfdfdf;
+        font-family: consolas, monospace,serif;
+    }
+
+.token.property, .token.tag, .token.boolean, .token.number {
+    color: #f92672;
+}
+
+.token.selector, .token.attr-name, .token.string {
+    color: #a6e22e;
+}
+
+.token.atrule, .token.attr-value, .token.keyword {
+    color: #66d9ef;
+}
+
+.token.keyword {
+    font-style: italic;
+}
+
+.token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string {
+    background: none;
+    color: #A67F59;
+}
+
+.token.class-name {
+    color: #ae81ff;
+}
+
+.token.function {
+    color: #fd971f;
+}
+
+.token.comment, .token.prolog, .token.doctype, .token.cdata {
+    color: #75715e;
 }

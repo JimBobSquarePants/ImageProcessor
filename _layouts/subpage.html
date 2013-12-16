@@ -1,14 +1,18 @@
 {% include header.html %}
-<article class="container" role="main">
-    <header role="banner">
-        <a href="{{ site.baseurl }}/{{page.group}}.html">&lt;&lt; Back</a>
-        <h1>
-            {{page.heading}}
-            <span>{{page.subheading}}</span>
-        </h1>
+<main role="main">
+    <header role="banner" class="subpage">
+        <div class="container">
+            <h1>{{page.heading}}
+                <span>{{page.subheading}}</span>
+            </h1>
+        </div>
     </header>
-    <hr />
-    <div class="row">
+    <div class="back">
+        <div class="container">
+            <a href="{{ site.baseurl }}/{{page.group}}.html">&lt;&lt; Back</a>
+        </div>
+    </div>
+    <div class="container row">
         <nav class="col-s-3" role="complementary">
             <h3>Contents</h3>
             {% include subnav.html %}
@@ -17,5 +21,5 @@
             {{ content }}
         </article>
     </div>
-</article>
+</main>
 {% include footer.html %}
