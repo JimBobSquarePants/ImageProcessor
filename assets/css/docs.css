@@ -113,7 +113,7 @@ header[role="banner"] {
 }
 
     header[role="banner"] h1 {
-        font-size: 3em;
+        font-size: 2em;
         margin-bottom: 0;
     }
 
@@ -127,6 +127,12 @@ header[role="banner"] {
         color: #e7e7e7;
         margin: .34em 0;
     }
+
+@media (min-width: 48em) {
+    header[role="banner"] h1 {
+        font-size: 3em;
+    }
+}
 
 footer[role="contentinfo"] {
     /*background-color: #e7e7e7;*/
