@@ -1,7 +1,7 @@
 ---
 permalink: roundedcorners.html
 layout: subpage
-group: imageprocessor
+group: imageprocessor-web
 title: RoundedCorners
 heading: Methods
 subheading: RoundedCorners.
@@ -11,27 +11,18 @@ sublinks: ["#roundedcorners|RoundedCorners"]
     <h1>RoundedCorners</h1>
     <p>Adds rounded corners to the current image.</p>
 
-    <pre class="language-csharp"><code>RoundedCorners(RoundedCornerLayer roundedCornersLayer)</code></pre>
+    <p>
+        Imageprocessor.Web can round the corners of your images. You can also optionally fill the background color for image types without transparency 
+        and choose which corners to round.
+    </p>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>http://your-image?roundedcorners=26</code></pre>
+    <p>Colour syntax:</p>
+    <pre class="language-markup"><code>http://your-image?roundedcorners=radius-26|bgcolor-fff</code></pre>
 
-    <h3>Parameters</h3>
-
-    <dl>
-        <dt><strong>roundedCornersLayer</strong></dt>
-        <dd>The <code>ImageProcessor.Imaging.RoundedCornerLayer</code> containing the following properties to round corners on the image.
-            <dl>
-                <dt><strong>Radius</strong></dt>
-                <dd>The radius at which the corner will be rounded.</dd>
-                <dt><strong>TopLeft</strong></dt>
-                <dd>A value indicating whether top left corners are to be added.</dd>
-                <dt><strong>TopRight</strong></dt>
-                <dd>A value indicating whether top right corners are to be added.</dd>
-                <dt><strong>BottomLeft</strong></dt>
-                <dd>A value indicating whether bottom left corners are to be added.</dd>
-                <dt><strong>BottomRight</strong></dt>
-                <dd>A value indicating whether bottom right corners are to be added.</dd>
-                <dt><strong>BackgroundColor</strong></dt>
-                <dd>The <code>System.Drawing.Color</code> to set as the background color. Used primarily for image formats that do not support transparency.</dd>
-            </dl>
-        </dd>
-    </dl>
+    <p>Independent Corners syntax:</p>
+    <pre class="language-markup"><code>http://your-image?roundedcorners=radius-26|tl-true|tr-false|bl-true|br-false</code></pre>
+    <img src="{{ site.baseurl }}/assets/img/rounded.png" alt="Image with rounded corners." />
 </section>

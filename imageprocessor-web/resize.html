@@ -1,7 +1,7 @@
 ---
 permalink: resize.html
 layout: subpage
-group: imageprocessor
+group: imageprocessor-web
 title: Resize
 heading: Methods
 subheading: Resize.
@@ -10,33 +10,57 @@ sublinks: ["#resize|Resize"]
 <section id="resize">
     <h1>Resize</h1>
     <p>Resizes the current image to the given dimensions.</p>
+    
+    <p>ImageProcessor.Web allows you to scale images both up and down with an excellent quality to size ratio. A maximum width and height can be set in the 
+        configuration to help protect you from DoS attacks.</p>
+    <p>Four different types of resizing methods are available:</p>
+    <ul>
+        <li>Pad (default)</li>
+        <li>Crop</li>
+        <li>Max</li>
+        <li>Stretch</li>
+    </ul>
+    <p>
+        Requests are passed thus:
+    </p>
+    <h2>Resize Pad</h2>
+    <p>Passing a single dimension will automatically preserve the aspect ratio of the original image. If the requested aspect ratio is different then the 
+        image will be padded to fit. You can also optionally fill the background color for image types without transparency.</p>
+    <pre class="language-markup"><code>http://your-image?width=600
+http://your-image?height=250</code>
+http://your-image?width=600&height=250
+http://your-image?width=600&height=250&bgcolor=fff</code></pre>
 
-    <pre class="language-csharp"><code>Resize(Size size)</code></pre>
+    <img src="{{ site.baseurl }}/assets/img/resize-pad.jpg" alt="Image resized with padding." />
 
-    <h3>Parameters</h3>
+    <hr />
 
-    <dl>
-        <dt><strong>size</strong></dt>
-        <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to.</dd>
-    </dl>
+    <h2>Resize Crop</h2>
+    <p>Crop mode also offers optional anchor positions:</p>
+    <ul>
+        <li>Center (default)</li>
+        <li>Top</li>
+        <li>Right</li>
+        <li>Bottom</li>
+        <li>Left</li>
+    </ul>
+    <pre class="language-markup"><code>
+http://your-image?width=600&height=250&mode=crop
+http://your-image?width=600&height=250&mode=crop&anchor=top</code></pre>
 
-    <pre class="language-csharp"><code>Resize(ResizeLayer resizeLayer)</code></pre>
+    <img src="{{ site.baseurl }}/assets/img/resize-crop.jpg" alt="Image resized with cropping." />
 
-    <h3>Parameters</h3>
+    <hr />
 
-    <dl>
-        <dt><strong>ResizeLayer</strong></dt>
-        <dd>The <code>ImageProcessor.Imaging.ResizeLayer</code> containing the following properties required to resize the image.
-            <dl>
-                <dt><strong>Size</strong></dt>
-                <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to.</dd>
-                <dt><strong>ResizeMode</strong></dt>
-                <dd>The <code>ImageProcessor.Imaging.ResizeMode</code> to apply to resized image.</dd>
-                <dt><strong>AnchorPosition</strong></dt>
-                <dd>The <code>ImageProcessor.Imaging.AnchorPosition</code> to apply to resized image.</dd>
-                <dt><strong>BackgroundColor</strong></dt>
-                <dd>The <code>System.Drawing.Color</code> to set as the background color. Used primarily for image formats that do not support transparency.</dd>
-            </dl>
-        </dd>
-    </dl>
+    <h2>Resize Max</h2>
+    <p>The maximum possible height or width is used that allows the correct aspect ratio.</p>
+    <pre class="language-markup"><code>http://your-image?width=600&height=250&mode=max</code></pre>
+
+    <img src="{{ site.baseurl }}/assets/img/resize-max.jpg" alt="Image resized with maximum limit." />
+    <hr />
+    <h2>Resize Stretch</h2>
+    <p>The image is stretched to wit the given dimensions..</p>
+    <pre class="language-markup"><code>http://your-image?width=600&height=250&mode=stretch</code></pre>
+
+    <img src="{{ site.baseurl }}/assets/img/resize-stretch.jpg" alt="Image stretched to fit the given dimension." />
 </section>

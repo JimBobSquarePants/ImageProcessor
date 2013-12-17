@@ -17,68 +17,6 @@ subheading: Suitable for desktop and web environments.
 </section>
 <hr />
 <section>
-    <h1>Plugin Based</h1>
-    <p>
-        ImageProcessor is built with extensibility in mind. All the individual processors follow an interface <code>IGraphicsprocessor</code> which allows developers
-        to easily extend the library. View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor/Processors">source code</a> to see examples.
-    </p>
-    <pre class="language-csharp"><code>/// <summary>
-/// Defines properties and methods for ImageProcessor Plugins.
-/// </summary>
-public interface IGraphicsProcessor
-{
-    #region Properties
-    /// <summary>
-    /// Gets the regular expression to search strings for.
-    /// </summary>
-    Regex RegexPattern { get; }
-
-    /// <summary>
-    /// Gets the DynamicParameter.
-    /// </summary>
-    dynamic DynamicParameter { get; }
-
-    /// <summary>
-    /// Gets the order in which this processor is to be used in a chain.
-    /// </summary>
-    int SortOrder { get; }
-
-    /// <summary>
-    /// Gets or sets any additional settings required by the processor.
-    /// </summary>
-    Dictionary<string, string> Settings { get; set; } 
-    #endregion
-
-    #region Methods
-    /// <summary>
-    /// The position in the original string where the first character of the captured 
-    /// substring was found.
-    /// </summary>
-    /// <param name="queryString">
-    /// The query string to search.
-    /// </param>
-    /// <returns>
-    /// The zero-based starting position in the original string where the captured
-    /// substring was found.
-    /// </returns>
-    int MatchRegexIndex(string queryString);
-
-    /// <summary>
-    /// Processes the image.
-    /// </summary>
-    /// <param name="factory">
-    /// The the current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class containing
-    /// the image to process.
-    /// </param>
-    /// <returns>
-    /// The processed image from the current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
-    /// </returns>
-    Image ProcessImage(ImageFactory factory);
-    #endregion
-}</code></pre>
-</section>
-<hr />
-<section>
     <h2>Example Code</h2>
 
     <pre class="language-csharp"><code>// Read a file and resize it.
@@ -106,4 +44,66 @@ using (MemoryStream inStream = new MemoryStream(photoBytes))
 }</code></pre>
 
     <p>Check out the details in each section.</p>
+</section>
+<hr />
+<section>
+    <h1>Extending ImageProcessor</h1>
+    <p>
+        ImageProcessor is built with extensibility in mind. All the individual processors follow an interface <code>IGraphicsprocessor</code> which allows developers
+        to easily extend the library. View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor/Processors">source code</a> to see examples.
+    </p>
+    <pre class="language-csharp"><code>/// &lt;summary&gt;
+/// Defines properties and methods for ImageProcessor Plugins.
+/// &lt;/summary&gt;
+public interface IGraphicsProcessor
+{
+    #region Properties
+    /// &lt;summary&gt;
+    /// Gets the regular expression to search strings for.
+    /// &lt;/summary&gt;
+    Regex RegexPattern { get; }
+
+    /// &lt;summary&gt;
+    /// Gets the DynamicParameter.
+    /// &lt;/summary&gt;
+    dynamic DynamicParameter { get; }
+
+    /// &lt;summary&gt;
+    /// Gets the order in which this processor is to be used in a chain.
+    /// &lt;/summary&gt;
+    int SortOrder { get; }
+
+    /// &lt;summary&gt;
+    /// Gets or sets any additional settings required by the processor.
+    /// &lt;/summary&gt;
+    Dictionary&lt;string, string&gt; Settings { get; set; } 
+    #endregion
+
+    #region Methods
+    /// &lt;summary&gt;
+    /// The position in the original string where the first character of the captured 
+    /// substring was found.
+    /// &lt;/summary&gt;
+    /// &lt;param name="queryString"&gt;
+    /// The query string to search.
+    /// &lt;/param&gt;
+    /// &lt;returns&gt;
+    /// The zero-based starting position in the original string where the captured
+    /// substring was found.
+    /// &lt;/returns&gt;
+    int MatchRegexIndex(string queryString);
+
+    /// &lt;summary&gt;
+    /// Processes the image.
+    /// &lt;/summary&gt;
+    /// &lt;param name="factory"&gt;
+    /// The the current instance of the &lt;see cref="T:ImageProcessor.ImageFactory"/&gt; class containing
+    /// the image to process.
+    /// &lt;/param&gt;
+    /// &lt;returns&gt;
+    /// The processed image from the current instance of the &lt;see cref="T:ImageProcessor.ImageFactory"/&gt; class.
+    /// &lt;/returns&gt;
+    Image ProcessImage(ImageFactory factory);
+    #endregion
+}</code></pre>
 </section>
