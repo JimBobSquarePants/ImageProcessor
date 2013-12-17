@@ -1,3 +1,3 @@
 User-agent: *
 Disallow: 
-Sitemap: http://jimbobsquarepants.github.io/Responsive/sitemap.xml
+Sitemap: http://jimbobsquarepants.github.io/ImageProcessor/sitemap.xml

@@ -10,6 +10,7 @@ subheading: Fast, web-based, image processing with disk caching as standard.
     <p>
         <strong>ImageProcessor.Web</strong> is a web extension to ImageProcessor that allows the developer to perform image manipulation using querystring parameters as instructions.
     </p>
+    <p>This works by adding a configurable HttpModule to your website which intercepts local and remote image requests, processing them on-the-fly to your desired output.</p>
     <p>
         The API for ImageProcessor.Web is imperative. This means that the order in which you supply the querystring parameters is the order in which the individual processors are implemented.
         This allows the API to be very flexible, allowing you to combine processes in any order.
