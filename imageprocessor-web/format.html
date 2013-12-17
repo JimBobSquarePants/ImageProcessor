@@ -1,24 +1,30 @@
 ---
 permalink: format.html
 layout: subpage
-group: imageprocessor
+group: imageprocessor-web
 title: Format
 heading: Methods
-subheading: Format.
+subheading: Format
 sublinks: ["#format|Format"]
 ---
 <section id="format">
     <h1>Format</h1>
-    <p>Sets the output format of the current image to the matching <code>System.Drawing.Imaging.ImageFormat</code>.</p>
+    <p>Sets the output format of the current image to the given value.</p>
 
-    <pre class="language-csharp"><code>Format(ImageFormat imageFormat, bool indexedFormat = false)</code></pre>
+    <p>Supported formats are:</p>
+    <ul>
+        <li>jpeg</li>
+        <li>bmp</li>
+        <li>gif</li>
+        <li>png</li>
+        <li>png8</li>
+        <li>tif</li>
+    </ul>
+    <p>
+        Requests are passed thus:
+    </p>
 
-    <h3>Parameters</h3>
+    <pre class="language-markup"><code>http://your-image?format=png8</code></pre>
 
-    <dl>
-        <dt><strong>imageFormat</strong></dt>
-        <dd>The <code>System.Drawing.Imaging.ImageFormat</code> to set the image to..</dd>
-        <dt><strong>indexedFormat</strong></dt>
-        <dd>Whether the pixel format of the image should be indexed. Used for generating Png8 images.</dd>
-    </dl>
+    <img src="{{ site.baseurl }}/assets/img/format.jpg" alt="Comparison of image formats" />
 </section>
