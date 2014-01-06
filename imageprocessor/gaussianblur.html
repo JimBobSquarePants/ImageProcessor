@@ -1,0 +1,41 @@
+---
+permalink: gaussianblur.html
+layout: subpage
+group: imageprocessor
+title: GaussianBlur
+heading: Methods
+subheading: GaussianBlur.
+sublinks: ["#gaussianblur|GaussianBlur"]
+---
+<section id="gaussianblur">
+    <h1>GaussianBlur</h1>
+    <p>Uses a Gaussian kernel to blur the current image.</p>
+
+    <pre class="language-csharp"><code>GaussianBlur(int size)</code></pre>
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>size</strong></dt>
+        <dd>The size of the kernel by which to blur the images pixels. Any integer between 0 and 100.</dd>
+    </dl>
+
+    <pre class="language-csharp"><code>GaussianBlur(GaussianLayer gaussianLayer)</code></pre>
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>ResizeLayer</strong></dt>
+        <dd>
+            The <code>ImageProcessor.Imaging.GaussianLayer</code> containing the following properties required to blur the image.
+            <dl>
+                <dt><strong>Size</strong></dt>
+                <dd>The size to set the Gaussian kernel to.</dd>
+                <dt><strong>Sigma</strong></dt>
+                <dd>The Sigma value (standard deviation) for Gaussian function used to calculate the kernel.</dd>
+                <dt><strong>Threshold </strong></dt>
+                <dd>The threshold value, which is added to each weighted sum of pixels.</dd>
+            </dl>
+        </dd>
+    </dl>
+</section>

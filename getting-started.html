@@ -54,14 +54,12 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
     &lt;cache configSource="config\imageprocessor\cache.config"/&gt;
     &lt;processing configSource="config\imageprocessor\processing.config"/&gt;
   &lt;/imageProcessor&gt;
-
  &lt;!-- HttpModule bindings --&gt;
   &lt;system.web&gt;
     &lt;httpModules&gt;
       &lt;add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/&gt;
     &lt;/httpModules&gt;
   &lt;/system.web&gt;
-
   &lt;system.webServer&gt;
     &lt;modules&gt;
       &lt;add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/&gt;
@@ -73,7 +71,7 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
 
             <h2>Addition Configuration</h2>
             <p>
-                ImageProcessor.Web also install 3 additional configuration files under the path <code>\config\imageprocessor\</code> within your 
+                ImageProcessor.Web also install 3 additional configuration files under the path <code>\config\imageprocessor\</code> within your
                 solution. These allow you to configure rules for caching, processing, and security.
             </p>
 
@@ -105,6 +103,22 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
         &lt;settings&gt;
           &lt;setting key="MaxWidth" value="3000"/&gt;
           &lt;setting key="MaxHeight" value="3000"/&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
+      &lt;!-- The makimum kernal size, sigma value and threshold values
+           for convolution. --&gt;
+      &lt;plugin name="GaussianBlur"&gt;
+        &lt;settings&gt;
+          &lt;setting key="MaxSize" value="22" /&gt;
+          &lt;setting key="MaxSigma" value="5.1" /&gt;
+          &lt;setting key="MaxThreshold" value="100" /&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
+      &lt;plugin name="GaussianSharpen"&gt;
+        &lt;settings&gt;
+          &lt;setting key="MaxSize" value="22" /&gt;
+          &lt;setting key="MaxSigma" value="5.1" /&gt;
+          &lt;setting key="MaxThreshold" value="100" /&gt;
         &lt;/settings&gt;
       &lt;/plugin&gt;
       &lt;!-- Presets that allow you to reduce code in your markup. 
