@@ -1,0 +1,34 @@
+---
+permalink: gaussianblur.html
+layout: subpage
+group: imageprocessor-web
+title: GaussianBlur
+heading: Methods
+subheading: GaussianBlur.
+sublinks: ["#gaussianblur|GaussianBlur"]
+---
+<section id="gaussianblur">
+    <h1>GaussianBlur</h1>
+    <p>
+        Uses a Gaussian kernel to blur the current image. Simply pass the desired kenel size to the processor.
+    </p>
+    Additional optional properties are also available
+    <ul>
+        <li>sigma (defaults to 1.4)</li>
+        <li>threshold (defaults to 0)</li>
+    </ul>
+
+    <div class="alert alert-info">
+        <p>
+            All gaussian blur requests have limiters to the given values set in the <code>processing.config</code> file to help prevent
+            <abbr title="Denial of service">DoS</abbr> attacks.
+        </p>
+    </div>
+    <p>
+        Requests are passed thus:
+    </p>
+
+    <pre class="language-markup"><code>http://your-image?blur=11,sigma-1.5,threshold-10</code></pre>
+
+    <img src="{{ site.baseurl }}/assets/img/gaussianblur.jpg" alt="image with gaussian blur" />
+</section>

@@ -12,17 +12,17 @@ sublinks: ["#watermark|Watermark"]
     <p>Adds a text based watermark to the current image with a wide range of options.</p>
     <ul>
         <li>text</li>
-        <li>size (px)</li>
+        <li>size (defaults to 48px)</li>
         <li>font (any installed font)</li>
         <li>opacity (1-100)</li>
-        <li>style (bold|italic|regular|strikeout|underline)</li>
+        <li>style (bold|italic|regular|strikeout|underline) defaults to regular</li>
         <li>shadow</li>
         <li>position (x,y)</li>
     </ul>
 
     <p>Requests are passed thus: Each parameter is optional.</p>
 
-    <pre class="language-markup"><code>http://your-image?watermark=watermark goodness,color-fff,size-36,style-italic,opacity-80,position-30,150,shadow-true,font-arial</code></pre>
+    <pre class="language-markup"><code>http://your-image?watermark=text-watermark goodness,color-fff,size-36,style-italic,opacity-80,position-30,150,shadow-true,font-arial</code></pre>
 
     <img src="{{ site.baseurl }}/assets/img/watermark.jpg" alt="Images with text watermark added." />
 </section>
