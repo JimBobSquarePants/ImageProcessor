@@ -387,7 +387,7 @@ namespace ImageProcessor.Processors
         /// </returns>
         private FontStyle ParseFontStyle(string input)
         {
-            FontStyle fontStyle = FontStyle.Bold;
+            FontStyle fontStyle = FontStyle.Regular;
 
             foreach (Match match in FontStyleRegex.Matches(input))
             {
@@ -397,8 +397,8 @@ namespace ImageProcessor.Processors
                     case "italic":
                         fontStyle = FontStyle.Italic;
                         break;
-                    case "regular":
-                        fontStyle = FontStyle.Regular;
+                    case "bold":
+                        fontStyle = FontStyle.Bold;
                         break;
                     case "strikeout":
                         fontStyle = FontStyle.Strikeout;
