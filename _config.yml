@@ -8,6 +8,7 @@ relative_permalinks: true
 
 # Name of the website
 name: ImageProcessor
+altname : "ImageProcessor.Web"
 
 # Short description (goes below the title)
 description: A C# library for the dynamic processing of image files with .NET. ImageProcessor can resize, rotate, crop, flip, fade, watermark and add Instagram style filters to images.
@@ -15,5 +16,5 @@ description: A C# library for the dynamic processing of image files with .NET. I
 # Your name, as you want it to appear underneath each post and in the footer
 author: James South
 
-version: "1.8.1.1"
-webversion: "3.0.0.3"
+version: 1.8.2
+webversion: 3.0.1
