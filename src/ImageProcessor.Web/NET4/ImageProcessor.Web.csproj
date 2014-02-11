@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\NET45\Caching\CachedImage.cs" />
+    <Compile Include="..\NET45\Caching\HostFileChangeMonitor2.cs" />
     <Compile Include="..\NET45\Caching\CacheIndexer.cs">
       <Link>CacheIndexer.cs</Link>
     </Compile>
