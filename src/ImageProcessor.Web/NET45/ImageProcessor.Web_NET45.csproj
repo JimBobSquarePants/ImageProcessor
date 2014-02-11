@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\CachedImage.cs" />
+    <Compile Include="Caching\HostFileChangeMonitor2.cs" />
     <Compile Include="Caching\MemCache.cs" />
     <Compile Include="Caching\DiskCache.cs" />
     <Compile Include="Caching\CacheIndexer.cs" />
