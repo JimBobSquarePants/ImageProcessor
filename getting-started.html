@@ -96,40 +96,54 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
 
             <h3>Processing.config</h3>
             <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
-  &lt;processing&gt;
-    &lt;plugins&gt;
-      &lt;!-- Maximum height and width to allow images to be resized to. --&gt;
-      &lt;plugin name="Resize"&gt;
-        &lt;settings&gt;
-          &lt;setting key="MaxWidth" value="3000"/&gt;
-          &lt;setting key="MaxHeight" value="3000"/&gt;
-        &lt;/settings&gt;
-      &lt;/plugin&gt;
-      &lt;!-- The makimum kernal size, sigma value and threshold values
-           for convolution. --&gt;
-      &lt;plugin name="GaussianBlur"&gt;
-        &lt;settings&gt;
-          &lt;setting key="MaxSize" value="22" /&gt;
-          &lt;setting key="MaxSigma" value="5.1" /&gt;
-          &lt;setting key="MaxThreshold" value="100" /&gt;
-        &lt;/settings&gt;
-      &lt;/plugin&gt;
-      &lt;plugin name="GaussianSharpen"&gt;
-        &lt;settings&gt;
-          &lt;setting key="MaxSize" value="22" /&gt;
-          &lt;setting key="MaxSigma" value="5.1" /&gt;
-          &lt;setting key="MaxThreshold" value="100" /&gt;
-        &lt;/settings&gt;
-      &lt;/plugin&gt;
+    &lt;processing&gt;
       &lt;!-- Presets that allow you to reduce code in your markup. 
            Note the use of <xmp>&#038;</xmp> to escape ampersands. --&gt;
-      &lt;plugin name="Preset"&gt;
-        &lt;settings&gt;
-          &lt;setting key="presetname" value="width=300<xmp>&#038;</xmp>height=150"/&gt;
-        &lt;/settings&gt;
-      &lt;/plugin&gt;
-    &lt;/plugins&gt;
-  &lt;/processing&gt;</code></pre>
+      &lt;presets&gt;
+        &lt;preset name="demo" value="width=300&#038;height=150&#038;bgcolor=transparent"/&gt;
+      &lt;/presets&gt;
+    &lt;!-- List of plugins. --&gt;
+    &lt;plugins autoloadplugins="true"&gt;
+    &lt;plugin name="Alpha" type="ImageProcessor.Processors.Alpha, ImageProcessor" /&gt;
+    &lt;plugin name="Brightness" type="ImageProcessor.Processors.Brightness, ImageProcessor" /&gt;
+    &lt;plugin name="Contrast" type="ImageProcessor.Processors.Contrast, ImageProcessor" /&gt;
+    &lt;plugin name="Crop" type="ImageProcessor.Processors.Crop, ImageProcessor" /&gt;
+    &lt;plugin name="Filter" type="ImageProcessor.Processors.Filter, ImageProcessor" /&gt;
+    &lt;plugin name="Flip" type="ImageProcessor.Processors.Flip, ImageProcessor" /&gt;
+    &lt;plugin name="Format" type="ImageProcessor.Processors.Format, ImageProcessor" /&gt;
+    &lt;!-- The makimum kernal size, sigma value and threshold values
+         for convolution. --&gt;
+    &lt;plugin name="GaussianBlur" type="ImageProcessor.Processors.GaussianBlur, ImageProcessor"&gt;
+      &lt;settings&gt;
+        &lt;setting key="MaxSize" value="22" /&gt;
+        &lt;setting key="MaxSigma" value="5.1" /&gt;
+        &lt;setting key="MaxThreshold" value="100" /&gt;
+      &lt;/settings&gt;
+    &lt;/plugin&gt;
+    &lt;plugin name="GaussianSharpen" type="ImageProcessor.Processors.GaussianSharpen, ImageProcessor"&gt;
+      &lt;settings&gt;
+        &lt;setting key="MaxSize" value="22" /&gt;
+        &lt;setting key="MaxSigma" value="5.1" /&gt;
+        &lt;setting key="MaxThreshold" value="100" /&gt;
+      &lt;/settings&gt;
+    &lt;/plugin&gt;
+    &lt;plugin name="Quality" type="ImageProcessor.Processors.Quality, ImageProcessor" /&gt;
+    &lt;plugin name="Resize" type="ImageProcessor.Processors.Resize, ImageProcessor"&gt;
+      &lt;settings&gt;
+        &lt;!-- Maximum height and width to allow images to be resized to. --&gt;
+        &lt;setting key="MaxWidth" value="3000" /&gt;
+        &lt;setting key="MaxHeight" value="3000" /&gt;
+        &lt;!-- Restricted height and width values to allow images to be resized to. --&gt;
+        &lt;setting key="RestrictTo" value="width=300height=300,width=300height=300"/&gt;
+      &lt;/settings&gt;
+    &lt;/plugin&gt;
+    &lt;plugin name="Rotate" type="ImageProcessor.Processors.Rotate, ImageProcessor" /&gt;
+    &lt;plugin name="RoundedCorners" type="ImageProcessor.Processors.RoundedCorners, ImageProcessor" /&gt;
+    &lt;plugin name="Saturation" type="ImageProcessor.Processors.Saturation, ImageProcessor" /&gt;
+    &lt;plugin name="Vignette" type="ImageProcessor.Processors.Vignette, ImageProcessor" /&gt;
+    &lt;plugin name="Watermark" type="ImageProcessor.Processors.Watermark, ImageProcessor" /&gt;
+      &lt;/plugins&gt;
+    &lt;/processing&gt;</code></pre>
         </section>
     </article>
 </div>

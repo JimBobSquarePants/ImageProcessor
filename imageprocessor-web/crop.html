@@ -9,12 +9,27 @@ sublinks: ["#crop|Crop"]
 ---
 <section id="crop">
     <h1>Crop</h1>
-    <p>Crops the current image to the given location and size. Simply pass the upper-left coordinates and the new width/height and the processor will work out the rest.</p>
+    <p>
+        Crops the current image to the given location and size.
+        There are two modes available:
+
+        <ol>
+            <li>
+                Pixel based - Supply the upper-left coordinates and the new width/height.
+            </li>
+            <li>
+                Percentage based - Supply the left, top, right, and bottom percentages to crop but an indicator to swicth mode.
+            </li>
+        </ol>
+        Pixel based
+        pass the upper-left coordinates and the new width/height and the processor will work out the rest.
+    </p>
 
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>http://your-image?crop=x,y,width,height</code></pre>
+    <pre class="language-markup"><code>http://your-image?crop=x,y,width,height
+http://your-image?crop=left,top,right,bottom&cropmode=percent</code></pre>
 
     <img src="{{ site.baseurl }}/assets/img/crop.jpg" alt="image cropped to the given dimensions" />
 </section>
