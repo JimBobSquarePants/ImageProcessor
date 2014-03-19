@@ -18,13 +18,13 @@ sublinks: ["#crop|Crop"]
                 Pixel based - Supply the upper-left coordinates and the new width/height.
             </li>
             <li>
-                Percentage based - Supply the left, top, right, and bottom percentages to crop but an indicator to swicth mode.
+                Percentage based - Supply the left, top, right, and bottom percentages as a decimal to crop with an indicator to switch mode.
             </li>
         </ol>
-        Pixel based
-        pass the upper-left coordinates and the new width/height and the processor will work out the rest.
     </p>
-
+    <p>
+        Passing the addtional parameter <code>center=top,left</code> as a decimal representing the percentage will adjust the crop to center on that point.
+    </p>
     <p>
         Requests are passed thus:
     </p>

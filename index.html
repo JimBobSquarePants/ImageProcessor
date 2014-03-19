@@ -9,25 +9,45 @@ subheading: A .NET library for on-the-fly processing of images.
         <div class="row">
             <div class="col-s-6">
                 <h2>Install via Nuget</h2>
-                <a href="https://nuget.org/packages/ImageProcessor/" role="button" class="download" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="Nuget Link"><i class="fa fa-download"></i>ImageProcessor</a>
-                <a href="https://nuget.org/packages/ImageProcessor.Web/" role="button" class="download" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="Web Nuget Link"><i class="fa fa-download"></i>ImageProcessor.Web</a>
+
+                <ul class="no-bullets">
+                    <li><a href="https://nuget.org/packages/ImageProcessor/" role="button" class="download" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="Nuget Link"><i class="fa fa-download"></i>ImageProcessor</a></li>
+                    <li><a href="https://nuget.org/packages/ImageProcessor.Web/" role="button" class="download" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="Web Nuget Link"><i class="fa fa-download"></i>ImageProcessor.Web</a></li>
+                    <li><a href="https://nuget.org/packages/ImageProcessor.Web.Config/" role="button" class="download" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="Web Config Nuget Link"><i class="fa fa-download"></i>ImageProcessor.Web.Config</a></li>
+                </ul>
+
                 <ul class="download-links">
                     <li>
                         <a href="http://github.com/JimBobSquarePants/ImageProcessor" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="GitHub project" rel="external">GitHub project</a>
                     </li>
-                    <li>Version {{site.version}}
+                    <li>
+                        Version {{site.version}}
                     </li>
-                    <li>Web Version {{site.webversion}}
+                    <li>
+                        Web Version {{site.webversion}}
+                    </li>
+                    <li>
+                        Web.Config Version {{site.configversion}}
                     </li>
                 </ul>
-                <p>
-                    <!--<div class="fb-like" data-href="http://jimbobsquarepants.github.io/ImageProcessor/" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>&nbsp;&nbsp;-->
-                    <a href="https://twitter.com/share" class="twitter-share-button" data-text="ImageProcessor - Manipulate images on-the-fly using .NET 4+" data-via="james_m_south" data-hashtags="imageprocessor">Tweet</a>
-                    <script>!function (d, s, id) { var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https'; if (!d.getElementById(id)) { js = d.createElement(s); js.id = id; js.src = p + '://platform.twitter.com/widgets.js'; fjs.parentNode.insertBefore(js, fjs); } }(document, 'script', 'twitter-wjs');</script>
-                </p>
-                <p>
-                    <script data-gittip-username="James_M_South" src="//gttp.co/v1.js"></script>
-                </p>
+
+                <ul class="social-icons">
+                    <li>
+                        <iframe src="http://ghbtns.com/github-btn.html?user=jimbobsquarepants&amp;repo=imageprocessor&type=watch&count=true"
+                                allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20" title="Star on GitHub"></iframe>
+                    </li>
+                    <li>
+                        <iframe src="http://ghbtns.com/github-btn.html?user=jimbobsquarepants&amp;repo=imageprocessor&type=fork&count=true"
+                                allowtransparency="true" frameborder="0" scrolling="0" width="95" height="20" title="Fork on GitHub"></iframe>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-text="ImageProcessor - Manipulate images on-the-fly using .NET 4+" data-via="james_m_south" data-hashtags="imageprocessor">Tweet</a>
+                    </li>
+                    <li>
+                        <a href="https://twitter.com/james_m_south" class="twitter-follow-button" data-show-count="false">Follow @james_m_south</a>
+                        <script>!function (d, s, id) { var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https'; if (!d.getElementById(id)) { js = d.createElement(s); js.id = id; js.src = p + '://platform.twitter.com/widgets.js'; fjs.parentNode.insertBefore(js, fjs); } }(document, 'script', 'twitter-wjs');</script>
+                    </li>
+                </ul>
             </div>
             <div class="col-s-6">
                 <img src="{{ site.baseurl }}/assets/img/penguins-all.jpg" alt="penguins all">
@@ -35,7 +55,8 @@ subheading: A .NET library for on-the-fly processing of images.
         </div>
     </div>
     <section>
-        <h1>What is it?
+        <h1>
+            What is it?
         </h1>
         <p>
             ImageProcessor is a collection of lightweight libraries written in C# that allows you to manipulate images on-the-fly using .NET 4+

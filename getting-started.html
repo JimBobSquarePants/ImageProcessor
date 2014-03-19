@@ -17,15 +17,25 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
             <p>
                 The simplest and fastest way to get the ImageProcessor libraries is to install them via Nuget.
             </p>
-            <a href="https://nuget.org/packages/ImageProcessor/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Nuget Link"><i class="fa fa-download"></i>ImageProcessor</a>
-            <a href="https://nuget.org/packages/ImageProcessor.Web/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Web Nuget Link"><i class="fa fa-download"></i>ImageProcessor.Web</a>
+            
+            <ul class="no-bullets">
+                <li><a href="https://nuget.org/packages/ImageProcessor/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Nuget Link"><i class="fa fa-download"></i>ImageProcessor</a></li>
+                <li><a href="https://nuget.org/packages/ImageProcessor.Web/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Web Nuget Link"><i class="fa fa-download"></i>ImageProcessor.Web</a></li>
+                <li><a href="https://nuget.org/packages/ImageProcessor.Web.Config/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Web Config Nuget Link"><i class="fa fa-download"></i>ImageProcessor.Web.Config</a></li>
+            </ul>
+
             <ul class="download-links">
                 <li>
-                    <a href="http://github.com/JimBobSquarePants/ImageProcessor" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="GitHub project" rel="external" >GitHub project</a>
+                    <a href="http://github.com/JimBobSquarePants/ImageProcessor" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="GitHub project" rel="external">GitHub project</a>
                 </li>
-                <li>Version {{site.version}}
+                <li>
+                    Version {{site.version}}
                 </li>
-                <li>Web Version {{site.webversion}}
+                <li>
+                    Web Version {{site.webversion}}
+                </li>
+                <li>
+                    Web.Config Version {{site.configversion}}
                 </li>
             </ul>
         </section>
@@ -75,18 +85,25 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
                 solution. These allow you to configure rules for caching, processing, and security.
             </p>
 
+            <div class="alert">
+                <p>
+                    As of ImageProcessor.Web v3.2.0 configuration is not installed automatically. Instead default configuration matching the values below is built into the system.
+                    To overwrite these settings install the ImageProcess.Web.Config nuget package.
+                </p>
+            </div>
+
             <h3>Cache.config</h3>
             <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
 &lt;!-- Sets the default cache location and maximum number of days to store 
      items in the cache --&gt;
-&lt;cache virtualPath="~/app_data/cache" maxDays="56"/&gt;</code></pre>
+&lt;cache virtualPath="~/app_data/cache" maxDays="365"/&gt;</code></pre>
 
             <h3>Security.config</h3>
             <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
   &lt;!-- Whether to allow remote image requests, the timeout for a request in 
        milliseconds and the prefix to use so that ImageProcessor can recognize 
        a remote request. --&gt;
-  &lt;security allowRemoteDownloads="true" timeout="300000" maxBytes="524288" remotePrefix="/remote.axd"&gt;
+  &lt;security allowRemoteDownloads="true" timeout="300000" maxBytes="4194304" remotePrefix="/remote.axd"&gt;
     &lt;!-- Sets allowable domains to process images from. --&gt;
     &lt;whiteList&gt;
       &lt;add url="http://images.mymovies.net"/&gt;
@@ -131,8 +148,8 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
     &lt;plugin name="Resize" type="ImageProcessor.Processors.Resize, ImageProcessor"&gt;
       &lt;settings&gt;
         &lt;!-- Maximum height and width to allow images to be resized to. --&gt;
-        &lt;setting key="MaxWidth" value="3000" /&gt;
-        &lt;setting key="MaxHeight" value="3000" /&gt;
+        &lt;setting key="MaxWidth" value="5000" /&gt;
+        &lt;setting key="MaxHeight" value="5000" /&gt;
         &lt;!-- Restricted height and width values to allow images to be resized to. --&gt;
         &lt;setting key="RestrictTo" value="width=300height=300,width=300height=300"/&gt;
       &lt;/settings&gt;

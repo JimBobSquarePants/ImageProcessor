@@ -1,12 +1,28 @@
-﻿/*
+﻿@font-face {
+    font-family: "open_sanssemibold";
+    src: url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Semibold-webfont.eot");
+    src: url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Semibold-webfont.eot?#iefix") format("embedded-opentype"), url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Semibold-webfont.woff") format("woff"), url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Semibold-webfont.ttf") format("truetype"), url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Semibold-webfont.svg#open_sanssemibold") format("svg");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "open_sansregular";
+    src: url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Regular-webfont.eot");
+    src: url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Regular-webfont.eot?#iefix") format("embedded-opentype"), url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Regular-webfont.woff") format("woff"), url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Regular-webfont.ttf") format("truetype"), url("libs/fonts/open-sans-fontfacekit/web fonts/OpenSans-Regular-webfont.svg#open_sansRegular") format("svg");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/*
  * Base elements.
  */
 body {
-    font-family: "Segoe UI",Tahoma,Arial,Verdana,Sans-Serif;
+    font-family: "open_sansregular",Arial,Sans-Serif;
 }
 
 h1, h2, h3 {
-    font-family: "Segoe UI Light", "Segoe UI",Tahoma,Arial,Verdana,Sans-Serif;
+    font-family: "open_sanssemibold",Arial,Sans-Serif;
     font-weight: 400;
 }
 
@@ -20,9 +36,8 @@ button,
 [type="button"],
 [type="reset"],
 [role="button"] {
-    font-family: "Segoe UI Light", "Segoe UI",Tahoma,Arial,Verdana,Sans-Serif;
+    /*font-family: "open_sanssemibold",Arial,Sans-Serif;*/
     font-weight: 400;
-    text-transform: uppercase;
     border-radius: 3px;
     background: linear-gradient(to bottom, rgba(244,244,244,1) 0,rgba(218,218,218,1) 100%);
     -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
@@ -63,7 +78,7 @@ nav[role="navigation"] {
     left: 0;
     right: 0;
     z-index: 1030;
-    padding: .2em 0;
+    padding: .5em 0;
     -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4);
     -ms-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4);
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.4);
@@ -125,12 +140,28 @@ nav[role="navigation"] {
     }
 }
 
+nav[role="complementary"] a {
+    line-height: 44px;
+    display: block;
+}
+
+@media (max-width: 61.99em) {
+    nav[role="complementary"] ul {
+        border: 1px solid #c0c0c0;
+        border-radius: 5px;
+    }
+
+    nav[role="complementary"] a {
+        padding: 0 .5em;
+    }
+
+    nav[role="complementary"] li + li a {
+        border-top: 1px solid #c0c0c0;
+    }
+}
+
 header[role="banner"] {
-    background-color: #211054;
-    background-image: linear-gradient(rgba(255,255,255,.05) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,.05) 2px, transparent 2px), linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
-    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-    background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
-    color: #fff;
+    background-color: #40a4e1;
     padding-top: 3.5em;
     padding-bottom: 1em;
     margin-bottom: 2em;
@@ -144,6 +175,12 @@ header[role="banner"] {
     header[role="banner"] h1 {
         font-size: 2em;
         margin-bottom: 0;
+        color: transparent;
+        background-color: #40a4e1;
+        color: #4d4d4d;
+        color: rgba(77, 77, 77, 0.80);
+        -webkit-text-shadow: 1px 1px 2px #40a4e1, 0 0 0 #000, 1px 1px 2px #40a4e1;
+        text-shadow: 1px 1px 2px #40a4e1, 0 0 0 #000, 1px 1px 2px #40a4e1;
     }
 
     header[role="banner"] a {
@@ -177,42 +214,8 @@ footer[role="contentinfo"] {
 }
 
 .download-links {
-    list-style: none;
-    padding: 0;
+    padding-left: 20px;
 }
-
-    .download-links li:first-child {
-        display: block;
-    }
-
-@media (min-width: 48em) {
-    .download-links li:first-child {
-        display: inline-block;
-    }
-}
-
-.download-links li {
-    display: inline-block;
-}
-
-    .download-links li:first-child + li:before {
-        content: "";
-        padding: 0;
-    }
-
-@media (min-width: 48em) {
-    .download-links li:first-child + li:before {
-        content: "|";
-        padding: 0 .5em;
-    }
-}
-
-.download-links li + li:before {
-    content: "|";
-    padding: 0 .5em;
-}
-
-
 
 /*
  * Back
@@ -227,33 +230,14 @@ header[role="banner"].subpage {
     margin-bottom: 1em;
 }
 
-/*
- * Helper examples.
- */
-
-.responsive-helper-pane,
-.responsive-helper-alert {
-    text-align: center;
-    position: relative;
-    padding: 1em 0;
-    border: 1px solid #c0c0c0;
+.social-icons {
+    list-style: none;
+    padding: 0;
 }
 
-.responsive-helper-alert {
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    bottom: -1px;
-}
-
-/*
- * Dropdown examples.
- */
-.dropdown-width-example {
-    height: 246px;
-    width: 288px;
-}
+    .social-icons li {
+        display: inline-block;
+    }
 
 .fa-download {
     margin-right: .5em;
@@ -263,30 +247,13 @@ header[role="banner"].subpage {
  * Force the spans to break words on the pre tag
  */
 pre[class*="language-"] {
-    /*white-space: nowrap;
-    -moz-word-break: break-all;
-    -o-word-break: break-all;
-    -ms-word-break: break-all;
-    word-break: break-all;
-    overflow: hidden;*/
-    white-space: pre;
-    width: 100%;
-    overflow-x: auto;
     -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
     -ms-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
     border: #c0c0c0 solid 4px;
 }
 
-    pre[class*="language-"] code {
-        white-space: pre;
-        -ms-word-wrap: normal;
-        word-wrap: normal;
-    }
-
 code {
-    -ms-word-wrap: break-word;
-    word-wrap: break-word;
     border: #c0c0c0 solid 2px;
 }
 

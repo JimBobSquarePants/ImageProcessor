@@ -2,19 +2,20 @@
 # Note - if you enable this, and attempt to view your site locally you have to 
 # pass the  --baseurl parameter when serving as an empty string e.g jekyll serve --baseurl ''
 # http://jekyllrb.com/docs/github-pages/
-baseurl : /ImageProcessor
+baseurl : "/ImageProcessor"
 
 relative_permalinks: true
 
 # Name of the website
-name: ImageProcessor
+name: "ImageProcessor"
 altname : "ImageProcessor.Web"
 
 # Short description (goes below the title)
-description: A C# library for the dynamic processing of image files with .NET. ImageProcessor can resize, rotate, crop, flip, fade, watermark and add Instagram style filters to images.
+description: "A C# library for the dynamic processing of image files with .NET. ImageProcessor can resize, rotate, crop, flip, fade, watermark and add Instagram style filters to images."
 
 # Your name, as you want it to appear underneath each post and in the footer
-author: James South
+author: "James South"
 
-version: 1.8.3
-webversion: 3.1.0
+version: "1.8.6"
+webversion: "3.2.0"
+configversion: "1.0.0"

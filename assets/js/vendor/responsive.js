@@ -1,25 +1,12 @@
-/*
- * Responsive framework
- *
- * Responsive is a minimalist framework for rapidly creating responsive websites specifically 
- * written to prevent the need to undo styles set by the framework itself and allow 
- * developers to write streamlined code.
- *
- * Portions of this CSS and JS are based on the incredibly hard work that has been 
- * done creating the HTML5 Boilerplate, Twitter Bootstrap, Zurb Foundation, and Normalize.css 
- * and all credit for that work is due to them.
- * 
- */
-
 /*  ==|== Responsive =============================================================
     Author: James South
     twitter : http://twitter.com/James_M_South
-    github : https://github.com/JimBobSquarePants/Responsive
+    github : https://github.com/ResponsiveBP/Responsive
     Copyright (c),  James South.
     Licensed under the MIT License.
     ============================================================================== */
 
-/*! Responsive v2.2.0 | MIT License | git.io/rRNRLA */
+/*! Responsive v2.5.0 | MIT License | responsivebp.com */
 
 /*
  * Responsive Utils
@@ -27,49 +14,9 @@
 
 /*global jQuery*/
 /*jshint forin:false*/
-(function ($) {
+(function ($, w) {
 
     "use strict";
-
-    $.support.getVendorPrefix = (function () {
-        /// <summary>Gets the correct vendor prefix for the current browser.</summary>
-        /// <param name="prop" type="String">The property to return the name for.</param>
-        /// <returns type="Object">
-        ///      The object containing the correct vendor prefixes.
-        ///      &#10;    1: js - The vendor prefix for the JavaScript property.
-        ///      &#10;    2: css - The vendor prefix for the CSS property.  
-        /// </returns>
-
-        var rprefixes = /^(Moz|Webkit|O|ms)(?=[A-Z])/,
-            div = document.createElement("div");
-
-        for (var prop in div.style) {
-            if (rprefixes.test(prop)) {
-                // Test is faster than match, so it's better to perform
-                // that on the lot and match only when necessary.
-                var match = prop.match(rprefixes)[0];
-                return {
-                    js: match,
-                    css: "-" + match.toLowerCase() + "-"
-                };
-            }
-        }
-
-        // Nothing found so far? Webkit does not enumerate over the CSS properties of the style object.
-        // However (prop in style) returns the correct value, so we'll have to test for
-        // the presence of a specific property.
-        if ("WebkitOpacity" in div.style) {
-            return {
-                js: "Webkit",
-                css: "-webkit-"
-            };
-        }
-
-        return {
-            js: "",
-            css: ""
-        };
-    }());
 
     $.support.transition = (function () {
         /// <summary>Returns a value indicating whether the browser supports CSS transitions.</summary>
@@ -102,18 +49,32 @@
 
     }());
 
+    $.fn.ensureTransitionEnd = function (duration) {
+        /// <summary>
+        /// Ensures that the transition end callback is triggered.
+        /// http://blog.alexmaccaw.com/css-transitions
+        ///</summary>
+        var called = false,
+            $this = $(this),
+            callback = function () { if (!called) { $this.trigger($.support.transition.end); } };
+
+        $this.one($.support.transition.end, function () { called = true; });
+        w.setTimeout(callback, duration);
+        return this;
+    };
+
     $.fn.swipe = function (options) {
         /// <summary>Adds swiping functionality to the given element.</summary>
-        ///	<param name="options" type="Object" optional="true" parameterArray="true">
-        ///		 A collection of optional settings to apply.
+        /// <param name="options" type="Object" optional="true" parameterArray="true">
+        ///      A collection of optional settings to apply.
         ///      &#10;    1: namespace - The namespace for isolating the touch events.
-        ///      &#10;    2: timeLimit - The limit in ms to recognise touch events for. Default - 1000; 0 disables.
-        ///	</param>
+        ///      &#10;    2: timeLimit - The limit in ms to recognize touch events for. Default - 1000; 0 disables.
+        /// </param>
         /// <returns type="jQuery">The jQuery object for chaining.</returns>
 
         var defaults = {
             namespace: null,
-            timeLimit: 1000
+            touchAction: "none"
         },
             settings = $.extend({}, defaults, options);
 
@@ -123,7 +84,9 @@
             eswipeend = "swipeend" + ns,
             etouchstart = "touchstart" + ns + " pointerdown" + ns + " MSPointerDown" + ns,
             etouchmove = "touchmove" + ns + " pointermove" + ns + "  MSPointerMove" + ns,
-            etouchend = "touchend" + ns + " pointerup" + ns + "  MSPointerUp" + ns,
+            etouchend = "touchend" + ns + " touchleave" + ns + " touchcancel" + ns +
+                        " pointerup" + ns + " pointerout" + ns + " pointercancel" + ns + " pointerleave" + ns +
+                        " MSPointerUp" + ns + "  MSPointerOut" + ns + "  MSPointerCancel" + ns + " MSPointerLeave" + ns,
             supportTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) ||
                 (navigator.msMaxTouchPoints > 0) ||
                 (window.DocumentTouch && document instanceof DocumentTouch);
@@ -131,39 +94,78 @@
         return this.each(function () {
 
             if (!supportTouch) {
-                return;
+                etouchstart += " mousedown" + ns;
+                etouchmove += " mousemove" + ns;
+                etouchend += (" mouseup" + ns + " mouseleave" + ns);
             }
 
             var $this = $(this);
 
-            // Enable extended touch events on ie.
-            $this.css({ "-ms-touch-action": "none", "touch-action": "none" });
+            // Enable extended touch events on IE.
+            $this.css({ "-ms-touch-action": "" + settings.touchAction + "", "touch-action": "" + settings.touchAction + "" });
 
             var start = {},
-                delta,
-                move = function (event) {
+                delta = {},
+                isScrolling,
+                onMove = function (event) {
 
-                    // Normalise the variables.
-                    var isPointer = event.type !== "touchmove",
+                    // Normalize the variables.
+                    var isMouse = event.type === "mousemove",
+                        isPointer = event.type !== "touchmove" && !isMouse,
                         original = event.originalEvent,
                         moveEvent;
 
-                    // Ensure swiping with one touch and not pinching.
-                    if (isPointer) {
-                        if (original.pointerType && original.pointerType !== 2) {
-                            return;
-                        }
-                    } else {
-                        if (original.touches.length > 1) {
-                            return;
-                        }
+                    // Only left click allowed.
+                    if (isMouse && event.which !== 1) {
+                        return;
                     }
+
+                    // One touch allowed.
+                    if (original.touches && original.touches.length > 1) {
+                        return;
+                    }
+
+                    // Ensure swiping with one touch and not pinching.
                     if (event.scale && event.scale !== 1) {
                         return;
                     }
 
-                    var dx = (isPointer ? original.clientX : original.touches[0].pageX) - start.x,
-                        dy = (isPointer ? original.clientY : original.touches[0].pageY) - start.y;
+                    var dx = (isMouse ? original.pageX : isPointer ? original.clientX : original.touches[0].pageX) - start.x,
+                        dy = (isMouse ? original.pageY : isPointer ? original.clientY : original.touches[0].pageY) - start.y;
+
+                    // Mimic touch action on iProducts.
+                    // Should also prevent bounce.
+                    if (!isPointer) {
+                        switch (settings.touchAction) {
+                            case "pan-x":
+
+                                isScrolling = Math.abs(dy) < Math.abs(dx);
+
+                                if (!isScrolling) {
+                                    event.preventDefault();
+                                } else {
+                                    event.stopPropagation();
+                                    return;
+                                }
+
+                                break;
+                            case "pan-y":
+
+                                isScrolling = Math.abs(dx) < Math.abs(dy);
+
+                                if (!isScrolling) {
+                                    event.preventDefault();
+                                } else {
+                                    event.stopPropagation();
+                                    return;
+                                }
+
+                                break;
+                            default:
+                                event.preventDefault();
+                                break;
+                        }
+                    }
 
                     moveEvent = $.Event(eswipemove, { delta: { x: dx, y: dy } });
 
@@ -179,22 +181,14 @@
                         y: dy
                     };
                 },
-                end = function () {
+                onEnd = function () {
 
                     // Measure duration
                     var duration = +new Date() - start.time,
                         endEvent;
 
-                    // Determine if slide attempt triggers next/previous slide.
-                    // If slide duration is less than 1000ms
-                    // and if slide amount is greater than 20px
-                    // or if slide amount is greater than half the width
-                    var isValidSlide = ((Number(duration) < settings.timeLimit || settings.timeLimit === 0) &&
-                        (Math.abs(delta.x) > 20 || Math.abs(delta.y) > 20 ||
-                            Math.abs(delta.x) > $this[0].clientWidth / 2 ||
-                            Math.abs(delta.y) > $this[0].clientHeight / 2));
-
-                    if (isValidSlide) {
+                    // Determine if slide attempt triggers slide.
+                    if (Math.abs(delta.x) > 1 || Math.abs(delta.y) > 1) {
 
                         // Set the direction and return it.
                         var horizontal = delta.x < 0 ? "left" : "right",
@@ -212,10 +206,30 @@
 
             $this.off(etouchstart).on(etouchstart, function (event) {
 
-                // Normalise the variables.
-                var isPointer = event.type !== "touchstart",
+                // Normalize the variables.
+                var isMouse = event.type === "mousedown",
+                    isPointer = event.type !== "touchstart" && !isMouse,
                     original = event.originalEvent,
-                    startEvent = $.Event(eswipestart);
+                    startEvent;
+
+                if ($(event.target).is("img")) {
+                    event.preventDefault();
+                }
+
+                // Used for testing first move event
+                isScrolling = undefined;
+
+                // Measure start values.
+                start = {
+                    // Get initial touch coordinates.
+                    x: isMouse ? original.pageX : isPointer ? original.clientX : original.touches[0].pageX,
+                    y: isMouse ? original.pageY : isPointer ? original.clientY : original.touches[0].pageY,
+
+                    // Store time to determine touch duration.
+                    time: +new Date()
+                };
+
+                startEvent = $.Event(eswipestart, { start: start });
 
                 $this.trigger(startEvent);
 
@@ -223,22 +237,12 @@
                     return;
                 }
 
-                // Measure start values.
-                start = {
-                    // Get initial touch coordinates.
-                    x: isPointer ? original.clientX : original.touches[0].pageX,
-                    y: isPointer ? original.clientY : original.touches[0].pageY,
-
-                    // Store time to determine touch duration.
-                    time: +new Date()
-                };
-
                 // Reset delta and end measurements.
-                delta = {};
+                delta = { x: 0, y: 0 };
 
                 // Attach touchmove and touchend listeners.
-                $this.on(etouchmove, move)
-                    .on(etouchend, end);
+                $this.on(etouchmove, onMove)
+                     .on(etouchend, onEnd);
             });
         });
     };
@@ -249,9 +253,12 @@
         /// <returns type="jQuery">The jQuery object for chaining.</returns>
 
         var ns = namespace && ("." + namespace),
-            etouchstart = "touchstart" + ns + " pointerdown" + ns + " MSPointerDown" + ns,
-            etouchmove = "touchmove" + ns + " pointermove" + ns + "  MSPointerMove" + ns,
-            etouchend = "touchend" + ns + " pointerup" + ns + "  MSPointerUp" + ns;
+            etouchstart = "mousedown" + ns + " touchstart" + ns + " pointerdown" + ns + " MSPointerDown" + ns,
+            etouchmove = "mousemove" + ns + " touchmove" + ns + " pointermove" + ns + "  MSPointerMove" + ns,
+            etouchend = "mouseup" + ns + " mouseleave" + ns +
+                        " touchend" + ns + " touchleave" + ns + " touchcancel" + ns +
+                        " pointerup" + ns + " pointerout" + ns + " pointercancel" + ns + " pointerleave" + ns +
+                        " MSPointerUp" + ns + "  MSPointerOut" + ns + "  MSPointerCancel" + ns + " MSPointerLeave" + ns;
 
         return this.each(function () {
 
@@ -324,7 +331,7 @@
         return options;
     };
 
-}(jQuery));
+}(jQuery, window));
 /*
  * Responsive AutoSize
  */
@@ -390,7 +397,6 @@
                     if (classes) {
                         self.$clone.removeData(classes);
                     }
-
                 };
 
             $.when(clone()).then(this.size());
@@ -468,7 +474,9 @@
             $element.height($clone.height());
 
             // Do our callback
-            supportTransition ? $element.one(supportTransition.end, complete) : complete();
+            supportTransition ? $element.one(supportTransition.end, complete)
+            .ensureTransitionEnd($element.css("transition-duration").slice(0, -1) * 1000)
+            : complete();
         }
     };
 
@@ -539,7 +547,8 @@
 
     w.RESPONSIVE_AUTOSIZE = true;
 
-}(jQuery, window, ".r.autosize"));/*
+}(jQuery, window, ".r.autosize"));
+/*
  * Responsive Carousel
  */
 
@@ -555,7 +564,8 @@
 
     // General variables.
     var supportTransition = $.support.transition,
-        vendorPrefixes = $.support.getVendorPrefix,
+        // Match the transition.
+        rtransition = /\d+(.\d+)/,
         emouseenter = "mouseenter" + ns,
         emouseleave = "mouseleave" + ns,
         eclick = "click" + ns,
@@ -574,12 +584,8 @@
 
     manageTouch = function () {
 
-        this.$element.swipe({ namespace: "r.carousel", timeLimit: 0 })
+        this.$element.swipe({ namespace: "r.carousel", touchAction: "pan-y" })
             .on("swipemove.r.carousel", $.proxy(function (event) {
-
-                if (this.options.mode !== "slide") {
-                    return;
-                }
 
                 if (this.sliding) {
                     return;
@@ -606,58 +612,58 @@
 
                 // Get the distance swiped as a percentage.
                 var width = $activeItem.width(),
-                    percent = parseInt((event.delta.x / width) * 100, 10),
+                    percent = parseFloat((event.delta.x / width) * 100),
                     diff = isNext ? 100 : -100;
 
                 // Shift the items but put a limit on sensitivity.
-                if (percent > -100 && percent < 100 && (percent < -10 || percent > 10)) {
-                    $activeItem.addClass("no-transition").css({ "transform": "translateX(" + percent + "%)" });
-                    $nextItem.addClass("no-transition swipe").css({ "transform": "translateX(" + (percent + diff) + "%)" });
+                if (Math.abs(percent) < 100 && Math.abs(percent) > 5) {
+                    this.$element.addClass("no-transition");
+                    if (this.options.mode === "slide") {
+                        $activeItem.css({ "transform": "translate(" + percent + "%, 0)" });
+                        $nextItem.addClass("swipe").css({ "transform": "translate(" + (percent + diff) + "%, 0)" });
+                    } else {
+                        $activeItem.addClass("swipe").css({ "opacity": 1 - Math.abs((percent / 100)) });
+                        $nextItem.addClass("swipe");
+                    }
                 }
+
             }, this))
             .on("swipeend.r.carousel", $.proxy(function (event) {
 
-                if (this.sliding) {
+                if (this.sliding || !this.$element.hasClass("no-transition")) {
                     return;
                 }
 
                 var direction = event.direction,
-                    method = null;
-
-                if (direction === "left") {
                     method = "next";
-                } else if (direction === "right") {
+
+                if (direction === "right") {
                     method = "prev";
                 }
 
                 // Re-enable the transitions.
-                this.$items.each(function () {
-                    $(this).removeClass("no-transition");
-                });
+                this.$element.removeClass("no-transition");
 
                 if (supportTransition) {
 
                     // Trim the animation duration based on the current position.
                     var activePosition = getActiveIndex.call(this),
-                        $activeItem = $(this.$items[activePosition]),
-                        prop = vendorPrefixes.css + "transition-duration";
+                        $activeItem = $(this.$items[activePosition]);
 
                     if (!this.translationDuration) {
-                        this.translationDuration = parseFloat($activeItem.css(prop));
+                        this.translationDuration = parseFloat($activeItem.css("transition-duration"));
                     }
 
-                    // Get the transform matrix and pull the right value.
-                    // index of 4 for translateX.
-                    var matrix = $activeItem.css(vendorPrefixes.css + "transform"),
-                           translateX = (matrix.match(/-?[0-9\.]+/g))[4],
-                    // Now turn that into a percentage.
-                        width = $activeItem.width(),
-                        percent = parseInt((Math.abs(translateX) / width) * 100, 10),
-                        newDuration = ((100 - percent) / 100) * this.translationDuration;
+                    // Get the distance and turn it into into a percentage
+                    // to calculate the duration. Whichever is lowest is used.
+                    var width = $activeItem.width(),
+                        percentageTravelled = parseInt((Math.abs(event.delta.x) / width) * 100, 10),
+                        swipeDuration = (((event.duration / 1000) * 100) / percentageTravelled),
+                        newDuration = (((100 - percentageTravelled) / 100) * (Math.min(this.translationDuration, swipeDuration)));
 
                     // Set the new temporary duration.
                     this.$items.each(function () {
-                        $(this).css(prop, newDuration + "s");
+                        $(this).css({ "transition-duration": newDuration + "s" });
                     });
                 }
 
@@ -692,7 +698,10 @@
                          .on(emouseleave, $.proxy(this.cycle, this));
         }
 
-        if (this.options.enabletouch && this.options.mode === "slide") {
+        // Add the css class to support fade.
+        this.options.mode === "fade" && this.$element.addClass("carousel-fade");
+
+        if (this.options.enabletouch) {
             manageTouch.call(this);
         }
     };
@@ -754,7 +763,7 @@
         }
 
         // Ensure that transition end is triggered.
-        if (this.$element.find(".next, .prev").length && $.support.transition.end) {
+        if (this.$element.find(".next, .prev").length && $.support.transition) {
             this.$element.trigger($.support.transition.end);
             this.cycle(true);
         }
@@ -815,10 +824,6 @@
             return false;
         }
 
-        if (this.interval) {
-            this.pause();
-        }
-
         // Trigger the slide event with positional data.
         var slideEvent = $.Event(eslide, { relatedTarget: $nextItem[0], direction: direction });
         this.$element.trigger(slideEvent);
@@ -829,6 +834,10 @@
 
         // Good to go? Then let's slide.
         this.sliding = true;
+
+        if (isCycling) {
+            this.pause();
+        }
 
         // Highlight the correct indicator.
         if (this.$indicators.length) {
@@ -844,10 +853,10 @@
 
         var complete = function () {
 
-            if (slideMode && self.$items) {
+            if (self.$items) {
                 // Clear the transition properties if set.
                 self.$items.each(function () {
-                    $(this).css({ "transition": "" });
+                    $(this).css({ "transition": "", "opacity": "" });
                 });
             }
 
@@ -865,14 +874,16 @@
         $activeItem.addClass(direction);
         $nextItem.addClass(direction);
 
-        if (slideMode && this.$items) {
-            // Clear the added css.
+        // Clear the added css.
+        if (this.$items) {
             this.$items.each(function () {
-                $(this).removeClass("swipe").css({ "transform": "" });
+                $(this).removeClass("swipe").css({ "transform": "", "opacity": "" });
             });
         }
 
-        supportTransition && (slideMode || fadeMode) ? $activeItem.one(supportTransition.end, complete) : complete();
+        supportTransition && (slideMode || fadeMode) ? $activeItem.one(supportTransition.end, complete)
+        .ensureTransitionEnd($activeItem.css("transition-duration").match(rtransition)[0] * 1000)
+        : complete();
 
         // Restart the cycle.
         if (isCycling) {
@@ -950,7 +961,8 @@
 
     w.RESPONSIVE_CAROUSEL = true;
 
-}(jQuery, window, ".r.carousel"));/*
+}(jQuery, window, ".r.carousel"));
+/*
  * Responsive Dismiss 
  */
 
@@ -1002,7 +1014,9 @@
                .removeClass("fade-in");
 
         // Do our callback
-        supportTransition ? this.$target.one(supportTransition.end, complete) : complete();
+        supportTransition ? this.$target.one(supportTransition.end, complete)
+        .ensureTransitionEnd(this.$target.css("transition-duration").slice(0, -1) * 1000)
+        : complete();
     };
 
     // Plug-in definition 
@@ -1051,10 +1065,11 @@
 
     w.RESPONSIVE_DISMISS = true;
 
-}(jQuery, window, ".r.dismiss"));/*
+}(jQuery, window, ".r.dismiss"));
+/*
  * Responsive Dropdown 
  */
-
+/*jshint expr:true*/
 /*global jQuery*/
 (function ($, w, ns) {
 
@@ -1066,6 +1081,8 @@
 
     // General variables.
     var supportTransition = w.getComputedStyle && $.support.transition,
+        // Match the transition.
+        rtransition = /\d+(.\d+)/,
         eclick = "click" + ns,
         eshow = "show" + ns,
         eshown = "shown" + ns,
@@ -1098,7 +1115,9 @@
         this.$element.trigger(startEvent)[method]("collapse");
         this.$element[startEvent.type === "show" ? "addClass" : "removeClass"]("expand trans");
 
-        supportTransition ? this.$element.one(supportTransition.end, complete) : complete();
+        supportTransition ? this.$element.one(supportTransition.end, complete)
+        .ensureTransitionEnd(this.$element.css("transition-duration").match(rtransition)[0] * 1000)
+        : complete();
     };
 
     // The Dropdown class definition
@@ -1239,7 +1258,8 @@
 
     w.RESPONSIVE_DROPDOWN = true;
 
-}(jQuery, window, ".r.dropdown"));/*
+}(jQuery, window, ".r.dropdown"));
+/*
  * Responsive Lightbox
  */
 
@@ -1269,6 +1289,7 @@
         $previous = $("<a/>").attr({ "href": "#", "title": "Previous (Left Arrow)" }).addClass("lightbox-direction left hidden"),
         $next = $("<a/>").attr({ "href": "#", "title": "Next (Right Arrow)" }).addClass("lightbox-direction right hidden"),
         $placeholder = $("<div/>").addClass("lightbox-placeholder"),
+        scrollbarWidth = 0,
         lastScroll = 0,
         supportTransition = $.support.transition,
         keys = {
@@ -1279,7 +1300,7 @@
         protocol = w.location.protocol.indexOf("http") === 0 ? w.location.protocol : "http:",
         // Regular expression.
         rexternalHost = new RegExp("//" + w.location.host + "($|/)"),
-        rimage = /(^data:image\/.*,)|(\.(jp(e|g|eg)|gif|png|bmp|ti(f|ff)|webp|svg)((\?|#).*)?$)/,
+        rimage = /(^data:image\/.*,)|(\.(jp(e|g|eg)|gif|png|bmp|ti(ff|f)|webp|svg)((\?|#).*)?$)/i,
         // Taken from jQuery.
         rhash = /^#.*$/, // Altered to only match beginning.
         rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
@@ -1322,7 +1343,7 @@
         var self = this,
             title = this.options.title,
             description = this.options.description,
-            close = this.options.close,
+            modal = this.options.modal,
             target = this.options.target,
             local = !this.options.external && !isExternalUrl(target),
             group = this.options.group,
@@ -1337,12 +1358,12 @@
         $img = $("<img/>"); // ditto.
 
         // 1: Build the header
-        if (title || close) {
+        if (title || !modal) {
 
             $header.html(title ? "<div class=\"container\"><h2>" + title + "</h2></div>" : "")
                    .appendTo($overlay);
 
-            if (close) {
+            if (!modal) {
                 $close.appendTo($overlay);
             }
         }
@@ -1359,8 +1380,11 @@
         if (local) {
             $img = null;
             $iframe = null;
-            $placeholder.detach().insertAfter(this.$element);
-            $(target).detach().appendTo($content).removeClass("hidden");
+            var $target = $(target);
+            this.isLocalHidden = $target.is(":hidden");
+            $lightbox.addClass(this.options.fitViewport ? "container" : "");
+            $placeholder.detach().insertAfter($target);
+            $target.detach().appendTo($content).removeClass("hidden");
             $content.appendTo($lightbox);
             toggleFade.call(this);
         } else {
@@ -1452,7 +1476,7 @@
     destroy = function (callback) {
         var self = this,
             empty = function () {
-                $lightbox.removeClass("lightbox-iframe lightbox-ajax lightbox-image").css({
+                $lightbox.removeClass("lightbox-iframe lightbox-ajax lightbox-image container").css({
                     "max-height": "",
                     "max-width": "",
                     "margin-top": "",
@@ -1473,7 +1497,7 @@
 
                 if (!self.options.external) {
                     // Put that kid back where it came from or so help me.
-                    $(self.options.target).addClass("hidden").detach().insertAfter($placeholder);
+                    $(self.options.target).addClass(self.isLocalHidden ? "hidden" : "").detach().insertAfter($placeholder);
                     $placeholder.detach().insertAfter($overlay);
                 }
 
@@ -1494,7 +1518,8 @@
         toggleFade.call(this);
 
         supportTransition ? $lightbox.one(supportTransition.end, cleanUp)
-            : cleanUp();
+        .ensureTransitionEnd($lightbox.css("transition-duration").slice(0, -1) * 1000)
+        : cleanUp();
     },
 
     resize = function () {
@@ -1523,6 +1548,7 @@
                     bottomHeight = footerHeight > 0 ? footerHeight : 1;
                     diff = topHeight + bottomHeight;
                     childHeight = windowHeight - diff;
+                    var ie10Mobile = navigator.userAgent.match(/IEMobile\/10\.0/);
 
                     if ($img) {
                         // IE8 doesn't change the width as max-width will cause the 
@@ -1535,6 +1561,15 @@
                     else if ($content) {
                         $lightbox.css("max-height", childHeight);
                         $content.css("max-height", childHeight);
+
+                        // Prevent IEMobile10 scrolling when content overflows the lightbox.
+                        // This causes the content to jump behind the model but it's all I can
+                        // find for now.
+                        if (ie10Mobile) {
+                            if ($content.children("*:first")[0].scrollHeight > $content.height()) {
+                                $html.addClass("lightbox-lock");
+                            }
+                        }
                     }
                     else {
 
@@ -1574,8 +1609,20 @@
 
                     bottom = top + $child.height();
 
+                    var getTopMargin = function () {
+                        if (bottomHeight > 1 && top > margin && windowHeight - bottom < bottomHeight) {
+                            var newMargin = ((top - margin) * -2) + 4;
+
+                            if ((newMargin * -1) + childHeight < windowHeight - bottom) {
+                                return newMargin;
+                            }
+                        }
+
+                        return fallback;
+                    };
+
                     $lightbox.css({
-                        "margin-top": bottomHeight > 1 && top > margin && windowHeight - bottom < bottomHeight ? ((top - margin) * -2) + 4 : fallback
+                        "margin-top": getTopMargin()
                     });
                 }
             };
@@ -1605,21 +1652,37 @@
 
         var fade = event === "show" ? "addClass" : "removeClass",
             self = this,
+            getScrollbarWidth = function () {
+                var $scroll = $("<div/>").css({ width: 99, height: 99, overflow: "scroll", position: "absolute", top: -9999 });
+                $body.append($scroll);
+                scrollbarWidth = $scroll[0].offsetWidth - $scroll[0].clientWidth;
+                $scroll.remove();
+
+                return scrollbarWidth;
+            },
             complete = function () {
 
                 if (event === "hide") {
                     $overlay.addClass("hidden");
-                    $html.removeClass("lightbox-on");
+                    $html.removeClass("lightbox-on")
+                         .css("margin-right", "");
 
-                    if (lastScroll !== $window.scrollTop) {
-                        $window.scrollTop(lastScroll);
-                        lastScroll = 0;
+                    if ($html.hasClass("lightbox-lock")) {
+
+                        $html.removeClass("lightbox-lock");
+                        if (lastScroll !== $window.scrollTop()) {
+                            $window.scrollTop(lastScroll);
+                            lastScroll = 0;
+                        }
                     }
-
                     return;
                 }
 
                 $overlay.off(eclick).on(eclick, function (e) {
+
+                    if (self.options.modal) {
+                        return;
+                    }
 
                     var closeTarget = $close[0],
                         eventTarget = e.target;
@@ -1645,13 +1708,17 @@
         if (lastScroll === 0) {
             lastScroll = $window.scrollTop();
         }
-        $html.addClass("lightbox-on");
+
+        // Remove the scrollbar.
+        $html.addClass("lightbox-on")
+             .css("margin-right", getScrollbarWidth());
 
         $overlay.removeClass("hidden")
             .redraw()[fade]("fade-in")
             .redraw();
 
         supportTransition ? $overlay.one(supportTransition.end, complete)
+        .ensureTransitionEnd($overlay.css("transition-duration").slice(0, -1) * 1000)
               : complete();
 
     },
@@ -1714,6 +1781,10 @@
                 return;
             }
 
+            if (this.options.modal) {
+                return;
+            }
+
             $body.off(ekeyup).on(ekeyup, $.proxy(function (e) {
 
                 // Bind the escape key.
@@ -1767,6 +1838,7 @@
                 newTarget.length ? newTarget.focus() : $close.focus();
                 return false;
             }
+            return true;
         });
 
     };
@@ -1776,7 +1848,7 @@
 
         this.$element = $(element);
         this.defaults = {
-            close: true,
+            modal: false,
             external: false,
             group: null,
             iframe: false,
@@ -1785,6 +1857,7 @@
             next: ">",
             previous: "<",
             mobileTarget: null,
+            fitViewport: true,
             mobileViewportWidth: 480,
             enabletouch: true
         };
@@ -1793,6 +1866,7 @@
         this.description = null;
         this.isShown = null;
         this.$group = null;
+        this.isLocalHidden = false;
 
         // Make a list of grouped lightbox targets.
         if (this.options.group) {
@@ -1851,6 +1925,7 @@
 
         // Call the callback.
         supportTransition ? $lightbox.one(supportTransition.end, complete)
+        .ensureTransitionEnd($lightbox.css("transition-duration").slice(0, -1) * 1000)
                           : complete();
     };
 
@@ -1881,6 +1956,7 @@
         destroy.call(this);
 
         supportTransition ? $lightbox.one(supportTransition.end, complete)
+        .ensureTransitionEnd($lightbox.css("transition-duration").slice(0, -1) * 1000)
                           : complete();
     };
 
@@ -1936,18 +2012,51 @@
 
         event.preventDefault();
 
-        var $this = $(this),
-            data = $this.data("r.lightboxOptions"),
+        // Handle close events.
+        var $this = $(this);
+
+        // If it's a modal close instruction we want to ignore it.
+        if ($this.is("[data-lightbox-modal-trigger]")) {
+            return;
+        }
+
+        var data = $this.data("r.lightboxOptions"),
             options = data || $.buildDataOptions($this, {}, "lightbox", "r"),
             params = $this.data("r.lightbox") ? "toggle" : options;
 
         // Run the lightbox method.
         $this.lightbox(params);
+
+    }).on(eclick, "[data-lightbox-modal-trigger]", function (event) {
+
+        event.preventDefault();
+
+        // Handle close events.
+        var $this = $(this),
+            data = $this.data("r.lightboxOptions"),
+            options = data || $.buildDataOptions($this, {}, "lightbox", "r"),
+            $closeTarget = $(options.modalTrigger || (options.modalTrigger = $this.attr("href")));
+
+        $closeTarget.each(function () {
+
+            var lightbox = $(this).data("r.lightbox");
+
+            if (lightbox) {
+                // Compare the elements.
+                if (lightbox.$element[0] === this) {
+                    lightbox.hide();
+                    return true;
+                }
+            }
+
+            return false;
+        });
     });
 
     w.RESPONSIVE_LIGHTBOX = true;
 
-}(jQuery, window, ".r.lightbox"));/*
+}(jQuery, window, ".r.lightbox"));
+/*
  * Responsive Tables
  */
 
@@ -2022,7 +2131,9 @@
         this.$element.addClass("fade-in").redraw();
 
         // Do our callback
-        supportTransition ? this.$element.one(supportTransition.end, complete) : complete();
+        supportTransition ? this.$element.one(supportTransition.end, complete)
+        .ensureTransitionEnd(this.$element.css("transition-duration").slice(0, -1) * 1000)
+        : complete();
     };
 
     // Plug-in definition 
@@ -2072,7 +2183,8 @@
 
     w.RESPONSIVE_TABLE = true;
 
-}(jQuery, window, ".r.table"));/*
+}(jQuery, window, ".r.table"));
+/*
  * Responsive tabs
  */
 
@@ -2098,7 +2210,7 @@
 
         var showEvent = $.Event(eshow),
             $element = this.$element,
-            $childTabs = $element.find("ul > li"),
+            $childTabs = $element.children("ul").find("li"),
             $childPanes = $element.children(":not(ul)"),
             $nextTab = $childTabs.eq(postion),
             $currentPane = $childPanes.eq(activePosition),
@@ -2161,7 +2273,9 @@
             };
 
             // Do our callback
-            supportTransition ? this.$element.one(supportTransition.end, complete) : complete();
+            supportTransition ? this.$element.one(supportTransition.end, complete)
+            .ensureTransitionEnd(this.$element.css("transition-duration").slice(0, -1) * 1000)
+            : complete();
         });
     };
 
