@@ -1,3 +1,5 @@
+/*! Responsive v2.5.3 | MIT License | responsivebp.com */
+
 (function () {
 
     "use strict";

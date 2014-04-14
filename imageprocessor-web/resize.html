@@ -39,11 +39,13 @@ sublinks: ["#resize|Resize"]
     <h2>Resize Pad</h2>
     <p>
         Passing a single dimension will automatically preserve the aspect ratio of the original image. If the requested aspect ratio is different then the
-        image will be padded to fit. You can also optionally fill the background color for image types without transparency.
+        image will be padded to fit. Widths and heights can optionally also be passed as a ratio and you can fill the background color for image types without transparency.
     </p>
     <pre class="language-markup"><code>http://your-image?width=600
 http://your-image?height=250</code>
 http://your-image?width=600&height=250
+http://your-image?width=600&heightratio=.416
+http://your-image?widthratio=2.4&height=250
 http://your-image?width=600&height=250&bgcolor=fff</code></pre>
 
     <img src="{{ site.baseurl }}/assets/img/resize-pad.jpg" alt="Image resized with padding." />
