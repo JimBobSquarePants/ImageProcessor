@@ -9,7 +9,16 @@ sublinks: ["#filter|Filter"]
 ---
 <section id="filter">
     <h1>Filter</h1>
-    <p>Applies a filter to the current image.</p>
+    <p>Applies a filter to the current image. Use the <code>MatrixFilters</code> class to assign the correct filter</p>
+
+    <pre class="language-csharp"><code>Filter(IMatrixFilter matrixFilter)</code></pre>
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>matrixFilter</strong></dt>
+        <dd>The <code>IMatrixFilter</code> of the filter to add to the image.</dd>
+    </dl>
 
     <pre class="language-csharp"><code>Filter(string filterName)</code></pre>
 
@@ -19,6 +28,12 @@ sublinks: ["#filter|Filter"]
         <dt><strong>filterName</strong></dt>
         <dd>The name of the filter to add to the image.</dd>
     </dl>
+
+    <div class="alert">
+        <p>
+            Please note that the <code>Filter(string filterName)</code> overload is now obsolete and will be removed in the next major version.
+        </p>
+    </div>
 
     <p>Available filters are:</p>
     <ul>

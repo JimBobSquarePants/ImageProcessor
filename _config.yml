@@ -16,6 +16,6 @@ description: "A C# library for the dynamic processing of image files with .NET. 
 # Your name, as you want it to appear underneath each post and in the footer
 author: "James South"
 
-version: "1.8.8"
-webversion: "3.2.2"
-configversion: "1.0.0"
+version: "1.9.0"
+webversion: "3.2.3"
+configversion: "1.1.0"

@@ -20,8 +20,11 @@ subheading: Fast, web-based, image processing with disk caching as standard.
 <section>
     <h1>Caching</h1>
     <p>
-        <strong>ImageProcessor.Web</strong> comes with caching as standard. Any processed image are cached both in the browser and on the server for a length of your choosing. 
+        <strong>ImageProcessor.Web</strong> comes with caching as standard. Any processed image are asynchronously cached both in the browser and on the server for a length of your choosing.
         The server cache intelligently stores millions of images and silently updates itself should the original image change or the cache expire.
+    </p>
+    <p>
+        Cached files are stored in nested folders based on an SHA1 representation of the full url. This ensures that the OS does not suffer from any slowdown due to file indexing.
     </p>
     <p>
         This saves massive amounts of processing power and bandwidth that help to keep your website snappy.
