@@ -150,8 +150,8 @@ nav[role="complementary"] a {
 
     nav[role="complementary"] a:before {
         content: "";
-        background-image: url(/assets/css/libs/images/gears.svg);
-        background-image: url(/assets/css/libs/images/gears.png)\9;
+        background-image: url(libs/images/gears.svg);
+        background-image: url(libs/images/gears.png)\9;
         background-repeat: no-repeat;
         background-position: left center;
         -moz-background-size: 28px 28px;
