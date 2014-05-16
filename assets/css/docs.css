@@ -143,7 +143,30 @@ nav[role="navigation"] {
 nav[role="complementary"] a {
     line-height: 44px;
     display: block;
+    color: #222;
+    text-decoration: none;
+    font-weight: bold;
 }
+
+    nav[role="complementary"] a:before {
+        content: "";
+        background-image: url(/assets/css/libs/images/gears.svg);
+        background-image: url(/assets/css/libs/images/gears.png)\9;
+        background-repeat: no-repeat;
+        background-position: left center;
+        -moz-background-size: 28px 28px;
+        -o-background-size: 28px 28px;
+        -webkit-background-size: 28px 28px;
+        background-size: 28px 28px;
+        width: 36px;
+        height: 44px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    nav[role="complementary"] a:hover {
+        text-decoration: underline;
+    }
 
 @media (max-width: 61.99em) {
     nav[role="complementary"] ul {
@@ -161,13 +184,10 @@ nav[role="complementary"] a {
 }
 
 header[role="banner"] {
-    background-color: #40a4e1;
+    background-color: #E44F32;
     padding-top: 3.5em;
     padding-bottom: 1em;
     margin-bottom: 2em;
-    -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-    -ms-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
     position: relative;
     z-index: 1;
 }
@@ -175,12 +195,7 @@ header[role="banner"] {
     header[role="banner"] h1 {
         font-size: 2em;
         margin-bottom: 0;
-        color: transparent;
-        background-color: #40a4e1;
-        color: #4d4d4d;
-        color: rgba(77, 77, 77, 0.80);
-        -webkit-text-shadow: 1px 1px 2px #40a4e1, 0 0 0 #000, 1px 1px 2px #40a4e1;
-        text-shadow: 1px 1px 2px #40a4e1, 0 0 0 #000, 1px 1px 2px #40a4e1;
+        color: #fff;
     }
 
     header[role="banner"] a {
@@ -190,7 +205,6 @@ header[role="banner"] {
     header[role="banner"] span {
         display: block;
         font-size: 55%;
-        color: #e7e7e7;
         margin: .34em 0;
     }
 
