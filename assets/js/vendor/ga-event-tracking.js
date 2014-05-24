@@ -186,13 +186,9 @@
     GoogleTracking.prototype.track = function () {
 
         var $element = this.$element,
-            target = this.options.target,
-            newWin = target && target === "_blank",
             callback = function () {
-                if (!newWin) {
-                    // Trigger the elements click event.
-                    $element.off("click.ga")[0].click();
-                }
+                // Trigger the elements click event.
+                $element.off("click.ga")[0].click();
             };
 
         var args = createArgs(this.options, callback);
@@ -250,7 +246,6 @@
             options = data || $.buildDataOptions($this, {}, "ga");
 
         // Parse specific attributes from anchors.
-        options.target || (options.target = $this.attr("target"));
         options.href || (options.href = $this.attr("href"));
 
         var params = $this.data("ga") ? "track" : options;
