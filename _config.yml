@@ -5,6 +5,8 @@
 baseurl : ""
 relative_permalinks: false
 
+exclude:          ["CNAME"]
+
 # Name of the website
 name: "ImageProcessor"
 altname : "ImageProcessor.Web"
