@@ -2,9 +2,8 @@
 # Note - if you enable this, and attempt to view your site locally you have to 
 # pass the  --baseurl parameter when serving as an empty string e.g jekyll serve --baseurl ''
 # http://jekyllrb.com/docs/github-pages/
-baseurl : "/ImageProcessor"
-
-relative_permalinks: true
+baseurl : ""
+relative_permalinks: false
 
 # Name of the website
 name: "ImageProcessor"

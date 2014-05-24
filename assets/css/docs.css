@@ -140,6 +140,16 @@ nav[role="navigation"] {
     }
 }
 
+.breadcrumb {
+    list-style: none;
+    padding-left: 0;
+}
+
+    .breadcrumb li {
+        display: inline-block;
+        text-transform: capitalize;
+    }
+
 nav[role="complementary"] a {
     line-height: 44px;
     display: block;
@@ -240,7 +250,7 @@ header[role="banner"].subpage {
 
 .back {
     background-color: #E7E7E7;
-    padding: 1em 0;
+    padding: 0 0 1em;
     margin-bottom: 1em;
 }
 

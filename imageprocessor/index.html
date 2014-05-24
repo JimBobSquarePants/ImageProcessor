@@ -1,0 +1,109 @@
+---
+layout: rootpage
+root: imageprocessor
+title: ImageProcessor
+heading: ImageProcessor
+subheading: Suitable for desktop and web environments. 
+---
+<section>
+    <h1>ImageProcessor</h1>
+    <p>
+        <strong>ImageProcessor</strong> contains all the core functionality that allows for image manipulation via the <code>ImageFactory</code> class. 
+    This has a fluent API which allows you to easily chain methods to deliver the desired output. This library contains no web 
+    specific components so is suitable for both desktop and web applications.
+    </p>
+
+    <p>Currently the system supports processing of jpg, jpeg, png, png8, gif (both animated and static), bmp, and tif file formats.</p>
+</section>
+<hr />
+<section>
+    <h2>Example Code</h2>
+
+    <pre class="language-csharp"><code>// Read a file and resize it.
+byte[] photoBytes = File.ReadAllBytes(file);
+int quality = 70;
+ImageFormat format = ImageFormat.Jpeg;
+Size size = new Size(150, 0)
+
+using (MemoryStream inStream = new MemoryStream(photoBytes))
+{
+    using (MemoryStream outStream = new MemoryStream())
+    {
+        using (ImageFactory imageFactory = new ImageFactory())
+        {
+            // Load, resize, set the format and quality and save an image.
+            imageFactory.Load(inStream)
+                        .Resize(size)
+                        .Format(format)
+                        .Quality(quality)
+                        .Save(outStream);
+        }
+
+        // Do something with the stream.
+    }
+}</code></pre>
+
+    <p>Check out the details in each section.</p>
+</section>
+<hr />
+<section>
+    <h1>Extending ImageProcessor</h1>
+    <p>
+        ImageProcessor is built with extensibility in mind. All the individual processors follow an interface <code>IGraphicsprocessor</code> which allows developers
+        to easily extend the library. View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor/Processors">source code</a> to see examples.
+    </p>
+    <pre class="language-csharp"><code>/// &lt;summary&gt;
+/// Defines properties and methods for ImageProcessor Plugins.
+/// &lt;/summary&gt;
+public interface IGraphicsProcessor
+{
+    #region Properties
+    /// &lt;summary&gt;
+    /// Gets the regular expression to search strings for.
+    /// &lt;/summary&gt;
+    Regex RegexPattern { get; }
+
+    /// &lt;summary&gt;
+    /// Gets the DynamicParameter.
+    /// &lt;/summary&gt;
+    dynamic DynamicParameter { get; }
+
+    /// &lt;summary&gt;
+    /// Gets the order in which this processor is to be used in a chain.
+    /// &lt;/summary&gt;
+    int SortOrder { get; }
+
+    /// &lt;summary&gt;
+    /// Gets or sets any additional settings required by the processor.
+    /// &lt;/summary&gt;
+    Dictionary&lt;string, string&gt; Settings { get; set; } 
+    #endregion
+
+    #region Methods
+    /// &lt;summary&gt;
+    /// The position in the original string where the first character of the captured 
+    /// substring was found.
+    /// &lt;/summary&gt;
+    /// &lt;param name="queryString"&gt;
+    /// The query string to search.
+    /// &lt;/param&gt;
+    /// &lt;returns&gt;
+    /// The zero-based starting position in the original string where the captured
+    /// substring was found.
+    /// &lt;/returns&gt;
+    int MatchRegexIndex(string queryString);
+
+    /// &lt;summary&gt;
+    /// Processes the image.
+    /// &lt;/summary&gt;
+    /// &lt;param name="factory"&gt;
+    /// The the current instance of the &lt;see cref="T:ImageProcessor.ImageFactory"/&gt; class containing
+    /// the image to process.
+    /// &lt;/param&gt;
+    /// &lt;returns&gt;
+    /// The processed image from the current instance of the &lt;see cref="T:ImageProcessor.ImageFactory"/&gt; class.
+    /// &lt;/returns&gt;
+    Image ProcessImage(ImageFactory factory);
+    #endregion
+}</code></pre>
+</section>
