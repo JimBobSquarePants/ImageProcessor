@@ -27,6 +27,19 @@
 <!--[if gt IE 8]><!-->
 <script src="{{ site.baseurl }}/assets/js/vendor/jquery-2.1.0.min.js"></script>
 <!--<![endif]-->
+
+<script>
+    $(document).ready(function () {
+        // This is whack!
+
+        if (window.location.host === "jimbobsquarepant.github.io") {
+            document.head.insertAdjacentHTML('beforeEnd', '<meta http-equiv="refresh" content="0; url=http://imageProcessor.org" />');
+        }
+
+    });
+</script>
+
+
 <script src="{{ site.baseurl }}/assets/js/vendor/prism.js"></script>
 <script src="{{ site.baseurl }}/assets/js/vendor/responsive.min.js"></script>
 <script src="{{ site.baseurl }}/assets/js/site.js"></script>
@@ -38,7 +51,7 @@
         i["GoogleAnalyticsObject"] = r; i[r] = i[r] || function () {
             (i[r].q = i[r].q || []).push(arguments)
         }, i[r].l = 1 * new Date(); a = s.createElement(o),
-        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+            m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
     })(window, document, "script", "//www.google-analytics.com/analytics.js", "ga");
 
     ga("create", "UA-33038042-1", "imageprocessor.org");
