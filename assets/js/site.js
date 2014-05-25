@@ -1,4 +1,13 @@
 ﻿(function () {
+    $(document).ready(function() {
+        // This is whack!
+
+        if (window.location.host === "jimbobsquarepant.github.io") {
+            document.head.insertAdjacentHTML('beforeEnd', '<meta http-equiv="refresh" content="0; url=http://imageProcessor.org" />');
+        }
+
+    });
+
     // C# extension for prism.
     // http://www.broculos.net/2013/05/why-we-chose-prism-syntax-highlighter.html#.Uq7lYvRdXjV
     Prism.languages.csharp = Prism.languages.extend("clike", {
