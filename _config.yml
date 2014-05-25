@@ -21,5 +21,6 @@ version: "1.9.1"
 webversion: "3.2.4"
 configversion: "1.1.0"
 
+#This is supposed to redirect
 gems:
   - jekyll-redirect-from
