@@ -122,7 +122,7 @@ nav[role="navigation"] {
     #navigation {
         clear: none;
         float: left;
-    }{
+    }
 
         #navigation.collapse {
             height: auto !important;
