@@ -6,7 +6,7 @@
     Licensed under the MIT License.
     ============================================================================== */
 
-/*! Responsive v2.5.3 | MIT License | responsivebp.com */
+/*! Responsive v2.5.5 | MIT License | responsivebp.com */
 
 /*
  * Responsive Utils
@@ -77,7 +77,7 @@
         /// <param name="callback" type="Function">The function to call on transition end.</param>
         /// <returns type="jQuery">The jQuery object for chaining.</returns>
         var supportTransition = $.support.transition;
-        
+
         return this.each(function () {
 
             if (!$.isFunction(callback)) {
@@ -87,9 +87,9 @@
             var $this = $(this).redraw(),
                 rtransition = /\d+(.\d+)/;
 
-         supportTransition ? $this.one(supportTransition.end, callback)
-                                  .ensureTransitionEnd($this.css("transition-duration").match(rtransition)[0] * 1000)
-                           : callback();
+            supportTransition ? $this.one(supportTransition.end, callback)
+                                     .ensureTransitionEnd((rtransition.test($this.css("transition-duration")) ? $this.css("transition-duration").match(rtransition)[0] : 0) * 1000)
+                              : callback();
         });
     };
 
@@ -98,7 +98,7 @@
     }());
 
     $.support.pointerEvents = (function () {
-        return (navigator.maxTouchPoints) || (navigator.msMaxTouchPoints);
+        return (w.PointerEvent || w.MSPointerEvent);
     }());
 
     (function () {
@@ -124,15 +124,16 @@
                 eend;
 
             // Keep the events separate since support could be crazy.
-            if (supportPointer) {
+            if (supportTouch) {
+                estart = touchStart + ns;
+                emove = touchMove + ns;
+                eend = (touchEnd.join(ns + " ")) + ns;
+            }
+            else if (supportPointer) {
                 estart = (pointerStart.join(ns + " ")) + ns;
                 emove = (pointerMove.join(ns + " ")) + ns;
                 eend = (pointerEnd.join(ns + " ")) + ns;
 
-            } else if (supportTouch) {
-                estart = touchStart + ns;
-                emove = touchMove + ns;
-                eend = (touchEnd.join(ns + " ")) + ns;
             } else {
                 estart = mouseStart + ns;
                 emove = mouseMove + ns;
@@ -180,7 +181,8 @@
                     onMove = function (event) {
 
                         // Normalize the variables.
-                        var isMouse = !supportPointer && !supportTouch,
+                        var isMouse = event.type === "mousemove",
+                            isPointer = event.type !== "touchmove" && !isMouse,
                             original = event.originalEvent,
                             moveEvent;
 
@@ -199,28 +201,19 @@
                             return;
                         }
 
-                        var dx = (isMouse ? original.pageX : supportPointer ? original.clientX : original.touches[0].pageX) - start.x,
-                            dy = (isMouse ? original.pageY : supportPointer ? original.clientY : original.touches[0].pageY) - start.y;
+                        var dx = (isMouse ? original.pageX : isPointer ? original.clientX : original.touches[0].pageX) - start.x,
+                            dy = (isMouse ? original.pageY : isPointer ? original.clientY : original.touches[0].pageY) - start.y;
 
                         // Mimic touch action on iProducts.
                         // Should also prevent bounce.
-                        if (!supportPointer) {
+                        if (!isPointer) {
                             switch (settings.touchAction) {
                                 case "pan-x":
-
-                                    isScrolling = Math.abs(dy) < Math.abs(dx);
-
-                                    if (!isScrolling) {
-                                        event.preventDefault();
-                                    } else {
-                                        event.stopPropagation();
-                                        return;
-                                    }
-
-                                    break;
                                 case "pan-y":
 
-                                    isScrolling = Math.abs(dx) < Math.abs(dy);
+                                    isScrolling = settings.touchAction === "pan-x" ?
+                                                  Math.abs(dy) < Math.abs(dx) :
+                                                  Math.abs(dx) < Math.abs(dy);
 
                                     if (!isScrolling) {
                                         event.preventDefault();
@@ -675,7 +668,6 @@
                             return;
                         }
 
-                        //$nextItem = this.$element.children("figure:not(.carousel-active)")[fallback]();
                         $nextItem = this.$element.children("figure")[fallback]();
                     }
 
@@ -765,7 +757,6 @@
             lazyOnDemand: true
         };
         this.options = $.extend({}, this.defaults, options);
-        this.$indicators = this.$element.children("ol:first");
         this.paused = null;
         this.interval = null;
         this.sliding = null;
@@ -890,7 +881,8 @@
             direction = isNext ? "left" : "right",
             fallback = isNext ? "first" : "last",
             self = this,
-            slidEvent = $.Event(eslid);
+            slideEvent,
+            slidEvent;
 
         if (isCycling) {
             // Pause if cycling.
@@ -912,7 +904,7 @@
         }
 
         // Trigger the slide event with positional data.
-        var slideEvent = $.Event(eslide, { relatedTarget: $nextItem[0], direction: direction });
+        slideEvent = $.Event(eslide, { relatedTarget: $nextItem[0], direction: direction });
         this.$element.trigger(slideEvent);
 
         if (this.sliding || slideEvent.isDefaultPrevented()) {
@@ -931,18 +923,6 @@
             this.pause();
         }
 
-        // Highlight the correct indicator.
-        if (this.$indicators.length) {
-            this.$indicators.find(".active").removeClass("active");
-
-            this.$element.one(eslid, function () {
-                var $nextIndicator = $(self.$indicators.children()[getActiveIndex.call(self)]);
-                if ($nextIndicator) {
-                    $nextIndicator.addClass("active");
-                }
-            });
-        }
-
         var complete = function () {
 
             if (self.$items) {
@@ -956,6 +936,7 @@
             $nextItem.removeClass([type, direction].join(" ")).addClass("carousel-active");
 
             self.sliding = false;
+            slidEvent = $.Event(eslid, { relatedTarget: $nextItem[0], direction: direction });
             self.$element.trigger(slidEvent);
         };
 
@@ -1032,11 +1013,21 @@
             options = data || $.buildDataOptions($this, {}, "carousel", "r"),
             $target = $(options.target || (options.target = $this.attr("href"))),
             slideIndex = options.slideTo,
+            numeric = typeof slideIndex === "number",
             carousel = $target.data("r.carousel");
 
         if (carousel) {
-            typeof slideIndex === "number" ? carousel.to(slideIndex) : carousel[options.slide]();
+
+            numeric ? carousel.to(slideIndex) : carousel[options.slide]();
+
+            $target.one(eslid, function () {
+                if (numeric) {
+                    // Show the correct highlight
+                    $this.addClass("active").siblings().removeClass("active");
+                }
+            });
         }
+
     }).on(eready, function () {
 
         $(".carousel").each(function () {
@@ -1260,7 +1251,7 @@
             this.$element[dimension](0).redraw();
         }
 
-        this.$element[dimension](this.endSize || "auto");
+        this.$element[dimension](this.endSize || "");
 
         transition.call(this, "removeClass", $.Event(eshow), eshown);
     };
@@ -1388,7 +1379,6 @@
         rhash = /^#.*$/, // Altered to only match beginning.
         rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
         rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
-        rembedProvider = /vimeo|vine|instagram|instagr\.am/i,
         // Events
         eclick = "click" + ns,
         ekeyup = "keyup" + ns,
@@ -1416,6 +1406,24 @@
 
         // If the regex doesn't match return true . 
         return !rexternalHost.test(locationParts[2]);
+    },
+
+    getMediaProvider = function (url) {
+        var providers = {
+            youtube: /youtu(be\.com|be\.googleapis\.com|\.be)/i,
+            vimeo: /vimeo/i,
+            vine: /vine/i,
+            instagram: /instagram|instagr\.am/i,
+            getty: /embed\.gettyimages\.com/i
+        };
+
+        for (var p in providers) {
+            if (providers.hasOwnProperty(p) && providers[p].test(url)) {
+                return p;
+            }
+        }
+
+        return false;
     },
 
     create = function () {
@@ -1494,7 +1502,7 @@
                 }).appendTo($iframeWrap);
 
                 // Test and add additional media classes.
-                var mediaClasses = rembedProvider.test(target) ? target.match(rembedProvider)[0].toLowerCase() : "";
+                var mediaClasses = getMediaProvider(target) || "";
 
                 $iframeWrap.addClass(mediaClasses).appendTo($lightbox);
 
@@ -1629,7 +1637,7 @@
                     bottomHeight = footerHeight > 0 ? footerHeight : 1;
                     diff = topHeight + bottomHeight;
                     childHeight = windowHeight - diff;
-                    var ie10Mobile = navigator.userAgent.match(/IEMobile\/10\.0/);
+                    var ieMobile = navigator.userAgent.match(/IEMobile\//);
 
                     if ($img) {
                         // IE8 doesn't change the width as max-width will cause the 
@@ -1645,7 +1653,7 @@
                         // Prevent IEMobile10 scrolling when content overflows the lightbox.
                         // This causes the content to jump behind the model but it's all I can
                         // find for now.
-                        if (ie10Mobile) {
+                        if (ieMobile) {
                             if ($content.children("*:first")[0].scrollHeight > $content.height()) {
                                 $html.addClass("lightbox-lock");
                             }
@@ -2332,7 +2340,7 @@
         $nextPane.redraw().addClass("fade-in");
 
         // Do the callback
-        callback.call(this);
+        callback.call(this, $nextPane);
 
     };
 
@@ -2360,7 +2368,7 @@
         }
 
         // Call the function with the callback
-        return tab.call(this, activePosition, position, function () {
+        return tab.call(this, activePosition, position, function ($item) {
 
             var complete = function () {
 
@@ -2369,7 +2377,7 @@
             };
 
             // Do our callback
-            this.$element.onTransitionEnd(complete);
+            $item.onTransitionEnd(complete);
         });
     };
 
