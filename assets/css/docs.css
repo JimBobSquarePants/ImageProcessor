@@ -271,9 +271,9 @@ header[role="banner"].subpage {
  * Force the spans to break words on the pre tag
  */
 pre[class*="language-"] {
-    -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+    /*-webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
     -ms-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);*/
     border: #c0c0c0 solid 4px;
 }
 
