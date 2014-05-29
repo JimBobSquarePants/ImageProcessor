@@ -6,7 +6,7 @@
     Licensed under the MIT License.
     ============================================================================== */
 
-/*! Responsive v2.5.3 | MIT License | responsivebp.com */
+/*! Responsive v2.5.5 | MIT License | responsivebp.com */
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 /**
@@ -455,7 +455,7 @@ hr, input[type="search"] {
  */
 html {
     -webkit-overflow-scrolling: touch; /* 1 */
-    font-size: 16px;
+    font-size: 100%;
     line-height: 1.4;
     color: #222;
 }
@@ -540,8 +540,7 @@ abbr {
     width: 100%;
 }
 
-.row [class*="col-"] + [class*="col-"]
- {
+.row [class*="col-"] + [class*="col-"] {
     margin-left: 2%;
 }
 
@@ -552,8 +551,7 @@ abbr {
     margin-left: 0;
 }
 
-.row [class*="col-xs"] + [class*="col-"]
- {
+.row [class*="col-xs"] + [class*="col-"] {
     margin-left: 2%;
 }
 
@@ -587,9 +585,13 @@ abbr {
 }
 
 /* Full width calculated with margins */
+.row [class*="col-"] + [class*="col-xs-12"],
+.col-xs-12 {
+    margin-left: 0;
+}
+
 .col-xs-12 {
     width: 100%;
-    margin-left: 0;
 }
 
 .col-xs-11 {
@@ -1006,6 +1008,7 @@ abbr {
 .no-gutter > .pull-xs-1 {
     right: 8.3333%;
 }
+
 @media (min-width: 48em) and (max-width: 61.99em) {
     .row [class*="col-"].reset-s-only {
         margin-left: 0 !important;
@@ -1031,9 +1034,13 @@ abbr {
         margin-left: 2%;
     }
 
+    .row [class*="col-"] + [class*="col-s-12"],
+    .col-s-12 {
+        margin-left: 0;
+    }
+
     .col-s-12 {
         width: 100%;
-        margin-left: 0;
     }
 
     .col-s-11 {
@@ -1450,6 +1457,7 @@ abbr {
         right: 8.3333%;
     }
 }
+
 @media (min-width: 62em) and (max-width: 74.99em) {
     .row [class*="col-"].reset-m-only {
         margin-left: 0 !important;
@@ -1475,9 +1483,13 @@ abbr {
         margin-left: 2%;
     }
 
+    .row [class*="col-"] + [class*="col-m-12"],
+    .col-m-12 {
+        margin-left: 0;
+    }
+
     .col-m-12 {
         width: 100%;
-        margin-left: 0;
     }
 
     .col-m-11 {
@@ -1894,6 +1906,7 @@ abbr {
         right: 8.3333%;
     }
 }
+
 @media (min-width: 75em) {
     .row [class*="col-"].reset-l {
         margin-left: 0 !important;
@@ -1908,9 +1921,13 @@ abbr {
         margin-left: 2%;
     }
 
+    .row [class*="col-"] + [class*="col-l-12"],
+    .col-l-12 {
+        margin-left: 0;
+    }
+
     .col-l-12 {
         width: 100%;
-        margin-left: 0;
     }
 
     .col-l-11 {
@@ -2328,6 +2345,7 @@ abbr {
         right: 8.3333%;
     }
 }
+
 /* 
  * Unordered and ordered lists 
  * Scale the padding/margin with the base font.
@@ -2774,6 +2792,17 @@ input[type="color"] {
     max-width: 105px;
 }
 
+@-moz-document url-prefix() {
+    /*
+     * Remove excess padding in Firefox
+     */
+    input[type="color"] {
+        min-height: 1.8em;
+        padding: 0;
+    }
+}
+
+
 /*
  * Add range styles for IE8 and IE9
  */
@@ -3012,6 +3041,7 @@ select.inline-block {
     margin: 1em 0;
     padding: 1em 0;
 }
+
 /*
  * Normalize button borders, color, and padding.
  * 1: Remove rounded corners on iPhone.
@@ -3029,13 +3059,10 @@ input[type="reset"],
     padding: .5em 1em;
     margin-bottom: 0;
     line-height: normal;
-    text-decoration: none !important;
-    font-size: 1em;
     border: solid 1px #c0c0c0;
     background-color: #dadada;
-    color: #222;
+    color: inherit;
     cursor: pointer;
-    position: relative;
     -ms-touch-action: none; /* 2 */
     touch-action: none; /* 2 */
 }
@@ -3045,10 +3072,7 @@ input[type="reset"],
  */
 input[type="submit"],
 input[type="reset"],
-input[type="button"],
-.form-no-grid input[type="submit"],
-.form-no-grid input[type="reset"],
-.form-no-grid input[type="button"] {
+input[type="button"] {
     width: auto;
     max-width: none;
 }
@@ -3061,7 +3085,6 @@ input[type="button"],
     input[type="button"]:hover,
     input[type="reset"]:hover,
     [role="button"]:hover {
-        color: #222;
         background-color: #cdcdcd;
     }
 
@@ -3070,7 +3093,6 @@ input[type="button"],
     input[type="button"]:focus,
     input[type="reset"]:focus,
     [role="button"]:focus {
-        color: #222;
         outline: 1px solid #00a9ec;
         outline-offset: -1px;
     }
@@ -3080,14 +3102,21 @@ input[type="button"],
     input[type="button"]:active,
     input[type="reset"]:active,
     [role="button"]:active {
-        color: #222;
         background-color: #e7e7e7;
         outline: none;
     }
 
-    /*
-     * 1. Fix IOS 6/7 opacity issue
-     */
+[role="button"],
+[role="button"]:hover,
+[role="button"]:focus,
+[role="button"]:active {
+    color: inherit;
+    text-decoration: none;
+}
+
+/*
+ * 1. Fix IOS 6/7 opacity issue
+ */
     button[disabled],
     input[type="submit"][disabled],
     input[type="button"][disabled],
@@ -3096,7 +3125,7 @@ input[type="button"],
         color: #5d5d5d;
         background-color: #e7e7e7;
         cursor: not-allowed;
-        opacity: 1;
+        opacity: 1 /* 1 */;
     }
 
     /*
@@ -3140,6 +3169,7 @@ input[type="button"],
     .btn-group > * {
         float: left;
     }
+
 /*
  * Colors and padding.
  */
@@ -3839,10 +3869,10 @@ pre {
 }
 
 .fade-out, .fade-in {
-    -moz-transition: opacity 0.3s linear 0s;
-    -o-transition: opacity 0.3s linear 0s;
-    -webkit-transition: opacity 0.3s linear 0s;
-    transition: opacity 0.3s linear 0s;
+    -moz-transition: opacity 0.3s;
+    -o-transition: opacity 0.3s;
+    -webkit-transition: opacity 0.3s;
+    transition: opacity 0.3s;
 }
 
 /*
