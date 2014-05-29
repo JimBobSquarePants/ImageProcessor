@@ -32,37 +32,37 @@ blockquote {
 }
 
 button,
-[type="submit"],
-[type="button"],
-[type="reset"],
 [role="button"] {
     /*font-family: "open_sanssemibold",Arial,Sans-Serif;*/
     font-weight: 400;
     border-radius: 3px;
-    background: linear-gradient(to bottom, rgba(244,244,244,1) 0,rgba(218,218,218,1) 100%);
+    background-color:#428bca;
+    border-color:#357ebd;
+    color: #fff;
+    /*background: linear-gradient(to bottom, rgba(244,244,244,1) 0,rgba(218,218,218,1) 100%);
     -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
     -ms-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);*/
 }
 
     button:hover,
-    [type="submit"]:hover,
-    [type="button"]:hover,
-    [type="reset"]:hover,
     [role="button"]:hover {
-        background: #cdcdcd;
+        background-color: #3276b1;
+        border-color: #285e8e;
     }
 
 
     button:active,
-    [type="submit"]:active,
-    [type="button"]:active,
-    [type="reset"]:active,
     [role="button"]:active {
-        background: #e7e7e7;
+        background-color: #4896DA;
+        border-color: #3276b1;
     }
 
-[role="button"] {
+[role="button"],
+[role="button"]:hover,
+[role="button"]:focus,
+[role="button"]:active{
+    color:#fff;
     margin-bottom: 1em;
 }
 
@@ -72,7 +72,7 @@ button,
 
 nav[role="navigation"] {
     color: #fff;
-    background: #222;
+    background: #1C253C;
     position: fixed;
     top: 0;
     left: 0;
@@ -115,14 +115,14 @@ nav[role="navigation"] {
     }
 
         #navigation a:hover {
-            background-color: #333;
+            background-color: #293657;
         }
 
 @media (min-width: 48em) {
     #navigation {
         clear: none;
         float: left;
-    }
+    }{
 
         #navigation.collapse {
             height: auto !important;
@@ -278,8 +278,7 @@ pre[class*="language-"] {
 }
 
 code {
-    border: #c0c0c0 solid 2px;
-}
+    border: none;
 
 /*
  * Monokai-esque style form prism.
