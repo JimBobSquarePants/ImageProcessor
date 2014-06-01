@@ -6,9 +6,10 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
 ---
 <div class="row">
     <nav class="col-s-3" role="complementary">
+        <h3>Overview</h3>
         <ul class="no-bullets">
             <li><a href="#download">Download ImageProcessor</a></li>
-            <li><a href="#config">Configuration</a></li>
+            <li><a href="#github">ImageProcessor on Github</a></li>
         </ul>
     </nav>
     <article class="col-s-9">
@@ -17,7 +18,7 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
             <p>
                 The simplest and fastest way to get the ImageProcessor libraries is to install them via Nuget.
             </p>
-            
+
             <ul class="no-bullets">
                 <li><a href="https://nuget.org/packages/ImageProcessor/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Nuget Link"><i class="fa fa-download"></i>ImageProcessor</a></li>
                 <li><a href="https://nuget.org/packages/ImageProcessor.Web/" role="button" class="download" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="Web Nuget Link"><i class="fa fa-download"></i>ImageProcessor.Web</a></li>
@@ -26,7 +27,7 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
 
             <ul class="download-links">
                 <li>
-                    <a href="http://github.com/JimBobSquarePants/ImageProcessor" data-ga-category="Home Actions" data-ga-action="Home Links" data-ga-label="GitHub project" rel="external">GitHub project</a>
+                    <a href="http://github.com/JimBobSquarePants/ImageProcessor" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="GitHub project" rel="external">GitHub project</a>
                 </li>
                 <li>
                     Version {{site.version}}
@@ -40,128 +41,13 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
             </ul>
         </section>
         <hr />
-        <section id="config">
-            <h1>Setting up your configuration</h1>
+        <section id="github">
+            <h1>ImageProcessor on Github</h1>
             <p>
-                When installing ImageProcessor.Web you will find that the web.config will have been altered and additional configuration files will have been
-                added to the solution.
+                If you want to learn more about ImageProcessor, tinker about in the source or even contribute to the project (Yes please!) then you can see the full source
+                in the <a href="http://github.com/JimBobSquarePants/ImageProcessor" data-ga-category="Getting Started Actions" data-ga-action="Getting Started Links" data-ga-label="GitHub project" rel="external">GitHub project</a>
             </p>
-            <p>
-                These are setup as follows.
-            </p>
-
-            <div class="alert">
-                <p>
-                    As of <strong>ImageProcessor.Web v3.2.0</strong> configuration is not installed automatically. Instead default configuration matching the values below is built into the system.
-                    To overwrite these settings install the ImageProcess.Web.Config nuget package.
-                </p>
-            </div>
-
-            <h2>The Web.Config</h2>
-            <pre class="language-markup"><code>&lt;configuration&gt;
- &lt;!-- Custom configuration group --&gt;
-  &lt;configSections&gt;
-    &lt;sectionGroup name="imageProcessor"&gt;
-      &lt;section name="security" requirePermission="false" type="ImageProcessor.Web.Config.ImageSecuritySection, ImageProcessor.Web"/&gt;
-      &lt;section name="processing" requirePermission="false" type="ImageProcessor.Web.Config.ImageProcessingSection, ImageProcessor.Web"/&gt;
-      &lt;section name="cache" requirePermission="false" type="ImageProcessor.Web.Config.ImageCacheSection, ImageProcessor.Web"/&gt;
-    &lt;/sectionGroup&gt;
-  &lt;/configSections&gt;
-  &lt;imageProcessor &gt;
-    &lt;security configSource="config\imageprocessor\security.config"/&gt;
-    &lt;cache configSource="config\imageprocessor\cache.config"/&gt;
-    &lt;processing configSource="config\imageprocessor\processing.config"/&gt;
-  &lt;/imageProcessor&gt;
- &lt;!-- HttpModule bindings --&gt;
-  &lt;system.web&gt;
-    &lt;httpModules&gt;
-      &lt;add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/&gt;
-    &lt;/httpModules&gt;
-  &lt;/system.web&gt;
-  &lt;system.webServer&gt;
-    &lt;modules&gt;
-      &lt;add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/&gt;
-    &lt;/modules&gt;
-  &lt;/system.webServer&gt;
-&lt;/configuration&gt;</code></pre>
-
-            <hr />
-
-            <h2>Addition Configuration</h2>
-            <p>
-                ImageProcessor.Web also install 3 additional configuration files under the path <code>\config\imageprocessor\</code> within your
-                solution. These allow you to configure rules for caching, processing, and security.
-            </p>
-
-            <h3>Cache.config</h3>
-            <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
-&lt;!-- Sets the default cache location and maximum number of days to store 
-     items in the cache --&gt;
-&lt;cache virtualPath="~/app_data/cache" maxDays="365"/&gt;</code></pre>
-
-            <h3>Security.config</h3>
-            <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
-  &lt;!-- Whether to allow remote image requests, the timeout for a request in 
-       milliseconds and the prefix to use so that ImageProcessor can recognize 
-       a remote request. --&gt;
-  &lt;security allowRemoteDownloads="true" timeout="300000" maxBytes="4194304" remotePrefix="/remote.axd"&gt;
-    &lt;!-- Sets allowable domains to process images from. --&gt;
-    &lt;whiteList&gt;
-      &lt;add url="http://images.mymovies.net"/&gt;
-      &lt;add url="http://maps.googleapis.com" extensionLess="true" imageFormat=".png"/&gt;
-    &lt;/whiteList&gt;
-  &lt;/security&gt;</code></pre>
-
-            <h3>Processing.config</h3>
-            <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
-    &lt;processing&gt;
-      &lt;!-- Presets that allow you to reduce code in your markup. 
-           Note the use of <xmp>&#038;</xmp> to escape ampersands. --&gt;
-      &lt;presets&gt;
-        &lt;preset name="demo" value="width=300&#038;height=150&#038;bgcolor=transparent"/&gt;
-      &lt;/presets&gt;
-    &lt;!-- List of plugins. --&gt;
-    &lt;plugins autoloadplugins="true"&gt;
-    &lt;plugin name="Alpha" type="ImageProcessor.Processors.Alpha, ImageProcessor" /&gt;
-    &lt;plugin name="Brightness" type="ImageProcessor.Processors.Brightness, ImageProcessor" /&gt;
-    &lt;plugin name="Contrast" type="ImageProcessor.Processors.Contrast, ImageProcessor" /&gt;
-    &lt;plugin name="Crop" type="ImageProcessor.Processors.Crop, ImageProcessor" /&gt;
-    &lt;plugin name="Filter" type="ImageProcessor.Processors.Filter, ImageProcessor" /&gt;
-    &lt;plugin name="Flip" type="ImageProcessor.Processors.Flip, ImageProcessor" /&gt;
-    &lt;plugin name="Format" type="ImageProcessor.Processors.Format, ImageProcessor" /&gt;
-    &lt;!-- The makimum kernal size, sigma value and threshold values
-         for convolution. --&gt;
-    &lt;plugin name="GaussianBlur" type="ImageProcessor.Processors.GaussianBlur, ImageProcessor"&gt;
-      &lt;settings&gt;
-        &lt;setting key="MaxSize" value="22" /&gt;
-        &lt;setting key="MaxSigma" value="5.1" /&gt;
-        &lt;setting key="MaxThreshold" value="100" /&gt;
-      &lt;/settings&gt;
-    &lt;/plugin&gt;
-    &lt;plugin name="GaussianSharpen" type="ImageProcessor.Processors.GaussianSharpen, ImageProcessor"&gt;
-      &lt;settings&gt;
-        &lt;setting key="MaxSize" value="22" /&gt;
-        &lt;setting key="MaxSigma" value="5.1" /&gt;
-        &lt;setting key="MaxThreshold" value="100" /&gt;
-      &lt;/settings&gt;
-    &lt;/plugin&gt;
-    &lt;plugin name="Quality" type="ImageProcessor.Processors.Quality, ImageProcessor" /&gt;
-    &lt;plugin name="Resize" type="ImageProcessor.Processors.Resize, ImageProcessor"&gt;
-      &lt;settings&gt;
-        &lt;!-- Maximum height and width to allow images to be resized to. --&gt;
-        &lt;setting key="MaxWidth" value="5000" /&gt;
-        &lt;setting key="MaxHeight" value="5000" /&gt;
-        &lt;!-- Restricted height and width values to allow images to be resized to. --&gt;
-        &lt;setting key="RestrictTo" value="width=300height=300,width=300height=300"/&gt;
-      &lt;/settings&gt;
-    &lt;/plugin&gt;
-    &lt;plugin name="Rotate" type="ImageProcessor.Processors.Rotate, ImageProcessor" /&gt;
-    &lt;plugin name="RoundedCorners" type="ImageProcessor.Processors.RoundedCorners, ImageProcessor" /&gt;
-    &lt;plugin name="Saturation" type="ImageProcessor.Processors.Saturation, ImageProcessor" /&gt;
-    &lt;plugin name="Vignette" type="ImageProcessor.Processors.Vignette, ImageProcessor" /&gt;
-    &lt;plugin name="Watermark" type="ImageProcessor.Processors.Watermark, ImageProcessor" /&gt;
-      &lt;/plugins&gt;
-    &lt;/processing&gt;</code></pre>
+            <p>Contributions are most welcome, after all, that's the whole point of open source.</p>
         </section>
     </article>
 </div>

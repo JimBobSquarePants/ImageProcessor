@@ -4,20 +4,159 @@ root: imageprocessor-web
 title: ImageProcessor.Web
 heading: ImageProcessor.Web
 subheading: Fast, web-based, image processing with disk caching as standard.
+sublinks: ["#about|About",
+"#config|Configuration",
+"#webconfig|&nbsp;- Web.Config",
+"#securityconfig|&nbsp;- Security.Config",
+"#processingconfig|&nbsp;- Processing.Config",
+"#cacheconfig|&nbsp;- Cache.Config",
+"#caching|Caching"]
 ---
-<section>
+<section id="about">
     <h1>ImageProcessor.Web</h1>
     <p>
         <strong>ImageProcessor.Web</strong> is a web extension to ImageProcessor that allows the developer to perform image manipulation using querystring parameters as instructions.
     </p>
     <p>This works by adding a configurable HttpModule to your website which intercepts local and remote image requests, processing them on-the-fly to your desired output.</p>
-    <p>
-        The API for ImageProcessor.Web is imperative. This means that the order in which you supply the querystring parameters is the order in which the individual processors are implemented.
-        This allows the API to be very flexible, allowing you to combine processes in any order.
-    </p>
+    <div class="alert">
+        <p>
+            The API for ImageProcessor.Web is imperative. This means that the order in which you supply the querystring parameters is the order in which the individual processors are implemented.
+            This allows the API to be very flexible, allowing you to combine processes in any order.
+        </p>
+    </div>
 </section>
 <hr />
-<section>
+<section id="config">
+    <h1>Setting up your configuration</h1>
+    <p>
+        When installing ImageProcessor.Web you will find that the web.config will have been altered and additional configuration files will have been
+        added to the solution.
+    </p>
+    <p>
+        These are setup as follows.
+    </p>
+
+    <div class="alert">
+        <p>
+            As of <strong>ImageProcessor.Web v3.2.0</strong> configuration is not installed automatically. Instead default configuration matching the values below is built into the system.
+            To overwrite these settings install the ImageProcess.Web.Config nuget package.
+        </p>
+    </div>
+    <div id="webconfig">
+        <h2>The Web.Config</h2>
+        <pre class="language-markup"><code>&lt;configuration&gt;
+ &lt;!-- Custom configuration group --&gt;
+  &lt;configSections&gt;
+    &lt;sectionGroup name="imageProcessor"&gt;
+      &lt;section name="security" requirePermission="false" type="ImageProcessor.Web.Config.ImageSecuritySection, ImageProcessor.Web"/&gt;
+      &lt;section name="processing" requirePermission="false" type="ImageProcessor.Web.Config.ImageProcessingSection, ImageProcessor.Web"/&gt;
+      &lt;section name="cache" requirePermission="false" type="ImageProcessor.Web.Config.ImageCacheSection, ImageProcessor.Web"/&gt;
+    &lt;/sectionGroup&gt;
+  &lt;/configSections&gt;
+  &lt;imageProcessor &gt;
+    &lt;security configSource="config\imageprocessor\security.config"/&gt;
+    &lt;cache configSource="config\imageprocessor\cache.config"/&gt;
+    &lt;processing configSource="config\imageprocessor\processing.config"/&gt;
+  &lt;/imageProcessor&gt;
+ &lt;!-- HttpModule bindings --&gt;
+  &lt;system.web&gt;
+    &lt;httpModules&gt;
+      &lt;add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/&gt;
+    &lt;/httpModules&gt;
+  &lt;/system.web&gt;
+  &lt;system.webServer&gt;
+    &lt;modules&gt;
+      &lt;add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/&gt;
+    &lt;/modules&gt;
+  &lt;/system.webServer&gt;
+&lt;/configuration&gt;</code></pre>
+    </div>
+    <hr />
+
+    <h2>Addition Configuration</h2>
+    <p>
+        ImageProcessor.Web also install 3 additional configuration files under the path <code>\config\imageprocessor\</code> within your
+        solution. These allow you to configure rules for caching, processing, and security.
+    </p>
+    <div id="securityconfig">
+        <h3>Security.config</h3>
+        <p>Contains setting pertaining to security configuration which allow the safe configuration of externally hosted files.</p>
+        <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+  &lt;!-- Whether to allow remote image requests, the timeout for a request in 
+       milliseconds and the prefix to use so that ImageProcessor can recognize 
+       a remote request. --&gt;
+  &lt;security allowRemoteDownloads="true" timeout="300000" maxBytes="4194304" remotePrefix="/remote.axd"&gt;
+    &lt;!-- Sets allowable domains to process images from. --&gt;
+    &lt;whiteList&gt;
+      &lt;add url="http://images.mymovies.net"/&gt;
+      &lt;add url="http://maps.googleapis.com" extensionLess="true" imageFormat=".png"/&gt;
+    &lt;/whiteList&gt;
+  &lt;/security&gt;</code></pre>
+    </div>
+    <div id="processingconfig">
+        <h3>Processing.config</h3>
+        <p>Contains information and configuration for all processors.</p>
+        <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+  &lt;processing preserveExifMetaData="false"&gt;
+    &lt;!-- Presets that allow you to reduce code in your markup. 
+         Note the use of <xmp>&#038;</xmp> to escape ampersands. --&gt;
+    &lt;presets&gt;
+      &lt;preset name="demo" value="width=300<xmp>&#038;</xmp>height=150<xmp>&#038;</xmp>bgcolor=transparent"/&gt;
+    &lt;/presets&gt;
+    &lt;!-- List of plugins. --&gt;
+    &lt;plugins autoloadplugins="true"&gt;
+      &lt;plugin name="Alpha" type="ImageProcessor.Processors.Alpha, ImageProcessor" /&gt;
+      &lt;plugin name="Brightness" type="ImageProcessor.Processors.Brightness, ImageProcessor" /&gt;
+      &lt;plugin name="Contrast" type="ImageProcessor.Processors.Contrast, ImageProcessor" /&gt;
+      &lt;plugin name="Crop" type="ImageProcessor.Processors.Crop, ImageProcessor" /&gt;
+      &lt;plugin name="Filter" type="ImageProcessor.Processors.Filter, ImageProcessor" /&gt;
+      &lt;plugin name="Flip" type="ImageProcessor.Processors.Flip, ImageProcessor" /&gt;
+      &lt;plugin name="Format" type="ImageProcessor.Processors.Format, ImageProcessor" /&gt;
+      &lt;!-- The makimum kernal size, sigma value and threshold values
+           for convolution. --&gt;
+      &lt;plugin name="GaussianBlur" type="ImageProcessor.Processors.GaussianBlur, ImageProcessor"&gt;
+        &lt;settings&gt;
+          &lt;setting key="MaxSize" value="22" /&gt;
+          &lt;setting key="MaxSigma" value="5.1" /&gt;
+          &lt;setting key="MaxThreshold" value="100" /&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
+      &lt;plugin name="GaussianSharpen" type="ImageProcessor.Processors.GaussianSharpen, ImageProcessor"&gt;
+          &lt;settings&gt;
+            &lt;setting key="MaxSize" value="22" /&gt;
+            &lt;setting key="MaxSigma" value="5.1" /&gt;
+          &lt;setting key="MaxThreshold" value="100" /&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
+      &lt;plugin name="Quality" type="ImageProcessor.Processors.Quality, ImageProcessor" /&gt;
+      &lt;plugin name="Resize" type="ImageProcessor.Processors.Resize, ImageProcessor"&gt;
+        &lt;settings&gt;
+          &lt;!-- Maximum height and width to allow images to be resized to. --&gt;
+          &lt;setting key="MaxWidth" value="5000" /&gt;
+          &lt;setting key="MaxHeight" value="5000" /&gt;
+          &lt;!-- Restricted height and width values to allow images to be resized to. --&gt;
+          &lt;setting key="RestrictTo" value="width=300height=300,width=300height=300"/&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
+      &lt;plugin name="Rotate" type="ImageProcessor.Processors.Rotate, ImageProcessor" /&gt;
+      &lt;plugin name="RoundedCorners" type="ImageProcessor.Processors.RoundedCorners, ImageProcessor" /&gt;
+      &lt;plugin name="Saturation" type="ImageProcessor.Processors.Saturation, ImageProcessor" /&gt;
+      &lt;plugin name="Vignette" type="ImageProcessor.Processors.Vignette, ImageProcessor" /&gt;
+      &lt;plugin name="Watermark" type="ImageProcessor.Processors.Watermark, ImageProcessor" /&gt;
+    &lt;/plugins&gt;
+  &lt;/processing&gt;</code></pre>
+    </div>
+    <div id="cacheconfig">
+        <h3>Cache.config</h3>
+        <p>Contains setting pertaining to caching configuration: Where to store the cache, how many days to store images for.</p>
+        <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;!-- Sets the default cache location and maximum number of days to store 
+     items in the cache --&gt;
+&lt;cache virtualPath="~/app_data/cache" maxDays="365"/&gt;</code></pre>
+    </div>
+</section>
+<hr />
+<section id="caching">
     <h1>Caching</h1>
     <p>
         <strong>ImageProcessor.Web</strong> comes with caching as standard. Any processed image are asynchronously cached both in the browser and on the server for a length of your choosing.

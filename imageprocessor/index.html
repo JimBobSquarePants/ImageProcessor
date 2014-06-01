@@ -4,8 +4,11 @@ root: imageprocessor
 title: ImageProcessor
 heading: ImageProcessor
 subheading: Suitable for desktop and web environments. 
+sublinks: ["#about|About",
+"#example|Example Code",
+"#extending|Extending ImageProcessor"]
 ---
-<section>
+<section id="about">
     <h1>ImageProcessor</h1>
     <p>
         <strong>ImageProcessor</strong> contains all the core functionality that allows for image manipulation via the <code>ImageFactory</code> class. 
@@ -13,10 +16,10 @@ subheading: Suitable for desktop and web environments.
     specific components so is suitable for both desktop and web applications.
     </p>
 
-    <p>Currently the system supports processing of jpg, jpeg, png, png8, gif (both animated and static), bmp, and tif file formats.</p>
+    <p>Currently the system supports processing of jpg, jpeg, png, png8, gif (both animated and static), bmp, and tiff file formats.</p>
 </section>
 <hr />
-<section>
+<section id="example">
     <h2>Example Code</h2>
 
     <pre class="language-csharp"><code>// Read a file and resize it.
@@ -29,7 +32,8 @@ using (MemoryStream inStream = new MemoryStream(photoBytes))
 {
     using (MemoryStream outStream = new MemoryStream())
     {
-        using (ImageFactory imageFactory = new ImageFactory())
+        // Initialize the ImageFactory using the overload to preserve EXIF metadata.
+        using (ImageFactory imageFactory = new ImageFactory(preserveExifData:true))
         {
             // Load, resize, set the format and quality and save an image.
             imageFactory.Load(inStream)
@@ -46,7 +50,7 @@ using (MemoryStream inStream = new MemoryStream(photoBytes))
     <p>Check out the details in each section.</p>
 </section>
 <hr />
-<section>
+<section id="extending">
     <h1>Extending ImageProcessor</h1>
     <p>
         ImageProcessor is built with extensibility in mind. All the individual processors follow an interface <code>IGraphicsprocessor</code> which allows developers
