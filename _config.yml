@@ -18,5 +18,5 @@ description: "A C# library for the dynamic processing of image files with .NET. 
 author: "James South"
 
 version: "1.9.4"
-webversion: "3.2.9"
+webversion: "3.3.0"
 configversion: "1.1.3"
