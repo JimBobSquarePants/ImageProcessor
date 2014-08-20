@@ -5,7 +5,7 @@
 baseurl : ""
 relative_permalinks: false
 
-exclude:          ["CNAME"]
+exclude:          ["CNAME","node_modules","Gemfile","Gemfile.lock"]
 
 # Name of the website
 name: "ImageProcessor"
@@ -20,3 +20,26 @@ author: "James South"
 version: "1.9.5"
 webversion: "3.3.0"
 configversion: "1.1.3"
+
+defaults:
+  -
+    scope:
+      path: "imageprocessor"
+    values:
+      layout: "rootpage"
+      root: imageprocessor
+      heading: Methods
+  -
+    scope:
+      path: "imageprocessor/methods"
+    values:
+      layout: "subpage"
+      group: imageprocessor
+      heading: Methods
+  -
+    scope:
+      path: "imageprocessor-web/processors"
+    values:
+      layout: "subpage"
+      group: imageprocessor-web
+      heading: Methods
