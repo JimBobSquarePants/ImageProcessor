@@ -9,7 +9,9 @@
     </header>
     <div class="container row">
         <nav class="col-m-3" role="complementary">
-            {% include rootnav.html param=page.root %}
+            {% include subnav.html %}
+            {% include classnav.html param=page.root %}
+            {% include methodnav.html param=page.root %}
         </nav>
         <article class="col-m-8 offset-m-1">
             {{ content }}

@@ -1,10 +1,8 @@
-<h3>Overview</h3>
-{% include subnav.html %}
-<h3>Methods</h3>
+<h3>Classes</h3>
 <ul class="no-bullets">
     {% assign sorted_pages = site.pages | sort:"name" %}
     {% for page in sorted_pages %}
-    {% if page.group == {{include.param}} %}
+    {% if page.classgroup == {{include.param}} %}
     <li><a href="{{ site.baseurl }}{{ page.url }}">{{ page.title }}</a></li>
     {% endif %}
     {% endfor %}

@@ -31,15 +31,23 @@ defaults:
       heading: Methods
   -
     scope:
+      path: "imageprocessor/classes"
+    values:
+      layout: "subpage"
+      classgroup: "imageprocessor"
+      heading: Methods
+  -
+    scope:
       path: "imageprocessor/methods"
     values:
       layout: "subpage"
-      group: imageprocessor
+      classgroup: ""
+      methodgroup: imageprocessor
       heading: Methods
   -
     scope:
       path: "imageprocessor-web/processors"
     values:
       layout: "subpage"
-      group: imageprocessor-web
+      methodgroup: imageprocessor-web
       heading: Methods
