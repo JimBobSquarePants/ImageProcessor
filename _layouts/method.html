@@ -1,17 +1,20 @@
 {% include header.html %}
 <main role="main">
-    <header role="banner">
+    <header role="banner" class="subpage">
         <div class="container">
             <h1>{{page.heading}}
-            <span>{{page.subheading}}</span>
+                <span>{{page.methodof}}.{{page.subheading}}</span>
             </h1>
         </div>
     </header>
+    <div class="back">
+        <div class="container">{% include breadcrumb.html %}</div>
+    </div>
     <div class="container row">
         <nav class="col-m-3" role="complementary">
-            {% include subnav.html %}
+            {% include inpagenav.html %}
             {% include classnav.html param=page.root %}
-            {% include methodnav.html param=page.root %}
+            {% include methodnav.html param=page.methodof %}
         </nav>
         <article class="col-m-8 offset-m-1">
             {{ content }}

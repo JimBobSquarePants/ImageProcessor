@@ -1,19 +1,20 @@
 ---
 title: Rotate
-subheading: Rotate.
+subheading: Rotate
 sublinks: ["#rotate|Rotate"]
 ---
 <section id="rotate">
     <h1>Rotate</h1>
     <p>Rotates the current image by the given angle without clipping.</p>
 
-    <pre class="language-csharp"><code>Rotate(RotateLayer rotateLayer)</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory Rotate(RotateLayer rotateLayer)</code></pre>
 
     <h3>Parameters</h3>
 
     <dl>
         <dt><strong>rotateLayer</strong></dt>
-        <dd>The <code>ImageProcessor.Imaging.RotateLayer</code> containing the following properties required to rotate the image.
+        <dd>
+            The <code>ImageProcessor.Imaging.RotateLayer</code> containing the following properties required to rotate the image.
             <dl>
                 <dt><strong>Angle</strong></dt>
                 <dd>The angle at which to rotate the image.</dd>
@@ -22,4 +23,6 @@ sublinks: ["#rotate|Rotate"]
             </dl>
         </dd>
     </dl>
+
+    <img src="{{ site.baseurl }}/assets/img/rotate.png" alt="Image rotated." />
 </section>

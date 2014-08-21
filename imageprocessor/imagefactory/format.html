@@ -1,13 +1,13 @@
 ---
 title: Format
-subheading: Format.
+subheading: Format
 sublinks: ["#format|Format"]
 ---
 <section id="format">
     <h1>Format</h1>
     <p>Sets the output format of the current image to the matching <code>System.Drawing.Imaging.ImageFormat</code>.</p>
 
-    <pre class="language-csharp"><code>Format(ImageFormat imageFormat, bool indexedFormat = false)</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory Format(ImageFormat imageFormat, bool indexedFormat = false)</code></pre>
 
     <h3>Parameters</h3>
 
@@ -17,4 +17,5 @@ sublinks: ["#format|Format"]
         <dt><strong>indexedFormat</strong></dt>
         <dd>Whether the pixel format of the image should be indexed. Used for generating Png8 images.</dd>
     </dl>
+    <img src="{{ site.baseurl }}/assets/img/format.jpg" alt="Comparison of image formats" />
 </section>

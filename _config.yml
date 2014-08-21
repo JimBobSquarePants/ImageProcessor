@@ -5,8 +5,6 @@
 baseurl : ""
 relative_permalinks: false
 
-exclude:          ["CNAME","node_modules","Gemfile","Gemfile.lock"]
-
 # Name of the website
 name: "ImageProcessor"
 altname : "ImageProcessor.Web"
@@ -21,33 +19,33 @@ version: "1.9.5"
 webversion: "3.3.0"
 configversion: "1.1.3"
 
+# Set variables by folder rather than individually.
 defaults:
   -
     scope:
       path: "imageprocessor"
     values:
-      layout: "rootpage"
-      root: imageprocessor
-      heading: Methods
+      layout: library
+      root: imageprocessor # Allows the root page to list all classes.
   -
     scope:
-      path: "imageprocessor/classes"
+      path: "imageprocessor/imagefactory"
     values:
-      layout: "subpage"
-      classgroup: "imageprocessor"
+      layout: method
       heading: Methods
+      methodof: imagefactory # Adds the method to the class page.
   -
     scope:
-      path: "imageprocessor/methods"
+      path: "imageprocessor/imagefactory/index.html"
     values:
-      layout: "subpage"
-      classgroup: ""
-      methodgroup: imageprocessor
-      heading: Methods
+      layout: class
+      class: imagefactory # Allows the class page to list all methods.
   -
     scope:
       path: "imageprocessor-web/processors"
     values:
-      layout: "subpage"
+      layout: method
       methodgroup: imageprocessor-web
       heading: Methods
+
+exclude: ["CNAME","node_modules","Gemfile","Gemfile.lock"]

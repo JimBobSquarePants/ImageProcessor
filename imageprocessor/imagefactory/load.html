@@ -1,22 +1,22 @@
 ---
 title: Load
-subheading: Load.
+subheading: Load
 sublinks: ["#load|Load"]
 ---
 <section id="load">
     <h1>Load</h1>
     <p>Loads the image to process. Always call this method first.</p>
 
-    <pre class="language-csharp"><code>Load(MemoryStream memoryStream)</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory Load(Stream stream)</code></pre>
 
     <h3>Parameters</h3>
 
     <dl>
-        <dt><strong>memoryStream</strong></dt>
-        <dd>The <code>System.IO.MemoryStream</code> containing the image information.</dd>
+        <dt><strong>stream</strong></dt>
+        <dd>The <code>System.IO.Stream</code> containing the image information.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>Load(string imagePath)</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory Load(string imagePath)</code></pre>
 
     <h3>Parameters</h3>
 

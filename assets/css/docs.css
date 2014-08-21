@@ -24,6 +24,7 @@ body {
 h1, h2, h3 {
     font-family: "open_sanssemibold",Arial,Sans-Serif;
     font-weight: 400;
+    text-transform: capitalize;
 }
 
 blockquote {
@@ -199,7 +200,6 @@ header[role="banner"] {
     background-color: #E44F32;
     padding-top: 3.5em;
     padding-bottom: 1em;
-    margin-bottom: 2em;
     position: relative;
     z-index: 1;
 }

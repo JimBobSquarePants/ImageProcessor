@@ -1,6 +1,0 @@
-<ul class="no-bullets">
-    {% for link in page.sublinks %}
-       {% assign splitlink = link | split: '|' %}
-       <li><a href="{{ splitlink[0] }}">{{ splitlink[1] }}</a></li>
-    {% endfor %}
-</ul>

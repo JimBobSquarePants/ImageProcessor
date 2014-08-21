@@ -1,13 +1,13 @@
 ---
 title: Resize
-subheading: Resize.
+subheading: Resize
 sublinks: ["#resize|Resize"]
 ---
 <section id="resize">
     <h1>Resize</h1>
     <p>Resizes the current image to the given dimensions.</p>
 
-    <pre class="language-csharp"><code>Resize(Size size)</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory Resize(Size size)</code></pre>
 
     <h3>Parameters</h3>
 
@@ -16,13 +16,14 @@ sublinks: ["#resize|Resize"]
         <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>Resize(ResizeLayer resizeLayer)</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory Resize(ResizeLayer resizeLayer)</code></pre>
 
     <h3>Parameters</h3>
 
     <dl>
         <dt><strong>ResizeLayer</strong></dt>
-        <dd>The <code>ImageProcessor.Imaging.ResizeLayer</code> containing the following properties required to resize the image.
+        <dd>
+            The <code>ImageProcessor.Imaging.ResizeLayer</code> containing the following properties required to resize the image.
             <dl>
                 <dt><strong>Size</strong></dt>
                 <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to.</dd>
@@ -37,4 +38,13 @@ sublinks: ["#resize|Resize"]
             </dl>
         </dd>
     </dl>
+
+    <h3>Resize Pad</h3>
+    <img src="{{ site.baseurl }}/assets/img/resize-pad.jpg" alt="Image resized with padding." />
+
+    <h3>Resize Crop</h3>
+    <img src="{{ site.baseurl }}/assets/img/resize-crop.jpg" alt="Image resized with cropping." />
+
+    <h3>Resize Max</h3>
+    <img src="{{ site.baseurl }}/assets/img/resize-stretch.jpg" alt="Image stretched to fit the given dimension." />
 </section>

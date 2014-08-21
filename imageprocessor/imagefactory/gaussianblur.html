@@ -1,13 +1,13 @@
 ---
 title: GaussianBlur
-subheading: GaussianBlur.
+subheading: GaussianBlur
 sublinks: ["#gaussianblur|GaussianBlur"]
 ---
 <section id="gaussianblur">
     <h1>GaussianBlur</h1>
     <p>Uses a Gaussian kernel to blur the current image.</p>
 
-    <pre class="language-csharp"><code>GaussianBlur(int size)</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory GaussianBlur(int size)</code></pre>
 
     <h3>Parameters</h3>
 
@@ -16,7 +16,7 @@ sublinks: ["#gaussianblur|GaussianBlur"]
         <dd>The size of the kernel by which to blur the images pixels.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>GaussianBlur(GaussianLayer gaussianLayer)</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory GaussianBlur(GaussianLayer gaussianLayer)</code></pre>
 
     <h3>Parameters</h3>
 
@@ -34,4 +34,5 @@ sublinks: ["#gaussianblur|GaussianBlur"]
             </dl>
         </dd>
     </dl>
+    <img src="{{ site.baseurl }}/assets/img/gaussianblur.jpg" alt="image with gaussian blur" />
 </section>
