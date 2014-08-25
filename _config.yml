@@ -48,4 +48,4 @@ defaults:
       methodgroup: imageprocessor-web
       heading: Methods
 
-exclude: ["CNAME","node_modules","Gemfile","Gemfile.lock"]
+exclude: ["CNAME","src","node_modules","Gemfile","Gemfile.lock"]
