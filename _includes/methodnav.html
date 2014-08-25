@@ -1,13 +1,11 @@
 {% assign sortedpages = site.pages | sort:"name" %}
-{% assign loopindex = 0 %}
-{% for page in sortedpages %}
-{% if page.methodof == {{include.param}} and page.layout == "method" %}
-{% if loopindex == 0 %}
-{% capture loopindex %}{{ loopindex | plus:1 }}{% endcapture %}
 <h3>Methods</h3>
-<ul class="no-bullets">
-{% endif %}
-<li><a href="{{ site.baseurl }}{{ page.url }}">{{ page.title }}</a></li>
-{% endif %}
-{% endfor %}
-</ul>
+<div class="pane nav">
+    <ul class="no-bullets">
+        {% for page in sortedpages %}
+        {% if page.methodof == {{include.param}} and page.layout == "method" %}
+        <li><a href="{{ site.baseurl }}{{ page.url }}">{{ page.title }}</a></li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+</div>

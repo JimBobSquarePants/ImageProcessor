@@ -1,14 +1,11 @@
 {% assign sortedpages = site.pages | sort:"name" %}
-{% assign loopindex = 0 %}
-{% for page in sortedpages %}
-{% if page.root == {{include.param}} and page.layout == "class" %}
-{% if loopindex == 0 %}
-{% capture loopindex %}{{ loopindex | plus:1 }}{% endcapture %}
 <h3>Classes</h3>
-<ul class="no-bullets">
-{% endif %}
-{% assign link = page.url | remove: "/index.html" %}
-<li><a href="{{ site.baseurl }}{{ link }}">{{ page.title }}</a></li>
-{% endif %}
-{% endfor %}
-</ul>
+<div class="pane nav">
+    <ul class="no-bullets">
+        {% for page in sortedpages %}
+        {% if page.root == {{include.param}} and page.layout == "class" %}
+        <li><a href="{{ site.baseurl }}{{ page.url }}">{{ page.title }}</a></li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+</div>
