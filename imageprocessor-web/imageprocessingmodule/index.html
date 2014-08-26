@@ -1,6 +1,6 @@
 ---
 layout: class
-class: ImageProcessingModule 
+class: ImageProcessingModule
 title: ImageProcessingModule
 heading: ImageProcessingModule
 subheading: Intercepts and processes image requests.
@@ -34,4 +34,39 @@ sublinks: ["#about|About", "#caching|Caching"]
     <p>
         The caching mechanism saves massive amounts of processing power and bandwidth that help to keep your website snappy.
     </p>
+</section>
+<hr />
+<section id="events">
+    <h1>Events</h1>
+    <h3>ImageProcessingModule.OnPostProcessing</h3>
+    <p>
+        On processing of a new or updated, uncached image the ImageProcessingModule will raise an awaitable
+        <code>OnPostProcessing</code> event.
+        This passes the following parameters:
+    </p>
+    <dl>
+        <dt><strong>sender</strong></dt>
+        <dd>
+            The instance of <code>ImageProcessingModule</code> raising the event.
+        </dd>
+        <dt><strong>eventargs</strong></dt>
+        <dd>
+            The <code>PostProcessingEventArgs</code> containing the following information.
+            <dl>
+                <dt><strong>CachedImagePath </strong></dt>
+                <dd>The absolute path to the newly cached image.</dd>
+            </dl>
+        </dd>
+    </dl>
+    <h3>Example Code</h3>
+    <pre class="language-csharp"><code>// Synchronous example.
+ImageProcessingModule.OnPostProcessing += (sender, args) => Debug.WriteLine(args.CachedImagePath);
+        
+// Asynchronous example
+ImageProcessingModule.OnPostProcessing += this.WritePath;
+private async void WritePath(object sender, PostProcessingEventArgs e)
+{   
+    // This is just for demo purposes. You would not use Task.Run in ASP.NET
+    await Task.Run(() => Debug.WriteLine(e.CachedImagePath));
+}</code></pre>
 </section>

@@ -1,26 +1,35 @@
 ---
-permalink: imageprocessor-web/watermark.html
 title: Watermark
-heading: Methods
 subheading: Watermark.
-sublinks: ["#watermark|Watermark"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="watermark">
+<section id="usage">
     <h1>Watermark</h1>
     <p>Adds a text based watermark to the current image with a wide range of options.</p>
     <ul>
         <li>text</li>
-        <li>size (defaults to 48px)</li>
-        <li>font (any installed font)</li>
-        <li>opacity (1-100)</li>
-        <li>style (bold|italic|regular|strikeout|underline) defaults to regular</li>
-        <li>shadow</li>
-        <li>position (x,y)</li>
+        <li>fontsize (defaults to 48px)</li>
+        <li>fontfamily (any installed fonts)</li>
+        <li>fontopacity (1-100)</li>
+        <li>fontstyle (bold|italic|regular|strikeout|underline) defaults to regular</li>
+        <li>dropshadow</li>
+        <li>textposition (x,y)</li>
     </ul>
 
     <p>Requests are passed thus: Each parameter is optional.</p>
 
-    <pre class="language-markup"><code>http://your-image?watermark=text-watermark goodness,color-fff,size-36,style-italic,opacity-80,position-30,150,shadow-true,font-arial</code></pre>
+    <pre class="language-markup"><code>&lt;!--All Properties--&gt;
+http://your-image?watermark=imageprocessor&color=fff&fontsize=36&fontstyle=italic&fontopacity=80&textposition=30,150&dropshadow=true&fontfamily=arial
+&lt;!--Legacy--&gt;
+http://your-image?watermark=text-imageprocessor,color-fff,size-36,style-italic,opacity-80,position-30,150,shadow-true,font-arial
+</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/typewriter.jpg" alt="original image" />
 
-    <img src="{{ site.baseurl }}/assets/img/watermark.jpg" alt="Images with text watermark added." />
+    <h3>Watermarked</h3>
+    <img src="{{ site.baseurl }}/assets/img/watermark/typewriter.jpg" alt="image with a watermark applied" />
 </section>
