@@ -1,0 +1,37 @@
+---
+layout: class
+class: ImageProcessingModule 
+title: ImageProcessingModule
+heading: ImageProcessingModule
+subheading: Intercepts and processes image requests.
+sublinks: ["#about|About", "#caching|Caching"]
+---
+<section id="about">
+    <h1>ImageProcessingModule</h1>
+    <p>
+        The ImageProcessingModule class provides methods to perform various manipulation functions on a given image based on querystring parameters.
+        The HttpModule is asynchronous and optimized for performance so that your website does not slow down under heavy load.
+    </p>
+    <div class="alert" role="alert">
+        <p>
+            The API for ImageProcessor.Web is imperative. This means that the order in which you supply the querystring parameters is the order in which the
+            individual processors are implemented. This allows the API to be very flexible, allowing you to combine processes in any order.
+        </p>
+    </div>
+</section>
+<hr />
+<section id="caching">
+    <h1>Caching</h1>
+    <p>
+        <strong>ImageProcessor.Web</strong> comes with caching as standard. Any processed image are asynchronously cached both in the browser and on the server
+        for a length of your choosing. The server cache intelligently stores millions of images and silently updates itself should the original image change or
+        the cache expire.
+    </p>
+    <p>
+        Cached files are stored in nested folders based on an SHA1 representation of the full url with a small number of images in each folder.
+        This allows for the storage of millions of images whilst ensuring that the OS does not suffer from any slowdown due to file indexing.
+    </p>
+    <p>
+        The caching mechanism saves massive amounts of processing power and bandwidth that help to keep your website snappy.
+    </p>
+</section>

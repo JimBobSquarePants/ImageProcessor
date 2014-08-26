@@ -1,9 +1,9 @@
 ---
 title: Resize
 subheading: Resize
-sublinks: ["#resize|Resize"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="resize">
+<section id="usage">
     <h1>Resize</h1>
     <p>Resizes the current image to the given dimensions.</p>
 
@@ -32,17 +32,29 @@ sublinks: ["#resize|Resize"]
                 <dt><strong>AnchorPosition</strong></dt>
                 <dd>The <code>ImageProcessor.Imaging.AnchorPosition</code> to apply to resized image.</dd>
                 <dt><strong>UpScale</strong></dt>
-                <dd>Whether to allow up-scaling of images. (Default true)</dd>
+                <dd>Whether to allow up-scaling of images. Defaults to <var>true</var></dd>
             </dl>
         </dd>
     </dl>
 
+    <h3>Remarks</h3>
+    <p>When resizing using the <code>Resize(Size size)</code> overload the default resize mode is <var>ResizeMode.Pad</var></p>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/car.jpg" alt="original image" />
+
     <h3>Resize Pad</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize-pad.jpg" alt="Image resized with padding." />
+    <img src="{{ site.baseurl }}/assets/img/resize/pad/car.jpg" alt="Image resized with padding." />
 
     <h3>Resize Crop</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize-crop.jpg" alt="Image resized with cropping." />
+    <img src="{{ site.baseurl }}/assets/img/resize/crop/car.jpg" alt="Image resized with cropping." />
 
     <h3>Resize Max</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize-stretch.jpg" alt="Image stretched to fit the given dimension." />
+    <img src="{{ site.baseurl }}/assets/img/resize/max/car.jpg" alt="Image resized to fit the aspect ratio." />
+    
+    <h3>Resize Stetch</h3>
+    <img src="{{ site.baseurl }}/assets/img/resize/stretch/car.jpg" alt="Image stretched to fit the given dimension." />
 </section>

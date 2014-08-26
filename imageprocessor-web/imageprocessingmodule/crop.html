@@ -1,0 +1,41 @@
+---
+title: Crop
+heading: Methods
+subheading: Crop
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Crop</h1>
+    <p>
+        Crops the current image to the given location and size.
+        There are two modes available:
+
+        <ol>
+            <li>
+                Pixel based - Supply the upper-left coordinates and the new width/height.
+            </li>
+            <li>
+                Percentage based - Supply the left, top, right, and bottom percentages as a decimal to crop with an indicator to switch mode.
+            </li>
+        </ol>
+    </p>
+    <p>
+        Passing the addtional parameter <code>center=top,left</code> as a decimal representing the percentage will adjust the crop to center on that point.
+    </p>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Pixel--&gt;
+http://your-image?crop=x,y,width,height
+&lt;!--Percentage--&gt;
+http://your-image?crop=left,top,right,bottom&cropmode=percent
+</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/coffee.jpg" alt="original image" />
+    <h3>Cropped</h3>
+    <img src="{{ site.baseurl }}/assets/img/crop/coffee.jpg" alt="image with crop applied" />
+</section>

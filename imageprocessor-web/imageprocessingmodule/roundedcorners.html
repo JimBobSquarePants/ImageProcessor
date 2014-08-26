@@ -1,0 +1,38 @@
+---
+title: RoundedCorners
+subheading: RoundedCorners
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>RoundedCorners</h1>
+    <p>Adds rounded corners to the current image.</p>
+
+    <p>
+        <strong> Imageprocessor.Web </strong> can round the corners of your images. You can also optionally fill the background color
+        for image types without transparency and choose which corners to round.
+    </p>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Standard--&gt;
+http://your-image?roundedcorners=100
+&lt;!--With background color--&gt;
+http://your-image?roundedcorners=100&bgcolor=fff
+&lt;!--Legacy with background color--&gt;
+http://your-image?roundedcorners=radius-100,bgcolor-fff</code></pre>
+
+    <p>Independent Corners syntax:</p>
+    <pre class="language-markup"><code>&lt;!--Standard--&gt;
+http://your-image?roundedcorners=100&tl=true&tr=false&bl=true&br=false
+&lt;!--Legacy--&gt;
+http://your-image?roundedcorners=radius-100|tl-true|tr-false|bl-true|br-false</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/bridge.jpg" alt="original image" />
+
+    <h3>100px Rounded Corners</h3>
+    <img src="{{ site.baseurl }}/assets/img/rounded/bridge.png" alt="Image with 100px rounded corners" />
+</section>

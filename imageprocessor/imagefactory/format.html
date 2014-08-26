@@ -1,9 +1,9 @@
 ---
 title: Format
 subheading: Format
-sublinks: ["#format|Format"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="format">
+<section id="usage">
     <h1>Format</h1>
     <p>Sets the output format of the current image to the matching <code>ImageProcessor.Imaging.Formats.ISupportedImageFormat</code>.</p>
 
@@ -15,5 +15,25 @@ sublinks: ["#format|Format"]
         <dt><strong>format</strong></dt>
         <dd>The <code>ImageProcessor.Imaging.Formats.ISupportedImageFormat</code> to set the image to.</dd>
     </dl>
-    <img src="{{ site.baseurl }}/assets/img/format.jpg" alt="Comparison of image formats" />
+
+    <p>Core formats are:</p>
+    <ul>
+        <li>BitmapFormat</li>
+        <li>JpegFormat</li>
+        <li>GifFormat</li>
+        <li>PngFormat</li>
+        <li>TiffFormat</li>
+    </ul>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/leaf.jpg" alt="original image" />
+
+    <h3>Gif</h3>
+    <img src="{{ site.baseurl }}/assets/img/format/gif/leaf.gif" alt="image saved in gif format" />
+
+    <h3>Png8</h3>
+    <img src="{{ site.baseurl }}/assets/img/format/png8/leaf.png" alt="image saved in png8 format" />
 </section>

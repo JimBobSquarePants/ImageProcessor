@@ -1,0 +1,32 @@
+---
+title: Flip
+subheading: Flip
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Flip</h1>
+    <p>Flips the current image either horizontally, vertically, or both.</p>
+
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Horizontal--&gt;
+http://your-image?flip=horizontal
+&lt;!--Vertical--&gt;
+http://your-image?flip=vertical
+&lt;!--Both--&gt;
+http://your-image?flip=both
+</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/plane.jpg" alt="original image" />
+
+    <h3>Horizontal</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/horizontal/plane.jpg" alt="image flipped horizontally" />
+
+    <h3>Vertical</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/vertical/plane.jpg" alt="image flipped vertically" />
+</section>

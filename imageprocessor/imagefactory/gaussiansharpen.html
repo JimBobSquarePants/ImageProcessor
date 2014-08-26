@@ -1,9 +1,9 @@
 ---
 title: GaussianSharpen
 subheading: GaussianSharpen
-sublinks: ["#gaussiansharpen|GaussianSharpen"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="gaussiansharpen">
+<section id="usage">
     <h1>GaussianSharpen</h1>
     <p>Uses a Gaussian kernel to sharpen the current image.</p>
 
@@ -21,7 +21,7 @@ sublinks: ["#gaussiansharpen|GaussianSharpen"]
     <h3>Parameters</h3>
 
     <dl>
-        <dt><strong>ResizeLayer</strong></dt>
+        <dt><strong>GaussianLayer</strong></dt>
         <dd>
             The <code>ImageProcessor.Imaging.GaussianLayer</code> containing the following properties required to sharpen the image.
             <dl>
@@ -34,5 +34,13 @@ sublinks: ["#gaussiansharpen|GaussianSharpen"]
             </dl>
         </dd>
     </dl>
-    <img src="{{ site.baseurl }}/assets/img/gaussiansharpen.jpg" alt="image with gaussian sharpen" />
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/china.jpg" alt="original image" />
+
+    <h3>Sharpen at 10 Kernel Size</h3>
+    <img src="{{ site.baseurl }}/assets/img/gaussian/sharpen/china.jpg" alt="image with gaussian sharpen applied image" />
 </section>

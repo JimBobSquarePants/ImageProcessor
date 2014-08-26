@@ -1,21 +1,21 @@
-{% include header.html %}
-<main role="main">
-    <header role="banner">
-        <div class="container">
-            <h1>
-                {{page.heading}}
-                <span>{{page.subheading}}</span>
-            </h1>
-        </div>
-    </header>
-    <div class="container row">
-        <nav class="col-m-3" role="complementary">
-            {% include inpagenav.html %}
-            {% include classnav.html param=page.root %}
-        </nav>
-        <article class="col-m-8 offset-m-1">
-            {{ content }}
-        </article>
+---
+layout: master
+---
+<header role="banner">
+    <div class="container">
+        <h1>
+            {{page.heading}}
+            {{page.class}}
+            <span>{{page.subheading}}</span>
+        </h1>
     </div>
-</main>
-{% include footer.html %}
+</header>
+<div class="container row">
+    <nav class="col-m-3" role="complementary">
+        {% include inpagenav.html %}
+        {% include classnav.html param=page.root %}
+    </nav>
+    <article class="col-m-8 offset-m-1">
+        {{ content }}
+    </article>
+</div>

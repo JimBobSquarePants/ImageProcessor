@@ -1,0 +1,39 @@
+---
+title: Format
+heading: Methods
+subheading: Format
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Format</h1>
+    <p>Sets the output format of the current image to the given value.</p>
+
+    <p>Core supported formats are:</p>
+    <ul>
+        <li>jpg</li>
+        <li>jpeg</li>
+        <li>bmp</li>
+        <li>gif</li>
+        <li>png</li>
+        <li>png8</li>
+        <li>tif</li>
+        <li>tiff</li>
+    </ul>
+    <p>
+        Requests are passed thus:
+    </p>
+
+    <pre class="language-markup"><code>http://your-image?format=png8</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/leaf.jpg" alt="original image" />
+
+    <h3>Gif</h3>
+    <img src="{{ site.baseurl }}/assets/img/format/gif/leaf.gif" alt="image saved in gif format" />
+
+    <h3>Png8</h3>
+    <img src="{{ site.baseurl }}/assets/img/format/png8/leaf.png" alt="image saved in png8 format" />
+</section>

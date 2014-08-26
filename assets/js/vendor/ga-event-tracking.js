@@ -2,69 +2,6 @@
 
     "use strict";
 
-    $.fn.isBound = function (type, ignore) {
-        /// <summary>Checks to see if there are any jQuery events bound to the given element.</summary>
-        /// <param name="type" type="string">The type of event. e.g click, hover.</param>
-        /// <param name="ignore" type="string">A namespace to ignore.</param>
-        /// <returns type="Boolean">True if the element has the given event type bound; otherwise, false.</returns>
-        var $elem = this,
-            bound = false,
-            toIgnore = ignore || new Date().getMilliseconds() + "",
-            data = $._data($elem[0], "events") && $._data($elem[0], "events")[type];
-
-        // Check the element.
-        if (data) {
-            $.each(data, function () {
-
-                if (this.namespace.indexOf(toIgnore) === -1) {
-                    bound = true;
-                    return false;
-                }
-
-                return true;
-            });
-
-            if (bound === true) {
-                return bound;
-            }
-        }
-
-        // Not found, check the parents for any delagated events.
-        $elem.parents().each(function () {
-            data = $._data(this, "events") && $._data(this, "events")[type];
-
-            if (data) {
-                $.each(data, function () {
-
-                    if (this.namespace.indexOf(toIgnore) === -1) {
-
-                        // Check each element that matches the selector.
-                        $(this.selector).each(function () {
-
-                            if ($elem[0] === this) {
-                                bound = true;
-                                return false;
-                            }
-
-                            return true;
-                        });
-                    }
-
-                    // Break early.
-                    if (bound === true) {
-                        return false;
-                    }
-
-                    return true;
-                });
-            }
-
-            return true;
-        });
-
-        return bound;
-    };
-
     // What mode we are running in.
     var isUniversal = w.ga && !w._gaq;
 
@@ -186,9 +123,14 @@
     GoogleTracking.prototype.track = function () {
 
         var $element = this.$element,
+            newWindow = this.options.newWindow,
             callback = function () {
-                // Trigger the elements click event.
-                $element.off("click.ga")[0].click();
+                if (!newWindow) {
+                    // Trigger the elements click event.
+                    $element.off("click.ga")[0].click();
+                } else {
+                    $element.off("click.ga");
+                }
             };
 
         var args = createArgs(this.options, callback);
@@ -233,17 +175,17 @@
     };
 
     var handler = function (e) {
+        var $this = $(this),
+            data = $this.data("gaOptions"),
+            options = data || $.buildDataOptions($this, {}, "ga");
 
-        var $this = $(this);
-
-        if (!$this.isBound("click", "ga")) {
+        // Prevent popup blocker.
+        options.newWindow = $this.attr("target") === "_blank";
+        if (!options.newWindow) {
             e.preventDefault();
         }
 
         e.stopImmediatePropagation();
-
-        var data = $this.data("gaOptions"),
-            options = data || $.buildDataOptions($this, {}, "ga");
 
         // Parse specific attributes from anchors.
         options.href || (options.href = $this.attr("href"));

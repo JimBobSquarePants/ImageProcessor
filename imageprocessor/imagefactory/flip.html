@@ -1,9 +1,9 @@
 ---
 title: Flip
 subheading: Flip
-sublinks: ["#flip|Flip"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="flip">
+<section id="usage">
     <h1>Flip</h1>
     <p>Flips the current image either horizontally or vertically.</p>
 
@@ -13,6 +13,18 @@ sublinks: ["#flip|Flip"]
 
     <dl>
         <dt><strong>flipVertically</strong></dt>
-        <dd>Whether to flip the image vertically.</dd>
+        <dd>Whether to flip the image vertically. Defaults to <var>False</var></dd>
     </dl>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/plane.jpg" alt="original image" />
+
+    <h3>Horizontal</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/horizontal/plane.jpg" alt="image flipped horizontally" />
+    
+    <h3>Vertical</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/vertical/plane.jpg" alt="image flipped vertically" />
 </section>

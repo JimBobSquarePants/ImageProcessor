@@ -1,0 +1,21 @@
+---
+layout: class
+class: NativeBinaryFactory
+title: NativeBinaryFactory
+heading: NativeBinaryFactory
+subheading: The core class for image manipulation.
+sublinks: ["#about|About",
+"#example|Example Code",
+"#extending|Extending ImageProcessor"]
+---
+<section id="about">
+    <h1>NativeBinaryFactory</h1>
+    <p>
+        The NativeBinaryFactory class controls the loading and unloading of any native (unmanaged) binaries required by ImageProcessor.
+        This ensures that any C++ binaries referenced or embedded within plugins can be loaded into memory and utilized by ImageProcessor.
+    </p>
+    <p>
+        An instance of NativeBinaryFactory is lazily initialized via the ImageProcessorBootstrapper singleton class
+        and exposes a single <a href="registernativebinary.html">method</a> to use.
+    </p>
+</section>

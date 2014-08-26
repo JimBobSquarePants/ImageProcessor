@@ -1,9 +1,9 @@
 ---
 layout: class
+class: ImageFactory
 title: ImageFactory
 heading: ImageFactory
 subheading: The core class for image manipulation.
-class: imagefactory
 sublinks: ["#about|About",
 "#example|Example Code",
 "#extending|Extending ImageProcessor"]
@@ -18,6 +18,12 @@ sublinks: ["#about|About",
         The API for the ImageFactory class is fluent which allows you to easily chain methods to deliver the desired output.
         For example, the following code loads, resizes, sets the format and saves the MemoryStream containing image information.
     </p>
+    <div role="alert" class="alert">
+        <p>
+            The Image Factory class implements the<code>System.IDisposable</code> interface. It is important to dispose of each instance correctly
+            to ensure that there are no memory leaks in your application.
+        </p>
+    </div>
 </section>
 <hr />
 <section id="example">
@@ -119,7 +125,6 @@ public interface ISupportedImageFormat
     /// Gets or sets the quality of output for images.
     /// &lt;/summary&gt;
     int Quality { get; set; }
-
     #region Methods
     /// &lt;summary&gt;
     /// Applies the given processor the current image.

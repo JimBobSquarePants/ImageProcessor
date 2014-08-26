@@ -1,0 +1,40 @@
+---
+title: GaussianSharpen
+subheading: GaussianSharpen
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>GaussianSharpen</h1>
+    <p>
+        Uses a Gaussian kernel to sharpen the current image. Pass the desired kenel size to the processor.
+    </p>
+    Additional optional properties are also available
+    <ul>
+        <li>sigma (defaults to 1.4)</li>
+        <li>threshold (defaults to 0)</li>
+    </ul>
+
+    <div class="alert" role="alert">
+        <p>
+            All gaussian sharpen requests have limiters to the given values set in the <code>processing.config</code> file to help prevent
+            <abbr title="Denial of service">DoS</abbr> attacks.
+        </p>
+    </div>
+    <p>
+        Requests are passed thus:
+    </p>
+
+    <pre class="language-markup"><code>&lt;!--Recommended--&gt;
+http://your-image?sharpen=10&sigma=1.5&threshold=10
+&lt;!--Legacy--&gt;
+http://your-image?sharpen=10,sigma-1.5,threshold-10</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/china.jpg" alt="original image" />
+
+    <h3>Sharpen at 10 Kernel Size</h3>
+    <img src="{{ site.baseurl }}/assets/img/gaussian/sharpen/china.jpg" alt="image with gaussian sharpen applied image" />
+</section>

@@ -1,11 +1,20 @@
 ---
 title: RoundedCorners
 subheading: RoundedCorners
-sublinks: ["#roundedcorners|RoundedCorners"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="roundedcorners">
+<section id="usage">
     <h1>RoundedCorners</h1>
     <p>Adds rounded corners to the current image.</p>
+
+    <pre class="language-csharp"><code>public ImageFactory RoundedCorners(int radius)</code></pre>
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>radius</strong></dt>
+        <dd>The radius at which the corner will be rounded.</dd>
+    </dl>
 
     <pre class="language-csharp"><code>public ImageFactory RoundedCorners(RoundedCornerLayer roundedCornersLayer)</code></pre>
 
@@ -29,6 +38,13 @@ sublinks: ["#roundedcorners|RoundedCorners"]
             </dl>
         </dd>
     </dl>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/bridge.jpg" alt="original image" />
 
-    <img src="{{ site.baseurl }}/assets/img/rounded.png" alt="Image with rounded corners." />
+    <h3>100px Rounded Corners</h3>
+    <img src="{{ site.baseurl }}/assets/img/rounded/bridge.png" alt="Image with 100px rounded corners" />
 </section>
