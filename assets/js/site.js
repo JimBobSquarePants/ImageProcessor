@@ -12,6 +12,37 @@
 (function ($, w, d) {
     "use strict";
 
+    // Ensure the navigation is accessible.
+    var resisizeTimer,
+        $navigation = $("#navigation"),
+        resize = function () {
+            var currentIndex = $.support.currentGrid().index;
+
+            // Small.
+            if (currentIndex >= 1) {
+                $navigation.attr({
+                    "aria-hidden": false,
+                    "tabindex": ""
+                });
+            } else if ($navigation.hasClass("collapse")) {
+                $navigation.attr({
+                    "aria-hidden": true,
+                    "tabindex": -1
+                });
+            }
+        };
+
+    $(w).on("resize orientationchange", function () {
+        if (resisizeTimer) {
+            w.clearTimeout(resisizeTimer);
+        }
+        resisizeTimer = w.setTimeout(resize, 50);
+    });
+
+    $(d).on("ready", function () {
+        resize();
+    });
+
     //Back to Top scroll
     $("button.to-top").on("click", function (event) {
         event.preventDefault();
