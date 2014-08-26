@@ -22,7 +22,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
 <section id="example">
     <h1>Examples</h1>
     <p>In this example a reference to an embedded C++ binary that allows for manipulation of images using the Google WebP image format is registered.</p>
-    <pre class="language-csharp"><code>string folder = Is64Bit ? "x64" : "x86";
+    <pre class="language-csharp"><code>string folder = ImageProcessorBootstrapper.Instance.NativeBinaryFactory.Is64BitEnvironment ? "x64" : "x86";
 string name = string.Format("ImageProcessor.Plugins.WebP.Resources.Unmanaged.{0}.libwebp.dll", folder);
 Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
 using (MemoryStream memoryStream = new MemoryStream())
