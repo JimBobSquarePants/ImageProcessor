@@ -1,9 +1,9 @@
 ---
 title: GaussianBlur
 subheading: GaussianBlur
-sublinks: ["#gaussianblur|GaussianBlur"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="gaussianblur">
+<section id="usage">
     <h1>GaussianBlur</h1>
     <p>Uses a Gaussian kernel to blur the current image.</p>
 
@@ -21,7 +21,7 @@ sublinks: ["#gaussianblur|GaussianBlur"]
     <h3>Parameters</h3>
 
     <dl>
-        <dt><strong>ResizeLayer</strong></dt>
+        <dt><strong>GaussianLayer</strong></dt>
         <dd>
             The <code>ImageProcessor.Imaging.GaussianLayer</code> containing the following properties required to blur the image.
             <dl>
@@ -34,5 +34,13 @@ sublinks: ["#gaussianblur|GaussianBlur"]
             </dl>
         </dd>
     </dl>
-    <img src="{{ site.baseurl }}/assets/img/gaussianblur.jpg" alt="image with gaussian blur" />
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/china.jpg" alt="original image" />
+
+    <h3>Blur at 10 Kernel Size</h3>
+    <img src="{{ site.baseurl }}/assets/img/gaussian/blur/china.jpg" alt="image with gaussian blur applied image" />
 </section>

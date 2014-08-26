@@ -1,9 +1,9 @@
 ---
 title: Watermark
 subheading: Watermark
-sublinks: ["#watermark|Watermark"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="watermark">
+<section id="usage">
     <h1>Watermark</h1>
     <p>Adds a text based watermark to the current image.</p>
 
@@ -13,7 +13,8 @@ sublinks: ["#watermark|Watermark"]
 
     <dl>
         <dt><strong>textLayer</strong></dt>
-        <dd>The <code>ImageProcessor.Imaging.TextLayer</code> containing the properties necessary to add the text based watermark to the image.
+        <dd>
+            The <code>ImageProcessor.Imaging.TextLayer</code> containing the properties necessary to add the text based watermark to the image.
             <dl>
                 <dt><strong>Text </strong></dt>
                 <dd>The text to write to the image.</dd>
@@ -34,4 +35,16 @@ sublinks: ["#watermark|Watermark"]
             </dl>
         </dd>
     </dl>
+
+    <h3>Remarks</h3>
+    <p>When no position is set the text will default to the center of the image. When no font is set the default system sans-serif font will be used.</p>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/typewriter.jpg" alt="original image" />
+
+    <h3>Watermarked</h3>
+    <img src="{{ site.baseurl }}/assets/img/watermark/typewriter.jpg" alt="image with a watermark applied" />
 </section>

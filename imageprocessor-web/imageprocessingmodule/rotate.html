@@ -1,0 +1,27 @@
+---
+title: Rotate
+subheading: Rotate
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Rotate</h1>
+    <p>Rotates the current image by the given angle without clipping.</p>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Standard--&gt;
+http://your-image?rotate=26
+&lt;!--With background color--&gt;
+http://your-image?rotate=54&bgcolor=fff
+&lt;!--Legacy with background color--&gt;
+http://your-image?rotate=angle-54,bgcolor-fff</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/bear.jpg" alt="original image" />
+
+    <h3>Rotated at 45 degrees</h3>
+    <img src="{{ site.baseurl }}/assets/img/rotate/bear.png" alt="image rotated at 45 degrees." />
+</section>

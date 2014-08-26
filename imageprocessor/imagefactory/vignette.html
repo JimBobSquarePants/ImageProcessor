@@ -1,13 +1,29 @@
 ---
 title: Vignette
 subheading: Vignette
-sublinks: ["#vignette|Vignette"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="vignette">
+<section id="usage">
     <h1>Vignette</h1>
     <p>Adds a vignette image effect to the current image.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory Vignette()</code></pre>
+    <pre class="language-csharp"><code>public ImageFactory Vignette(Color color)</code></pre>
 
-    <img src="{{ site.baseurl }}/assets/img/vignette.jpg" alt="Images with vignette effect added." />
+    <h3>Parameters</h3>
+    <dl>
+        <dt><strong>color</strong></dt>
+        <dd>The <code>System.Drawing.Color</code> to tint the image with. Defaults to <var>Black</var></dd>
+    </dl>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/mountain.jpg" alt="original image" />
+
+    <h3>Black Vignette</h3>
+    <img src="{{ site.baseurl }}/assets/img/vignette/black/mountain.jpg" alt="image with a black vignette" />
+
+    <h3>Purple Vignette</h3>
+    <img src="{{ site.baseurl }}/assets/img/vignette/purple/mountain.jpg" alt="image with a purple vignette" />
 </section>

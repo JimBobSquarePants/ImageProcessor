@@ -216,6 +216,7 @@ pip-log.txt
 
 #Jekyll
 _site/
+node_modules
 
 #other branches
 src/

@@ -1,9 +1,9 @@
 ---
 title: Quality
 subheading: Quality
-sublinks: ["#quality|Quality"]
+sublinks: ["#usage|Usage","#example|Examples"]
 ---
-<section id="quality">
+<section id="usage">
     <h1>Quality</h1>
     <p>Alters the output quality of the current image. This method will only effect the output quality of jpeg images.</p>
 
@@ -13,7 +13,15 @@ sublinks: ["#quality|Quality"]
 
     <dl>
         <dt><strong>percentage</strong></dt>
-        <dd>The percentage by which to alter the images quality. Any integer between 0 and 100.</dd>
+        <dd>The percentage by which to alter the images quality. Any integer between <var>0</var> and <var>100</var>.</dd>
     </dl>
-    <img src="{{ site.baseurl }}/assets/img/quality.jpg" alt="Comparison of images rendered at varying quality." />
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/mana.jpg" alt="original image" />
+
+    <h3>25% Quality</h3>
+    <img src="{{ site.baseurl }}/assets/img/quality/mana.jpg" alt="image rendered at 25% quality." />
 </section>

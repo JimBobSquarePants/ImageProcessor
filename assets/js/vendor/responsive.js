@@ -6,10 +6,10 @@
     Licensed under the MIT License.
     ============================================================================== */
 
-/*! Responsive v2.5.5 | MIT License | responsivebp.com */
+/*! Responsive v3.1.0 | MIT License | responsivebp.com */
 
 /*
- * Responsive Utils
+ * Responsive Core
  */
 
 /*global jQuery*/
@@ -17,6 +17,60 @@
 (function ($, w, d) {
 
     "use strict";
+
+    $.pseudoUnique = function (length) {
+        /// <summary>Returns a pseudo unique alpha-numeric string of the given length.</summary>
+        /// <param name="length" type="Number">The length of the string to return. Defaults to 8.</param>
+        /// <returns type="String">The pseudo unique alpha-numeric string.</returns>
+
+        var len = length || 8,
+            text = "",
+            possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+            max = possible.length;
+
+        if (len > max) {
+            len = max;
+        }
+
+        for (var i = 0; i < len; i += 1) {
+            text += possible.charAt(Math.floor(Math.random() * max));
+        }
+
+        return text;
+    };
+
+    $.support.rtl = (function () {
+        /// <summary>Returns a value indicating whether the current page is setup for right-to-left languages.</summary>
+        /// <returns type="Boolean">
+        ///      True if right-to-left language support is set up; otherwise false.
+        ///</returns>
+
+        return $("html[dir=rtl]").length ? true : false;
+    }());
+
+    $.support.currentGrid = (function () {
+        /// <summary>Returns a value indicating what grid range the current browser width is within.</summary>
+        /// <returns type="Object">
+        ///      An object containing two properties.
+        ///      &#10;    1: grid - The current applied grid; either xs, s, m, or l.
+        ///      &#10;    2: index - The index of the current grid in the range.
+        ///      &#10;    3: range - The available grid range.
+        ///</returns>
+
+        var $div = $("<div/>").addClass("grid-state-indicator").prependTo("body");
+
+        return function () {
+            // These numbers match values in the css
+            var grids = ["xs", "s", "m", "l"],
+                key = parseInt($div.width(), 10);
+
+            return {
+                grid: grids[key],
+                index: key,
+                range: grids
+            };
+        };
+    }());
 
     $.support.transition = (function () {
         /// <summary>Returns a value indicating whether the browser supports CSS transitions.</summary>
@@ -84,12 +138,8 @@
                 return;
             }
 
-            var $this = $(this).redraw(),
-                rtransition = /\d+(.\d+)/;
-
-            supportTransition ? $this.one(supportTransition.end, callback)
-                                     .ensureTransitionEnd((rtransition.test($this.css("transition-duration")) ? $this.css("transition-duration").match(rtransition)[0] : 0) * 1000)
-                              : callback();
+            var $this = $(this).redraw();
+            supportTransition ? $this.one(supportTransition.end, callback) : callback();
         });
     };
 
@@ -147,33 +197,29 @@
             };
         };
 
-        $.fn.swipe = function (options) {
+        var addSwipe = function ($elem, handler) {
             /// <summary>Adds swiping functionality to the given element.</summary>
-            /// <param name="options" type="Object" optional="true" parameterArray="true">
-            ///      A collection of optional settings to apply.
-            ///      &#10;    1: namespace - The namespace for isolating the touch events.
+            /// <param name="$elem" type="Object">
+            ///      The jQuery object representing the given node(s).
             /// </param>
             /// <returns type="jQuery">The jQuery object for chaining.</returns>
 
-            var defaults = {
-                namespace: null,
-                touchAction: "none"
-            },
-                settings = $.extend({}, defaults, options);
-
-            var ns = settings.namespace ? "." + settings.namespace : "",
-                eswipestart = "swipestart" + ns,
-                eswipemove = "swipemove" + ns,
-                eswipeend = "swipeend" + ns,
+            var ns = handler.namespace ? "." + handler.namespace : "",
+                eswipestart = "swipestart",
+                eswipemove = "swipemove",
+                eswipeend = "swipeend",
                 etouch = getEvents(ns);
 
-            return this.each(function () {
-                var $this = $(this);
+            // Set the touchaction variable for move.
+            var touchAction = handler.data && handler.data.touchAction || "none";
 
-                if (supportPointer) {
-                    // Enable extended touch events on IE.
-                    $this.css({ "-ms-touch-action": "" + settings.touchAction + "", "touch-action": "" + settings.touchAction + "" });
-                }
+            if (supportPointer) {
+                // Enable extended touch events on supported browsers before any touch events.
+                $elem.css({ "-ms-touch-action": "" + touchAction + "", "touch-action": "" + touchAction + "" });
+            }
+
+            return $elem.each(function () {
+                var $this = $(this);
 
                 var start = {},
                     delta = {},
@@ -207,13 +253,13 @@
                         // Mimic touch action on iProducts.
                         // Should also prevent bounce.
                         if (!isPointer) {
-                            switch (settings.touchAction) {
+                            switch (touchAction) {
                                 case "pan-x":
                                 case "pan-y":
 
-                                    isScrolling = settings.touchAction === "pan-x" ?
-                                                  Math.abs(dy) < Math.abs(dx) :
-                                                  Math.abs(dx) < Math.abs(dy);
+                                    isScrolling = touchAction === "pan-x" ?
+                                                  Math.abs(dy) <= Math.abs(dx) :
+                                                  Math.abs(dx) <= Math.abs(dy);
 
                                     if (!isScrolling) {
                                         event.preventDefault();
@@ -230,7 +276,6 @@
                         }
 
                         moveEvent = $.Event(eswipemove, { delta: { x: dx, y: dy } });
-
                         $this.trigger(moveEvent);
 
                         if (moveEvent.isDefaultPrevented()) {
@@ -309,15 +354,13 @@
             });
         };
 
-        $.fn.removeSwipe = function (namespace) {
+        var removeSwipe = function ($elem, handler) {
             /// <summary>Removes swiping functionality from the given element.</summary>
-            /// <param name="namespace" type="String">The namespace for isolating the touch events.</param>
-            /// <returns type="jQuery">The jQuery object for chaining.</returns>
 
-            var ns = namespace ? "." + namespace : "",
+            var ns = handler.namespace ? "." + handler.namespace : "",
                 etouch = getEvents(ns);
 
-            return this.each(function () {
+            return $elem.each(function () {
 
                 // Disable extended touch events on ie.
                 // Unbind events.
@@ -326,6 +369,15 @@
             });
         };
 
+        // Create special events so we can use on/off.
+        $.event.special.swipe = {
+            add: function (handler) {
+                addSwipe($(this), handler);
+            },
+            remove: function (handler) {
+                removeSwipe($(this), handler);
+            }
+        };
     }());
 
     $.extend($.expr[":"], {
@@ -380,6 +432,60 @@
 
         return options;
     };
+
+    $.debounce = function (func, wait, immediate) {
+        /// <summary>
+        /// Returns a function, that, as long as it continues to be invoked, will not
+        /// be triggered. The function will be called after it stops being called for
+        /// N milliseconds. If `immediate` is passed, trigger the function on the
+        /// leading edge, instead of the trailing.
+        ///</summary>
+        /// <param name="func" type="Function">
+        ///      The function to debounce.
+        /// </param>
+        /// <param name="wait" type="Number">
+        ///      The number of milliseconds to delay.
+        /// </param>
+        /// <param name="wait" type="immediate">
+        ///      Specify execution on the leading edge of the timeout.
+        /// </param>
+        /// <returns type="jQuery">The function.</returns>
+        var timeout;
+        return function () {
+            var context = this, args = arguments;
+            w.clearTimeout(timeout);
+            timeout = w.setTimeout(function () {
+                timeout = null;
+                if (!immediate) { func.apply(context, args); }
+            }, wait);
+            if (immediate && !timeout) { func.apply(context, args); }
+        };
+    };
+
+    (function (old) {
+        /// <summary>Override the core html method in the jQuery object to fire a domchanged event whenever it is called.</summary>
+        /// <param name="old" type="Function">
+        ///      The jQuery function being overridden.
+        /// </param>
+        /// <returns type="jQuery">The jQuery object for chaining.</returns>
+
+        var echanged = $.Event("domchanged"),
+            $d = $(d);
+
+        $.fn.html = function () {
+            // Execute the original HTML method using the
+            // augmented arguments collection.
+            var result = old.apply(this, arguments);
+
+            if (arguments.length) {
+                $d.trigger(echanged);
+            }
+
+            return result;
+
+        };
+    })($.fn.html);
+
 }(jQuery, window, document));
 /*
  * Responsive AutoSize
@@ -396,60 +502,14 @@
     }
 
     // General variables and methods.
-    var resisizeTimer,
-        eready = "ready" + ns,
-        eresize = "resize" + ns + " orientationchange" + ns,
-        ekeyup = "keyup" + ns,
-        epaste = "paste" + ns,
-        ecut = "cut" + ns,
+    var eready = "ready" + ns,
+        echanged = ["domchanged" + ns, "shown.r.modal"].join(" "),
+        eresize = "resize orientationchange",
+        ekeyup = "keyup",
+        epaste = "paste",
+        ecut = "cut",
         esize = "size" + ns,
         esized = "sized" + ns;
-
-    // Private methods.
-    var bindEvents = function () {
-
-        this.$element.on(ekeyup + " " + epaste + " " + ecut, function (event) {
-
-            var $this = $(this),
-                delay = 0;
-
-            if (event.type === "paste" || event.type === "cut") {
-                delay = 5;
-            }
-
-            w.setTimeout(function () {
-
-                // Run the size method.
-                $this.autoSize("size");
-
-            }, delay);
-        });
-
-    },
-        createClone = function () {
-
-            var self = this,
-                attributes = this.options.removeAttributes,
-                classes = this.options.removeClasses,
-                $element = this.$element,
-                clone = function () {
-
-                    // Create a clone and offset it removing all specified attributes classes and data.
-                    self.$clone = self.$element.clone()
-                                      .css({ "position": "absolute", "top": "-99999px", "left": "-99999px", "visibility": "hidden", "overflow": "hidden" })
-                                      .attr({ "tabindex": -1, "rows": 2 })
-                                      .removeAttr("id name data-autosize " + attributes)
-                                      .removeClass(classes)
-                                      .insertAfter($element);
-
-                    // jQuery goes spare if you try to remove null data.
-                    if (classes) {
-                        self.$clone.removeData(classes);
-                    }
-                };
-
-            $.when(clone()).then(this.size());
-        };
 
     // AutoSize class definition
     var AutoSize = function (element, options) {
@@ -464,8 +524,37 @@
         this.sizing = null;
 
         // Initial setup.
-        bindEvents.call(this);
-        createClone.call(this);
+        this.clone();
+
+        // Bind events
+        this.$element.on([ekeyup, epaste, ecut].join(" "), $.proxy(this.change, this));
+        $(w).off(eresize).on(eresize, $.debounce($.proxy(this.size, this), 50));
+    };
+
+    AutoSize.prototype.clone = function () {
+
+        var self = this,
+            attributes = this.options.removeAttributes,
+            classes = this.options.removeClasses,
+            $element = this.$element,
+            clone = function () {
+
+                // Create a clone and offset it removing all specified attributes classes and data.
+                self.$clone = self.$element.clone()
+                                  .attr({ "tabindex": -1, "rows": 2, "aria-hidden": true })
+                                  .removeAttr("id name data-autosize " + attributes)
+                                  .removeClass(classes)
+                                  .removeClass(classes)
+                                  .addClass("autosize-clone")
+                                  .insertAfter($element);
+
+                // jQuery goes spare if you try to remove null data.
+                if (classes) {
+                    self.$clone.removeData(classes);
+                }
+            };
+
+        $.when(clone()).then(this.size());
     };
 
     AutoSize.prototype.size = function () {
@@ -526,6 +615,23 @@
         }
     };
 
+    AutoSize.prototype.change = function (event) {
+
+        var self = this,
+            delay = 0;
+
+        if (event.type === "paste" || event.type === "cut") {
+            delay = 5;
+        }
+
+        w.setTimeout(function () {
+
+            // Run the size method.
+            self.size();
+
+        }, delay);
+    };
+
     // Plug-in definition 
     $.fn.autoSize = function (options) {
 
@@ -540,9 +646,8 @@
                 $this.data("r.autosize", (data = new AutoSize(this, opts)));
             }
 
-            // Run the appropriate function is a string is passed.
-            if (typeof options === "string") {
-                data[options]();
+            if (options === "size") {
+                data.size();
             }
         });
     };
@@ -558,37 +663,19 @@
     };
 
     // Data API
-    $(document).on(eready, function () {
-
+    var init = function () {
         $("textarea[data-autosize]").each(function () {
-
             var $this = $(this),
-                data = $this.data("r.autosizeOptions"),
-                options = data || $.buildDataOptions($this, {}, "autosize", "r");
-
-            // Run the autosize method.
-            $this.autoSize(options);
+                options = $this.data("r.autosizeOptions");
+            if (!options) {
+                $this.addClass("autosize").autoSize($.buildDataOptions($this, {}, "autosize", "r"));
+            }
         });
-    });
+    },
+    debouncedInit = $.debounce(init, 500);
 
-    $(w).on(eresize, function () {
-
-        if (resisizeTimer) {
-            w.clearTimeout(resisizeTimer);
-        }
-
-        var resize = function () {
-
-            $("textarea[data-autosize]").each(function () {
-
-                var autosize = $(this).data("r.autosize");
-
-                if (autosize) { autosize.size(); }
-
-            });
-        };
-
-        resisizeTimer = w.setTimeout(resize, 5);
+    $(document).on([eready, echanged].join(" "), function (event) {
+        event.type === "ready" ? init() : debouncedInit();
     });
 
     w.RESPONSIVE_AUTOSIZE = true;
@@ -610,151 +697,40 @@
 
     // General variables.
     var supportTransition = $.support.transition,
-        emouseenter = "mouseenter" + ns,
-        emouseleave = "mouseleave" + ns,
-        eclick = "click" + ns,
+        rtl = $.support.rtl,
+        emouseenter = "mouseenter",
+        emouseleave = "mouseleave",
+        ekeydown = "keydown",
+        eclick = "click",
         eready = "ready" + ns,
+        echanged = ["domchanged" + ns, "shown.r.modal"].join(" "),
         eslide = "slide" + ns,
         eslid = "slid" + ns;
 
-    // Private methods.
-    var getActiveIndex = function () {
-
-        var $activeItem = this.$element.find(".carousel-active");
-        this.$items = $activeItem.parent().children("figure");
-
-        return this.$items.index($activeItem);
-    },
-
-        manageLazyImages = function () {
-            if (!this.data("lazyLoaded")) {
-
-                this.find("img[data-src]").each(function () {
-                    if (this.src.length === 0) {
-                        this.src = this.getAttribute("data-src");
-                    }
-                });
-
-                this.data("lazyLoaded", true);
-            }
-        },
-
-        manageTouch = function () {
-
-            this.$element.swipe({ namespace: "r.carousel", touchAction: "pan-y" })
-                .on("swipemove.r.carousel", $.proxy(function (event) {
-
-                    if (this.sliding) {
-                        return;
-                    }
-
-                    this.pause();
-
-                    // Left is next.
-                    var isNext = event.delta.x < 0,
-                        type = isNext ? "next" : "prev",
-                        fallback = isNext ? "first" : "last",
-                        activePosition = getActiveIndex.call(this),
-                        $activeItem = $(this.$items[activePosition]),
-                        $nextItem = $activeItem[type]("figure");
-
-                    if (this.$items.length === 1) {
-                        return;
-                    }
-
-                    if (!$nextItem.length) {
-
-                        if (!this.options.wrap) {
-                            return;
-                        }
-
-                        $nextItem = this.$element.children("figure")[fallback]();
-                    }
-
-                    if ($nextItem.hasClass("carousel-active")) {
-                        return;
-                    }
-
-                    if (this.options.lazyLoadImages && this.options.lazyOnDemand) {
-                        // Load the next image.
-                        manageLazyImages.call($nextItem);
-                    }
-
-                    // Get the distance swiped as a percentage.
-                    var width = $activeItem.width(),
-                        percent = parseFloat((event.delta.x / width) * 100),
-                        diff = isNext ? 100 : -100;
-
-                    // Shift the items but put a limit on sensitivity.
-                    if (Math.abs(percent) < 100 && Math.abs(percent) > 5) {
-                        this.$element.addClass("no-transition");
-                        if (this.options.mode === "slide") {
-                            $activeItem.css({ "transform": "translate(" + percent + "%, 0)" });
-                            $nextItem.addClass("swipe").css({ "transform": "translate(" + (percent + diff) + "%, 0)" });
-                        } else {
-                            $activeItem.addClass("swipe").css({ "opacity": 1 - Math.abs((percent / 100)) });
-                            $nextItem.addClass("swipe");
-                        }
-                    }
-
-                }, this))
-                .on("swipeend.r.carousel", $.proxy(function (event) {
-
-                    if (this.sliding || !this.$element.hasClass("no-transition")) {
-                        return;
-                    }
-
-                    var direction = event.direction,
-                        method = "next";
-
-                    if (direction === "right") {
-                        method = "prev";
-                    }
-
-                    // Re-enable the transitions.
-                    this.$element.removeClass("no-transition");
-
-                    if (supportTransition) {
-
-                        // Trim the animation duration based on the current position.
-                        var activePosition = getActiveIndex.call(this),
-                            $activeItem = $(this.$items[activePosition]);
-
-                        if (!this.translationDuration) {
-                            this.translationDuration = parseFloat($activeItem.css("transition-duration"));
-                        }
-
-                        // Get the distance and turn it into into a percentage
-                        // to calculate the duration. Whichever is lowest is used.
-                        var width = $activeItem.width(),
-                            percentageTravelled = parseInt((Math.abs(event.delta.x) / width) * 100, 10),
-                            swipeDuration = (((event.duration / 1000) * 100) / percentageTravelled),
-                            newDuration = (((100 - percentageTravelled) / 100) * (Math.min(this.translationDuration, swipeDuration)));
-
-                        // Set the new temporary duration.
-                        this.$items.each(function () {
-                            $(this).css({ "transition-duration": newDuration + "s" });
-                        });
-                    }
-
-                    this.cycle();
-                    this[method]();
-
-                }, this));
-        };
+    var keys = {
+        SPACE: 32,
+        LEFT: 37,
+        RIGHT: 39
+    };
 
     // Carousel class definition
     var Carousel = function (element, options) {
 
         this.$element = $(element);
         this.defaults = {
-            interval: 5000,
+            interval: 0, // Better for a11y
             mode: "slide",
             pause: "hover",
             wrap: true,
-            enabletouch: true,
-            lazyLoadImages: true,
-            lazyOnDemand: true
+            keyboard: true,
+            touch: true,
+            lazyImages: true,
+            lazyOnDemand: true,
+            nextTrigger: null,
+            nextHint: "Next (" + (rtl ? "Left" : "Right") + " Arrow)",
+            previousTrigger: null,
+            previousHint: "Previous (" + (rtl ? "Right" : "Left") + " Arrow)",
+            indicators: null
         };
         this.options = $.extend({}, this.defaults, options);
         this.paused = null;
@@ -762,28 +738,77 @@
         this.sliding = null;
         this.$items = null;
         this.translationDuration = null;
+        this.$nextTrigger = this.options.nextTrigger ? $(this.options.nextTrigger) : this.$element.find(".carousel-control.forward");
+        this.$previousTrigger = this.options.previousTrigger ? $(this.options.previousTrigger) : this.$element.find(".carousel-control.back");
+        this.$indicators = this.options.indicators ? $(this.options.indicators) : this.$element.find("ol > li");
+        this.id = this.$element.attr("id") || "carousel-" + $.pseudoUnique();
 
+        var self = this;
+
+        // Add the css class to support fade.
+        this.options.mode === "fade" && this.$element.addClass("carousel-fade");
+
+        if (this.options.lazyImages && !this.options.lazyOnDemand) {
+            $(w).on("load", $.proxy(this.lazyimages), this);
+        }
+
+        // Add a11y features.
+        this.$element.attr({ "role": "listbox", "id": this.id });
+        this.$element.children("figure").each(function () {
+            var $this = $(this),
+                active = $this.hasClass("carousel-active");
+
+            $this.attr({
+                "role": "option",
+                "aria-selected": active,
+                "tabindex": active ? 0 : -1
+            });
+        });
+
+        // Find and add a11y to controls.
+        var $controls = this.$nextTrigger.add(this.$previousTrigger);
+        $controls.each(function () {
+            var $this = $(this).attr({ "tabindex": 0, "aria-controls": self.id });
+            !$this.is("button") ? $this.attr({ "role": "button" }) : $this.attr({ "type": "button" });
+            if (!$this.find(".visuallyhidden").length) {
+                $("<span/>").addClass("visuallyhidden")
+                            .html($this.is(self.$nextTrigger.selector) ? self.options.nextHint : self.options.previousHint)
+                            .appendTo($this);
+            }
+        });
+
+        // Find and a11y indicators.
+        this.$indicators.attr({ "role": "button", "aria-controls": self.id });
+
+        // Bind events
+        // Not namespaced as we want to keep behaviour when not using data api.
         if (this.options.pause === "hover") {
-            // Bind the mouse enter/leave events
-            if (!$.support.touchEvents && $.support.pointerEvents) {
+            // Bind the mouse enter/leave events.
+            if (!$.support.touchEvents && !$.support.pointerEvents) {
                 this.$element.on(emouseenter, $.proxy(this.pause, this))
                     .on(emouseleave, $.proxy(this.cycle, this));
             }
         }
 
-        // Add the css class to support fade.
-        this.options.mode === "fade" && this.$element.addClass("carousel-fade");
-
-        if (this.options.enabletouch) {
-            manageTouch.call(this);
+        if (this.options.touch) {
+            // You always have to pass the third parameter if setting data.
+            this.$element.on("swipe.carousel", { touchAction: "pan-y" }, true)
+                         .on("swipemove.carousel", $.proxy(this.swipemove, this))
+                         .on("swipeend.carousel", $.proxy(this.swipeend, this));
         }
 
-        if (this.options.lazyLoadImages && !this.options.lazyOnDemand) {
-            var self = this;
-            $(w).on("load", function () {
-                manageLazyImages.call(self.$element);
-            });
+        if (this.options.keyboard) {
+            this.$element.on(ekeydown, $.proxy(this.keydown, this));
         }
+
+        $(document).on(eclick, "[aria-controls=" + this.id + "]", $.proxy(this.click, this));
+    };
+
+    Carousel.prototype.activeindex = function () {
+        var $activeItem = this.$element.find(".carousel-active");
+        this.$items = $activeItem.parent().children("figure");
+
+        return this.$items.index($activeItem);
     };
 
     Carousel.prototype.cycle = function (event) {
@@ -809,7 +834,7 @@
 
     Carousel.prototype.to = function (position) {
 
-        var activePosition = getActiveIndex.call(this),
+        var activePosition = this.activeindex(),
             self = this;
 
         if (position > (this.$items.length - 1) || position < 0) {
@@ -900,20 +925,20 @@
         }
 
         if ($nextItem.hasClass("carousel-active")) {
-            return false;
+            return (this.sliding = false);
         }
 
         // Trigger the slide event with positional data.
         slideEvent = $.Event(eslide, { relatedTarget: $nextItem[0], direction: direction });
         this.$element.trigger(slideEvent);
 
-        if (this.sliding || slideEvent.isDefaultPrevented()) {
+        if (slideEvent.isDefaultPrevented()) {
             return false;
         }
 
-        if (this.options.lazyLoadImages && this.options.lazyOnDemand) {
+        if (this.options.lazyImages && this.options.lazyOnDemand) {
             // Load the next image.
-            manageLazyImages.call($nextItem);
+            this.lazyimages.call($nextItem);
         }
 
         // Good to go? Then let's slide.
@@ -923,17 +948,23 @@
             this.pause();
         }
 
+        // Highlight the correct indicator.
+        this.$element.one(eslid, function () {
+            self.$indicators.removeClass("active")
+                .eq(self.activeindex()).addClass("active");
+        });
+
         var complete = function () {
 
             if (self.$items) {
                 // Clear the transition properties if set.
-                self.$items.each(function () {
-                    $(this).css({ "transition": "", "opacity": "" });
-                });
+                self.$items.removeClass("swiping").css({ "transition-duration": "" });
             }
 
-            $activeItem.removeClass(["carousel-active", direction].join(" "));
-            $nextItem.removeClass([type, direction].join(" ")).addClass("carousel-active");
+            $activeItem.removeClass(["carousel-active", direction].join(" "))
+                       .attr({ "aria-selected": false, "tabIndex": -1 });
+            $nextItem.removeClass([type, direction].join(" ")).addClass("carousel-active")
+                     .attr({ "aria-selected": true, "tabIndex": 0 });
 
             self.sliding = false;
             slidEvent = $.Event(eslid, { relatedTarget: $nextItem[0], direction: direction });
@@ -950,7 +981,7 @@
         // Clear the added css.
         if (this.$items) {
             this.$items.each(function () {
-                $(this).removeClass("swipe").css({ "transform": "", "opacity": "" });
+                $(this).removeClass("swipe swipe-next").css({ "left": "", "right": "", "opacity": "" });
             });
         }
 
@@ -963,6 +994,185 @@
         }
 
         return this;
+    };
+
+    Carousel.prototype.keydown = function (event) {
+
+        var which = event && event.which;
+
+        if (which === keys.LEFT || which === keys.RIGHT) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Seek out the correct direction indicator, shift, and focus.
+            switch (which) {
+                case keys.LEFT:
+                    if (rtl) {
+                        this.next();
+                        this.$nextTrigger.focus();
+                    } else {
+                        this.prev();
+                        this.$previousTrigger.focus();
+                    }
+                    break;
+                case keys.RIGHT:
+                    if (rtl) {
+                        this.prev();
+                        this.$previousTrigger.focus();
+                    } else {
+                        this.next();
+                        this.$nextTrigger.focus();
+                    }
+                    break;
+            }
+        }
+    };
+
+    Carousel.prototype.click = function (event) {
+
+        if (!event) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        var $this = $(event.target),
+            indicator = $this.is(this.$indicators.selector);
+
+        if (indicator) {
+            this.to($this.index());
+        } else if ($this.is(this.$nextTrigger.selector)) {
+            this.next();
+        }
+        else if ($this.is(this.$previousTrigger.selector)) {
+            this.prev();
+        }
+    };
+
+    Carousel.prototype.swipemove = function (event) {
+
+        if (this.sliding) {
+            return;
+        }
+
+        this.pause();
+
+        // Left is next.
+        var isNext = event.delta.x < 0,
+            type = isNext ? (rtl ? "prev" : "next") : (rtl ? "next" : "prev"),
+            fallback = isNext ? (rtl ? "last" : "first") : (rtl ? "first" : "last"),
+            activePosition = this.activeindex(),
+            $activeItem = this.$items.eq(activePosition),
+            $nextItem = $activeItem[type]("figure");
+
+        if (this.$items.length === 1) {
+            return;
+        }
+
+        this.$items.removeClass("swipe-next");
+
+        if (!$nextItem.length) {
+
+            if (!this.options.wrap) {
+                return;
+            }
+
+            $nextItem = this.$element.children("figure")[fallback]();
+        }
+
+        if ($nextItem.hasClass("carousel-active")) {
+            return;
+        }
+
+        if (this.options.lazyImages && this.options.lazyOnDemand) {
+            // Load the next image.
+            this.lazyimages.call($nextItem);
+        }
+
+        // Get the distance swiped as a percentage.
+        var width = $activeItem.width(),
+            percent = parseFloat((event.delta.x / width) * 100),
+            diff = isNext ? 100 : -100;
+
+        if (rtl) {
+            percent *= -1;
+        }
+
+        // Shift the items but put a limit on sensitivity.
+        if (Math.abs(percent) < 100 && Math.abs(percent) > 5) {
+            this.$element.addClass("no-transition");
+            if (this.options.mode === "slide") {
+                if (rtl) {
+                    $activeItem.addClass("swiping").css({ "right": percent + "%" });
+                    $nextItem.addClass("swipe swipe-next").css({ "right": (percent - diff) + "%" });
+                } else {
+                    $activeItem.addClass("swiping").css({ "left": percent + "%" });
+                    $nextItem.addClass("swipe swipe-next").css({ "left": (percent + diff) + "%" });
+                }
+            } else {
+                $activeItem.addClass("swipe").css({ "opacity": 1 - Math.abs((percent / 100)) });
+                $nextItem.addClass("swipe swipe-next");
+            }
+        } else {
+            this.cycle();
+        }
+    };
+
+    Carousel.prototype.swipeend = function (event) {
+
+        if (this.sliding || !this.$element.hasClass("no-transition")) {
+            return;
+        }
+
+        var direction = event.direction,
+            method = "next";
+
+        if (direction === "right") {
+            method = "prev";
+        }
+
+        // Re-enable the transitions.
+        this.$element.removeClass("no-transition");
+
+        if (supportTransition) {
+
+            // Trim the animation duration based on the current position.
+            var activePosition = this.activeindex(),
+                $activeItem = this.$items.eq(activePosition);
+
+            if (!this.translationDuration) {
+                this.translationDuration = parseFloat($activeItem.css("transition-duration"));
+            }
+
+            // Get the distance and turn it into into a percentage
+            // to calculate the duration. Whichever is lowest is used.
+            var width = $activeItem.width(),
+                percentageTravelled = parseInt((Math.abs(event.delta.x) / width) * 100, 10),
+                swipeDuration = (((event.duration / 1000) * 100) / percentageTravelled),
+                newDuration = (((100 - percentageTravelled) / 100) * (Math.min(this.translationDuration, swipeDuration)));
+
+            // Set the new temporary duration.
+            this.$items.each(function () {
+                $(this).css({ "transition-duration": newDuration + "s" });
+            });
+        }
+
+        this.cycle();
+        this.slide(method, $(this.$items.filter(".swipe-next")));
+    };
+
+    Carousel.prototype.lazyimages = function () {
+        if (!this.data("lazyLoaded")) {
+
+            this.find("img[data-src]").each(function () {
+                if (this.src.length === 0) {
+                    this.src = this.getAttribute("data-src");
+                }
+            });
+
+            this.data("lazyLoaded", true);
+        }
     };
 
     // Plug-in definition 
@@ -983,12 +1193,12 @@
                 // Cycle to the given number.
                 data.to(options);
 
-            } else if (typeof options === "string" || (options = opts.slide)) {
+            } else if (typeof options === "string" && /(cycle|pause|next|prev)/.test(options) || (options = opts.slide)) {
 
                 data[options]();
 
             } else if (data.options.interval) {
-                data.cycle();
+                data.pause().cycle();
             }
         });
     };
@@ -1004,45 +1214,165 @@
     };
 
     // Data API
-    $(document).on(eclick, ":attrStart(data-carousel-slide)", function (event) {
-
-        event.preventDefault();
-
-        var $this = $(this),
-            data = $this.data("r.carouselOptions"),
-            options = data || $.buildDataOptions($this, {}, "carousel", "r"),
-            $target = $(options.target || (options.target = $this.attr("href"))),
-            slideIndex = options.slideTo,
-            numeric = typeof slideIndex === "number",
-            carousel = $target.data("r.carousel");
-
-        if (carousel) {
-
-            numeric ? carousel.to(slideIndex) : carousel[options.slide]();
-
-            $target.one(eslid, function () {
-                if (numeric) {
-                    // Show the correct highlight
-                    $this.addClass("active").siblings().removeClass("active");
-                }
-            });
-        }
-
-    }).on(eready, function () {
-
+    var init = function () {
         $(".carousel").each(function () {
-
             var $this = $(this),
-                data = $this.data("r.carouselOptions"),
-                options = data || $.buildDataOptions($this, {}, "carousel", "r");
-
-            $this.carousel(options);
+                options = $this.data("r.carouselOptions");
+            if (!options) {
+                $this.carousel($.buildDataOptions($this, {}, "carousel", "r"));
+            }
         });
+    },
+    debouncedInit = $.debounce(init, 500);
+
+    $(document).on([eready, echanged].join(" "), function (event) {
+        event.type === "ready" ? init() : debouncedInit();
     });
 
     w.RESPONSIVE_CAROUSEL = true;
 
 }(jQuery, window, ".r.carousel"));
+/*
+ * Responsive Conditional
+ */
+
+/*global jQuery*/
+/*jshint expr:true*/
+(function ($, w, ns) {
+
+    "use strict";
+
+    if (w.RESPONSIVE_CONDITIONAL) {
+        return;
+    }
+
+    // General variables and methods.
+    var eready = "ready" + ns,
+        echanged = ["domchanged" + ns, "shown.r.modal"].join(" "),
+        eresize = ["resize", "orientationchange"].join(".conditional "),
+        eloaded = "loaded" + ns,
+        eerror = "error" + ns;
+
+    // AutoSize class definition
+    var Conditional = function (element, options) {
+
+        this.$element = $(element);
+        this.defaults = {
+            xs: null,
+            s: null,
+            m: null,
+            l: null,
+            fallback: null,
+            errorHint: "<p>An error has occured.</p>"
+        };
+        this.cache = {};
+        this.options = $.extend({}, this.defaults, options);
+        this.currentGrid = null;
+        this.currentTarget = null;
+        this.sizing = null;
+
+        // Bind events.
+        $(w).on(eresize, $.debounce($.proxy(this.resize, this), 50));
+
+        // First Run
+        this.resize();
+    };
+
+    Conditional.prototype.resize = function () {
+
+        var grid = $.support.currentGrid().grid;
+
+        if (this.currentGrid !== grid) {
+            this.currentGrid = grid;
+
+            var self = this,
+                target = this.options[grid] || this.options.fallback;
+
+            if (target && target !== this.currentTarget) {
+                this.currentTarget = target;
+
+                // First check the cache.
+                if (this.cache[this.currentGrid]) {
+                    this.$element.empty().html(this.cache[this.currentGrid]);
+                    this.$element.trigger($.Event(eloaded, { relatedTarget: self.$element[0], loadTarget: target, grid: this.currentGrid }));
+
+                } else {
+                    this.$element.empty().load(target, null, function (responseText, textStatus) {
+                        
+                        // Handle errors.
+                        if (textStatus === "error") {
+                            self.$element.trigger($.Event(eerror, { relatedTarget: self.$element[0], loadTarget: target, grid: self.currentGrid }));
+                            self.$element.html(self.options.errorHint);
+                            return;
+                        }
+
+                        var selector, off = target.indexOf(" ");
+                        if (off >= 0) {
+                            selector = $.trim(target.slice(off));
+                        }
+
+                        // Cache the result so no further requests are made. This uses the internal `parseHTML`
+                        // method so be aware that could one day change.
+                        self.cache[grid] = selector
+                            ? jQuery("<div>").append($.parseHTML(responseText)).find(selector).wrap("<div>").parent().html()
+                            : responseText;
+
+                        self.$element.trigger($.Event(eloaded, { relatedTarget: self.$element[0], loadTarget: target, grid: self.currentGrid }));
+                    });
+                }
+            }
+        }
+    };
+
+    // Plug-in definition 
+    $.fn.conditional = function (options) {
+
+        return this.each(function () {
+
+            var $this = $(this),
+                data = $this.data("r.conditional"),
+                opts = typeof options === "object" ? options : null;
+
+            if (!data) {
+                // Check the data and reassign if not present.
+                $this.data("r.conditional", (data = new Conditional(this, opts)));
+            }
+
+            if (options === "resize") {
+                data.resize();
+            }
+        });
+    };
+
+    // Set the public constructor.
+    $.fn.conditional.Constructor = Conditional;
+
+    // No conflict.
+    var old = $.fn.conditional;
+    $.fn.conditional.noConflict = function () {
+        $.fn.conditional = old;
+        return this;
+    };
+
+    // Data API
+    var init = function () {
+        $(":attrStart(data-conditional)").each(function () {
+            var $this = $(this),
+                options = $this.data("r.conditionalOptions");
+            if (!options) {
+                $this.conditional($.buildDataOptions($this, {}, "conditional", "r"));
+            }
+        });
+    },
+    debouncedInit = $.debounce(init, 500);
+
+    $(document).on([eready, echanged].join(" "), function (event) {
+        event.type === "ready" ? init() : debouncedInit();
+    });
+
+    w.RESPONSIVE_CONDITIONAL = true;
+
+}(jQuery, window, ".r.conditional"));
 /*
  * Responsive Dismiss 
  */
@@ -1058,16 +1388,42 @@
     }
 
     // General variables.
-    var eclick = "click" + ns,
+    var eready = "ready" + ns,
+        echanged = ["domchanged" + ns, "shown.r.modal"].join(" "),
+        eclick = "click",
         edismiss = "dismiss" + ns,
         edismissed = "dismissed" + ns;
 
     // Dismiss class definition
-    var Dismiss = function (element, target) {
+    var Dismiss = function (element, options) {
 
-        this.$element = $(element);
-        this.$target = this.$element.parents(target);
+        this.defaults = {
+            closeHint: "Click to close"
+        };
+
+        this.options = $.extend({}, this.defaults, options);
+
+        this.$element = $(element).attr({ "type": "button" });
+        this.$target = this.$element.closest(options.target);
         this.dismissing = null;
+
+        // A11y goodness.
+        if (this.$element.is("button")) {
+            $(element).attr({ "type": "button" });
+        }
+
+        if (this.$target.hasClass("alert")) {
+            this.$target.attr({ "role": "alert" });
+        }
+
+        if (!this.$element.find(".visuallyhidden").length) {
+            $("<span/>").addClass("visuallyhidden")
+                        .html(this.options.closeHint)
+                        .appendTo(this.$element);
+        }
+
+        // Bind events
+        this.$element.on(eclick, $.proxy(this.click, this));
     };
 
     Dismiss.prototype.close = function () {
@@ -1076,12 +1432,12 @@
             $target = this.$target,
             self = this,
             complete = function () {
-
                 self.dismissing = false;
-                $target.addClass("hidden").trigger($.Event(edismissed));
+                $target.addClass("hidden").attr({ "aria-hidden": true, "tabindex": -1 });
+                self.$element.trigger($.Event(edismissed));
             };
 
-        $target.trigger(dismissEvent);
+        this.$element.trigger(dismissEvent);
 
         if (this.dismissing || dismissEvent.isDefaultPrevented()) {
             return;
@@ -1097,8 +1453,13 @@
         this.$target.onTransitionEnd(complete);
     };
 
+    Dismiss.prototype.click = function (event) {
+        event.preventDefault();
+        this.close();
+    };
+
     // Plug-in definition 
-    $.fn.dismiss = function (target) {
+    $.fn.dismiss = function (options) {
 
         return this.each(function () {
 
@@ -1107,11 +1468,13 @@
 
             if (!data) {
                 // Check the data and reassign if not present.
-                $this.data("dismiss", (data = new Dismiss(this, target + ":first")));
+                $this.data("dismiss", (data = new Dismiss(this, options)));
             }
 
             // Close the element.
-            data.close();
+            if (options === "close") {
+                data.close();
+            }
         });
     };
 
@@ -1126,19 +1489,19 @@
     };
 
     // Data API
-    $("body").on(eclick, ":attrStart(data-dismiss)", function (event) {
+    var init = function () {
+        $("button[data-dismiss-target]").each(function () {
+            var $this = $(this),
+                options = $this.data("r.dismissOptions");
+            if (!options) {
+                $this.dismiss($.buildDataOptions($this, {}, "dismiss", "r"));
+            }
+        });
+    },
+    debouncedInit = $.debounce(init, 500);
 
-        event.preventDefault();
-
-        var $this = $(this),
-            data = $this.data("r.dismissOptions"),
-            options = data || $.buildDataOptions($this, {}, "dismiss", "r"),
-            target = options.target || (options.target = $this.attr("href"));
-
-        // Run the dismiss method.
-        if (target) {
-            $(this).dismiss(options.target);
-        }
+    $(document).on([eready, echanged].join(" "), function (event) {
+        event.type === "ready" ? init() : debouncedInit();
     });
 
     w.RESPONSIVE_DISMISS = true;
@@ -1159,47 +1522,28 @@
 
     // General variables.
     var supportTransition = w.getComputedStyle && $.support.transition,
-        eclick = "click" + ns,
+        rtl = $.support.rtl,
+        eready = "ready" + ns,
+        echanged = ["domchanged" + ns, "shown.r.modal"].join(" "),
+        eclick = "click",
+        ekeydown = "keydown",
         eshow = "show" + ns,
         eshown = "shown" + ns,
         ehide = "hide" + ns,
         ehidden = "hidden" + ns;
 
-    // Private methods.
-    var transition = function (method, startEvent, completeEvent) {
-
-        var self = this,
-            complete = function () {
-
-                // The event to expose.
-                var eventToTrigger = $.Event(completeEvent);
-
-                // Ensure the height/width is set to auto.
-                self.$element.removeClass("trans")[self.options.dimension]("");
-
-                self.transitioning = false;
-                self.$element.trigger(eventToTrigger);
-            };
-
-        if (this.transitioning || startEvent.isDefaultPrevented()) {
-            return;
-        }
-
-        this.transitioning = true;
-
-        // Remove or add the expand classes.
-        this.$element.trigger(startEvent)[method]("collapse");
-        this.$element[startEvent.type === "show" ? "addClass" : "removeClass"]("expand trans");
-
-        this.$element.onTransitionEnd(complete);
+    var keys = {
+        SPACE: 32,
+        LEFT: 37,
+        RIGHT: 39
     };
 
     // The Dropdown class definition
     var Dropdown = function (element, options) {
 
         this.$element = $(element);
+        this.$target = $(options.target);
         this.defaults = {
-            toggle: true,
             dimension: "height"
         };
         this.options = $.extend({}, this.defaults, options);
@@ -1208,57 +1552,94 @@
         this.endSize = null;
 
         if (this.options.parent) {
-            this.$parent = this.$element.parents(this.options.parent + ":first");
+            this.$parent = this.$target.closest(this.options.parent);
         }
 
-        // Check to see if the plug-in is set to toggle and trigger 
-        // the correct internal method if so.
-        if (this.options.toggle) {
-            this.toggle();
+        // Add accessibility features.
+        if (this.$parent) {
+            this.$parent.attr({ "role": "tablist", "aria-multiselectable": "true" })
+                .find("div:not(.collapse,.accordion-body)").attr("role", "presentation");
+        } else {
+            $(".accordion").find("div:not(.collapse,.accordion-body)").addBack().attr("role", "presentation");
         }
+
+        var $tab = $("[href='" + this.options.target + "'], [data-dropdown-target='" + this.options.target + "']"),
+            tabId = $tab.attr("id") || "dropdown-" + $.pseudoUnique(),
+            paneId = this.$target.attr("id") || "dropdown-" + $.pseudoUnique(),
+            active = !this.$target.hasClass("collapse");
+
+        $tab.attr({
+            "id": tabId,
+            "role": "tab",
+            "aria-controls": paneId,
+            "aria-selected": active,
+            "aria-expanded": active,
+            "tabindex": 0
+        });
+
+        this.$target.attr({
+            "id": paneId,
+            "role": "tabpanel",
+            "aria-labelledby": tabId,
+            "aria-hidden": !active,
+            "tabindex": active ? 0 : -1
+        });
+
+        // Bind events.
+        this.$element.on(eclick, $.proxy(this.click, this));
+        this.$element.on(ekeydown, $.proxy(this.keydown, this));
     };
 
     Dropdown.prototype.show = function () {
 
-        if (this.transitioning || this.$element.hasClass("expand")) {
+        if (this.transitioning || this.$target.hasClass("expand")) {
             return;
         }
 
-        var dimension = this.options.dimension,
-            actives = this.$parent && this.$parent.find(".dropdown-group:not(.collapse)"),
-            hasData;
+        var self = this,
+            dimension = this.options.dimension,
+            $actives = [];
 
-        if (actives && actives.length) {
-            hasData = actives.data("r.dropdown");
-            actives.dropdown("hide");
+        if (this.$parent) {
+            // Get all the related open panes.
+            $actives = this.$parent.find(" > [role=presentation] > [role=presentation]").children("[role=tab]");
 
-            if (!hasData) {
-                actives.data("r.dropdown", null);
-            }
+            $actives = $.grep($actives, function (a) {
+                var data = $(a).data("r.dropdown"),
+                    $target = data && data.$target;
+
+                return $target && $target.hasClass("dropdown-group") && !$target.hasClass("collapse") && data.$parent && data.$parent[0] === self.$parent[0];
+            });
         }
 
         // Set the height/width to zero then to the height/width
         // so animation can take place.
-        this.$element[dimension](0);
+        this.$target[dimension](0);
 
         if (supportTransition) {
 
             // Calculate the height/width.
-            this.$element[dimension]("auto");
-            this.endSize = w.getComputedStyle(this.$element[0])[dimension];
+            this.$target[dimension]("auto");
+            this.endSize = w.getComputedStyle(this.$target[0])[dimension];
 
             // Reset to zero and force repaint.
-            this.$element[dimension](0).redraw();
+            this.$target[dimension](0).redraw();
         }
 
-        this.$element[dimension](this.endSize || "");
+        this.$target[dimension](this.endSize || "");
 
-        transition.call(this, "removeClass", $.Event(eshow), eshown);
+        this.transition("removeClass", $.Event(eshow), eshown);
+
+        if ($actives && $actives.length) {
+            $.each($actives, function () {
+                $(this).dropdown("hide");
+            });
+        }
     };
 
     Dropdown.prototype.hide = function () {
 
-        if (this.transitioning || this.$element.hasClass("collapse")) {
+        if (this.transitioning || this.$target.hasClass("collapse")) {
             return;
         }
 
@@ -1269,20 +1650,118 @@
         if (supportTransition) {
 
             // Set the height to auto, calculate the height/width and reset.
-            size = w.getComputedStyle(this.$element[0])[dimension];
+            size = w.getComputedStyle(this.$target[0])[dimension];
 
             // Reset the size and force repaint.
-            this.$element[dimension](size).redraw(); // Force reflow ;
+            this.$target[dimension](size).redraw(); // Force reflow ;
         }
 
-        this.$element.removeClass("expand");
-        this.$element[dimension](0);
-        transition.call(this, "addClass", $.Event(ehide), ehidden);
+        this.$target.removeClass("expand");
+        this.$target[dimension](0);
+        this.transition("addClass", $.Event(ehide), ehidden);
     };
 
     Dropdown.prototype.toggle = function () {
-        // Run the correct command based on the presence of the class 'collapse'.
-        this[this.$element.hasClass("collapse") ? "show" : "hide"]();
+        // Run the correct command based on the presence of the class "collapse".
+        this[this.$target.hasClass("collapse") ? "show" : "hide"]();
+    };
+
+    Dropdown.prototype.transition = function (method, startEvent, completeEvent) {
+
+        var self = this,
+            doShow = method === "removeClass",
+            complete = function () {
+
+                // The event to expose.
+                var eventToTrigger = $.Event(completeEvent);
+
+                // Ensure the height/width is set to auto.
+                self.$target.removeClass("trans")[self.options.dimension]("");
+
+                self.transitioning = false;
+
+                // Set the correct aria attributes.
+                self.$target.attr({
+                    "aria-hidden": !doShow,
+                    "tabindex": doShow ? 0 : -1,
+                });
+
+
+                var $tab = $("#" + self.$target.attr("aria-labelledby")).attr({
+                    "aria-selected": doShow,
+                    "aria-expanded": doShow
+                });
+
+                if (doShow) {
+                    $tab.focus();
+                }
+
+                // Toggle any children.
+                self.$target.find("[tabindex]:not(.collapse)").attr({
+                    "aria-hidden": !doShow,
+                    "tabindex": doShow ? 0 : -1,
+                });
+
+                self.$element.trigger(eventToTrigger);
+            };
+
+        if (this.transitioning || startEvent.isDefaultPrevented()) {
+            return;
+        }
+
+        this.transitioning = true;
+
+        // Remove or add the expand classes.
+        this.$element.trigger(startEvent);
+        this.$target[method]("collapse");
+        this.$target[startEvent.type === "show" ? "addClass" : "removeClass"]("expand trans");
+
+        this.$target.onTransitionEnd(complete);
+    };
+
+    Dropdown.prototype.click = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.toggle();
+    };
+
+    Dropdown.prototype.keydown = function (event) {
+
+        var which = event.which;
+
+        if (which === keys.SPACE || which === keys.LEFT || which === keys.RIGHT) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            var $this = $(event.target),
+                $parent = this.options.parent ? $this.closest("[role=tablist]") : $this.closest(".accordion"),
+                $items = $parent.find(" > [role=presentation] > [role=presentation]").children("[role=tab]"),
+                index = $items.index($items.filter(":focus")),
+                length = $items.length;
+
+            if (which === keys.SPACE) {
+                $($items.eq(index)).data("r.dropdown").toggle();
+                return;
+            }
+
+            if (which === keys.LEFT) {
+                rtl ? index += 1 : index -= 1;
+            } else if (which === keys.RIGHT) {
+                rtl ? index -= 1 : index += 1;
+            }
+
+            // Ensure that the index stays within bounds.
+            if (index === length) {
+                index = 0;
+            }
+
+            if (index < 0) {
+                index = length - 1;
+            }
+
+            $($items.eq(index)).data("r.dropdown").show();
+        }
     };
 
     // Plug-in definition 
@@ -1298,7 +1777,7 @@
             }
 
             // Run the appropriate function if a string is passed.
-            if (typeof options === "string") {
+            if (typeof options === "string" && /(show|hide|toggle)/.test(options)) {
                 data[options]();
             }
         });
@@ -1314,25 +1793,26 @@
         return this;
     };
 
-    // Dropdown data api initialization.
-    $("body").on(eclick, ":attrStart(data-dropdown)", function (event) {
+    // Data API
+    var init = function () {
+        $(":attrStart(data-dropdown)").each(function () {
+            var $this = $(this),
+                options = $this.data("r.dropdownOptions");
+            if (!options) {
+                $this.dropdown($.buildDataOptions($this, {}, "dropdown", "r"));
+            }
+        });
+    },
+    debouncedInit = $.debounce(init, 500);
 
-        event.preventDefault();
-
-        var $this = $(this),
-            data = $this.data("r.dropdownOptions"),
-            options = data || $.buildDataOptions($this, {}, "dropdown", "r"),
-            target = options.target || (options.target = $this.attr("href")),
-            $target = $(target),
-            params = $target.data("r.dropdown") ? "toggle" : options;
-
-        // Run the dropdown method.
-        $target.dropdown(params);
+    $(document).on([eready, echanged].join(" "), function (event) {
+        event.type === "ready" ? init() : debouncedInit();
     });
 
     w.RESPONSIVE_DROPDOWN = true;
 
 }(jQuery, window, ".r.dropdown"));
+
 /*
  * Responsive Lightbox
  */
@@ -1344,33 +1824,42 @@
 
     "use strict";
 
-    if (w.RESPONSIVE_LIGHTBOX) {
+    if (w.RESPONSIVE_MODAL) {
         return;
     }
 
-    // General variables.
     var $window = $(w),
         $html = $("html"),
         $body = $("body"),
-        $overlay = $("<div/>").addClass("lightbox-overlay lightbox-loader fade-out"),
-        $lightbox = $("<div/>").addClass("lightbox fade-out").appendTo($overlay),
-        $header = $("<div/>").addClass("lightbox-header fade-out"),
-        $footer = $("<div/>").addClass("lightbox-footer fade-out"),
-        $img = null,
-        $iframe = null,
-        $content = null,
-        $close = $("<a/>").attr({ "href": "#", "title": "Close (Esc)" }).addClass("lightbox-close fade-out").html("x"),
-        $previous = $("<a/>").attr({ "href": "#", "title": "Previous (Left Arrow)" }).addClass("lightbox-direction left hidden"),
-        $next = $("<a/>").attr({ "href": "#", "title": "Next (Right Arrow)" }).addClass("lightbox-direction right hidden"),
-        $placeholder = $("<div/>").addClass("lightbox-placeholder"),
-        scrollbarWidth = 0,
-        lastScroll = 0,
+        $overlay = $("<div/>").attr({ "role": "document" }).addClass("modal-overlay modal-loader fade-out"),
+        $modal = $("<div/>").addClass("modal fade-out").appendTo($overlay),
+        $header = $("<div/>").addClass("modal-header fade-out"),
+        $footer = $("<div/>").addClass("modal-footer fade-out"),
+        $close = $("<button/>").attr({ "type": "button" }).addClass("modal-close fade-out"),
+        $prev = $("<button/>").attr({ "type": "button" }).addClass("modal-direction prev fade-out"),
+        $next = $("<button/>").attr({ "type": "button" }).addClass("modal-direction next fade-out"),
+        $placeholder = $("<div/>").addClass("modal-placeholder"),
+        // Events
+        eready = "ready" + ns,
+        echanged = "domchanged" + ns,
+        eresize = ["resize", "orientationchange"].join(".modal "),
+        eclick = "click",
+        ekeydown = "keydown",
+        efocusin = "focusin",
+        eshow = "show" + ns,
+        eshown = "shown" + ns,
+        ehide = "hide" + ns,
+        ehidden = "hidden" + ns,
+        eerror = "error" + ns,
+        rtl = $.support.rtl,
         supportTransition = $.support.transition,
+        currentGrid = $.support.currentGrid(),
         keys = {
             ESCAPE: 27,
             LEFT: 37,
             RIGHT: 39
         },
+        lastScroll = 0,
         protocol = w.location.protocol.indexOf("http") === 0 ? w.location.protocol : "http:",
         // Regular expression.
         rexternalHost = new RegExp("//" + w.location.host + "($|/)"),
@@ -1378,84 +1867,328 @@
         // Taken from jQuery.
         rhash = /^#.*$/, // Altered to only match beginning.
         rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
-        rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
-        // Events
-        eclick = "click" + ns,
-        ekeyup = "keyup" + ns,
-        eshow = "show" + ns,
-        eshown = "shown" + ns,
-        ehide = "hide" + ns,
-        ehidden = "hidden" + ns,
-        eresize = "resize" + ns + " orientationchange" + ns,
-        efocusin = "focusin" + ns;
+        rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/;
 
-    // Private methods.
-    var isExternalUrl = function (url) {
-        // Handle different host types.
-        // Split the url into it's various parts.
-        var locationParts = rurl.exec(url) || rurl.exec(protocol + url);
-
-        if (locationParts === undefined || rhash.test(url)) {
-            return false;
-        }
-
-        // Target is a local protocol.
-        if (!locationParts || !locationParts[2] || rlocalProtocol.test(locationParts[1])) {
-            return false;
-        }
-
-        // If the regex doesn't match return true . 
-        return !rexternalHost.test(locationParts[2]);
-    },
-
-    getMediaProvider = function (url) {
-        var providers = {
-            youtube: /youtu(be\.com|be\.googleapis\.com|\.be)/i,
-            vimeo: /vimeo/i,
-            vine: /vine/i,
-            instagram: /instagram|instagr\.am/i,
-            getty: /embed\.gettyimages\.com/i
+    var Modal = function (element, options) {
+        this.$element = $(element);
+        this.defaults = {
+            modal: null,
+            external: false,
+            group: null,
+            iframe: false,
+            iframeScroll: true,
+            keyboard: true,
+            touch: true,
+            next: ">",
+            nextHint: "Next (" + (rtl ? "Left" : "Right") + " Arrow)",
+            prev: "<",
+            previousHint: "Previous (" + (rtl ? "Right" : "Left") + " Arrow)",
+            closeHint: "Close (Esc)",
+            errorHint: "<p>An error has occured.</p>",
+            mobileTarget: null,
+            mobileViewportWidth: "xs",
+            fitViewport: true
         };
+        this.options = $.extend({}, this.defaults, options);
+        this.title = null;
+        this.description = null;
+        this.isShown = null;
+        this.$group = null;
 
-        for (var p in providers) {
-            if (providers.hasOwnProperty(p) && providers[p].test(url)) {
-                return p;
+        // Make a list of grouped modal targets.
+        if (this.options.group) {
+            this.$group = $(this.options.group);
+        }
+
+        // Bind events.
+        this.$element.on(eclick, $.proxy(this.click, this));
+        var onResize = $.debounce($.proxy(this.resize, this), 15);
+        $(w).off(eresize).on(eresize, onResize);
+    };
+
+    Modal.prototype.show = function () {
+
+        if (this.isShown) {
+            return;
+        }
+
+        // If the trigger has a mobile target and the viewport is smaller than the mobile limit
+        // then redirect to that page instead.
+        if (this.options.mobileTarget) {
+            var width = this.options.mobileViewportWidth;
+            // Handle numeric width.
+            if (typeof width === "number" && width >= parseInt($window.width(), 10)) {
+                w.location.href = this.options.mobileTarget;
+                return;
+            }
+
+            // Handle specific range.
+            if (typeof width === "string") {
+                var index = $.inArray(width, currentGrid.range);
+                if (currentGrid.index <= index && index > -1) {
+                    w.location.href = this.options.mobileTarget;
+                    return;
+                }
             }
         }
 
-        return false;
-    },
+        var self = this,
+            showEvent = $.Event(eshow),
+            shownEvent = $.Event(eshown),
+            complete = function () {
 
-    create = function () {
+                $modal.data("currentModal", self.$element);
+
+                $modal.focus();
+
+                // Ensure that focus is maintained within the modal.
+                $(document).on(efocusin, function (event) {
+                    if (event.target !== $overlay[0] && !$.contains($overlay[0], event.target)) {
+                        var $newTarget = $modal.find("input, select, a, iframe, img, button").first();
+                        $newTarget.length ? $newTarget.focus() : ((!self.options.modal && $close.focus()) || $overlay.focus());
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                // Bind the keyboard and touch actions.
+                if (self.options.keyboard) {
+                    $(document).on(ekeydown, $.proxy(self.keydown, self));
+                }
+
+                if (self.options.group) {
+                    if (self.options.touch) {
+                        $modal.on("swipe.modal", true)
+                              .on("swipeend.modal", $.proxy(self.swipeend, self));
+                    }
+                }
+
+                // Bind the next/prev/close events.
+                $modal.off(eclick).on(eclick, $.proxy(function (event) {
+                    var next = $next[0],
+                        prev = $prev[0],
+                        eventTarget = event.target;
+
+                    if (eventTarget === next || eventTarget === prev) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        this[eventTarget === next ? "next" : "prev"]();
+                        return;
+                    }
+
+                    if (this.options.modal) {
+                        if (eventTarget === $modal.find(this.options.modal)[0]) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            this.hide();
+                        }
+                    }
+
+                }, self));
+
+                self.$element.trigger(shownEvent);
+            };
+
+        this.$element.trigger(showEvent);
+
+        if (showEvent.isDefaultPrevented()) {
+            return;
+        }
+
+        this.isShown = true;
+        this.overlay();
+        this.create();
+
+        // Call the callback.
+        $modal.onTransitionEnd(complete);
+    };
+
+    Modal.prototype.hide = function (preserveOverlay, callback) {
+
+        if (!this.isShown) {
+            return;
+        }
+
+        var self = this,
+            hideEvent = $.Event(ehide),
+            hiddenEvent = $.Event(ehidden),
+            complete = function () {
+                $modal.removeData("currentModal");
+                self.$element.trigger(hiddenEvent);
+            };
+
+        this.$element.trigger(hideEvent);
+
+        if (hideEvent.isDefaultPrevented()) {
+            return;
+        }
+
+        this.isShown = false;
+
+        this.destroy(callback);
+
+        if (!preserveOverlay) {
+            this.overlay(true);
+        }
+
+        $modal.onTransitionEnd(complete);
+    };
+
+    Modal.prototype.overlay = function (hide) {
+
+        var fade = hide ? "removeClass" : "addClass",
+            self = this,
+            complete = function () {
+                if (hide) {
+                    // Put scroll position etc back as before.
+                    $overlay.addClass("hidden");
+                    $html.removeClass("modal-on")
+                         .css("margin-right", "");
+
+                    if ($html.hasClass("modal-lock")) {
+                        $html.removeClass("modal-lock");
+                        if (lastScroll !== $window.scrollTop()) {
+                            $window.scrollTop(lastScroll);
+                            lastScroll = 0;
+                        }
+                    }
+
+                    return;
+                }
+
+                // Bind click events to handle hide.
+                $overlay.off(eclick).on(eclick, function (event) {
+
+                    if (self.options.modal) {
+                        return;
+                    }
+
+                    var closeTarget = $close[0],
+                        eventTarget = event.target;
+
+                    if (eventTarget === $modal[0] || $.contains($modal[0], eventTarget)) {
+                        return;
+                    }
+
+                    if (eventTarget === closeTarget) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        self.hide();
+                    }
+
+                    if (eventTarget === $overlay[0] || ($.contains($overlay[0], eventTarget))) {
+                        self.hide();
+                    }
+                });
+            };
+
+        // Show the overlay.
+        var getScrollbarWidth = function () {
+            var $scroll = $("<div/>").css({ width: 99, height: 99, overflow: "scroll", position: "absolute", top: -9999 });
+            $body.append($scroll);
+            var scrollbarWidth = $scroll[0].offsetWidth - $scroll[0].clientWidth;
+            $scroll.remove();
+            return scrollbarWidth;
+        };
+
+        // Add the overlay to the body if not done already.
+        if (!$(".modal-overlay").length) {
+            $body.append($overlay);
+        }
+
+        if (!hide) {
+            // Take note of the current scroll position then remove the scrollbar.
+            if (lastScroll === 0) {
+                lastScroll = $window.scrollTop();
+            }
+
+            $html.addClass("modal-on")
+                 .css("margin-right", getScrollbarWidth());
+        }
+
+        $overlay.removeClass("hidden").redraw()[fade]("fade-in").redraw();
+        $overlay.onTransitionEnd(complete);
+    };
+
+    Modal.prototype.create = function () {
+
+        $overlay.addClass("modal-loader");
 
         // Calculate whether this is an external request and set the value.
         this.options.external = !rhash.test(this.options.target);
+
+        var isExternalUrl = function (url) {
+            // Handle different host types.
+            // Split the url into it's various parts.
+            var locationParts = rurl.exec(url) || rurl.exec(protocol + url);
+
+            if (locationParts === undefined || rhash.test(url)) {
+                return false;
+            }
+
+            // Target is a local protocol.
+            if (!locationParts || !locationParts[2] || rlocalProtocol.test(locationParts[1])) {
+                return false;
+            }
+
+            // If the regex doesn't match return true . 
+            return !rexternalHost.test(locationParts[2]);
+        };
+
+        var fadeIn = function () {
+
+            self.resize();
+
+            $.each([$header, $footer, $close, $next, $prev, $modal], function () {
+
+                this.addClass("fade-in")
+                    .redraw();
+            });
+
+            // self.overlay();
+            $overlay.removeClass("modal-loader");
+        };
 
         var self = this,
             title = this.options.title,
             description = this.options.description,
             modal = this.options.modal,
             target = this.options.target,
-            local = !this.options.external && !isExternalUrl(target),
-            group = this.options.group,
-            nextText = this.options.next,
-            previousText = this.options.previous,
+            external = isExternalUrl(target),
+            local = !this.options.external && !external,
+            $group = this.$group,
+            nextText = this.options.next + "<span class=\"visuallyhidden\">" + this.options.nextHint + "</span>",
+            prevText = this.options.prev + "<span class=\"visuallyhidden\">" + this.options.prevHint + "</span>",
             iframeScroll = this.options.iframeScroll,
-            iframe = this.options.iframe || !local ? isExternalUrl(target) && !rimage.test(target) : false,
-            $iframeWrap = $("<div/>").addClass(iframeScroll ? "media media-scroll" : "media");
+            iframe = this.options.iframe || !local ? external && !rimage.test(target) : false,
+            $iframeWrap = $("<div/>").addClass(iframeScroll ? "media media-scroll" : "media"),
+            $content = $("<div/>").addClass("modal-content");
 
-        $content = $("<div/>").addClass("lightbox-content");
-        $iframe = $("<iframe/>"); // This needs to be assigned then unassigned or ie8 won't test against it.
-        $img = $("<img/>"); // ditto.
+        if ($group) {
+            // Test to see if the grouped target have data.
+            var $filtered = $group.filter(function () {
+                return $(this).data("r.modal");
+            });
+
+            if ($filtered.length) {
+                // Need to show next/prev.
+                $next.html(nextText).prependTo($modal);
+                $prev.html(prevText).prependTo($modal);
+            }
+        }
 
         // 1: Build the header
         if (title || !modal) {
 
-            $header.html(title ? "<div class=\"container\"><h2>" + title + "</h2></div>" : "")
-                   .appendTo($overlay);
+            if (title) {
+                var id = "modal-label-" + $.pseudoUnique();
+                $header.html("<div class=\"container\"><h2 id=\"" + id + "\">" + title + "</h2></div>")
+                       .appendTo($overlay.attr({ "aria-labelledby": id }));
+            }
 
             if (!modal) {
-                $close.appendTo($overlay);
+                $close.html("x <span class=\"visuallyhidden\">" + this.options.closeHint + "</span>").appendTo($overlay);
             }
         }
 
@@ -1469,27 +2202,41 @@
 
         // 3: Build the content
         if (local) {
-            $img = null;
-            $iframe = null;
             var $target = $(target);
             this.isLocalHidden = $target.is(":hidden");
-            $lightbox.addClass(this.options.fitViewport ? "container" : "");
+            $modal.addClass(this.options.fitViewport ? "container" : "");
             $placeholder.detach().insertAfter($target);
             $target.detach().appendTo($content).removeClass("hidden");
-            $content.appendTo($lightbox);
-            toggleFade.call(this);
+            $content.appendTo($modal);
+            // Fade in.
+            fadeIn();
         } else {
             if (iframe) {
 
-                $img = null;
-                $content = null;
-                $lightbox.addClass("lightbox-iframe");
+                $modal.addClass("modal-iframe");
 
                 // Normalize the src.
-                var src = target.indexOf("http") !== 0 ? protocol + target : target;
+                var src = target.indexOf("http") !== 0 ? protocol + target : target,
+                    getMediaProvider = function (url) {
+                        var providers = {
+                            youtube: /youtu(be\.com|be\.googleapis\.com|\.be)/i,
+                            vimeo: /vimeo/i,
+                            vine: /vine/i,
+                            instagram: /instagram|instagr\.am/i,
+                            getty: /embed\.gettyimages\.com/i
+                        };
+
+                        for (var p in providers) {
+                            if (providers.hasOwnProperty(p) && providers[p].test(url)) {
+                                return [p, "scaled"].join(" ");
+                            }
+                        }
+
+                        return false;
+                    };
 
                 // Have to add inline styles for older browsers.
-                $iframe.attr({
+                $("<iframe/>").attr({
                     "scrolling": iframeScroll ? "yes" : "no",
                     "allowTransparency": true,
                     "frameborder": 0,
@@ -1497,318 +2244,208 @@
                     "vspace": 0,
                     "webkitallowfullscreen": "",
                     "mozallowfullscreen": "",
-                    "allowfullscreen": "",
-                    "src": src
-                }).appendTo($iframeWrap);
+                    "allowfullscreen": ""
+                }).one("load error", function () {
+                    // Fade in. Can be slow but ensures concurrency.
+                    fadeIn();
+                }).appendTo($iframeWrap).attr("src", src);
 
                 // Test and add additional media classes.
                 var mediaClasses = getMediaProvider(target) || "";
-
-                $iframeWrap.addClass(mediaClasses).appendTo($lightbox);
-
-                // Not on load as can take forever.
-                toggleFade.call(this);
+                $iframeWrap.addClass(mediaClasses).appendTo($modal);
 
             } else {
-
                 if (rimage.test(target)) {
 
-                    $iframe = null;
-                    $content = null;
-                    $lightbox.addClass("lightbox-image");
+                    $modal.addClass("modal-image");
 
-                    $img.one("load error", function () {
-                        toggleFade.call(self);
-                    }).attr("src", target)
-                        .appendTo($lightbox);
+                    $("<img/>").one("load error", function () {
+                        // Fade in.
+                        fadeIn();
+                    }).appendTo($modal).attr("src", target);
                 } else {
-
-                    $img = null;
-                    $iframe = null;
-                    $lightbox.addClass("lightbox-ajax");
+                    $modal.addClass("modal-ajax");
+                    $modal.addClass(this.options.fitViewport ? "container" : "");
 
                     // Standard ajax load.
-                    $content.load(target, function () {
-                        $content.appendTo($lightbox);
-                        toggleFade.call(self);
-                    });
-                }
-            }
-        }
+                    $content.load(target, null, function (responseText, textStatus) {
 
-        if (group) {
-            // Need to show next/previous.
-            $next.text(nextText).prependTo($lightbox).removeClass("hidden");
-            $previous.text(previousText).prependTo($lightbox).removeClass("hidden");
-        }
-
-        // Bind the click events.
-        $lightbox.off(eclick).on(eclick, $.proxy(function (event) {
-
-            var next = $next[0],
-                previous = $previous[0],
-                eventTarget = event.target;
-
-            if (eventTarget === next || eventTarget === previous) {
-                event.preventDefault();
-                event.stopPropagation();
-                this[eventTarget === next ? "next" : "previous"]();
-            }
-
-            if ($img) {
-                if (eventTarget === $img[0] && this.options.group) {
-                    this.next();
-                }
-            }
-        }, this));
-    },
-
-    destroy = function (callback) {
-        var self = this,
-            empty = function () {
-                $lightbox.removeClass("lightbox-iframe lightbox-ajax lightbox-image container").css({
-                    "max-height": "",
-                    "max-width": "",
-                    "margin-top": "",
-                    "margin-bottom": ""
-                }).empty();
-
-                manageFocus("hide");
-
-                // Unbind the keyboard actions.
-                if (self.options.keyboard) {
-
-                    manageKeyboard.call(self, "hide");
-                }
-
-                callback && callback();
-
-            }, cleanUp = function () {
-
-                if (!self.options.external) {
-                    // Put that kid back where it came from or so help me.
-                    $(self.options.target).addClass(self.isLocalHidden ? "hidden" : "").detach().insertAfter($placeholder);
-                    $placeholder.detach().insertAfter($overlay);
-                }
-
-                // Clean up the header/footer.
-                $header.empty().detach();
-                $footer.empty().detach();
-                $close.detach();
-
-                // Clean up the lightbox.
-                $next.detach();
-                $previous.detach();
-
-                // Fix __flash__removeCallback' is undefined error.
-                $.when($lightbox.find("iframe").attr("src", "")).then(w.setTimeout(empty, 100));
-
-                $lightbox.removeData("currentLightbox");
-            };
-
-        toggleFade.call(this);
-
-        $lightbox.onTransitionEnd(cleanUp);
-    },
-
-    resize = function () {
-        // Bind the resize event and fade in.
-        var maxWidth = parseInt($lightbox.css("max-width"), 10),
-            onResize = function () {
-
-                var windowHeight = $window.height(),
-                    headerHeight,
-                    footerHeight,
-                    closeHeight,
-                    childHeight,
-                    topHeight,
-                    bottomHeight,
-                    diff,
-                    $child = $iframe || $img || $content;
-
-                if ($child) {
-
-                    // Defaulting to 1px on the footer prevents the address bar from
-                    // covering the lightbox on windows phone.
-                    headerHeight = $header.height() || 0;
-                    footerHeight = $footer.height() || 0;
-                    closeHeight = $close.outerHeight() || 0;
-                    topHeight = (headerHeight > closeHeight ? headerHeight : closeHeight);
-                    bottomHeight = footerHeight > 0 ? footerHeight : 1;
-                    diff = topHeight + bottomHeight;
-                    childHeight = windowHeight - diff;
-                    var ieMobile = navigator.userAgent.match(/IEMobile\//);
-
-                    if ($img) {
-                        // IE8 doesn't change the width as max-width will cause the 
-                        // The image width to be set to zero.
-                        $img.css({
-                            "max-height": childHeight,
-                            "max-width": "100%"
-                        });
-                    } else if ($content) {
-                        $lightbox.css("max-height", childHeight);
-                        $content.css("max-height", childHeight);
-
-                        // Prevent IEMobile10 scrolling when content overflows the lightbox.
-                        // This causes the content to jump behind the model but it's all I can
-                        // find for now.
-                        if (ieMobile) {
-                            if ($content.children("*:first")[0].scrollHeight > $content.height()) {
-                                $html.addClass("lightbox-lock");
-                            }
-                        }
-                    } else {
-
-                        var iframeWidth = $iframe.width(),
-                            iframeHeight = $iframe.height(),
-                            ratio = iframeWidth / iframeHeight,
-                            childWidth = childHeight * ratio;
-
-                        $.each([$lightbox, $iframe], function () {
-
-                            this.css({
-                                "max-height": childHeight,
-                                "max-width": childWidth > maxWidth ? maxWidth : childWidth
-                            });
-                        });
-                    }
-
-                    // Adjust the vertically aligned position if necessary to account for
-                    // overflow into the footer.
-                    var margin = topHeight,
-                        top,
-                        bottom;
-
-                    $overlay.css({
-                        "padding-top": topHeight > 0 ? topHeight : ""
-                    });
-
-                    top = parseInt($lightbox.offset().top, 10);
-
-                    // Thaaanks IE8!
-                    if (top < 0) {
-                        $lightbox.css({ "margin-top": 1 });
-                        top = parseInt($lightbox.offset().top, 10);
-                    }
-
-                    var fallback = footerHeight > 1 ? -((topHeight + bottomHeight) / 2) : "";
-
-                    bottom = top + $child.height();
-
-                    var getTopMargin = function () {
-                        if (bottomHeight > 1 && top > margin && windowHeight - bottom < bottomHeight) {
-                            var newMargin = ((top - margin) * -2) + 4;
-
-                            if ((newMargin * -1) + childHeight < windowHeight - bottom) {
-                                return newMargin;
-                            }
+                        if (textStatus === "error") {
+                            self.$element.trigger($.Event(eerror, { relatedTarget: $content[0] }));
+                            $content.html(self.options.errorHint);
                         }
 
-                        return fallback;
-                    };
+                        $content.appendTo($modal);
 
-                    $lightbox.css({
-                        "margin-top": getTopMargin()
+                        // Fade in.
+                        fadeIn();
                     });
                 }
-            };
-
-        $window.off(eresize).on(eresize, onResize);
-
-        onResize();
-    },
-
-    toggleFade = function () {
-
-        // Resize the lightbox content.
-        if (this.isShown) {
-            resize();
+            }
         }
+    };
 
-        $.each([$header, $footer, $close, $lightbox], function () {
+    Modal.prototype.destroy = function (callback) {
+        var self = this;
 
-            this.toggleClass("fade-in")
+        $.each([$header, $footer, $close, $modal, $next, $prev], function () {
+            this.removeClass("fade-in")
                 .redraw();
         });
 
-        $overlay.toggleClass("lightbox-loader");
-    },
+        $modal.onTransitionEnd(function () {
 
-    toggleOverlay = function (event) {
+            // Clean up the next/prev.
+            $next.detach();
+            $prev.detach();
 
-        var fade = event === "show" ? "addClass" : "removeClass",
-            self = this,
-            getScrollbarWidth = function () {
-                var $scroll = $("<div/>").css({ width: 99, height: 99, overflow: "scroll", position: "absolute", top: -9999 });
-                $body.append($scroll);
-                scrollbarWidth = $scroll[0].offsetWidth - $scroll[0].clientWidth;
-                $scroll.remove();
+            // Clean up the header/footer.
+            $header.empty().detach();
+            $footer.empty().detach();
+            $close.detach();
 
-                return scrollbarWidth;
-            },
-            complete = function () {
+            // Remove label.
+            $overlay.removeAttr("aria-labelledby");
 
-                if (event === "hide") {
-                    $overlay.addClass("hidden");
-                    $html.removeClass("lightbox-on")
-                         .css("margin-right", "");
+            if (!self.options.external) {
+                // Put that kid back where it came from or so help me.
+                $(self.options.target).addClass(self.isLocalHidden ? "hidden" : "").detach().insertAfter($placeholder);
+                $placeholder.detach().insertAfter($overlay);
+            }
 
-                    if ($html.hasClass("lightbox-lock")) {
+            // Fix __flash__removeCallback' is undefined error.
+            $.when($modal.find("iframe").attr("src", "")).then(w.setTimeout(function () {
 
-                        $html.removeClass("lightbox-lock");
-                        if (lastScroll !== $window.scrollTop()) {
-                            $window.scrollTop(lastScroll);
-                            lastScroll = 0;
-                        }
-                    }
-                    return;
+                $modal.removeClass("modal-iframe modal-ajax modal-image container").css({
+                    "max-height": "",
+                    "max-width": ""
+                }).empty();
+
+                // Return focus events back to normal.
+                $(document).off(efocusin);
+
+                // Unbind the keyboard and touch actions.
+                if (self.options.keyboard) {
+                    $(document).off(ekeydown);
                 }
 
-                $overlay.off(eclick).on(eclick, function (e) {
+                if (self.options.touch) {
+                    $modal.off("swipe.modal swipeend.modal");
+                }
 
-                    if (self.options.modal) {
-                        return;
-                    }
+                // Handle callback passed from direction and linked calls.
+                callback && callback.call(self);
+            }, 100));
 
-                    var closeTarget = $close[0],
-                        eventTarget = e.target;
+        });
+    };
 
-                    if (eventTarget === closeTarget) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        self.hide();
-                    }
+    Modal.prototype.click = function (event) {
+        event.preventDefault();
 
-                    if (eventTarget === $overlay[0]) {
-                        self.hide();
-                    }
-                });
+        // Check to see if there is a current instance running. Useful for 
+        // nested triggers.
+        var $current = $modal.data("currentModal");
+
+        if ($current && $current[0] !== this.$element[0]) {
+            var self = this,
+            complete = function () {
+                if (supportTransition) {
+                    self.show();
+                } else {
+                    w.setTimeout(function () {
+                        self.show();
+                    }, 300);
+                }
             };
 
-        // Add the overlay to the body if not done already.
-        if (!$("div.lightbox-overlay").length) {
-
-            $body.append($overlay);
+            $current.data("r.modal").hide(true, complete);
+            return;
         }
 
-        if (lastScroll === 0) {
-            lastScroll = $window.scrollTop();
+        this.show();
+    };
+
+    Modal.prototype.keydown = function (event) {
+
+        if (this.options.modal) {
+            return;
         }
 
-        // Remove the scrollbar.
-        $html.addClass("lightbox-on")
-             .css("margin-right", getScrollbarWidth());
+        // Bind the escape key.
+        if (event.which === keys.ESCAPE) {
+            this.hide();
+        }
 
-        $overlay.removeClass("hidden")
-            .redraw()[fade]("fade-in")
-            .redraw();
+        // Bind the next/prev keys.
+        if (this.options.group) {
+            // Bind the left arrow key.
+            if (event.which === keys.LEFT) {
+                rtl ? this.next() : this.prev();
+            }
 
-        $overlay.onTransitionEnd(complete);
-    },
+            // Bind the right arrow key.
+            if (event.which === keys.RIGHT) {
+                rtl ? this.prev() : this.next();
+            }
+        }
+    };
 
-    direction = function (course) {
+    Modal.prototype.resize = function () {
+        // Resize the model
+        var windowHeight = parseInt($window.height(), 10),
+            headerHeight = $header.length && parseInt($header.height(), 10) || 0,
+            closeHeight = $close.length && parseInt($close.outerHeight(), 10) || 0,
+            topHeight = closeHeight > headerHeight ? closeHeight : headerHeight,
+            footerHeight = $footer.length && parseInt($footer.height(), 10) || 0,
+            maxHeight = (windowHeight - (topHeight + footerHeight)) * 0.95;
 
+        $(".modal-overlay").css({ "padding-top": topHeight, "padding-bottom": footerHeight });
+
+        if ($modal.hasClass("modal-image")) {
+
+            $modal.children("img").css("max-height", maxHeight);
+        } else if ($modal.hasClass("modal-iframe")) {
+
+            // Calculate the ratio.
+            var $iframe = $modal.find(".media > iframe"),
+                iframeWidth = parseInt($iframe.width(), 10),
+                iframeHeight = parseInt($iframe.height(), 10),
+                ratio = iframeWidth / iframeHeight,
+                maxWidth = maxHeight * ratio;
+
+            // Set both to ensure there is no overflow.
+            if ($iframe.parent().hasClass("scaled")) {
+                $modal.css({
+                    "max-height": maxHeight,
+                    "max-width": maxWidth
+                });
+            }
+
+        } else {
+            var $content = $modal.children(".modal-content");
+
+            $.each([$modal, $content], function () {
+                this.css({
+                    "max-height": maxHeight
+                });
+            });
+
+            // Prevent IEMobile10+ scrolling when content overflows the modal.
+            // This causes the content to jump behind the model but it's all I can
+            // find for now.
+            if (w.MSPointerEvent) {
+                if ($content.length && $content.children("*:first")[0].scrollHeight > parseInt($content.height(), 10)) {
+                    $html.addClass("modal-lock");
+                }
+            }
+        }
+
+        // Reassign the current grid.
+        currentGrid = $.support.currentGrid();
+    };
+
+    Modal.prototype.direction = function (course) {
         if (!this.isShown) {
             return;
         }
@@ -1819,13 +2456,12 @@
                 length = this.$group.length,
                 position = course === "next" ? index + 1 : index - 1,
                 complete = function () {
-                    if (self.$sibling) {
-
+                    if (self.$sibling && self.$sibling.data("r.modal")) {
                         if (supportTransition) {
-                            self.$sibling.trigger(eclick);
+                            self.$sibling.data("r.modal").show();
                         } else {
                             w.setTimeout(function () {
-                                self.$sibling.trigger(eclick);
+                                self.$sibling.data("r.modal").show();
                             }, 300);
                         }
                     }
@@ -1850,239 +2486,33 @@
             }
 
             this.$sibling = $(this.$group[position]);
-
-            destroy.call(this, complete);
-
-            this.isShown = false;
+            this.hide(true, complete);
         }
-    },
-
-    manageKeyboard = function (event) {
-        if (this.options.keyboard) {
-
-            if (event === "hide") {
-                $body.off(ekeyup);
-                return;
-            }
-
-            if (this.options.modal) {
-                return;
-            }
-
-            $body.off(ekeyup).on(ekeyup, $.proxy(function (e) {
-
-                // Bind the escape key.
-                if (e.which === keys.ESCAPE) {
-                    this.hide();
-                }
-
-                // Bind the next/previous keys.
-                if (this.options.group) {
-                    // Bind the left arrow key.
-                    if (e.which === keys.LEFT) {
-                        this.previous();
-                    }
-
-                    // Bind the right arrow key.
-                    if (e.which === keys.RIGHT) {
-                        this.next();
-                    }
-                }
-            }, this));
-        }
-    },
-
-    manageTouch = function (off) {
-
-        if (off) {
-            $lightbox.removeSwipe("r.lightbox");
-            return;
-        }
-
-        $lightbox.swipe({ namespace: "r.lightbox" }).on("swipeend.r.lightbox", $.proxy(function (event) {
-
-            var eventDirection = event.direction,
-                method = (eventDirection === "up" || eventDirection === "right") ? "next" : "previous";
-
-            this[method]();
-
-        }, this));
-    },
-
-    manageFocus = function (off) {
-
-        if (off) {
-            $(document).off(efocusin);
-            return;
-        }
-
-        $(document).off(efocusin).on(efocusin, function (event) {
-            if (!$.contains($overlay[0], event.target)) {
-                var newTarget = $lightbox.find("input, select, a, button, iframe").first();
-                newTarget.length ? newTarget.focus() : $close.focus();
-                return false;
-            }
-            return true;
-        });
-
     };
 
-    // Lightbox class definition
-    var LightBox = function (element, options) {
-
-        this.$element = $(element);
-        this.defaults = {
-            modal: false,
-            external: false,
-            group: null,
-            iframe: false,
-            iframeScroll: false,
-            keyboard: true,
-            next: ">",
-            previous: "<",
-            mobileTarget: null,
-            fitViewport: true,
-            mobileViewportWidth: 480,
-            enabletouch: true
-        };
-        this.options = $.extend({}, this.defaults, options);
-        this.title = null;
-        this.description = null;
-        this.isShown = null;
-        this.$group = null;
-        this.isLocalHidden = false;
-
-        // Make a list of grouped lightbox targets.
-        if (this.options.group) {
-            this.$group = $("[data-lightbox-group=" + this.options.group + "]");
-        }
-
-        this.toggle();
+    Modal.prototype.next = function () {
+        this.direction("next");
     };
 
-    LightBox.prototype.show = function () {
+    Modal.prototype.prev = function () {
+        this.direction("prev");
+    };
 
-        if (this.isShown) {
+    Modal.prototype.swipeend = function (event) {
+        if (rtl) {
+            this[(event.direction === "right") ? "prev" : "next"]();
             return;
         }
 
-        // If the trigger has a mobile target and the viewport is smaller than the mobile limit
-        // then redirect to that page instead.
-        if (this.options.mobileTarget && this.options.mobileViewportWidth >= parseInt($window.width(), 10)) {
-            w.location.href = this.options.mobileTarget;
-            return;
-        }
-
-        var self = this,
-            showEvent = $.Event(eshow),
-            shownEvent = $.Event(eshown),
-            complete = function () {
-
-                manageFocus();
-
-                // Bind the keyboard actions.
-                if (self.options.keyboard) {
-                    manageKeyboard.call(self, "show");
-                }
-
-                if (self.options.group) {
-                    if (self.options.enabletouch) {
-                        manageTouch.call(self);
-                    } else {
-                        manageTouch.call(self, "off");
-                    }
-                }
-
-                self.$element.trigger(shownEvent);
-            };
-
-        this.$element.trigger(showEvent);
-
-        if (showEvent.isDefaultPrevented()) {
-            return;
-        }
-
-        this.isShown = true;
-        $lightbox.data("currentLightbox", this.$element);
-
-        toggleOverlay.call(this, "show");
-        create.call(this);
-
-        // Call the callback.
-        $lightbox.onTransitionEnd(complete);
-    };
-
-    LightBox.prototype.hide = function () {
-
-        if (!this.isShown) {
-            return;
-        }
-
-        var self = this,
-            hideEvent = $.Event(ehide),
-            hiddenEvent = $.Event(ehidden),
-            complete = function () {
-
-                self.$element.trigger(hiddenEvent);
-            };
-
-        this.$element.trigger(hideEvent);
-
-        if (hideEvent.isDefaultPrevented()) {
-            return;
-        }
-
-        this.isShown = false;
-
-        toggleOverlay.call(this, "hide");
-        destroy.call(this);
-
-        $lightbox.onTransitionEnd(complete);
-    };
-
-    LightBox.prototype.next = function () {
-        direction.call(this, "next");
-    };
-
-    LightBox.prototype.previous = function () {
-        direction.call(this, "previous");
-    };
-
-    LightBox.prototype.toggle = function () {
-
-        // Check to see if there is a current instance running. Useful for 
-        // nested triggers.
-        var $currentLightbox = $lightbox.data("currentLightbox");
-
-        if ($currentLightbox && $currentLightbox[0] !== this.element) {
-            var data = $currentLightbox.data("r.lightbox"),
-                self = this,
-                complete = function () {
-                    data.isShown = false;
-                    if (supportTransition) {
-                        return self[!self.isShown ? "show" : "hide"]();
-                    } else {
-                        return w.setTimeout(function () {
-                            return self[!self.isShown ? "show" : "hide"]();
-                        }, 300);
-                    }
-                };
-
-            if (data) {
-                destroy.call(data, complete);
-                return true;
-            }
-        }
-
-        return this[!this.isShown ? "show" : "hide"]();
+        this[(event.direction === "right") ? "next" : "prev"]();
     };
 
     // Plug-in definition 
-    $.fn.lightbox = function (options) {
+    $.fn.modal = function (options) {
 
         return this.each(function () {
             var $this = $(this),
-                data = $this.data("r.lightbox"),
+                data = $this.data("r.modal"),
                 opts = typeof options === "object" ? options : {};
 
             if (!opts.target) {
@@ -2091,76 +2521,45 @@
 
             if (!data) {
                 // Check the data and reassign if not present.
-                $this.data("r.lightbox", (data = new LightBox(this, opts)));
+                $this.data("r.modal", (data = new Modal(this, opts)));
             }
 
             // Run the appropriate function if a string is passed.
-            if (typeof options === "string") {
+            if (typeof options === "string" && /(show|hide|next|prev)/.test(options)) {
                 data[options]();
             }
-
         });
     };
 
     // Set the public constructor.
-    $.fn.lightbox.Constructor = LightBox;
+    $.fn.modal.Constructor = Modal;
 
     // No conflict.
-    var old = $.fn.lightbox;
-    $.fn.lightbox.noConflict = function () {
-        $.fn.lightbox = old;
+    var old = $.fn.modal;
+    $.fn.modal.noConflict = function () {
+        $.fn.modal = old;
         return this;
     };
 
     // Data API
-    $body.on(eclick, ":attrStart(data-lightbox)", function (event) {
-
-        event.preventDefault();
-
-        // Handle close events.
-        var $this = $(this);
-
-        // If it's a modal close instruction we want to ignore it.
-        if ($this.is("[data-lightbox-modal-trigger]")) {
-            return;
-        }
-
-        var data = $this.data("r.lightboxOptions"),
-            options = data || $.buildDataOptions($this, {}, "lightbox", "r"),
-            params = $this.data("r.lightbox") ? "toggle" : options;
-
-        // Run the lightbox method.
-        $this.lightbox(params);
-
-    }).on(eclick, "[data-lightbox-modal-trigger]", function (event) {
-
-        event.preventDefault();
-
-        // Handle close events.
-        var $this = $(this),
-            data = $this.data("r.lightboxOptions"),
-            options = data || $.buildDataOptions($this, {}, "lightbox", "r"),
-            $closeTarget = $(options.modalTrigger || (options.modalTrigger = $this.attr("href")));
-
-        $closeTarget.each(function () {
-
-            var lightbox = $(this).data("r.lightbox");
-
-            if (lightbox) {
-                // Compare the elements.
-                if (lightbox.$element[0] === this) {
-                    lightbox.hide();
-                    return true;
-                }
+    var init = function () {
+        $(":attrStart(data-modal)").each(function () {
+            var $this = $(this),
+                options = $this.data("r.modalOptions");
+            if (!options) {
+                $this.modal($.buildDataOptions($this, {}, "modal", "r"));
             }
-
-            return false;
         });
+    },
+    debouncedInit = $.debounce(init, 500);
+
+    $(document).on([eready, echanged, eshown].join(" "), function (event) {
+        event.type === "ready" ? init() : debouncedInit();
     });
 
-    w.RESPONSIVE_LIGHTBOX = true;
+    w.RESPONSIVE_MODAL = true;
 
-}(jQuery, window, ".r.lightbox"));
+}(jQuery, window, ".r.modal"));
 /*
  * Responsive Tables
  */
@@ -2177,13 +2576,14 @@
 
     // General variables and methods.
     var eready = "ready" + ns,
+        echanged = ["domchanged" + ns, "shown.r.modal"].join(" "),
         eadd = "add" + ns,
         eadded = "added" + ns;
 
     // Table class definition.
     var Table = function (element) {
 
-        this.$element = $(element);
+        this.$element = $(element).addClass("table-list");
         this.$thead = this.$element.find("thead");
         this.$tfoot = this.$element.find("tfoot");
         this.$tbody = this.$element.find("tbody");
@@ -2201,8 +2601,7 @@
             return;
         }
 
-        var supportTransition = $.support.transition,
-            self = this,
+        var self = this,
             addEvent = $.Event(eadd),
             complete = function () {
                 self.$element.trigger($.Event(eadded));
@@ -2233,26 +2632,24 @@
             });
         });
 
-        this.$element.addClass("fade-in").redraw();
+        this.$element.redraw().addClass("fade-in");
 
         // Do our callback
-        supportTransition ? this.$element.one(supportTransition.end, complete)
-        .ensureTransitionEnd(this.$element.css("transition-duration").slice(0, -1) * 1000)
-        : complete();
+        this.$element.onTransitionEnd(complete);
     };
 
     // Plug-in definition 
-    $.fn.table = function (options) {
+    $.fn.tablelist = function (options) {
 
         return this.each(function () {
 
             var $this = $(this),
-                data = $this.data("r.table"),
+                data = $this.data("r.tablelist"),
                 opts = typeof options === "object" ? options : null;
 
             if (!data) {
                 // Check the data and reassign if not present.
-                $this.data("r.table", (data = new Table(this, opts)));
+                $this.data("r.tablelist", (data = new Table(this, opts)));
             }
 
             // Run the appropriate function is a string is passed.
@@ -2263,32 +2660,34 @@
     };
 
     // Set the public constructor.
-    $.fn.table.Constructor = Table;
+    $.fn.tablelist.Constructor = Table;
 
     // No conflict.
     var old = $.fn.table;
-    $.fn.table.noConflict = function () {
-        $.fn.table = old;
+    $.fn.tablelist.noConflict = function () {
+        $.fn.tablelist = old;
         return this;
     };
 
     // Data API
-    $(document).on(eready, function () {
-
+    var init = function () {
         $("table[data-table-list]").each(function () {
-
             var $this = $(this),
-                data = $this.data("r.tableOptions"),
-                options = data || $.buildDataOptions($this, {}, "table", "r");
-
-            // Run the table method.
-            $this.table(options);
+                options = $this.data("r.tablelistOptions");
+            if (!options) {
+                $this.tablelist($.buildDataOptions($this, {}, "tablelist", "r"));
+            }
         });
+    },
+    debouncedInit = $.debounce(init, 500);
+
+    $(document).on([eready, echanged].join(" "), function (event) {
+        event.type === "ready" ? init() : debouncedInit();
     });
 
     w.RESPONSIVE_TABLE = true;
 
-}(jQuery, window, ".r.table"));
+}(jQuery, window, ".r.tablelist"));
 /*
  * Responsive tabs
  */
@@ -2304,44 +2703,18 @@
     }
 
     // General variables.
-    var eready = "ready" + ns,
-        eclick = "click" + ns,
+    var rtl = $.support.rtl,
+        eready = "ready" + ns,
+        echanged = ["domchanged" + ns, "shown.r.modal"].join(" "),
+        eclick = "click",
+        ekeydown = "keydown",
         eshow = "show" + ns,
         eshown = "shown" + ns;
 
-    // Private methods.
-    var tab = function (activePosition, postion, callback) {
-
-        var showEvent = $.Event(eshow),
-            $element = this.$element,
-            $childTabs = $element.children("ul").find("li"),
-            $childPanes = $element.children(":not(ul)"),
-            $nextTab = $childTabs.eq(postion),
-            $currentPane = $childPanes.eq(activePosition),
-            $nextPane = $childPanes.eq(postion);
-
-        $element.trigger(showEvent);
-
-        if (this.tabbing || showEvent.isDefaultPrevented()) {
-            return;
-        }
-
-        this.tabbing = true;
-
-        $childTabs.removeClass("tab-active");
-        $nextTab.addClass("tab-active");
-
-        // Do some class shuffling to allow the transition.
-        $currentPane.addClass("fade-out fade-in");
-        $nextPane.addClass("tab-pane-active fade-out");
-        $childPanes.filter(".fade-in").removeClass("tab-pane-active fade-in");
-
-        // Force redraw.
-        $nextPane.redraw().addClass("fade-in");
-
-        // Do the callback
-        callback.call(this, $nextPane);
-
+    var keys = {
+        SPACE: 32,
+        LEFT: 37,
+        RIGHT: 39
     };
 
     // Tabs class definition
@@ -2349,11 +2722,41 @@
 
         this.$element = $(element);
         this.tabbing = null;
+
+        // Add accessibility features.
+        var $tablist = this.$element.children("ul:first").attr("role", "tablist"),
+            $triggers = $tablist.children().attr("role", "presentation"),
+            $panes = this.$element.children(":not(ul)"),
+            id = $.pseudoUnique();
+
+        $triggers.each(function (index) {
+            var $this = $(this),
+                $tab = $this.children("a");
+
+            $tab.attr({
+                "role": "tab",
+                "id": "tab-" + id + "-" + index,
+                "aria-controls": "pane-" + id + "-" + index,
+                "aria-selected": $this.hasClass("tab-active") ? true : false,
+                "tabIndex": 0
+            });
+
+            $panes.eq(index).attr({
+                "role": "tabpanel",
+                "id": "pane-" + id + "-" + index,
+                "aria-labelledby": "tab-" + id + "-" + index,
+                "tabIndex": $this.hasClass("tab-active") ? 0 : -1
+            });
+        });
+
+        // Bind events.
+        $(this.$element).on(eclick, "ul[role=tablist] > li > [role=tab]", $.proxy(this.click, this))
+                        .on(ekeydown, "ul[role=tablist] > li > [role=tab]", $.proxy(this.keydown, this));
     };
 
     Tabs.prototype.show = function (position) {
 
-        var $activeItem = this.$element.find(".tab-active"),
+        var $activeItem = this.$element.children("ul").children(".tab-active"),
             $children = $activeItem.parent().children(),
             activePosition = $children.index($activeItem),
             self = this;
@@ -2368,10 +2771,9 @@
         }
 
         // Call the function with the callback
-        return tab.call(this, activePosition, position, function ($item) {
+        return this.tab(activePosition, position, function ($item) {
 
             var complete = function () {
-
                 self.tabbing = false;
                 self.$element.trigger($.Event(eshown));
             };
@@ -2379,6 +2781,87 @@
             // Do our callback
             $item.onTransitionEnd(complete);
         });
+    };
+
+    Tabs.prototype.tab = function (activePosition, postion, callback) {
+
+        var showEvent = $.Event(eshow),
+           $element = this.$element,
+           $childTabs = $element.children("ul").children("li"),
+           $childPanes = $element.children(":not(ul)"),
+           $nextTab = $childTabs.eq(postion),
+           $currentPane = $childPanes.eq(activePosition),
+           $nextPane = $childPanes.eq(postion);
+
+        $element.trigger(showEvent);
+
+        if (this.tabbing || showEvent.isDefaultPrevented()) {
+            return;
+        }
+
+        this.tabbing = true;
+
+        $childTabs.removeClass("tab-active").children("a").attr({ "aria-selected": false });
+        $nextTab.addClass("tab-active").children("a").attr({ "aria-selected": true }).focus();
+
+        // Do some class shuffling to allow the transition.
+        $currentPane.addClass("fade-out fade-in");
+        $nextPane.attr({ "tabIndex": 0 }).addClass("tab-pane-active fade-out");
+        $childPanes.filter(".fade-in").attr({ "tabIndex": -1 }).removeClass("tab-pane-active fade-in");
+
+        // Force redraw.
+        $nextPane.redraw().addClass("fade-in");
+
+        // Do the callback
+        callback.call(this, $nextPane);
+    };
+
+    Tabs.prototype.click = function (event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        var $this = $(event.target),
+            $li = $this.parent(),
+            index = $li.index();
+
+        this.show(index);
+    };
+
+    Tabs.prototype.keydown = function (event) {
+
+        var which = event.which;
+        // Ignore anything but left and right.
+        if (which === keys.SPACE || which === keys.LEFT || which === keys.RIGHT) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            var $this = $(event.target),
+                $li = $this.parent(),
+                $all = $li.siblings().addBack(),
+                length = $all.length,
+                index = $li.index();
+
+            if (which === keys.SPACE) {
+                this.show(index);
+                return;
+            }
+
+            // Select the correct index.
+            index = which === keys.LEFT ? (rtl ? index + 1 : index - 1) : (rtl ? index - 1 : index + 1);
+
+            // Ensure that the index stays within bounds.
+            if (index === length) {
+                index = 0;
+            }
+
+            if (index < 0) {
+                index = length - 1;
+            }
+
+            this.show(index);
+        }
     };
 
     // Plug-in definition 
@@ -2398,7 +2881,6 @@
             if (typeof options === "number") {
                 data.show(options);
             }
-
         });
     };
 
@@ -2413,20 +2895,20 @@
     };
 
     // Data API
-    $(document).on(eready, function () {
-        $("[data-tabs]").tabs();
-    });
+    var init = function () {
+        $("[data-tabs]").each(function () {
+            var $this = $(this),
+                loaded = $this.data("r.tabsLoaded");
+            if (!loaded) {
+                $this.data("r.tabsLoaded", true);
+                $this.tabs();
+            }
+        });
+    },
+    debouncedInit = $.debounce(init, 500);
 
-    $(document).on(eclick, "[data-tabs] > ul > li > a", function (event) {
-
-        event.preventDefault();
-
-        var $this = $(this),
-            $li = $this.parent(),
-            $tabs = $this.parents("[data-tabs]:first"),
-            index = $li.index();
-
-        $tabs.tabs(index);
+    $(document).on([eready, echanged].join(" "), function (event) {
+        event.type === "ready" ? init() : debouncedInit();
     });
 
     w.RESPONSIVE_TABS = true;

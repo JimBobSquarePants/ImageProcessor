@@ -1,0 +1,28 @@
+---
+title: Tint
+subheading: Tint
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Tint</h1>
+    <p>Tints the current image with the given color</p>
+
+    <p>
+        Requests are passed thus:
+    </p>
+
+    <pre class="language-markup"><code>&lt;!--Hex--&gt;
+http://your-image?tint=800080
+&lt;!--RGBA--&gt;
+http://your-image?tint=128,0,128,255
+&lt;!--Known Color--&gt;
+http://your-image?tint=purple</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/legs.jpg" alt="original image" />
+    <h3>Dark Pink Tint</h3>
+    <img src="{{ site.baseurl }}/assets/img/tint/legs.jpg" alt="image with a dark pink tint" />
+</section>

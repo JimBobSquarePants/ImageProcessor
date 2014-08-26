@@ -1,0 +1,34 @@
+---
+title: Vignette
+subheading: Vignette
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Vignette</h1>
+    <p>Adds a vignette image effect to the current image.</p>
+
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Default Black--&gt;
+http://your-image?vignette=true
+&lt;!--Hex--&gt;
+http://your-image?vignette=800080
+&lt;!--RGBA--&gt;
+http://your-image?vignette=128,0,128,255
+&lt;!--Known Color--&gt;
+http://your-image?vignette=purple
+</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/mountain.jpg" alt="original image" />
+
+    <h3>Black Vignette</h3>
+    <img src="{{ site.baseurl }}/assets/img/vignette/black/mountain.jpg" alt="image with a black vignette" />
+
+    <h3>Purple Vignette</h3>
+    <img src="{{ site.baseurl }}/assets/img/vignette/purple/mountain.jpg" alt="image with a purple vignette" />
+</section>
