@@ -1,0 +1,18 @@
+---
+title: Meta
+subheading: Meta
+sublinks: ["#usage|Usage"]
+---
+<section id="usage">
+    <h1>Meta </h1>
+
+    <p>Toggles preservation of EXIF defined metadata within the image. Overrides the global variable set in the <a href="/imageprocessor-web/#processingconfig">processing.config</a></p>
+    <p>
+        Requests are passed thus:
+    </p>
+
+    <pre class="language-markup"><code>&lt;!--Force metadata preservation--&gt;
+http://your-image?metadata=true
+&lt;!--Force metadata disposal--&gt;
+http://your-image?metadata=false</code></pre>
+</section>
