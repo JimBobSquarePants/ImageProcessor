@@ -29,6 +29,28 @@ h1, h2, h3 {
     text-transform: capitalize;
 }
 
+h1 {
+    font-size: 1.17em;
+    margin: 1em 0;
+}
+
+h3 {
+    font-size: 1em;
+    margin: 1.33em 0;
+}
+
+@media (min-width: 48em ) {
+    h1 {
+        font-size: 2em;
+        margin: .67em 0;
+    }
+
+    h3 {
+        font-size: 1.17em;
+        margin: 1em 0;
+    }
+}
+
 blockquote {
     padding: 1em 1em 1em 1.5em;
     border-left: 5px solid #009688;
@@ -105,7 +127,7 @@ header[role="banner"] {
 }
 
     header[role="banner"] h1 {
-        font-size: 2em;
+        font-size: 1.5em;
         margin-bottom: 0;
     }
 
