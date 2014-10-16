@@ -292,7 +292,8 @@ footer[role="contentinfo"] {
         display: inline-block;
     }
 
-.fa-download {
+button > .fa,
+a > .fa {
     margin-right: .5em;
 }
 
