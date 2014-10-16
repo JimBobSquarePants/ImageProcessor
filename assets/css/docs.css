@@ -193,7 +193,7 @@ nav[role="navigation"] {
     #navigation a {
         display: block;
         float: none;
-        padding: .5em 0;
+        padding: .5em;
     }
 
         #navigation a.active,
