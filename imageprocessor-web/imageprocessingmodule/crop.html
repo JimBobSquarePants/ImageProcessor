@@ -15,7 +15,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
                 Pixel based - Supply the upper-left coordinates and the new width/height.
             </li>
             <li>
-                Percentage based - Supply the left, top, right, and bottom percentages as a decimal to crop with an indicator to switch mode.
+                Percentage based - Supply the left, top, right, and bottom percentages as a decimal between 0 and 1 to crop with an indicator to switch mode.
             </li>
         </ol>
     </p>
@@ -24,7 +24,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
     </p>
     <pre class="language-markup"><code>&lt;!--Pixel--&gt;
 http://your-image?crop=x,y,width,height
-&lt;!--Percentage each value is a decimal between 0 and 1--&gt;
+&lt;!--Percentage - Each value is a decimal between 0 and 1--&gt;
 http://your-image?crop=left,top,right,bottom&cropmode=percent
 </code></pre>
 </section>
