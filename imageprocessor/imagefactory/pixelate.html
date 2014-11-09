@@ -1,0 +1,34 @@
+---
+title: Pixelate
+subheading: Pixelate
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Pixelate</h1>
+    <p>Pixelates an image with the given size.</p>
+    <div class="alert" role="alert">
+        <p>Added version 2.1.0</p>
+    </div>
+
+    <pre class="language-csharp"><code>public ImageFactory Pixelate(int pixelSize, Rectangle? rectangle = null)</code></pre>
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>pixelSize</strong></dt>
+        <dd>The size of the pixels to create.</dd>
+        <dt><strong>rectangle</strong></dt>
+        <dd>
+            The <code>Nullable&lt;System.Drawing.Rectangle&gt;</code> representing the area in which to pixelate the image.
+            If not set, the whole image is pixelated.
+        </dd>
+    </dl>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/coffee.jpg" alt="original image" />
+    <h3>Cropped</h3>
+    <img src="{{ site.baseurl }}/assets/img/crop/coffee.jpg" alt="image with crop applied" />
+</section>

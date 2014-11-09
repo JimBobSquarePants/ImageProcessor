@@ -1,0 +1,34 @@
+---
+title: Overlay
+subheading: Overlay
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Overlay</h1>
+    <p>Adds a image overlay to the current image.</p>
+    <div class="alert" role="alert">
+        <p>Added version 2.1.0</p>
+    </div>
+
+    <pre class="language-csharp"><code>public ImageFactory Overlay(ImageLayer imageLayer)</code></pre>
+
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>imageLayer</strong></dt>
+        <dd>The <code>ImageProcessor.Imaging.ImageLayer</code> containing the properties necessary to add the image overlay to the image.</dd>
+    </dl>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/plane.jpg" alt="original image" />
+
+    <h3>Horizontal</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/horizontal/plane.jpg" alt="image flipped horizontally" />
+    
+    <h3>Vertical</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/vertical/plane.jpg" alt="image flipped vertically" />
+</section>
