@@ -1,0 +1,39 @@
+---
+title: Mask
+subheading: Mask
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Mask</h1>
+    <p>Applies the given image mask to the current image.</p>
+    <div class="alert" role="alert">
+        <p>Added version 2.1.0</p>
+    </div>
+
+    <pre class="language-csharp"><code>public ImageFactory Mask(Image imageMask, Point? point = null)</code></pre>
+
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>imageMask</strong></dt>
+        <dd>The image containing the mask to apply.</dd>
+        <dt><strong>point</strong></dt>
+        <dd>
+            The <code>Nullable&lt;System.Drawing.Point&gt;</code>to place the mask if it not the same dimensions as the original image.
+            If no position is set, the mask will be centered within the image.
+        </dd>
+    </dl>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/plane.jpg" alt="original image" />
+
+    <h3>Horizontal</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/horizontal/plane.jpg" alt="image flipped horizontally" />
+    
+    <h3>Vertical</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/vertical/plane.jpg" alt="image flipped vertically" />
+</section>

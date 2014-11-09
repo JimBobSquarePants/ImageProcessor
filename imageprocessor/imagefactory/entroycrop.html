@@ -1,0 +1,28 @@
+---
+title: EntropyCrop
+subheading: EntropyCrop
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>EntropyCrop</h1>
+    <p>Crops an image to the area of greatest entropy.</p>
+    <div class="alert" role="alert">
+        <p>Added version 2.1.0</p>
+    </div>
+    <pre class="language-csharp"><code>public ImageFactory EntropyCrop(byte threshold = 128)</code></pre>
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>threshold</strong></dt>
+        <dd>The threshold in bytes to control the entropy detection level. Defaults to <var>128</var></dd>
+    </dl>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/coffee.jpg" alt="original image" />
+    <h3>Cropped</h3>
+    <img src="{{ site.baseurl }}/assets/img/crop/coffee.jpg" alt="image with crop applied" />
+</section>

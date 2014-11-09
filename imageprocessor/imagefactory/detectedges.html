@@ -1,0 +1,43 @@
+---
+title: DetectEdges
+subheading: DetectEdges
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>DetectEdges</h1>
+    <p>Detects the edges in the current image using various one and two dimensional algorithms.</p>
+    <div class="alert" role="alert">
+        <p>Added version 2.1.0</p>
+    </div>
+
+    <pre class="language-csharp"><code>public ImageFactory DetectEdges(IEdgeFilter filter, bool greyscale = true)</code></pre>
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>filter</strong></dt>
+        <dd>The <code>ImageProcessor.Imaging.Filters.EdgeDetection.IEdgeFilter</code> to detect edges with.</dd>
+        <dt><strong>greyscale</strong></dt>
+        <dd>Whether to convert the image to greyscale first. Defaults to <var>true</var>.</dd>
+    </dl>
+
+    <p>Available filters are:</p>
+    <ul>
+        <li>KayyaliEdgeFilter</li>
+        <li>KirschEdgeFilter</li>
+        <li>Laplacian3X3EdgeFilter</li>
+        <li>Laplacian5X5EdgeFilter</li>
+        <li>PrewittEdgeFilter</li>
+        <li>RobertsCrossEdgeFilter</li>
+        <li>ScharrEdgeFilter</li>
+        <li>SobelEdgeFilter</li>
+    </ul>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/coffee.jpg" alt="original image" />
+    <h3>Cropped</h3>
+    <img src="{{ site.baseurl }}/assets/img/crop/coffee.jpg" alt="image with crop applied" />
+</section>

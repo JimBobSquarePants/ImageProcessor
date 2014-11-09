@@ -1,0 +1,36 @@
+---
+title: Hue
+subheading: Hue
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Hue</h1>
+    <p>Alters the hue of the current image changing the overall color.</p>
+    <div class="alert" role="alert">
+        <p>Added version 2.1.0</p>
+    </div>
+
+    <pre class="language-csharp"><code>public ImageFactory Hue(int degrees, bool rotate = false)</code></pre>
+
+
+    <h3>Parameters</h3>
+
+    <dl>
+        <dt><strong>degrees</strong></dt>
+        <dd>The angle by which to alter the images hue. Any integer between <var>0</var> and <var>360</var>.</dd>
+        <dt><strong>rotate</strong></dt>
+        <dd>Whether to rotate the hue of the current image altering each color. Defaults to <var>False</var></dd>
+    </dl>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/plane.jpg" alt="original image" />
+
+    <h3>Horizontal</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/horizontal/plane.jpg" alt="image flipped horizontally" />
+    
+    <h3>Vertical</h3>
+    <img src="{{ site.baseurl }}/assets/img/flip/vertical/plane.jpg" alt="image flipped vertically" />
+</section>
