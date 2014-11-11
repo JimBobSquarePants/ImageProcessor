@@ -1,5 +1,6 @@
 ---
 title: DetectEdges
+heading: Methods
 subheading: DetectEdges
 sublinks: ["#usage|Usage","#example|Examples"]
 ---
@@ -14,29 +15,22 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <p>Added version 2.1.0</p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory DetectEdges(IEdgeFilter filter, bool greyscale = true)</code></pre>
-
-    <h3>Parameters</h3>
-
-    <dl>
-        <dt><strong>filter</strong></dt>
-        <dd>The <code>ImageProcessor.Imaging.Filters.EdgeDetection.IEdgeFilter</code> to detect edges with.</dd>
-        <dt><strong>greyscale</strong></dt>
-        <dd>Whether to convert the image to greyscale first. Defaults to <var>true</var>.</dd>
-    </dl>
-
     <p>Available filters are:</p>
     <ul>
-        <li>KayyaliEdgeFilter</li>
-        <li>KirschEdgeFilter</li>
-        <li>Laplacian3X3EdgeFilter</li>
-        <li>Laplacian5X5EdgeFilter</li>
-        <li>LaplacianOfGaussianEdgeFilter</li>
-        <li>PrewittEdgeFilter</li>
-        <li>RobertsCrossEdgeFilter</li>
-        <li>ScharrEdgeFilter</li>
-        <li>SobelEdgeFilter</li>
+        <li>kayyali</li>
+        <li>kirsch</li>
+        <li>laplacian3X3</li>
+        <li>laplacian5X5</li>
+        <li>laplacianffgaussian</li>
+        <li>prewitt</li>
+        <li>robertscross</li>
+        <li>scharr</li>
+        <li>sobel</li>
     </ul>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>http://your-image?detectedges=kayyali&amp;greyscale=false</code></pre>
 </section>
 <hr />
 <section id="example">

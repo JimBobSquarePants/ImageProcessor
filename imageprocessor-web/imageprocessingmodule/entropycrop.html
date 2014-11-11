@@ -1,0 +1,29 @@
+---
+title: EntropyCrop
+heading: Methods
+subheading: EntropyCrop
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>EntropyCrop</h1>
+    <p>
+        Crops an image to the area of greatest entropy.
+        This method works best with images containing large areas of a single color or similar colors around the edges.
+    </p>
+    <div class="alert" role="alert">
+        <p>Added version 2.1.0</p>
+    </div>
+    <p>
+        Requests are passed thus:
+    </p>
+
+    <pre class="language-markup"><code>http://your-image?entropycrop=128</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/beach.jpg" alt="original image" />
+    <h3>Cropped</h3>
+    <img src="{{ site.baseurl }}/assets/img/entropycrop/beach.jpg" alt="image with entropy crop applied" />
+</section>

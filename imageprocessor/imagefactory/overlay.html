@@ -5,7 +5,10 @@ sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
     <h1>Overlay</h1>
-    <p>Adds a image overlay to the current image.</p>
+    <p>
+        Adds a image overlay to the current image.
+        If the overlay is larger than the image it will be resized to match the images dimensions.
+    </p>
     <div class="alert" role="alert">
         <p>Added version 2.1.0</p>
     </div>
@@ -17,18 +20,30 @@ sublinks: ["#usage|Usage","#example|Examples"]
 
     <dl>
         <dt><strong>imageLayer</strong></dt>
-        <dd>The <code>ImageProcessor.Imaging.ImageLayer</code> containing the properties necessary to add the image overlay to the image.</dd>
+        <dd>
+            The <code>ImageProcessor.Imaging.ImageLayer</code> containing the properties necessary to add the image overlay to the image.
+            <dl>
+                <dt><strong>Image</strong></dt>
+                <dd>The <code>System.Drawing.Image</code> overlay the image with.</dd>
+                <dt><strong>Size</strong></dt>
+                <dd>The <code>System.Drawing.Size</code> at which to render the overlay.</dd>
+                <dt><strong>Opacity</strong></dt>
+                <dd>The opacity of the image. Between <var>0</var> and <var>100</var></dd>
+                <dt><strong>Position</strong></dt>
+                <dd>
+                    The <code>Nullable&lt;System.Drawing.Point&gt;</code> determining the position within the current image to render the overlay.
+                    If not set then the overlay will be centered.
+                </dd>
+            </dl>
+        </dd>
     </dl>
 </section>
 <hr />
 <section id="example">
     <h1>Examples</h1>
     <h3>Original</h3>
-    <img src="{{ site.baseurl }}/assets/img/originals/plane.jpg" alt="original image" />
+    <img src="{{ site.baseurl }}/assets/img/originals/factory.jpg" alt="original image" />
 
-    <h3>Horizontal</h3>
-    <img src="{{ site.baseurl }}/assets/img/flip/horizontal/plane.jpg" alt="image flipped horizontally" />
-    
-    <h3>Vertical</h3>
-    <img src="{{ site.baseurl }}/assets/img/flip/vertical/plane.jpg" alt="image flipped vertically" />
+    <h3>Overlay</h3>
+    <img src="{{ site.baseurl }}/assets/img/overlay/factory.jpg" alt="image with overlay applied" />
 </section>
