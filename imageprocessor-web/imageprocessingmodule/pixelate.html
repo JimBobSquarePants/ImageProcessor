@@ -10,19 +10,11 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <p>Added version 2.1.0</p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory Pixelate(int pixelSize, Rectangle? rectangle = null)</code></pre>
-
-    <h3>Parameters</h3>
-
-    <dl>
-        <dt><strong>pixelSize</strong></dt>
-        <dd>The size of the pixels to create.</dd>
-        <dt><strong>rectangle</strong></dt>
-        <dd>
-            The <code>Nullable&lt;System.Drawing.Rectangle&gt;</code> representing the area in which to pixelate the image.
-            If not set, the whole image is pixelated.
-        </dd>
-    </dl>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Pixelate--&gt;
+http://your-image?pixelate=8</code></pre>
 </section>
 <hr />
 <section id="example">

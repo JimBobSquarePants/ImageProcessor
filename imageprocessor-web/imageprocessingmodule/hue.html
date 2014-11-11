@@ -5,22 +5,22 @@ sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
     <h1>Hue</h1>
-    <p>Alters the hue of the current image changing the overall color.</p>
+    <p>
+        Alters the hue of the current image changing the overall color.
+        The angle can be and value between <var>0</var> and <var>360</var> degrees.
+    </p>
     <div class="alert" role="alert">
         <p>Added version 2.1.0</p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory Hue(int degrees, bool rotate = false)</code></pre>
-
-
-    <h3>Parameters</h3>
-
-    <dl>
-        <dt><strong>degrees</strong></dt>
-        <dd>The angle by which to alter the images hue. Any integer between <var>0</var> and <var>360</var>.</dd>
-        <dt><strong>rotate</strong></dt>
-        <dd>Whether to rotate the hue of the current image altering each color. Defaults to <var>False</var></dd>
-    </dl>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Hue--&gt;
+http://your-image?hue=180,height
+&lt;!--Hue Rotate--&gt;
+http://your-image?hue=180&rotatehue=true
+</code></pre>
 </section>
 <hr />
 <section id="example">

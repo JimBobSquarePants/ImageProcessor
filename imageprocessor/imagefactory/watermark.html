@@ -29,7 +29,10 @@ sublinks: ["#usage|Usage","#example|Examples"]
                 <dt><strong>Opacity</strong></dt>
                 <dd>The opacity of the text.</dd>
                 <dt><strong>Position</strong></dt>
-                <dd>The <code>System.Drawing.Point</code> determining the position within the current image to render the text.</dd>
+                <dd>
+                    The <code>Nullable&lt;System.Drawing.Point&gt;</code> determining the position within the current image to render the overlay.
+                    If not set then the text will be centered.
+                </dd>
                 <dt><strong>DropShadow</strong></dt>
                 <dd>Whether to apply a drop shadow to the text.</dd>
             </dl>

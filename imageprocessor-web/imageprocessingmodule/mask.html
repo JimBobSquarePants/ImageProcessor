@@ -9,24 +9,18 @@ sublinks: ["#usage|Usage","#example|Examples"]
         Applies the given image mask to the current image.
         Any area containing transparency withing the mask will be removed from the original image. If the mask is larger than the image it will be resized to match the images dimensions.
     </p>
+    <p>
+        The image mask is called by name alone. It has to be a locally stored file which defaults to the location
+        <code>~/images/imageprocessor/mask/</code>. This value is configurable.
+    </p>
     <div class="alert" role="alert">
         <p>Added version 2.1.0</p>
     </div>
-
-    <pre class="language-csharp"><code>public ImageFactory Mask(Image imageMask, Point? point = null)</code></pre>
-
-
-    <h3>Parameters</h3>
-
-    <dl>
-        <dt><strong>imageMask</strong></dt>
-        <dd>The image containing the mask to apply.</dd>
-        <dt><strong>point</strong></dt>
-        <dd>
-            The <code>Nullable&lt;System.Drawing.Point&gt;</code>to place the mask if it not the same dimensions as the original image.
-            If no position is set, the mask will be centered within the image.
-        </dd>
-    </dl>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Mask--&gt;
+http://your-image?mask=imagemask.png&amp;mask.position=30,30</code></pre>
 </section>
 <hr />
 <section id="example">

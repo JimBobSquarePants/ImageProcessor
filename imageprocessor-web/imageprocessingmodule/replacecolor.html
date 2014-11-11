@@ -10,18 +10,16 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <p>Added version 2.1.0</p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory ReplaceColor(Color target, Color replacement, int fuzziness = 0)</code></pre>
-
-    <h3>Parameters</h3>
-
-    <dl>
-        <dt><strong>target</strong></dt>
-        <dd>The target <code>System.Drawing.Color</code></dd>
-        <dt><strong>replacement</strong></dt>
-        <dd>The replacement <code>System.Drawing.Color</code></dd>
-        <dt><strong>fuzziness</strong></dt>
-        <dd>A value between <var>0</var> and <var>128</var> with which to alter the target detection accuracy.</dd>
-    </dl>
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Hex--&gt;
+http://your-image?replace=000|fff&amp;fuzziness=30
+&lt;!--RGBA--&gt;
+http://your-image?replace=255,0,0,0|255,255,255,255&amp;fuzziness=30,
+&lt;!--Known Color--&gt;
+http://your-image?replace=black,white&amp;fuzziness=30
+</code></pre>
 </section>
 <hr />
 <section id="example">

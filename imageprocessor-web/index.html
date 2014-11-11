@@ -19,17 +19,17 @@ sublinks: ["#about|About",
     <p>
         This works by adding a configurable HttpModule to your website which intercepts local and remote image requests,
         processing them on-the-fly to your desired output.
-    </p>    
+    </p>
     <p>
         For a list of the Url API methods follow the link here:
-    <br/>
-    <br/>
-      <a href="imageprocessingmodule/#methods" role="button" class="download" 
-         data-ga-category="Landing Page Actions" 
-         data-ga-action="Landing Page Links" 
-         data-ga-label="Web API Link">
-        <i class="fa fa-cogs"></i>ImageProcessingModule
-      </a> 
+        <br />
+        <br />
+        <a href="imageprocessingmodule/#methods" role="button" class="download"
+           data-ga-category="Landing Page Actions"
+           data-ga-action="Landing Page Links"
+           data-ga-label="Web API Link">
+            <i class="fa fa-cogs"></i>ImageProcessingModule
+        </a>
     </p>
 
 </section>
@@ -94,9 +94,38 @@ sublinks: ["#about|About",
             Contains setting pertaining to security configuration which allow the safe configuration of externally hosted files.
             The more precise the url, the more restrictive the whitelist.
         </p>
+        <div class="alert" role="alert">
+            <p>
+                From version <strong>2.1.0</strong> A new configuration layout has been added for the security section to allow for custom image services
+                which allow you to add new sources for images to process.
+            </p>
+        </div>
+        <h3>v2.1.0</h3>
+        <pre class="language-markup"><code>
+&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;security&gt;
+  &lt;services autoLoadServices="true"&gt;
+    &lt;service name="LocalFileImageService" type="ImageProcessor.Web.Services.LocalFileImageService, ImageProcessor.Web"/&gt;
+    &lt;service prefix="remote.axd" name="RemoteImageService" type="ImageProcessor.Web.Services.RemoteImageService, ImageProcessor.Web"&gt;
+       &lt;!-- The timeout for a request in milliseconds and the maximum 
+            allowable download in bytes. --&gt;
+      &lt;settings&gt;
+        &lt;setting key="MaxBytes" value="4194304"/&gt;
+        &lt;setting key="Timeout" value="3000"/&gt;
+      &lt;/settings&gt;
+      &lt;!-- Sets allowable domains to process images from. --&gt;
+      &lt;whitelist&gt;
+        &lt;add url="http://images.mymovies.net"/&gt;
+        &lt;add url="http://maps.googleapis.com" extensionLess="true" imageFormat=".png"/&gt;
+      &lt;/whitelist&gt;
+    &lt;/service&gt;
+  &lt;/services&gt;
+&lt;/security&gt;
+</code></pre>
+        <h3>Pre v2.1.0</h3>
         <pre class="language-markup"><code>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
   &lt;!-- Whether to allow remote image requests, the timeout for a request in 
-       milliseconds and the prefix to use so that ImageProcessor can recognize 
+       milliseconds, the maximum allowable download in bytes and the prefix to use so that ImageProcessor can recognize 
        a remote request. --&gt;
   &lt;security allowRemoteDownloads="true" timeout="300000" maxBytes="4194304" remotePrefix="/remote.axd"&gt;
     &lt;!-- Sets allowable domains to process images from. --&gt;
@@ -125,6 +154,8 @@ sublinks: ["#about|About",
       &lt;plugin name="Brightness" type="ImageProcessor.Web.Processors.Brightness, ImageProcessor.Web" /&gt;
       &lt;plugin name="Contrast" type="ImageProcessor.Web.Processors.Contrast, ImageProcessor.Web" /&gt;
       &lt;plugin name="Crop" type="ImageProcessor.Web.Processors.Crop, ImageProcessor.Web" /&gt;
+      &lt;plugin name="DetectEdges" type="ImageProcessor.Web.Processors.DetectEdges, ImageProcessor.Web" /&gt;
+      &lt;plugin name="EntropyCrop" type="ImageProcessor.Web.Processors.EntropyCrop, ImageProcessor.Web" /&gt;
       &lt;plugin name="Filter" type="ImageProcessor.Web.Processors.Filter, ImageProcessor.Web" /&gt;
       &lt;plugin name="Flip" type="ImageProcessor.Web.Processors.Flip, ImageProcessor.Web" /&gt;
       &lt;plugin name="Format" type="ImageProcessor.Web.Processors.Format, ImageProcessor.Web" /&gt;
@@ -144,8 +175,21 @@ sublinks: ["#about|About",
           &lt;setting key="MaxThreshold" value="100" /&gt;
         &lt;/settings&gt;
       &lt;/plugin&gt;
+      &lt;plugin name="Hue" type="ImageProcessor.Web.Processors.Hue, ImageProcessor.Web" /&gt;
+      &lt;plugin name="Mask" type="ImageProcessor.Web.Processors.Mask, ImageProcessor.Web"&gt;
+        &lt;settings&gt;
+          &lt;setting key="VirtualPath" value="~/images/imageprocessor/mask/" /&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
       &lt;plugin name="Meta" type="ImageProcessor.Web.Processors.Meta, ImageProcessor.Web" /&gt;
+      &lt;plugin name="Overlay" type="ImageProcessor.Web.Processors.Overlay, ImageProcessor.Web"&gt;
+        &lt;settings&gt;
+          &lt;setting key="VirtualPath" value="~/images/imageprocessor/overlay/" /&gt;
+        &lt;/settings&gt;
+      &lt;/plugin&gt;
+      &lt;plugin name="Pixelate" type="ImageProcessor.Web.Processors.Pixelate, ImageProcessor.Web" /&gt;
       &lt;plugin name="Quality" type="ImageProcessor.Web.Processors.Quality, ImageProcessor.Web" /&gt;
+      &lt;plugin name="ReplaceColor" type="ImageProcessor.Web.Processors.ReplaceColor, ImageProcessor.Web" /&gt;
       &lt;plugin name="Resize" type="ImageProcessor.Web.Processors.Resize, ImageProcessor.Web"&gt;
         &lt;settings&gt;
           &lt;!-- Maximum height and width to allow images to be resized to. --&gt;
@@ -179,9 +223,10 @@ sublinks: ["#about|About",
     <h1>Extending ImageProcessor.Web</h1>
     <p>
         ImageProcessor.Web is built with extensibility in mind. All the individual processors used within the ImageProcessingModule methods
-        follow an interface <code>IWebGraphicsprocessor</code> which allows developers to easily extend the library.
+        follow an interface <code>IWebGraphicsprocessor</code> which allows developers to extend the library.
         View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor.Web/Processors">source code</a> to see examples.
     </p>
+    <h3>IWebGraphicsProcessor</h3>
     <pre class="language-csharp"><code>/// &lt;summary&gt;
 /// Defines properties and methods for ImageProcessor.Web Plugins.
 /// &lt;/summary&gt;
@@ -211,6 +256,59 @@ public interface IWebGraphicsProcessor
     /// the captured substring was found.
     /// &lt;/returns&gt;
     int MatchRegexIndex(string queryString);
+}</code></pre>
+
+    <h3>IImageService</h3>
+    <p>
+        The <code>IImageService</code> defines methods and properties which allow developers to extend ImageProcessor to retrieve
+        images from alternate locations to process.
+        View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor.Web/Services/IImageService.cs">source code</a> to see examples.
+    </p>
+    <pre class="language-csharp"><code>/// &lt;summary&gt;
+///  Defines properties and methods for allowing retrieval of image from different sources.
+/// &lt;/summary&gt;
+public interface IImageService
+{
+    /// &lt;summary&gt;
+    /// Gets or sets the prefix for the given implementation.
+    /// &lt;remarks&gt;
+    /// This value is used as a prefix for any image requests that should use this service.
+    /// &lt;/remarks&gt;
+    /// &lt;/summary&gt;
+    string Prefix { get; set; }
+    /// &lt;summary&gt;
+    /// Gets a value indicating whether the image service requests files from
+    /// the locally based file system.
+    /// &lt;/summary&gt;
+    bool IsFileLocalService { get; }
+    /// &lt;summary&gt;
+    /// Gets or sets any additional settings required by the service.
+    /// &lt;/summary&gt;
+    Dictionary&lt;string, string&gt; Settings { get; set; }
+    /// &lt;summary&gt;
+    /// Gets or sets the white list of &lt;see cref="System.Uri" /&gt;. 
+    /// &lt;/summary&gt;
+    Uri[] WhiteList { get; set; }
+    /// &lt;summary&gt;
+    /// Gets a value indicating whether the current request passes sanitizing rules.
+    /// &lt;/summary&gt;
+    /// &lt;param name="path"&gt;
+    /// The image path.
+    /// &lt;/param&gt;
+    /// &lt;returns&gt;
+    /// &lt;c&gt;True&lt;/c&gt; if the request is valid; otherwise, &lt;c&gt;False&lt;/c&gt;.
+    /// &lt;/returns&gt;
+    bool IsValidRequest(string path);
+    /// &lt;summary&gt;
+    /// Gets the image using the given identifier.
+    /// &lt;/summary&gt;
+    /// &lt;param name="id"&gt;
+    /// The value identifying the image to fetch.
+    /// &lt;/param&gt;
+    /// &lt;returns&gt;
+    /// The &lt;see cref="System.Byte" /&gt; array containing the image data.
+    /// &lt;/returns&gt;
+    Task&lt;byte[]&gt; GetImage(object id);
 }</code></pre>
 </section>
 

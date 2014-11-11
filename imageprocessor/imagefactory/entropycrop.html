@@ -5,7 +5,10 @@ sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
     <h1>EntropyCrop</h1>
-    <p>Crops an image to the area of greatest entropy.</p>
+    <p>
+        Crops an image to the area of greatest entropy.
+        This method works best with images containing large areas of a single color or similar colors around the edges.
+    </p>
     <div class="alert" role="alert">
         <p>Added version 2.1.0</p>
     </div>
@@ -22,7 +25,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
 <section id="example">
     <h1>Examples</h1>
     <h3>Original</h3>
-    <img src="{{ site.baseurl }}/assets/img/originals/coffee.jpg" alt="original image" />
+    <img src="{{ site.baseurl }}/assets/img/originals/beach.jpg" alt="original image" />
     <h3>Cropped</h3>
-    <img src="{{ site.baseurl }}/assets/img/crop/coffee.jpg" alt="image with crop applied" />
+    <img src="{{ site.baseurl }}/assets/img/entropycrop/beach.jpg" alt="image with entropy crop applied" />
 </section>

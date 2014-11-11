@@ -1,0 +1,34 @@
+---
+title: Overlay
+subheading: Overlay
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Overlay</h1>
+    <p>
+        Adds a image overlay to the current image.
+        If the overlay is larger than the image it will be resized to match the images dimensions.
+    </p>
+    <p>
+        The image overlay is called by name alone. It has to be a locally stored file which defaults to the location
+        <code>~/images/imageprocessor/overlay/</code>. This value is configurable.
+    </p>
+    <div class="alert" role="alert">
+        <p>Added version 2.1.0</p>
+    </div>
+
+    <p>
+        Requests are passed thus:
+    </p>
+    <pre class="language-markup"><code>&lt;!--Overlay--&gt;
+http://your-image?overlay=imageoverlay.png&amp;overlay.position=30,30&amp;overlay.size=100,100&amp;overlay.opacity=50</code></pre>
+</section>
+<hr />
+<section id="example">
+    <h1>Examples</h1>
+    <h3>Original</h3>
+    <img src="{{ site.baseurl }}/assets/img/originals/factory.jpg" alt="original image" />
+
+    <h3>Overlay</h3>
+    <img src="{{ site.baseurl }}/assets/img/overlay/factory.jpg" alt="image with overlay applied" />
+</section>
