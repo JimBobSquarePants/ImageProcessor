@@ -1,5 +1,6 @@
 ImageProcessor
 ===============
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/JimBobSquarePants/ImageProcessor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr)](https://ci.appveyor.com/project/JamesSouth/imageprocessor)
 
