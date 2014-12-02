@@ -29,7 +29,7 @@ namespace ImageProcessor
     /// <summary>
     /// Encapsulates methods for processing image files.
     /// </summary>
-    public class ImageFactory : IDisposable
+    public partial class ImageFactory : IDisposable
     {
         #region Fields
         /// <summary>
