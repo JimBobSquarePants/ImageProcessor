@@ -26,7 +26,7 @@ namespace ImageProcessor.Web.Caching
     /// <summary>
     /// The disk cache.
     /// </summary>
-    internal sealed class DiskCache
+    public sealed class DiskCache
     {
         #region Fields
         /// <summary>
