@@ -16,7 +16,8 @@ description: "A C# library for the dynamic processing of image files with .NET. 
 author: "James South"
 
 version: "2.1.0"
-webversion: "4.1.3"
+webversion: "4.1.4"
+webpostprocessorversion: "1.0.0"
 configversion: "2.1.0"
 
 # Set variables by folder rather than individually.
