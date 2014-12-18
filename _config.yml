@@ -17,7 +17,7 @@ author: "James South"
 
 version: "2.1.0"
 webversion: "4.1.4"
-webpostprocessorversion: "1.0.0"
+webpostprocessorversion: "1.0.1"
 configversion: "2.1.0"
 
 # Set variables by folder rather than individually.
