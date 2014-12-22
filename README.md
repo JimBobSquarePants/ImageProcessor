@@ -2,9 +2,13 @@ ImageProcessor
 ===============
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/JimBobSquarePants/ImageProcessor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr)](https://ci.appveyor.com/project/JamesSouth/imageprocessor)
+####Master
+[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr/branch/Master?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor/branch/Master)
 
-Imageprocessor is a lightweight library written in C# that allows you to manipulate images on-the-fly using .NET 4.5+
+####Latest Build
+[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor)
+
+Imageprocessor is a lightweight, extensible library written in C# that allows you to manipulate images on-the-fly using .NET 4.5+
 
 It's fast, extensible, easy to use, comes bundled with some great features and is fully open source.
 
@@ -17,12 +21,11 @@ Things I would :heart: people to help me out with:
 
  - Unit tests. I need to get some going for all the regular expressions within the ImageProcessor core plus anywhere else we can think of. If that's your bag please contribute.
  - Documentation. Nobody likes doing docs, I've written a lot but my prose is clumsy and verbose. If you think you can make things clearer or you spot any mistakes please submit a pull request (Guide to how the docs work below).
- - Async. I'd love someone with real async chops to have a look at the ImageProcessor.Web. It works and it works damn well but I'm no expert on threading so I'm sure someone can improve on it. 
 
 **Just remember to StyleCop all things! :oncoming_police_car:**
 
 ##RoadMap
-I want the next version of ImageProcessor to run on all devices. Sadly it looks like using `System.Drawing` will not allow me to do that so I need to have a look at using the classes within [System.Windows.Media.Imaging](http://msdn.microsoft.com/en-us/library/System.Windows.Media.Imaging(v=vs.110).aspx) This is a **LOT** of work so any help that could be offered would be greatly appreciated.
+I want the next version of ImageProcessor to run on all devices. Sadly it looks like using `System.Drawing` will not allow me to do that so I need to have a look at using an alternative. This is a lot of work so any help that could be offered would be greatly appreciated.
 
 ##Documentation
 
