@@ -108,9 +108,26 @@ namespace ImageProcessor.Web.HttpModules
         #endregion
 
         /// <summary>
+        /// The process querystring event handler.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The <see cref="ProcessQueryStringEventArgs"/>.
+        /// </param>
+        /// <returns>Returns the processed querystring.</returns>
+        public delegate string ProcessQuerystringEventHandler(object sender, ProcessQueryStringEventArgs e);
+
+        /// <summary>
         /// The event that is called when a new image is processed.
         /// </summary>
         public static event EventHandler<PostProcessingEventArgs> OnPostProcessing;
+
+        /// <summary>
+        /// The event that is called when a querystring is processed.
+        /// </summary>
+        public static event ProcessQuerystringEventHandler OnProcessQuerystring;
 
         #region IHttpModule Members
         /// <summary>
@@ -327,15 +344,18 @@ namespace ImageProcessor.Web.HttpModules
                     }
                 }
 
+                // Replace any presets in the querystring with the actual value.
+                queryString = this.ReplacePresetsInQueryString(queryString);
+
+                // Execute the handler which can change the querystring 
+                queryString = this.CheckQuerystringHandler(queryString, request.RawUrl);
+
                 // If the current service doesn't require a prefix, don't fetch it.
                 // Let the static file handler take over.
                 if (string.IsNullOrWhiteSpace(currentService.Prefix) && string.IsNullOrWhiteSpace(queryString))
                 {
                     return;
                 }
-
-                // Replace any presets in the querystring with the actual value.
-                queryString = this.ReplacePresetsInQueryString(queryString);
 
                 string parts = !string.IsNullOrWhiteSpace(urlParameters) ? "?" + urlParameters : string.Empty;
                 string fullPath = string.Format("{0}{1}?{2}", requestPath, parts, queryString);
@@ -433,36 +453,17 @@ namespace ImageProcessor.Web.HttpModules
 
                     if (context.Items[CachedResponseFileDependency] == null)
                     {
-                        context.Items[CachedResponseFileDependency] = new List<string> { cachedPath };
-                    }
-
-                    string incomingEtag = context.Request.Headers["If" + "-None-Match"];
-
-                    if (incomingEtag != null && !isNewOrUpdated)
-                    {
-                        // Set the Content-Length header so the client doesn't wait for
-                        // content but keeps the connection open for other requests.
-                        context.Response.AddHeader("Content-Length", "0");
-                        context.Response.StatusCode = (int)HttpStatusCode.NotModified;
-                        context.Response.SuppressContent = true;
-
                         if (isFileLocal)
                         {
-                            // Set the headers and quit. 
                             // Some services might only provide filename so we can't monitor for the browser.
-                            this.SetHeaders(
-                                context,
-                                (string)context.Items[CachedResponseTypeKey],
-                                Path.GetFileName(requestPath) == requestPath ? new List<string> { cachedPath } : new List<string> { requestPath, cachedPath });
+                            context.Items[CachedResponseFileDependency] = Path.GetFileName(requestPath) == requestPath
+                                ? new List<string> { cachedPath }
+                                : new List<string> { requestPath, cachedPath };
                         }
                         else
                         {
-                            this.SetHeaders(context, (string)context.Items[CachedResponseTypeKey], new List<string> { cachedPath });
+                            context.Items[CachedResponseFileDependency] = new List<string> { cachedPath };
                         }
-
-                        // Complete the requests but don't abort the thread.
-                        context.ApplicationInstance.CompleteRequest();
-                        return;
                     }
 
                     // The cached file is valid so just rewrite the path.
@@ -478,7 +479,6 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// This will make the browser and server keep the output
         /// in its cache and thereby improve performance.
-        /// <see href="http://en.wikipedia.org/wiki/HTTP_ETag"/>
         /// </summary>
         /// <param name="context">
         /// the <see cref="T:System.Web.HttpContext">HttpContext</see> object that provides
@@ -529,16 +529,44 @@ namespace ImageProcessor.Web.HttpModules
         /// </returns>
         private string ReplacePresetsInQueryString(string queryString)
         {
-            foreach (Match match in PresetRegex.Matches(queryString))
+            if (!string.IsNullOrWhiteSpace(queryString))
             {
-                if (match.Success)
+                foreach (Match match in PresetRegex.Matches(queryString))
                 {
-                    string preset = match.Value.Split('=')[1];
+                    if (match.Success)
+                    {
+                        string preset = match.Value.Split('=')[1];
 
-                    // We use the processor config system to store the preset values.
-                    string replacements = ImageProcessorConfiguration.Instance.GetPresetSettings(preset);
-                    queryString = Regex.Replace(queryString, preset, replacements ?? string.Empty);
+                        // We use the processor config system to store the preset values.
+                        string replacements = ImageProcessorConfiguration.Instance.GetPresetSettings(preset);
+                        queryString = Regex.Replace(queryString, preset, replacements ?? string.Empty);
+                    }
                 }
+            }
+
+            return queryString;
+        }
+
+        /// <summary>
+        /// Checks if there is a handler that changes the querystring and executes that handler.
+        /// </summary>
+        /// <param name="queryString">
+        /// The query string.
+        /// </param>
+        /// <param name="rawUrl">
+        /// The raw request url.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/> containing the updated querystring.
+        /// </returns>
+        private string CheckQuerystringHandler(string queryString, string rawUrl)
+        {
+            // Fire the process querystring event.
+            ProcessQuerystringEventHandler handler = OnProcessQuerystring;
+            if (handler != null)
+            {
+                ProcessQueryStringEventArgs args = new ProcessQueryStringEventArgs { Querystring = queryString ?? string.Empty, RawUrl = rawUrl ?? string.Empty };
+                queryString = handler(this, args);
             }
 
             return queryString;
