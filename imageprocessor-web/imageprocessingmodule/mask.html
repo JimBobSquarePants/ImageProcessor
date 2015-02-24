@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/mask/
+redirect_from: "imageprocessor-web/imageprocessingmodule/mask.html"
+
 title: Mask
 subheading: Mask
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -19,8 +22,11 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>&lt;!--Mask--&gt;
-http://your-image?mask=imagemask.png&amp;mask.position=30,30</code></pre>
+    {% highlight xml %}
+<!--Hue-->
+http://your-image?mask=imagemask.png&amp;mask.position=30,30
+    {% endhighlight %}
+
 </section>
 <hr />
 <section id="example">

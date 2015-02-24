@@ -1,14 +1,6 @@
 ---
 layout: master
 ---
-<header role="banner">
-    <div class="container">
-        <h1>
-            {{page.heading}}
-            <span>{{page.methodof}}.{{page.subheading}}</span>
-        </h1>
-    </div>
-</header>
 <div class="breadcrumb">
     <div class="container">{% include breadcrumb.html %}</div>
 </div>
@@ -17,6 +9,7 @@ layout: master
         {% include inpagenav.html %}
         {% include classnav.html param=page.root %}
         {% include methodnav.html param=page.methodof %}
+        {% include pluginsnav.html param=page.root %}
     </nav>
     <article class="col-m-8 offset-m-1">
         {{ content }}

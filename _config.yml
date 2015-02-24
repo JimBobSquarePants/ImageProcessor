@@ -5,6 +5,16 @@
 baseurl : ""
 relative_permalinks: false
 
+# General settings
+permalink: pretty
+markdown: kramdown
+kramdown:
+    input: GFM
+    hard_wrap: false
+    parse_block_html: true
+
+highlighter: pygments
+
 # Name of the website
 name: "ImageProcessor"
 altname : "ImageProcessor.Web"
@@ -20,58 +30,33 @@ webversion: "4.1.5"
 webpostprocessorversion: "1.0.1"
 configversion: "2.1.1"
 
-# Set variables by folder rather than individually.
+# Collections
+
 defaults:
-# ===================================================
-# ImageProcessor
-# ===================================================
+  -
+    scope:
+      path: ""
+    values:
+      layout: "home"
   -
     scope:
       path: "imageprocessor"
     values:
-      navgroup: imageprocessor
-      layout: library
-      root: ImageProcessor # Allows the root page to list all classes.
-  -
-    scope:
-      path: "imageprocessor/imagefactory"
-    values:
-      layout: method
-      heading: Methods
-      methodof: ImageFactory # Adds the method to the class page.
-  -
-    scope:
-      path: "imageprocessor/imagefactory/index.html"
-    values:
-      layout: class
-  -
-    scope:
-      path: "imageprocessor/nativebinaryfactory"
-    values:
-      layout: method
-      heading: Methods
-      methodof: NativeBinaryFactory # Adds the method to the class page.
-  -
-    scope:
-      path: "imageprocessor/nativebinaryfactory/index.html"
-    values:
-      layout: class
-
-# ===================================================
-# ImageProcessor.Web
-# ===================================================
+      layout: "rootpage"
+      navgroup: "imageprocessor"
+      root: ImageProcessor
   -
     scope:
       path: "imageprocessor-web"
     values:
-      navgroup: imageprocessorweb
-      layout: library
+      layout: "rootpage"
+      navgroup: "imageprocessor-web"
       root: ImageProcessorWeb
   -
     scope:
       path: "imageprocessor-web/imageprocessingmodule"
     values:
-      navgroup: imageprocessorweb
+      navgroup: imageprocessor-web
       layout: method
       heading: Methods
       methodof: ImageProcessingModule
@@ -79,6 +64,16 @@ defaults:
     scope:
       path: "imageprocessor-web/imageprocessingmodule/index.html"
     values:
+      navgroup: imageprocessor-web
       layout: class
+      class: ImageProcessingModule
+      methodof: null
 
-exclude: ["CNAME","src","node_modules","Gemfile","Gemfile.lock"]
+gems:
+  - jekyll-redirect-from
+
+exclude:
+  - CNAME
+  - src
+  - node_modules
+  - Gemfile*

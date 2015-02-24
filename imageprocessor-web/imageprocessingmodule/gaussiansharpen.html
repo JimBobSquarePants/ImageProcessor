@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/gaussiansharpen/
+redirect_from: "imageprocessor-web/imageprocessingmodule/gaussiansharpen.html"
+
 title: GaussianSharpen
 subheading: GaussianSharpen
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -23,11 +26,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <p>
         Requests are passed thus:
     </p>
-
-    <pre class="language-markup"><code>&lt;!--Recommended--&gt;
+    {% highlight xml %}
+<!--Recommended-->
 http://your-image?sharpen=10&sigma=1.5&threshold=10
-&lt;!--Legacy--&gt;
-http://your-image?sharpen=10,sigma-1.5,threshold-10</code></pre>
+<!--Legacy-->
+http://your-image?sharpen=10,sigma-1.5,threshold-10
+    {% endhighlight %}
 </section>
 <hr />
 <section id="example">

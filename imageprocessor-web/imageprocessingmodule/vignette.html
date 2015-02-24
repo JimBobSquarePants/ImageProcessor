@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/vignette/
+redirect_from: "imageprocessor-web/imageprocessingmodule/vignette.html"
+
 title: Vignette
 subheading: Vignette
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -10,15 +13,17 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>&lt;!--Default Black--&gt;
+    {% highlight xml %}
+<!--Default Black-->
 http://your-image?vignette=true
-&lt;!--Hex--&gt;
+<!--Hex-->
 http://your-image?vignette=800080
-&lt;!--RGBA--&gt;
+<!--RGBA-->
 http://your-image?vignette=128,0,128,255
-&lt;!--Known Color--&gt;
+<!--Known Color-->
 http://your-image?vignette=purple
-</code></pre>
+    {% endhighlight %}
+
 </section>
 <hr />
 <section id="example">

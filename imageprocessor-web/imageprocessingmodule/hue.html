@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/hue/
+redirect_from: "imageprocessor-web/imageprocessingmodule/hue.html"
+
 title: Hue
 subheading: Hue
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -10,17 +13,20 @@ sublinks: ["#usage|Usage","#example|Examples"]
         The angle can be and value between <var>0</var> and <var>360</var> degrees.
     </p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>Added version 4.1.0</p>
     </div>
 
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>&lt;!--Hue--&gt;
+
+    {% highlight xml %}
+<!--Hue-->
 http://your-image?hue=180
-&lt;!--Hue Rotate--&gt;
+<!--Hue Rotate-->
 http://your-image?hue=180&hue.rotate=true
-</code></pre>
+    {% endhighlight %}
+
 </section>
 <hr />
 <section id="example">
@@ -30,7 +36,7 @@ http://your-image?hue=180&hue.rotate=true
 
     <h3>Hue adjusted at 180 degrees</h3>
     <img src="{{ site.baseurl }}/assets/img/hue/camera.jpg" alt="image with hue applied" />
-    
+
     <h3>Hue rotated at 180 degrees</h3>
     <img src="{{ site.baseurl }}/assets/img/hue/rotate/camera.jpg" alt="image with hue rotate applied" />
 </section>

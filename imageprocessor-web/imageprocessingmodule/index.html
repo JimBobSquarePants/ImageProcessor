@@ -1,10 +1,17 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/
+
 layout: class
 class: ImageProcessingModule
+methodof: null
 title: ImageProcessingModule
 heading: ImageProcessingModule
 subheading: Intercepts and processes image requests.
-sublinks: ["#about|About", "#caching|Caching"]
+sublinks:
+ - "#about|About"
+ - "#remote|Remote Files"
+ - "#caching|Caching"
+ - "#events|Events"
 ---
 <section id="about">
     <h1>ImageProcessingModule</h1>
@@ -20,6 +27,25 @@ sublinks: ["#about|About", "#caching|Caching"]
     </div>
 </section>
 <hr />
+<section id="remote">
+    <h1>Remote Files</h1>
+    <p>
+        <strong>ImageProcessor.Web</strong> allows you to configure remote image requests from a whitelist of urls.
+        These commands are set in the <a href="../configuration/#securityconfig">security.config</a> file under the path <code>\config\imageprocessor\</code> within your solution.
+        The more precise the url, the more restrictive the whitelist.
+    </p>
+    <p>
+        Remote requests are given in the following format:
+    </p>
+    {% highlight xml %}
+<!-- Recommended syntax as of version 4.2 -->
+/remote.axd/your-external-image?width=300
+
+<!-- Legacy syntax -->
+/remote.axd?http://your-external-image?width=300
+    {% endhighlight %}
+</section>
+<hr />
 <section id="caching">
     <h1>Caching</h1>
     <p>
@@ -28,20 +54,72 @@ sublinks: ["#about|About", "#caching|Caching"]
         the cache expire.
     </p>
     <p>
-        Cached files are stored in nested folders based on an SHA1 representation of the full url with a small number of images in each folder.
+        Cached files, by default, are stored in nested folders based on an <abbr title="Secure Hash Algorithm">SHA-1</abbr> representation of the full url with a small number of images in each folder.
         This allows for the storage of millions of images whilst ensuring that the OS does not suffer from any slowdown due to file indexing.
     </p>
     <p>
         The caching mechanism saves massive amounts of processing power and bandwidth that help to keep your website snappy.
     </p>
+    <div class="alert" role="alert">
+        <p>
+            As of version <a href="https://www.nuget.org/packages/ImageProcessor.Web/4.2.0">4.2.0</a> this caching mechanism is plugin based. See the
+            <a href="../extending/">extending</a> documentaion for details.
+        </p>
+    </div>
 </section>
 <hr />
 <section id="events">
     <h1>Events</h1>
+    <h3>ImageProcessingModule.OnProcessQuerystring</h3>
+    <p>
+        On initial examination of an image request the ImageProcessingModule will raise an
+        <code>OnProcessQuerystring</code> event. This allows the developer to add their own instructions to
+        the ImageProcessingModule without requiring them to be present in the request URL. This is useful
+        for adding security watermarks to images or for changing the background colour of image formats that do not
+        support alpha transparency.
+    </p>
+    <p>
+        This event passes the following parameters:
+    </p>
+    <dl>
+        <dt><strong>sender</strong></dt>
+        <dd>
+            The instance of <code>ImageProcessingModule</code> raising the event.
+        </dd>
+        <dt><strong>eventargs</strong></dt>
+        <dd>
+            The <code>ProcessQuerystringEventArgs</code> containing the following information.
+            <dl>
+                <dt><strong>RawUrl </strong></dt>
+                <dd>The raw URL of the current request.</dd>
+            </dl>
+            <dl>
+                <dt><strong>Querystring </strong></dt>
+                <dd>The querystring part of the current request.</dd>
+            </dl>
+        </dd>
+    </dl>
+    <h3>Example Code</h3>
+    {% highlight c# %}
+ImageProcessingModule.OnProcessQuerystring += (sender, args) =>
+{
+    if (!args.RawUrl.Contains("watermark"))
+    {
+        return args.Querystring += "watermark=protected&color=fff&fontsize=36&fontopacity=70textshadow=true&fontfamily=arial";
+    }
+
+    return args.Querystring;
+};
+    {% endhighlight %}
+
+    <hr />
+
     <h3>ImageProcessingModule.OnPostProcessing</h3>
     <p>
         On processing of a new or updated, uncached image the ImageProcessingModule will raise an awaitable
         <code>OnPostProcessing</code> event.
+    </p>
+    <p>
         This passes the following parameters:
     </p>
     <dl>
@@ -59,14 +137,16 @@ sublinks: ["#about|About", "#caching|Caching"]
         </dd>
     </dl>
     <h3>Example Code</h3>
-    <pre class="language-csharp"><code>// Synchronous example.
+    {% highlight c# %}
+// Synchronous example.
 ImageProcessingModule.OnPostProcessing += (sender, args) => Debug.WriteLine(args.CachedImagePath);
-        
+
 // Asynchronous example
 ImageProcessingModule.OnPostProcessing += this.WritePath;
 private async void WritePath(object sender, PostProcessingEventArgs e)
-{   
-    // This is just for demo purposes. You would not use Task.Run in ASP.NET
+{
+    // This is just for demo purposes. You would not normally use Task.Run in ASP.NET
     await Task.Run(() => Debug.WriteLine(e.CachedImagePath));
-}</code></pre>
+}
+    {% endhighlight %}
 </section>

@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/resize/
+redirect_from: "imageprocessor-web/imageprocessingmodule/resize.html"
+
 title: Resize
 subheading: Resize
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -38,18 +41,20 @@ sublinks: ["#usage|Usage","#example|Examples"]
         image will be padded to fit. Widths and heights can optionally also be passed as a ratio and you can fill the background color
         for image types without transparency.
     </p>
-    <pre class="language-markup"><code>&lt;!--Automatic height based on width--&gt;
+    {% highlight xml %}
+<!--Automatic height based on width-->
 http://your-image?width=600
-&lt;!--Automatic width based on height--&gt;
+<!--Automatic width based on height-->
 http://your-image?height=250
-&lt;!--Both dimensions specified--&gt;
+<!--Both dimensions specified-->
 http://your-image?width=600&height=250
-&lt;!--Height ratio passed for automatic scaling--&gt;
+<!--Height ratio passed for automatic scaling-->
 http://your-image?width=600&heightratio=0.416
-&lt;!--Width ratio passed for automatic scaling--&gt;
+<!--Width ratio passed for automatic scaling-->
 http://your-image?widthratio=2.4&height=250
-&lt;!--Background color added to padded image--&gt;
-http://your-image?width=600&height=250&bgcolor=fff</code></pre>
+<!--Background color added to padded image-->
+http://your-image?width=600&height=250&bgcolor=fff
+    {% endhighlight %}
 
     <hr />
 
@@ -62,21 +67,27 @@ http://your-image?width=600&height=250&bgcolor=fff</code></pre>
         <li>Bottom</li>
         <li>Left</li>
     </ul>
-    <pre class="language-markup"><code>&lt;!--Standard--&gt;
+    {% highlight xml %}
+<!--Standard-->
 http://your-image?width=600&height=250&mode=crop
-&lt;!--Crop anchored to the top--&gt;
-http://your-image?width=600&height=250&mode=crop&anchor=top</code></pre>
+<!--Crop anchored to the top-->
+http://your-image?width=600&height=250&mode=crop&anchor=top
+    {% endhighlight %}
 
     <hr />
 
     <h2>Resize Max</h2>
     <p>The maximum possible height or width is used that allows the correct aspect ratio.</p>
-    <pre class="language-markup"><code>http://your-image?width=600&height=250&mode=max</code></pre>
+    {% highlight xml %}
+http://your-image?width=600&height=250&mode=max
+    {% endhighlight %}
 
     <hr />
     <h2>Resize Stretch</h2>
-    <p>The image is stretched to wit the given dimensions..</p>
-    <pre class="language-markup"><code>http://your-image?width=600&height=250&mode=stretch</code></pre>
+    <p>The image is stretched to wit the given dimensions.</p>
+    {% highlight xml %}
+http://your-image?width=600&height=250&mode=stretch
+    {% endhighlight %}
 </section>
 <hr />
 <section id="example">

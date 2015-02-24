@@ -1,0 +1,14 @@
+---
+layout: master
+---
+<div class="container row">
+    <div class="col-m-6">
+        {{ content }}
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <input type="hidden" name="cmd" value="_s-xclick">
+            <input type="hidden" name="hosted_button_id" value="X7ZQNTJ82F5V8">
+            <button type="submit"><i class="fa fa-paypal"></i> Donate via PayPal</button>
+            <img alt="pixel" src="https://www.paypalobjects.com/en_GB/i/scr/pixel.gif" width="1" height="1" />
+        </form>
+    </div>
+</div>

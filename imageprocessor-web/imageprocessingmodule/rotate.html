@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/rotate/
+redirect_from: "imageprocessor-web/imageprocessingmodule/rotate.html"
+
 title: Rotate
 subheading: Rotate
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -9,12 +12,15 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>&lt;!--Standard--&gt;
+    {% highlight xml %}
+<!--Standard-->
 http://your-image?rotate=26
-&lt;!--With background color--&gt;
+<!--With background color-->
 http://your-image?rotate=54&bgcolor=fff
-&lt;!--Legacy with background color--&gt;
-http://your-image?rotate=angle-54,bgcolor-fff</code></pre>
+<!--Legacy with background color-->
+http://your-image?rotate=angle-54,bgcolor-fff
+    {% endhighlight %}
+
 </section>
 <hr />
 <section id="example">

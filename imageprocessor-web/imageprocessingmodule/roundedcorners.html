@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/roundedcorners/
+redirect_from: "imageprocessor-web/imageprocessingmodule/roundedcorners.html"
+
 title: RoundedCorners
 subheading: RoundedCorners
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -14,18 +17,24 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>&lt;!--Standard--&gt;
+    {% highlight xml %}
+<!--Standard-->
 http://your-image?roundedcorners=100
-&lt;!--With background color--&gt;
+<!--With background color-->
 http://your-image?roundedcorners=100&bgcolor=fff
-&lt;!--Legacy with background color--&gt;
-http://your-image?roundedcorners=radius-100,bgcolor-fff</code></pre>
+<!--Legacy with background color-->
+http://your-image?roundedcorners=radius-100,bgcolor-fff
+    {% endhighlight %}
+
 
     <p>Independent Corners syntax:</p>
-    <pre class="language-markup"><code>&lt;!--Standard--&gt;
+    {% highlight xml %}
+<!--Standard-->
 http://your-image?roundedcorners=100&tl=true&tr=false&bl=true&br=false
-&lt;!--Legacy--&gt;
-http://your-image?roundedcorners=radius-100|tl-true|tr-false|bl-true|br-false</code></pre>
+<!--Legacy-->
+http://your-image?roundedcorners=radius-100|tl-true|tr-false|bl-true|br-false
+    {% endhighlight %}
+
 </section>
 <hr />
 <section id="example">

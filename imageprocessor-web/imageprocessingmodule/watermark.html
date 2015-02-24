@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/watermark/
+redirect_from: "imageprocessor-web/imageprocessingmodule/watermark.html"
+
 title: Watermark
 subheading: Watermark.
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -18,11 +21,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
 
     <p>Requests are passed thus: Each parameter is optional.</p>
 
-    <pre class="language-markup"><code>&lt;!--All Properties--&gt;
+    {% highlight xml %}
+<!--All Properties-->
 http://your-image?watermark=imageprocessor&color=fff&fontsize=36&fontstyle=italic&fontopacity=80&textposition=30,150&dropshadow=true&fontfamily=arial
-&lt;!--Legacy--&gt;
+<!--Legacy-->
 http://your-image?watermark=text-imageprocessor,color-fff,size-36,style-italic,opacity-80,position-30,150,shadow-true,font-arial
-</code></pre>
+    {% endhighlight %}
 </section>
 <hr />
 <section id="example">
