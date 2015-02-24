@@ -1,0 +1,13 @@
+---
+layout: master
+---
+<div class="container row">
+    <nav class="col-m-3" role="complementary">
+        {% include inpagenav.html %}
+        {% include classnav.html param=page.root %}
+        {% include pluginsnav.html param=page.root %}
+    </nav>
+    <article class="col-m-8 offset-m-1">
+        {{ content }}
+    </article>
+</div>

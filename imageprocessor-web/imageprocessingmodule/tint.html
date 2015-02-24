@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/tint/
+redirect_from: "imageprocessor-web/imageprocessingmodule/tint.html"
+
 title: Tint
 subheading: Tint
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -10,13 +13,14 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <p>
         Requests are passed thus:
     </p>
-
-    <pre class="language-markup"><code>&lt;!--Hex--&gt;
+    {% highlight xml %}
+<!--Hex-->
 http://your-image?tint=800080
-&lt;!--RGBA--&gt;
+<!--RGBA-->
 http://your-image?tint=128,0,128,255
-&lt;!--Known Color--&gt;
-http://your-image?tint=purple</code></pre>
+<!--Known Color-->
+http://your-image?tint=purple
+    {% endhighlight %}
 </section>
 <hr />
 <section id="example">

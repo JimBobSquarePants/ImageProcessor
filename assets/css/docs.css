@@ -30,19 +30,19 @@ h1, h2, h3 {
 }
 
 h1 {
-    font-size: 1.17em;
-    margin: 1em 0;
+    font-size: 1.17rem;
+    margin: 1rem 0;
 }
 
 h3 {
-    font-size: 1em;
-    margin: 1.33em 0;
+    font-size: 1rem;
+    margin: 1.33rem 0;
 }
 
 @media (min-width: 48em ) {
     h1 {
-        font-size: 2em;
-        margin: .67em 0;
+        font-size: 2rem;
+        margin: 1.34rem 0;
     }
 
     h3 {
@@ -52,7 +52,7 @@ h3 {
 }
 
 blockquote {
-    padding: 1em 1em 1em 1.5em;
+    padding: 1rem 1rem 1rem 1.5rem;
     border-left: 5px solid #009688;
 }
 
@@ -73,7 +73,7 @@ a {
     }
 
 hr {
-    margin: 2.5em 0;
+    margin: 2.5rem 0;
 }
 
 /*==|Buttons|======================================================
@@ -107,9 +107,9 @@ button,
     [role="button"]:focus,
     [role="button"]:active {
         display: inline-block;
-        padding: 0.5em 1em;
+        padding: 0.5rem 1rem;
         color: #fff;
-        margin-bottom: 1em;
+        margin-bottom: 1rem;
     }
 
 /*==|Header====|===================================================
@@ -119,15 +119,15 @@ button,
 header[role="banner"] {
     background-color: #009688;
     color: #fff;
-    background-image: url("libs/images/bg.png");
-    padding-top: 3.5em;
-    padding-bottom: 1em;
+    /*background-image: url("libs/images/bg.png");*/
+    padding-top: 3.5rem;
+    padding-bottom: 1rem;
     position: relative;
     z-index: 1;
 }
 
     header[role="banner"] h1 {
-        font-size: 1.5em;
+        font-size: 1.5rem;
         margin-bottom: 0;
     }
 
@@ -138,12 +138,12 @@ header[role="banner"] {
     header[role="banner"] span {
         display: block;
         font-size: 55%;
-        margin: .34em 0;
+        margin: .34rem 0;
     }
 
 @media (min-width: 48em) {
     header[role="banner"] h1 {
-        font-size: 3em;
+        font-size: 3rem;
     }
 }
 

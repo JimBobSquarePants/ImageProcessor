@@ -51,31 +51,31 @@ sublinks: ["#about|About","#extending|Extending ImageProcessor"]
         follow an interface <code>IGraphicsprocessor</code> which allows developers to easily extend the library.
         View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor/Processors">source code</a> to see examples.
     </p>
-    <pre class="language-csharp"><code>/// &lt;summary&gt;
+    <pre class="language-csharp"><code>/// <summary>
 /// Defines properties and methods for ImageProcessor Plugins.
-/// &lt;/summary&gt;
+/// </summary>
 public interface IGraphicsProcessor
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets or sets the DynamicParameter.
-    /// &lt;/summary&gt;
+    /// </summary>
     dynamic DynamicParameter { get; set; }
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets or sets any additional settings required by the processor.
-    /// &lt;/summary&gt;
-    Dictionary&lt;string, string&gt; Settings { get; set; }
+    /// </summary>
+    Dictionary<string, string> Settings { get; set; }
  
-    /// &lt;summary&gt;
+    /// <summary>
     /// Processes the image.
-    /// &lt;/summary&gt;
-    /// &lt;param name="factory"&gt;
-    /// The current instance of the &lt;see cref="T:ImageProcessor.ImageFactory" /&gt; class 
+    /// </summary>
+    /// <param name="factory">
+    /// The current instance of the <see cref="T:ImageProcessor.ImageFactory" /> class 
     /// containing the image to process.
-    /// &lt;/param&gt;
-    /// &lt;returns&gt;
+    /// </param>
+    /// <returns>
     /// The processed image from the current instance of the 
-    /// &lt;see cref="T:ImageProcessor.ImageFactory" /&gt; class.
-    /// &lt;/returns&gt;
+    /// <see cref="T:ImageProcessor.ImageFactory" /> class.
+    /// </returns>
     Image ProcessImage(ImageFactory factory);
 }</code></pre>
     <p>
@@ -83,85 +83,85 @@ public interface IGraphicsProcessor
         the <code>ISupportedImageFormat</code> interface. ImageProcessor will automatically search for classes implementing that interface when initializing.
         View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor/Imaging/Formats">source code</a> to see examples.
     </p>
-    <pre class="language-csharp"><code>/// &lt;summary&gt;
+    <pre class="language-csharp"><code>/// <summary>
 /// The SupportedImageFormat interface providing information about image 
 /// formats to ImageProcessor.
-/// &lt;/summary&gt;
+/// </summary>
 public interface ISupportedImageFormat
 {
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets the file headers.
-    /// &lt;/summary&gt;
+    /// </summary>
     byte[][] FileHeaders { get; }
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets the list of file extensions.
-    /// &lt;/summary&gt;
+    /// </summary>
     string[] FileExtensions { get; }
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets the standard identifier used on the Internet to indicate the type 
     /// of data that a file contains. 
-    /// &lt;/summary&gt;
+    /// </summary>
     string MimeType { get; }
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets the default file extension.
-    /// &lt;/summary&gt;
+    /// </summary>
     string DefaultExtension { get; }
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets the file format of the image. 
-    /// &lt;/summary&gt;
+    /// </summary>
     ImageFormat ImageFormat { get; }
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets or sets a value indicating whether the image format is indexed.
-    /// &lt;/summary&gt;
+    /// </summary>
     bool IsIndexed { get; set; }
-    /// &lt;summary&gt;
+    /// <summary>
     /// Gets or sets the quality of output for images.
-    /// &lt;/summary&gt;
+    /// </summary>
     int Quality { get; set; }
     #region Methods
-    /// &lt;summary&gt;
+    /// <summary>
     /// Applies the given processor the current image.
-    /// &lt;/summary&gt;
-    /// &lt;param name="processor"&gt;
+    /// </summary>
+    /// <param name="processor">
     /// The processor delegate.
-    /// &lt;/param&gt;
-    /// &lt;param name="factory"&gt;
-    /// The &lt;see cref="ImageFactory" /&gt;.
-    /// &lt;/param&gt;
-    void ApplyProcessor(Func&lt;imagefactory, image&gt; processor, ImageFactory factory);
-    /// &lt;summary&gt;
+    /// </param>
+    /// <param name="factory">
+    /// The <see cref="ImageFactory" />.
+    /// </param>
+    void ApplyProcessor(Func<imagefactory, image> processor, ImageFactory factory);
+    /// <summary>
     /// Loads the image to process. 
-    /// &lt;/summary&gt;
-    /// &lt;param name="stream"&gt;
-    /// The &lt;see cref="T:System.IO.Stream" /&gt; containing the image information.
-    /// &lt;/param&gt;
-    /// &lt;returns&gt;
-    /// The &lt;see cref="T:System.Drawing.Image" /&gt;.
-    /// &lt;/returns&gt;
+    /// </summary>
+    /// <param name="stream">
+    /// The <see cref="T:System.IO.Stream" /> containing the image information.
+    /// </param>
+    /// <returns>
+    /// The <see cref="T:System.Drawing.Image" />.
+    /// </returns>
     Image Load(Stream stream);
-    /// &lt;summary&gt;
+    /// <summary>
     /// Saves the current image to the specified output stream.
-    /// &lt;/summary&gt;
-    /// &lt;param name="stream"&gt;
-    /// The &lt;see cref="T:System.IO.Stream" /&gt; to save the image information to.
-    /// &lt;/param&gt;
-    /// &lt;param name="image"&gt;
-    /// The &lt;see cref="T:System.Drawing.Image" /&gt; to save.
-    /// &lt;/param&gt;
-    /// &lt;returns&gt;
-    /// The &lt;see cref="T:System.Drawing.Image" /&gt;.
-    /// &lt;/returns&gt;
+    /// </summary>
+    /// <param name="stream">
+    /// The <see cref="T:System.IO.Stream" /> to save the image information to.
+    /// </param>
+    /// <param name="image">
+    /// The <see cref="T:System.Drawing.Image" /> to save.
+    /// </param>
+    /// <returns>
+    /// The <see cref="T:System.Drawing.Image" />.
+    /// </returns>
     Image Save(Stream stream, Image image);
-    /// &lt;summary&gt;
+    /// <summary>
     /// Saves the current image to the specified file path.
-    /// &lt;/summary&gt;
-    /// &lt;param name="path"&gt;The path to save the image to.&lt;/param&gt;
-    /// &lt;param name="image"&gt;
-    /// The &lt;see cref="T:System.Drawing.Image" /&gt; to save.
-    /// &lt;/param&gt;
-    /// &lt;returns&gt;
-    /// The &lt;see cref="T:System.Drawing.Image" /&gt;.
-    /// &lt;/returns&gt;
+    /// </summary>
+    /// <param name="path">The path to save the image to.</param>
+    /// <param name="image">
+    /// The <see cref="T:System.Drawing.Image" /> to save.
+    /// </param>
+    /// <returns>
+    /// The <see cref="T:System.Drawing.Image" />.
+    /// </returns>
     Image Save(string path, Image image);
     #endregion
 }</code></pre>

@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/replacecolor/
+redirect_from: "imageprocessor-web/imageprocessingmodule/replacecolor.html"
+
 title: ReplaceColor
 subheading: ReplaceColor
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,19 +10,21 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>ReplaceColor</h1>
     <p>Replaces a color within the current image.</p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>Added version <a href="https://www.nuget.org/packages/ImageProcessor.Web/4.1.0">4.1.0</a></p>
     </div>
 
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>&lt;!--Hex--&gt;
-http://your-image?replace=000|fff&amp;fuzziness=30
-&lt;!--RGBA--&gt;
-http://your-image?replace=[255,0,0,0],[255,255,255,255]&amp;fuzziness=30,
-&lt;!--Known Color--&gt;
-http://your-image?replace=black,white&amp;fuzziness=30
-</code></pre>
+    {% highlight xml %}
+<!--Hex-->
+http://your-image?replace=000|fff&fuzziness=30
+<!--RGBA-->
+http://your-image?replace=[255,0,0,0],[255,255,255,255]&fuzziness=30,
+<!--Known Color-->
+http://your-image?replace=black,white&fuzziness=30
+    {% endhighlight %}
+
 </section>
 <hr />
 <section id="example">

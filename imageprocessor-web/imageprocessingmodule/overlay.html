@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/overlay/
+redirect_from: "imageprocessor-web/imageprocessingmodule/overlay.html"
+
 title: Overlay
 subheading: Overlay
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -20,8 +23,10 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>&lt;!--Overlay--&gt;
-http://your-image?overlay=imageoverlay.png&amp;overlay.position=30,30&amp;overlay.size=100,100&amp;overlay.opacity=50</code></pre>
+    {% highlight xml %}
+http://your-image?overlay=imageoverlay.png&overlay.position=30,30&overlay.size=100,100&overlay.opacity=50
+    {% endhighlight %}
+
 </section>
 <hr />
 <section id="example">

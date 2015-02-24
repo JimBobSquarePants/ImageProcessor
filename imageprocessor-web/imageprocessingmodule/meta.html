@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/meta/
+redirect_from: "imageprocessor-web/imageprocessingmodule/meta.html"
+
 title: Meta
 subheading: Meta
 sublinks: ["#usage|Usage"]
@@ -10,9 +13,11 @@ sublinks: ["#usage|Usage"]
     <p>
         Requests are passed thus:
     </p>
-
-    <pre class="language-markup"><code>&lt;!--Force metadata preservation--&gt;
+    {% highlight xml %}
+<!--Force metadata preservation-->
 http://your-image?metadata=true
-&lt;!--Force metadata disposal--&gt;
-http://your-image?metadata=false</code></pre>
+<!--Force metadata disposal-->
+http://your-image?metadata=false
+    {% endhighlight %}
+
 </section>

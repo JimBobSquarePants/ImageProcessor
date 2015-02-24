@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor-web/imageprocessingmodule/flip/
+redirect_from: "imageprocessor-web/imageprocessingmodule/flip.html"
+
 title: Flip
 subheading: Flip
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -10,13 +13,14 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <p>
         Requests are passed thus:
     </p>
-    <pre class="language-markup"><code>&lt;!--Horizontal--&gt;
+    {% highlight xml %}
+<!--Horizontal-->
 http://your-image?flip=horizontal
-&lt;!--Vertical--&gt;
+<!--Vertical-->
 http://your-image?flip=vertical
-&lt;!--Both--&gt;
+<!--Both-->
 http://your-image?flip=both
-</code></pre>
+    {% endhighlight %}
 </section>
 <hr />
 <section id="example">
