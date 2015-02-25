@@ -47,6 +47,38 @@ defaults:
       root: ImageProcessor
   -
     scope:
+      path: "imageprocessor/imagefactory"
+    values:
+      navgroup: imageprocessor
+      layout: method
+      heading: Methods
+      methodof: ImageFactory
+  -
+    scope:
+      path: "imageprocessor/imagefactory/index.html"
+    values:
+      navgroup: imageprocessor
+      layout: class
+      class: ImageFactory
+      methodof: null
+  -
+    scope:
+      path: "imageprocessor/nativebinaryfactory"
+    values:
+      navgroup: imageprocessor
+      layout: method
+      heading: Methods
+      methodof: NativeBinaryFactory
+  -
+    scope:
+      path: "imageprocessor/nativebinaryfactory/index.html"
+    values:
+      navgroup: imageprocessor
+      layout: class
+      class: NativeBinaryFactory
+      methodof: null
+  -
+    scope:
       path: "imageprocessor-web"
     values:
       layout: "rootpage"

@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/resize/
+redirect_from: "imageprocessor/imagefactory/resize.html"
+
 title: Resize
 subheading: Resize
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Resize</h1>
     <p>Resizes the current image to the given dimensions.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory Resize(Size size)</code></pre>
+    {% highlight c# %}
+public ImageFactory Resize(Size size)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -16,7 +21,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>public ImageFactory Resize(ResizeLayer resizeLayer)</code></pre>
+    {% highlight c# %}
+public ImageFactory Resize(ResizeLayer resizeLayer)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

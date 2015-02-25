@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/watermark/
+redirect_from: "imageprocessor/imagefactory/watermark.html"
+
 title: Watermark
 subheading: Watermark
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Watermark</h1>
     <p>Adds a text based watermark to the current image.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory Watermark(TextLayer textLayer )</code></pre>
+    {% highlight c# %}
+    public ImageFactory Watermark (TextLayer textLayer)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -30,7 +35,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
                 <dd>The opacity of the text.</dd>
                 <dt><strong>Position</strong></dt>
                 <dd>
-                    The <code>Nullable<System.Drawing.Point></code> determining the position within the current image to render the overlay.
+                    The <code>Nullable&lt;system.drawing.point&gt;</code> determining the position within the current image to render the overlay.
                     If not set then the text will be centered.
                 </dd>
                 <dt><strong>DropShadow</strong></dt>

@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/hue/
+redirect_from: "imageprocessor/imagefactory/hue.html"
+
 title: Hue
 subheading: Hue
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,11 +10,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Hue</h1>
     <p>Alters the hue of the current image changing the overall color.</p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>Added in version <a href="https://www.nuget.org/packages/ImageProcessor/2.1.0">2.1.0</a></p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory Hue(int degrees, bool rotate = false)</code></pre>
-
+    {% highlight c# %}
+public ImageFactory Hue(int degrees, bool rotate = false)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

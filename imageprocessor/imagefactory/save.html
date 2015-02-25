@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/save/
+redirect_from: "imageprocessor/imagefactory/save.html"
+
 title: Save
 subheading: Save.
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Save</h1>
     <p>Saves the current image to the specified file path or Stream.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory Save(Stream stream)</code></pre>
+    {% highlight c# %}
+public ImageFactory Save(Stream stream)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -16,7 +21,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The <code>System.IO.Stream</code> to save the image information to.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>public ImageFactory Save(string filePath)</code></pre>
+    {% highlight c# %}
+public ImageFactory Save(string filePath)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

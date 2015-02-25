@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/filter/
+redirect_from: "imageprocessor/imagefactory/filter.html"
+
 title: Filter
 subheading: Filter
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Filter</h1>
     <p>Applies a filter to the current image. Use the <code>MatrixFilters</code> class to assign the correct filter</p>
 
-    <pre class="language-csharp"><code>public ImageFactory Filter(IMatrixFilter matrixFilter)</code></pre>
+    {% highlight c# %}
+public ImageFactory Filter(IMatrixFilter matrixFilter)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

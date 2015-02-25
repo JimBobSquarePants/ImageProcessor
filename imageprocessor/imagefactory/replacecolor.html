@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/replacecolor/
+redirect_from: "imageprocessor/imagefactory/replacecolor.html"
+
 title: ReplaceColor
 subheading: ReplaceColor
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,10 +10,13 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>ReplaceColor</h1>
     <p>Replaces a color within the current image.</p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>Added in version <a href="https://www.nuget.org/packages/ImageProcessor/2.1.0">2.1.0</a>
+        </p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory ReplaceColor(Color target, Color replacement, int fuzziness = 0)</code></pre>
+    {% highlight c# %}
+public ImageFactory ReplaceColor(Color target, Color replacement, int fuzziness = 0)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

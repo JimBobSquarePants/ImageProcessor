@@ -19,7 +19,7 @@ sublinks: ["#about|About",
     </p>
     <div role="alert" class="alert">
         <p>
-            The Image Factory class implements the<code>System.IDisposable</code> interface. It is important to dispose of each instance correctly
+            The Image Factory class implements the <code>System.IDisposable</code> interface. It is important to dispose of each instance correctly
             to ensure that there are no memory leaks in your application.
         </p>
     </div>
@@ -28,8 +28,9 @@ sublinks: ["#about|About",
 <section id="example">
     <h2>Example Code</h2>
 
-    <pre class="language-csharp"><code>
+    {% highlight c# %}
 byte[] photoBytes = File.ReadAllBytes(file);
+// Format is automatically detected though can be changed
 ISupportedImageFormat format = new JpegFormat { Quality = 70 };
 Size size = new Size(150, 0)
 using (MemoryStream inStream = new MemoryStream(photoBytes))
@@ -47,5 +48,6 @@ using (MemoryStream inStream = new MemoryStream(photoBytes))
         }
         // Do something with the stream.
     }
-}</code></pre>
+}
+    {% endhighlight %}
 </section>

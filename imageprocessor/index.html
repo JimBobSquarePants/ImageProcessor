@@ -11,7 +11,7 @@ sublinks: ["#about|About","#extending|Extending ImageProcessor"]
     </p>
     <p>
         It contains multiple methods within the core functionality that allows for image manipulation via the
-        <a href="imagefactory.html">ImageFactory</a> class. This has a fluent API which allows you to easily chain methods to deliver the desired output.
+        <a href="imagefactory/">ImageFactory</a> class. This has a fluent API which allows you to easily chain methods to deliver the desired output.
     </p>
     <p>
         <strong>ImageProcessor</strong> contains no web specific components so is suitable for both desktop and web applications.
@@ -48,121 +48,9 @@ sublinks: ["#about|About","#extending|Extending ImageProcessor"]
     <h1>Extending ImageProcessor</h1>
     <p>
         ImageProcessor is built with extensibility in mind. All the individual processors used within the ImageFactory methods
-        follow an interface <code>IGraphicsprocessor</code> which allows developers to easily extend the library.
-        View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor/Processors">source code</a> to see examples.
+        follow an interface <code>IGraphicsprocessor</code> while file format support can be extended using the <code>ISupportedImageFormat</code>
+        interface. This allows developers' to extend the library to suit their needs.
     </p>
-    <pre class="language-csharp"><code>/// <summary>
-/// Defines properties and methods for ImageProcessor Plugins.
-/// </summary>
-public interface IGraphicsProcessor
-{
-    /// <summary>
-    /// Gets or sets the DynamicParameter.
-    /// </summary>
-    dynamic DynamicParameter { get; set; }
-    /// <summary>
-    /// Gets or sets any additional settings required by the processor.
-    /// </summary>
-    Dictionary<string, string> Settings { get; set; }
- 
-    /// <summary>
-    /// Processes the image.
-    /// </summary>
-    /// <param name="factory">
-    /// The current instance of the <see cref="T:ImageProcessor.ImageFactory" /> class 
-    /// containing the image to process.
-    /// </param>
-    /// <returns>
-    /// The processed image from the current instance of the 
-    /// <see cref="T:ImageProcessor.ImageFactory" /> class.
-    /// </returns>
-    Image ProcessImage(ImageFactory factory);
-}</code></pre>
-    <p>
-        It is also possible to extend the image formats that ImageProcessor is capable of manipulating by providing a new class implementing
-        the <code>ISupportedImageFormat</code> interface. ImageProcessor will automatically search for classes implementing that interface when initializing.
-        View the <a href="https://github.com/JimBobSquarePants/ImageProcessor/tree/master/src/ImageProcessor/Imaging/Formats">source code</a> to see examples.
-    </p>
-    <pre class="language-csharp"><code>/// <summary>
-/// The SupportedImageFormat interface providing information about image 
-/// formats to ImageProcessor.
-/// </summary>
-public interface ISupportedImageFormat
-{
-    /// <summary>
-    /// Gets the file headers.
-    /// </summary>
-    byte[][] FileHeaders { get; }
-    /// <summary>
-    /// Gets the list of file extensions.
-    /// </summary>
-    string[] FileExtensions { get; }
-    /// <summary>
-    /// Gets the standard identifier used on the Internet to indicate the type 
-    /// of data that a file contains. 
-    /// </summary>
-    string MimeType { get; }
-    /// <summary>
-    /// Gets the default file extension.
-    /// </summary>
-    string DefaultExtension { get; }
-    /// <summary>
-    /// Gets the file format of the image. 
-    /// </summary>
-    ImageFormat ImageFormat { get; }
-    /// <summary>
-    /// Gets or sets a value indicating whether the image format is indexed.
-    /// </summary>
-    bool IsIndexed { get; set; }
-    /// <summary>
-    /// Gets or sets the quality of output for images.
-    /// </summary>
-    int Quality { get; set; }
-    #region Methods
-    /// <summary>
-    /// Applies the given processor the current image.
-    /// </summary>
-    /// <param name="processor">
-    /// The processor delegate.
-    /// </param>
-    /// <param name="factory">
-    /// The <see cref="ImageFactory" />.
-    /// </param>
-    void ApplyProcessor(Func<imagefactory, image> processor, ImageFactory factory);
-    /// <summary>
-    /// Loads the image to process. 
-    /// </summary>
-    /// <param name="stream">
-    /// The <see cref="T:System.IO.Stream" /> containing the image information.
-    /// </param>
-    /// <returns>
-    /// The <see cref="T:System.Drawing.Image" />.
-    /// </returns>
-    Image Load(Stream stream);
-    /// <summary>
-    /// Saves the current image to the specified output stream.
-    /// </summary>
-    /// <param name="stream">
-    /// The <see cref="T:System.IO.Stream" /> to save the image information to.
-    /// </param>
-    /// <param name="image">
-    /// The <see cref="T:System.Drawing.Image" /> to save.
-    /// </param>
-    /// <returns>
-    /// The <see cref="T:System.Drawing.Image" />.
-    /// </returns>
-    Image Save(Stream stream, Image image);
-    /// <summary>
-    /// Saves the current image to the specified file path.
-    /// </summary>
-    /// <param name="path">The path to save the image to.</param>
-    /// <param name="image">
-    /// The <see cref="T:System.Drawing.Image" /> to save.
-    /// </param>
-    /// <returns>
-    /// The <see cref="T:System.Drawing.Image" />.
-    /// </returns>
-    Image Save(string path, Image image);
-    #endregion
-}</code></pre>
+
+    <p>Details of those interfaces can be found in the <a href="extending/">extending</a> documentation.</p>
 </section>

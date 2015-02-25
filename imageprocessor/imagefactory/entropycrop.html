@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/entropycrop/
+redirect_from: "imageprocessor/imagefactory/entropycrop.html"
+
 title: EntropyCrop
 subheading: EntropyCrop
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -10,9 +13,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
         This method works best with images containing large areas of a single color or similar colors around the edges.
     </p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>Added in version <a href="https://www.nuget.org/packages/ImageProcessor/2.1.0">2.1.0</a></p>
     </div>
-    <pre class="language-csharp"><code>public ImageFactory EntropyCrop(byte threshold = 128)</code></pre>
+
+    {% highlight c# %}
+public ImageFactory EntropyCrop(byte threshold = 128)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

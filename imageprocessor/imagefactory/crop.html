@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/crop/
+redirect_from: "imageprocessor/imagefactory/crop.html"
+
 title: Crop
 subheading: Crop
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Crop</h1>
     <p>Crops the current image to the given location and size.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory Crop(Rectangle rectangle)</code></pre>
+    {% highlight c# %}
+public ImageFactory Crop(Rectangle rectangle)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -16,7 +21,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The <code>System.Drawing.Rectangle</code> containing the coordinates to crop the image to.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>Crop(CropLayer cropLayer)</code></pre>
+    {% highlight c# %}
+public ImageFactory Crop(CropLayer cropLayer)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

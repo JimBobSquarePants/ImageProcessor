@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/load/
+redirect_from: "imageprocessor/imagefactory/load.html"
+
 title: Load
 subheading: Load
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Load</h1>
     <p>Loads the image to process. Always call this method first.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory Load(Stream stream)</code></pre>
+    {% highlight c# %}
+public ImageFactory Load(Stream stream)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -16,7 +21,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The <code>System.IO.Stream</code> containing the image information.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>public ImageFactory Load(string imagePath)</code></pre>
+    {% highlight c# %}
+public ImageFactory Load(string imagePath)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

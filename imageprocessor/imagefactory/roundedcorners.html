@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/roundedcorners/
+redirect_from: "imageprocessor/imagefactory/roundedcorners.html"
+
 title: RoundedCorners
 subheading: RoundedCorners
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,8 +10,10 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>RoundedCorners</h1>
     <p>Adds rounded corners to the current image.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory RoundedCorners(int radius)</code></pre>
-
+    {% highlight c# %}
+public ImageFactory RoundedCorners(int radius)
+    {% endhighlight %}
+ 
     <h3>Parameters</h3>
 
     <dl>
@@ -16,7 +21,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The radius at which the corner will be rounded.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>public ImageFactory RoundedCorners(RoundedCornerLayer roundedCornersLayer)</code></pre>
+    {% highlight c# %}
+public ImageFactory RoundedCorners(RoundedCornerLayer roundedCornersLayer)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

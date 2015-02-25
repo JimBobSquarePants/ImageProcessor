@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/pixelate/
+redirect_from: "imageprocessor/imagefactory/pixelate.html"
+
 title: Pixelate
 subheading: Pixelate
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,10 +10,14 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Pixelate</h1>
     <p>Pixelates an image with the given size.</p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>
+            Added in version <a href="https://www.nuget.org/packages/ImageProcessor/2.1.0">2.1.0</a>
+        </p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory Pixelate(int pixelSize, Rectangle? rectangle = null)</code></pre>
+    {% highlight c# %}
+public ImageFactory Pixelate(int pixelSize, Rectangle? rectangle = null)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -19,7 +26,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The size of the pixels to create.</dd>
         <dt><strong>rectangle</strong></dt>
         <dd>
-            The <code>Nullable<System.Drawing.Rectangle></code> representing the area in which to pixelate the image.
+            The <code>Nullable&lt;System.Drawing.Rectangle&gt;</code> representing the area in which to pixelate the image.
             If not set, the whole image is pixelated.
         </dd>
     </dl>

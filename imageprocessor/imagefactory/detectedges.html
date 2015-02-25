@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/detectedges/
+redirect_from: "imageprocessor/imagefactory/detectedges.html"
+
 title: DetectEdges
 subheading: DetectEdges
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -11,10 +14,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
         colors of the originl image.
     </p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>Added in version <a href="https://www.nuget.org/packages/ImageProcessor/2.1.0">2.1.0</a></p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory DetectEdges(IEdgeFilter filter, bool greyscale = true)</code></pre>
+    {% highlight c# %}
+public ImageFactory DetectEdges(IEdgeFilter filter, bool greyscale = true)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/overlay/
+redirect_from: "imageprocessor/imagefactory/overlay.html"
+
 title: Overlay
 subheading: Overlay
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -10,11 +13,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
         If the overlay is larger than the image it will be resized to match the images dimensions.
     </p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>Added in version <a href="https://www.nuget.org/packages/ImageProcessor/2.1.0">2.1.0</a></p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory Overlay(ImageLayer imageLayer)</code></pre>
-
+    {% highlight c# %}
+public ImageFactory Overlay(ImageLayer imageLayer)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -31,7 +35,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
                 <dd>The opacity of the image. Between <var>0</var> and <var>100</var></dd>
                 <dt><strong>Position</strong></dt>
                 <dd>
-                    The <code>Nullable<System.Drawing.Point></code> determining the position within the current image to render the overlay.
+                    The <code>Nullable&lt;System.Drawing.Point&gt;</code> determining the position within the current image to render the overlay.
                     If not set then the overlay will be centered.
                 </dd>
             </dl>
