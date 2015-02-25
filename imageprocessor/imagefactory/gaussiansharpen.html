@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/gaussiansharpen/
+redirect_from: "imageprocessor/imagefactory/gaussiansharpen.html"
+
 title: GaussianSharpen
 subheading: GaussianSharpen
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>GaussianSharpen</h1>
     <p>Uses a Gaussian kernel to sharpen the current image.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory GaussianSharpen(int size)</code></pre>
+    {% highlight c# %}
+public ImageFactory GaussianSharpen(int size)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -16,7 +21,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The size of the kernel by which to sharpen the images pixels.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>public ImageFactory GaussianSharpen(GaussianLayer gaussianLayer)</code></pre>
+    {% highlight c# %}
+public ImageFactory GaussianSharpen(GaussianLayer gaussianLayer)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 

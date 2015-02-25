@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/mask/
+redirect_from: "imageprocessor/imagefactory/mask.html"
+
 title: Mask
 subheading: Mask
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -10,11 +13,13 @@ sublinks: ["#usage|Usage","#example|Examples"]
         Any area containing transparency withing the mask will be removed from the original image. If the mask is larger than the image it will be resized to match the images dimensions.
     </p>
     <div class="alert" role="alert">
-        <p>Added version 2.1.0</p>
+        <p>Added in version <a href="https://www.nuget.org/packages/ImageProcessor/2.1.0">2.1.0</a>
+        </p>
     </div>
 
-    <pre class="language-csharp"><code>public ImageFactory Mask(Image imageMask, Point? point = null)</code></pre>
-
+    {% highlight c# %}
+public ImageFactory Mask(Image imageMask, Point? point = null)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -23,7 +28,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The image containing the mask to apply.</dd>
         <dt><strong>point</strong></dt>
         <dd>
-            The <code>Nullable<System.Drawing.Point></code>to place the mask if it not the same dimensions as the original image.
+            The <code>Nullable&lt;System.Drawing.Point&gt;</code>to place the mask if it not the same dimensions as the original image.
             If no position is set, the mask will be centered within the image.
         </dd>
     </dl>

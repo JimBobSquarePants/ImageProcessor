@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/imagefactory/gaussianblur/
+redirect_from: "imageprocessor/imagefactory/gaussianblur.html"
+
 title: GaussianBlur
 subheading: GaussianBlur
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>GaussianBlur</h1>
     <p>Uses a Gaussian kernel to blur the current image.</p>
 
-    <pre class="language-csharp"><code>public ImageFactory GaussianBlur(int size)</code></pre>
+    {% highlight c# %}
+public ImageFactory GaussianBlur(int size)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -16,7 +21,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <dd>The size of the kernel by which to blur the images pixels.</dd>
     </dl>
 
-    <pre class="language-csharp"><code>public ImageFactory GaussianBlur(GaussianLayer gaussianLayer)</code></pre>
+    {% highlight c# %}
+public ImageFactory GaussianBlur(GaussianLayer gaussianLayer)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
