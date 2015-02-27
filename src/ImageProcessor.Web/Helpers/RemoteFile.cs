@@ -10,7 +10,6 @@
 
 namespace ImageProcessor.Web.Helpers
 {
-    #region Using
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -18,7 +17,6 @@ namespace ImageProcessor.Web.Helpers
     using System.Security;
     using System.Threading.Tasks;
     using System.Web;
-    #endregion
 
     /// <summary>
     /// Encapsulates methods used to download files from a website address.
@@ -173,16 +171,20 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         internal async Task<WebResponse> GetWebResponseAsync()
         {
-            WebResponse response;
+            WebResponse response = null;
             try
             {
                 response = await this.GetWebRequest().GetResponseAsync();
             }
             catch (WebException ex)
             {
-                if (ex.Status == WebExceptionStatus.NameResolutionFailure)
+                if (response != null)
                 {
-                    throw new HttpException(404, "No image exists at " + Uri);
+                    HttpWebResponse errorResponse = (HttpWebResponse)ex.Response;
+                    if (errorResponse.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        throw new HttpException(404, "No image exists at " + this.Uri);
+                    }
                 }
 
                 throw;
@@ -217,7 +219,6 @@ namespace ImageProcessor.Web.Helpers
         #endregion
 
         #region Private
-
         /// <summary>
         /// Creates the WebRequest object used internally for this RemoteFile instance.
         /// </summary>
