@@ -9,7 +9,7 @@ sublinks:
  - "#isupportedimageformat|ISupportedImageFormat"
 ---
 
-#Extending ImageProcessor
+# Extending ImageProcessor
 
 ImageProcessor is built with extensibility in mind. All the individual processors used within the ImageFactory methods
 follow an interface `IGraphicsprocessor` which allows developers to easily extend the library.
@@ -17,7 +17,8 @@ View the [source code](https://github.com/JimBobSquarePants/ImageProcessor/tree/
      
 
 <div id="igraphicsprocessor">
-##IGraphicsProcessor
+
+## IGraphicsProcessor
 
 All the individual image processors follow an interface `IWebGraphicsprocessor` which allows developers to extend the library.
 
@@ -56,7 +57,8 @@ public interface IGraphicsProcessor
 </div>
 ---
 <div id="isupportedimageformat">
-##ISupportedImageFormat
+
+## ISupportedImageFormat
 
 It is also possible to extend the image formats that ImageProcessor is capable of manipulating by providing a new class implementing
 the `ISupportedImageFormat`` interface. ImageProcessor will automatically search for classes implementing that interface when initializing.

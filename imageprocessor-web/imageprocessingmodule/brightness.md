@@ -24,11 +24,14 @@ http://your-image?brightness=-25
 </section>
 ---
 <section id="example">
-#Examples
+# Examples
 
-###Original
+### Original
+
 ![Original image]({{ site.baseurl }}/assets/img/originals/lock.jpg)
 
-###25% Brightness
+### 25% Brightness
+
 ![Image with brightness adjusted]({{ site.baseurl }}/assets/img/brightness/lock.jpg)
+
 </section>

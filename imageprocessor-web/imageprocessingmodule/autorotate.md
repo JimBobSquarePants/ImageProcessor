@@ -7,7 +7,8 @@ subheading: AutoRotate
 sublinks: ["#usage|Usage"]
 ---
 <section id="usage">
-#AutoRotate
+
+# AutoRotate
 
 Performs auto-rotation to ensure that EXIF defined rotation is reflected in the final image.
 
@@ -17,7 +18,7 @@ Requests are passed thus:
 http://your-image?autorotate=true
 {% endhighlight %}
     
-###Remarks
+### Remarks
 
 If EXIF preservation is set to preserve metadata during processing this method will not alter the images rotation.
 </section>
