@@ -10,7 +10,7 @@ sublinks:
 ---
 <section id="about">
 
-#Azure Blob Cache
+# Azure Blob Cache
 
 <a href="https://nuget.org/packages/ImageProcessor.Web.Plugins.AzureBlobCache/" role="button" class="download" data-ga-category="Plugin Actions" data-ga-action="Plugin Links" data-ga-label="AzureBlobCache Plugin Nuget Link"><i class="fa fa-download"></i>Plugins.AzureBlobCache</a>
 
@@ -41,7 +41,7 @@ Make sure you have look at the fine work on their website.
 <hr />
 <section id="config">
 
-#Configuration
+# Configuration
 
 Upon installation the following will be added to the [Cache.Config](../configuration/#cacheconfig) section in the 
 configuration files.
