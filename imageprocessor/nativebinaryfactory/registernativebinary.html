@@ -1,4 +1,7 @@
 ---
+permalink: imageprocessor/nativebinaryfactory/registernativebinary/
+redirect_from: "imageprocessor/nativebinaryfactory/registernativebinary.html"
+
 title: RegisterNativeBinary
 subheading: RegisterNativeBinary
 sublinks: ["#usage|Usage","#example|Examples"]
@@ -7,7 +10,9 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>RegisterNativeBinary</h1>
     <p>Registers any embedded native (unmanaged) binaries required by ImageProcessor.</p>
 
-    <pre class="language-csharp"><code>RegisterNativeBinary(string name, byte[] resourceBytes)</code></pre>
+    {% highlight c# %}
+RegisterNativeBinary(string name, byte[] resourceBytes)
+    {% endhighlight %}
 
     <h3>Parameters</h3>
 
@@ -22,9 +27,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
 <section id="example">
     <h1>Examples</h1>
     <p>In this example a reference to an embedded C++ binary that allows for manipulation of images using the Google WebP image format is registered.</p>
-    <pre class="language-csharp"><code>string folder = ImageProcessorBootstrapper.Instance.NativeBinaryFactory.Is64BitEnvironment ? "x64" : "x86";
+
+    {% highlight c# %}
+string folder = ImageProcessorBootstrapper.Instance.NativeBinaryFactory.Is64BitEnvironment ? "x64" : "x86";
 string name = string.Format("ImageProcessor.Plugins.WebP.Resources.Unmanaged.{0}.libwebp.dll", folder);
 Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
+
 using (MemoryStream memoryStream = new MemoryStream())
 {
     if (stream != null)
@@ -32,5 +40,6 @@ using (MemoryStream memoryStream = new MemoryStream())
         stream.CopyTo(memoryStream);
         ImageProcessorBootstrapper.Instance.NativeBinaryFactory.RegisterNativeBinary("libwebp.dll", memoryStream.ToArray());
     }
-}</code></pre>
+}
+    {% endhighlight %}
 </section>
