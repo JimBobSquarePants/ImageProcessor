@@ -8,7 +8,8 @@ subheading: Crop
 sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
-#Crop
+
+# Crop
 
 Crops the current image to the given location and size.
 There are two modes available:

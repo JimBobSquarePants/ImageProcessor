@@ -7,7 +7,8 @@ subheading: Contrast
 sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
-#Contrast
+
+# Contrast
 
 Adjusts the contrast of images. Pass the desired percentage
 value (without the '%') to the processor.
