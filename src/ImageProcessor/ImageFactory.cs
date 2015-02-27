@@ -139,6 +139,9 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(Stream stream)
         {
+            // Reset the position of the stream to ensure we're reading the correct part.
+            stream.Position = 0;
+
             ISupportedImageFormat format = FormatUtilities.GetFormat(stream);
 
             if (format == null)
@@ -682,6 +685,26 @@ namespace ImageProcessor
         }
 
         /// <summary>
+        /// Converts the current image to a CMYK halftone representation of that image.
+        /// </summary>
+        /// <param name="comicMode">
+        /// Whether to trace over the current image and add borders to add a comic book effect.
+        /// </param>
+        /// <returns>
+        /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
+        /// </returns>
+        public ImageFactory Halftone(bool comicMode = false)
+        {
+            if (this.ShouldProcess)
+            {
+                Halftone halftone = new Halftone { DynamicParameter = comicMode };
+                this.CurrentImageFormat.ApplyProcessor(halftone.ProcessImage, this);
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Applies the given image mask to the current image.
         /// </summary>
         /// <param name="imageMask">
@@ -866,6 +889,35 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Rotate rotate = new Rotate { DynamicParameter = degrees };
+                this.CurrentImageFormat.ApplyProcessor(rotate.ProcessImage, this);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Rotates the image without expanding the canvas to fit the image.
+        /// </summary>
+        /// <param name="degrees">
+        /// The angle at which to rotate the image in degrees.
+        /// </param>
+        /// <param name="keepSize">
+        /// Whether to keep the original image dimensions.
+        /// <para>
+        /// If set to true, the image is zoomed to fit the bounding area.
+        /// </para>
+        /// <para>
+        /// If set to false, the area is cropped to fit the rotated image.
+        /// </para>
+        /// </param>
+        /// <returns>
+        /// The current instance of the <see cref="T:ImageProcessor.ImageFactory" /> class.
+        /// </returns>
+        public ImageFactory RotateBounded(float degrees, bool keepSize = false)
+        {
+            if (this.ShouldProcess)
+            {
+                RotateBounded rotate = new RotateBounded { DynamicParameter = new Tuple<float, bool>(degrees, keepSize) };
                 this.CurrentImageFormat.ApplyProcessor(rotate.ProcessImage, this);
             }
 
@@ -1059,8 +1111,9 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Allow the same stream to be used as for input.
-                stream.Position = 0;
+                stream.SetLength(0);
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image);
+                stream.Position = 0;
             }
 
             return this;
