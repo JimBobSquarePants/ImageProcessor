@@ -27,6 +27,15 @@ outwith the website for increased performance.
 The caching mechanism will store processed image files from any allowable image location including but not limited to
 local, remote, and blob stored locations. The cache is self cleaning and will automatically update itself should a source
 image change. It is interchangeable with the default disk cache with very little configuration.
+
+<div class="alert" role="alert">
+  
+Development of this plugin was kindly supported by the amazing team at [Crumpled Dog](http://www.crumpled-dog.com/)
+
+Make sure you have look at the fine work on their website.
+
+</div>
+
 </section>
 <hr />
 <section id="config">

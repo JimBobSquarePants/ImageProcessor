@@ -82,6 +82,8 @@ configuration file you can add your own image sources.
       <settings>
         <setting key="MaxBytes" value="4194304"/>
         <setting key="Timeout" value="3000"/>
+        <!-- Added version 4.2.0. -->
+        <setting key="Protocol" value="http"/>
       </settings>
       <!-- Sets allowable domains to process images from. -->
       <whitelist>
@@ -215,6 +217,7 @@ the web implementaion in the configuration file you can add your own image proce
       </settings>
     </plugin>
     <plugin name="Rotate" type="ImageProcessor.Web.Processors.Rotate, ImageProcessor.Web"/>
+    <plugin name="RotateBounded" type="ImageProcessor.Web.Processors.RotateBounded, ImageProcessor.Web"/>
     <plugin name="RoundedCorners" type="ImageProcessor.Web.Processors.RoundedCorners, ImageProcessor.Web"/>
     <plugin name="Saturation" type="ImageProcessor.Web.Processors.Saturation, ImageProcessor.Web"/>
     <plugin name="Tint" type="ImageProcessor.Web.Processors.Tint, ImageProcessor.Web"/>

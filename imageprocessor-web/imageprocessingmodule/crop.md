@@ -22,7 +22,9 @@ Requests are passed thus:
 {% highlight xml %}
 <!--Pixel-->
 http://your-image?crop=x,y,width,height
-<!--Percentage - Each value is a decimal between 0 and 1-->
+<!--Percentage: 
+    Current -  Each value is a decimal between 0 and 100. 
+    Legacy - Each value is a decimal between 0 and 1. -->
 http://your-image?crop=left,top,right,bottom&cropmode=percent
 {% endhighlight %}
 

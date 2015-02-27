@@ -27,42 +27,75 @@
         }
     });
 
-    $.buildDataOptions = function ($elem, options, prefix, namespace) {
+    var pseudoUnique = function (length) {
+        /// <summary>Returns a pseudo unique alpha-numeric string of the given length.</summary>
+        /// <param name="length" type="Number">The length of the string to return. Defaults to 8.</param>
+        /// <returns type="String">The pseudo unique alpha-numeric string.</returns>
+
+        var len = length || 8,
+            text = "",
+            possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+            max = possible.length;
+
+        if (len > max) {
+            len = max;
+        }
+
+        for (var i = 0; i < len; i += 1) {
+            text += possible.charAt(Math.floor(Math.random() * max));
+        }
+
+        return text;
+    };
+
+    var getDataOptions = function ($elem, filter) {
         /// <summary>Creates an object containing options populated from an elements data attributes.</summary>
         /// <param name="$elem" type="jQuery">The object representing the DOM element.</param>
-        /// <param name="options" type="Object">The object to extend</param>
-        /// <param name="prefix" type="String">The prefix with which to identify the data attribute.</param>
-        /// <param name="namespace" type="String">The namespace with which to segregate the data attribute.</param>
+        /// <param name="filter" type="String">The prefix with filter to identify the data attribute.</param>
         /// <returns type="Object">The extended object.</returns>
+
+        var options = {};
         $.each($elem.data(), function (key, val) {
 
-            if (key.indexOf(prefix) === 0 && key.length > prefix.length) {
+            if (key.indexOf(filter) === 0 && key.length > filter.length) {
 
                 // Build a key with the correct format.
-                var length = prefix.length,
+                var length = filter.length,
                     newKey = key.charAt(length).toLowerCase() + key.substring(length + 1);
 
                 options[newKey] = val;
-
-                // Clean up.
-                $elem.removeData(key);
             }
-
         });
 
-        if (namespace) {
-            $elem.data(namespace + "." + prefix + "Options", options);
-        } else {
-            $elem.data(prefix + "Options", options);
-        }
-
-        return options;
+        // Can't use Object.keys for IE8 support.
+        var keys = 0, i; for (i in options) { if (options.hasOwnProperty(i)) { keys++; } }
+        return keys ? options : $elem.data();
     };
 
-    var createArgs = function (options, callback) {
-        /// <summary>
-        ///     Creates the parameter array to pass to the Google ga() method.
-        /// </summary>
+    var GoogleTracking = function (element, options) {
+        /// <summary> Tracks google events via a click event.</summary>
+        /// <param name="element" type="DOM">The DOM element.</param>
+        /// <param name="options" type="String">The options to pass to the Google ga() function.</param>
+
+        this.element = element;
+        this.id = element.id || (element.id = pseudoUnique());
+        this.$element = $(element);
+        this.$delegate = $("body");
+        this.isUniversal = isUniversal;
+        this.newWindow = /_blank/i.test(this.$element.attr("target"));
+        this.defaults = {
+            debug: false,
+            type: isUniversal ? "event" : "_trackEvent"
+        };
+
+        this.options = $.extend({}, this.defaults, options);
+
+        // Bind click events.
+        this.$delegate.one("click", "#" + this.id, $.proxy(this.click, this));
+    };
+
+    GoogleTracking.prototype.createArgs = function (options, callback) {
+        /// <summary> Creates the parameter array to pass to the Google ga() function.</summary>
         /// <param name="options" type="Object">The options to pass to the arguments</param>
         /// <param name="callback" type="Function">The callback to fire once tracking is done.</param>
         /// <returns type="Array">The array of necessary parameters.</returns>
@@ -81,7 +114,7 @@
 
             var value = options[val];
 
-            if (value) {
+            if (value || value === null) {
                 params.push(value);
             }
 
@@ -98,68 +131,74 @@
                 $.extend(last, defaults);
             }
         }
-
         return params;
     };
 
-    var GoogleTracking = function (element, options) {
+    GoogleTracking.prototype.click = function (event) {
+        /// <summary>Handles any click events bound to the element.</summary>
+        /// <param name="event" type="Object">The triggered event.</param>
 
-        this.$element = $(element);
-        this.defaults = {
-            track: true,
-            type: isUniversal ? "event" : "_trackEvent"
-        };
-
-        this.options = $.extend({}, this.defaults, options);
-
-        // Check to see if the plug-in is set to track and trigger 
-        // the correct internal method if so.
-        if (this.options.track) {
-            this.track();
-        }
-
-    };
-
-    GoogleTracking.prototype.track = function () {
-
-        var $element = this.$element,
-            newWindow = this.options.newWindow,
+        var element = this.element,
+            newWindow = this.newWindow,
+            doClick = false,
+            original = event.originalEvent,
+            prevented = function (e) {
+                return e.defaultPrevented ||
+               e.defaultPrevented === undefined &&
+               e.returnValue === false ? true : false;
+            },
             callback = function () {
                 if (!newWindow) {
-                    // Trigger the elements click event.
-                    $element.off("click.ga")[0].click();
-                } else {
-                    $element.off("click.ga");
+                    if (doClick) {
+                        // Trigger the elements click event.
+                        element.click();
+                    }
                 }
             };
 
-        var args = createArgs(this.options, callback);
+        var args = this.createArgs(this.options, callback);
 
-        if (isUniversal) {
-            // Push the data.
-            w.ga.apply(w.ga, args);
+        if (this.isUniversal) {
+            if (this.options.debug) {
+                // Log the data.
+                console && console.log(args);
+                window.setTimeout(callback, 100);
+            } else {
+                // Push the data.
+                w.ga.apply(w.ga, args);
+            }
         } else {
-            w._gaq.push(args);
+            if (this.options.debug) {
+                console && console.log(args);
+            } else {
+                w._gaq.push(args);
+            }
             w.setTimeout(callback, 100);
+        }
+
+        // Only allow callback "click" in strict situations.
+        if (!newWindow && !prevented(original)) {
+            doClick = true;
+            event.preventDefault();
         }
     };
 
+    // No conflict.
+    var old = $.fn.gaTracking;
+
+    // Plug-in definition 
     $.fn.gaTracking = function (options) {
+        /// <summary>Tracks google events bound to an element triggered via "click".</summary>
+        /// <param name="options" type="Object">The options to pass to the Google ga() function.</param>
 
         return this.each(function () {
 
             var $this = $(this),
-                data = $this.data("ga"),
-                opts = typeof options === "object" ? options : null;
+                data = $this.data("gaTracking");
 
             if (!data) {
-                // Check the data and reassign if not present.
-                $this.data("ga", (data = new GoogleTracking(this, opts)));
-            }
-
-            // Run the appropriate function if a string is passed.
-            if (typeof options === "string") {
-                data[options]();
+                // Check the data and assign if not present.
+                $this.data("gaTracking", new GoogleTracking(this, options));
             }
         });
     };
@@ -167,36 +206,17 @@
     // Set the public constructor.
     $.fn.gaTracking.Constructor = GoogleTracking;
 
-    // No conflict.
-    var old = $.fn.gaTracking;
     $.fn.gaTracking.noConflict = function () {
         $.fn.gaTracking = old;
         return this;
     };
 
-    var handler = function (e) {
-        var $this = $(this),
-            data = $this.data("gaOptions"),
-            options = data || $.buildDataOptions($this, {}, "ga");
-
-        // Prevent popup blocker.
-        options.newWindow = $this.attr("target") === "_blank";
-        if (!options.newWindow) {
-            e.preventDefault();
-        }
-
-        e.stopImmediatePropagation();
-
-        // Parse specific attributes from anchors.
-        options.href || (options.href = $this.attr("href"));
-
-        var params = $this.data("ga") ? "track" : options;
-
-        // Run the tracking method.
-        $this.gaTracking(params);
-    };
-
-    // Google tracking data api initialization.
-    $(":attrStart(data-ga)").on("click.ga", handler);
+    // Data API
+    $(document).on("ready.ga.data-api", function () {
+        $(":attrStart(data-ga)").each(function () {
+            var $this = $(this);
+            $this.gaTracking(getDataOptions($this, "ga"));
+        });
+    });
 
 }(jQuery, window));

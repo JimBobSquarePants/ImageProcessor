@@ -19,7 +19,7 @@ be [added to the library](../extending). The following plugins are available for
 <section id="azure">
 #Azure Blob Cache
 
-The Azure blob cache pluging is an extension to the caching mechanism which allows caching of images within
+The Azure blob cache plugin is an extension to the caching mechanism which allows caching of images within
 [Azure Blob Storage](http://azure.microsoft.com/en-us/documentation/articles/storage-dotnet-how-to-use-blobs/) to serve 
 via a content delivery network. This is extremely useful for load balanced or high traffic sites where images have to be served 
 outwith the website for increased performance.

@@ -1,5 +1,8 @@
 ---
+permalink: imageprocessor/imagefactory/
+
 layout: class
+methodof: null
 class: ImageFactory
 title: ImageFactory
 heading: ImageFactory
@@ -30,7 +33,7 @@ sublinks: ["#about|About",
 
     {% highlight c# %}
 byte[] photoBytes = File.ReadAllBytes(file);
-// Format is automatically detected though can be changed
+// Format is automatically detected though can be changed.
 ISupportedImageFormat format = new JpegFormat { Quality = 70 };
 Size size = new Size(150, 0)
 using (MemoryStream inStream = new MemoryStream(photoBytes))
