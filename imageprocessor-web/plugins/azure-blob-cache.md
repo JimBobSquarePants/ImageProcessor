@@ -9,6 +9,7 @@ sublinks:
  - "#config|Configuration"
 ---
 <section id="about">
+
 #Azure Blob Cache
 
 <a href="https://nuget.org/packages/ImageProcessor.Web.Plugins.AzureBlobCache/" role="button" class="download" data-ga-category="Plugin Actions" data-ga-action="Plugin Links" data-ga-label="AzureBlobCache Plugin Nuget Link"><i class="fa fa-download"></i>Plugins.AzureBlobCache</a>
@@ -28,7 +29,7 @@ The caching mechanism will store processed image files from any allowable image 
 local, remote, and blob stored locations. The cache is self cleaning and will automatically update itself should a source
 image change. It is interchangeable with the default disk cache with very little configuration.
 
-<div class="alert" role="alert">
+<div class="alert" role=alert>
   
 Development of this plugin was kindly supported by the amazing team at [Crumpled Dog](http://www.crumpled-dog.com/)
 
@@ -39,6 +40,7 @@ Make sure you have look at the fine work on their website.
 </section>
 <hr />
 <section id="config">
+
 #Configuration
 
 Upon installation the following will be added to the [Cache.Config](../configuration/#cacheconfig) section in the 
