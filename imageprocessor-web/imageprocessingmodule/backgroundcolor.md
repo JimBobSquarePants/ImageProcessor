@@ -7,7 +7,8 @@ subheading: BackgroundColor
 sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
-#BackgroundColor
+
+# BackgroundColor
 
 Changes the background color of the current image.</p>
 

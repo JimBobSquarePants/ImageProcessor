@@ -7,7 +7,8 @@ subheading: Alpha
 sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
-#Alpha
+
+# Alpha
 
 Adjusts the alpha transparency of images. Pass the desired percentage
 value (without the '%') to the processor.

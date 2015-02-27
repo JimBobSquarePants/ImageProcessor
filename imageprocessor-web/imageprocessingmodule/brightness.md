@@ -7,7 +7,8 @@ subheading: Brightness
 sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
-#Brightness
+
+# Brightness
 
 Adjusts the brightness of images. Pass the desired percentage
 value (without the '%') to the processor.
