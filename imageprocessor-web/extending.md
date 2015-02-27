@@ -10,13 +10,14 @@ sublinks:
  - "#iimagecache|IImageCache"
 ---
 
-#Extending ImageProcessor.Web
+# Extending ImageProcessor.Web
 
 ImageProcessor.Web is built with extensibility in mind. All the individual processors, all the image source, and image cache methods
 used within the ImageProcessingModule can be replaced with individual implementations. 
 
 <div id="iwebgraphicsprocessor">
-##IWebGraphicsProcessor
+
+## IWebGraphicsProcessor
 
 All the individual image processors follow an interface `IWebGraphicsprocessor` which allows developers to extend the library.
 
@@ -63,7 +64,8 @@ public interface IWebGraphicsProcessor
 </div>
 ---
 <div id="iimageservice">
-##IImageService
+
+## IImageService
 
 The `IImageService` defines methods and properties which allow developers to extend ImageProcessor to retrieve
 images from alternate locations to process.
@@ -131,7 +133,8 @@ public interface IImageService
 </div>
 ---
 <div id="iimagecache">
-##IImageCache
+
+## IImageCache
 
 The `IImageCache` defines methods and properties which allow developers to extend ImageProcessor to persist
 cached images in alternate locations. For eample: Azure Blob Containers.

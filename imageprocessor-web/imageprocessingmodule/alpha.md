@@ -20,13 +20,14 @@ http://your-image?alpha=50
 </section>
 ---
 <section id="example">
-#Examples
 
-###Original
+# Examples
+
+### Original
 
 ![Original image]({{ site.baseurl }}/assets/img/originals/balloon.jpg)
 
-###50% Alpha
+### 50% Alpha
 
 ![Image with alpha transparency adjusted]({{ site.baseurl }}/assets/img/alpha/balloon.png)
 </section>

@@ -23,11 +23,15 @@ http://your-image?bgcolor=purple
 </section>
 ---
 <section id="example">
-#Examples
 
-###Original
+# Examples
+
+### Original
+
 ![Original image]({{ site.baseurl }}/assets/img/rounded/beach.png)
 
-###Purple Background Color
+### Purple Background Color
+
 ![Image with a purple background color applied]({{ site.baseurl }}/assets/img/bgcolor/beach.jpg)
+
 </section>

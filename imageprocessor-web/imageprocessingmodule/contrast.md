@@ -24,11 +24,15 @@ http://your-image?contrast=-25
 </section>
 ---
 <section id="example">
-#Examples
 
-###Original
+# Examples
+
+### Original
+
 ![Original image]({{ site.baseurl }}/assets/img/originals/blackforrest.jpg)
 
-###25% Contrast
+### 25% Contrast
+
 ![Image with contrast adjusted]({{ site.baseurl }}/assets/img/contrast/blackforrest.jpg)
+
 </section>

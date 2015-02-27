@@ -31,12 +31,15 @@ http://your-image?crop=left,top,right,bottom&cropmode=percent
 </section>
 ---
 <section id="example">
-#Examples
 
-###Original
+# Examples
+
+### Original
+
 ![Original image]({{ site.baseurl }}/assets/img/originals/coffee.jpg)
 
-###Cropped
+### Cropped
+
 ![Image with contrast adjusted]({{ site.baseurl }}/assets/img/crop/coffee.jpg)
 
 </section>

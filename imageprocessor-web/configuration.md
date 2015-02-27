@@ -37,7 +37,7 @@ file. This allows the library to intercept processing calls to locally stored im
 
 ---
 
-##Additional configuration
+## Additional configuration
 
 Further configuration options can be enabled by installing the [ImageProcessor.Web.Config](https://nuget.org/packages/ImageProcessor.Web.Config/)
 Nuget package which will add the additional configuration values to your `web.config` file. 
@@ -64,7 +64,8 @@ Details for these configuration values can be found below.
 </div>
 ---
 <div id="securityconfig">
-###Security.Config
+
+### Security.Config
 
 Contains setting pertaining to security configuration which allow the safe configuration of externally hosted files.
 The more precise the url, the more restrictive the whitelist.
@@ -118,7 +119,8 @@ prior to that the config is as follows.
 </div>
 ---
 <div id="cacheconfig">
-###Cache.Config
+
+### Cache.Config
 
 Contains setting pertaining to caching configuration: Where to store the cache, how many days to store images for.
 
@@ -153,7 +155,8 @@ prior to that the config is as follows.
 </div>
 ---
 <div id="processingconfig">
-###Processing.Config
+
+### Processing.Config
 
 Contains information and configuration for all processors.
 
