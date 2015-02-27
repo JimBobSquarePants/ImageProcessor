@@ -46,17 +46,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\CachedImage.cs" />
+    <Compile Include="Caching\DiskCache.cs" />
+    <Compile Include="Caching\IImageCache.cs" />
+    <Compile Include="Caching\ImageCacheBase.cs" />
+    <Compile Include="Configuration\Shared\SettingElement.cs" />
+    <Compile Include="Configuration\Shared\SettingElementCollection.cs" />
+    <Compile Include="Extensions\TypeInitializationExtensions.cs" />
     <Compile Include="Helpers\ProcessQueryStringEventArgs.cs" />
     <Compile Include="Processors\DetectEdges.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />
+    <Compile Include="Processors\Halftone.cs" />
     <Compile Include="Processors\Hue.cs" />
     <Compile Include="Processors\Mask.cs" />
     <Compile Include="Processors\Overlay.cs" />
     <Compile Include="Processors\Pixelate.cs" />
     <Compile Include="Processors\ReplaceColor.cs" />
+    <Compile Include="Processors\RotateBounded.cs" />
     <Compile Include="Services\IImageService.cs" />
     <Compile Include="Caching\MemCache.cs" />
-    <Compile Include="Caching\DiskCache.cs" />
     <Compile Include="Caching\CacheIndexer.cs" />
     <Compile Include="Configuration\ImageCacheSection.cs" />
     <Compile Include="Configuration\ImageProcessingSection.cs" />
@@ -105,13 +112,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Configuration\Resources\cache.config">
+    <None Include="Configuration\Resources\cache.config.transform">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Configuration\Resources\processing.config">
+    </None>
+    <None Include="Configuration\Resources\processing.config.transform">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Configuration\Resources\security.config" />
+    </None>
+    <None Include="Configuration\Resources\security.config.transform" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

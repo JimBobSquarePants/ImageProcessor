@@ -10,6 +10,8 @@ namespace ImageProcessor.Imaging.Colors
     using System;
     using System.Drawing;
 
+    using ImageProcessor.Imaging.Helpers;
+
     /// <summary>
     /// Represents an HSLA (hue, saturation, luminosity, alpha) color.
     /// Adapted from <see href="http://richnewman.wordpress.com/about/code-listings-and-diagrams/hslcolor-class/"/>
@@ -337,6 +339,21 @@ namespace ImageProcessor.Imaging.Colors
         }
 
         /// <summary>
+        /// Allows the implicit conversion of an instance of <see cref="HslaColor"/> to a 
+        /// <see cref="CmykColor"/>.
+        /// </summary>
+        /// <param name="hslaColor">
+        /// The instance of <see cref="HslaColor"/> to convert.
+        /// </param>
+        /// <returns>
+        /// An instance of <see cref="CmykColor"/>.
+        /// </returns>
+        public static implicit operator CmykColor(HslaColor hslaColor)
+        {
+            return CmykColor.FromColor(hslaColor);
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
@@ -346,10 +363,10 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (this.IsEmpty())
             {
-                return "HSLAColor [Empty]";
+                return "HslaColor [Empty]";
             }
 
-            return string.Format("HSLAColor [ H={0:#0.##}, S={1:#0.##}, L={2:#0.##}, A={3:#0.##}]", this.H, this.S, this.L, this.A);
+            return string.Format("HslaColor [ H={0:#0.##}, S={1:#0.##}, L={2:#0.##}, A={3:#0.##}]", this.H, this.S, this.L, this.A);
         }
 
         /// <summary>
@@ -478,16 +495,7 @@ namespace ImageProcessor.Imaging.Colors
         /// </returns>
         private static float Clamp(float value)
         {
-            if (value < 0.0)
-            {
-                value = 0.0f;
-            }
-            else if (value > 1.0)
-            {
-                value = 1.0f;
-            }
-
-            return value;
+            return ImageMaths.Clamp(value, 0, 1);
         }
 
         /// <summary>
