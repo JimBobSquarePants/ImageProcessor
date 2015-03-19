@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1E656CDE-124D-4FAF-837C-0EF1E192D418}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -34,7 +32,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B5217BED
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5D12E196-FB7A-4D97-B156-56901EF8084D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.AmazonS3Cache", "ImageProcessor.Web.Plugins.AmazonS3Cache\ImageProcessor.Web.Plugins.AmazonS3Cache.csproj", "{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}"
+EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = ImageProcessor.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		All|Any CPU = All|Any CPU
 		All|Mixed Platforms = All|Mixed Platforms
@@ -197,23 +200,36 @@ Global
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.All|Any CPU.ActiveCfg = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.All|Any CPU.Build.0 = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.All|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.All|Mixed Platforms.Build.0 = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.All|x86.ActiveCfg = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{C7D1F0DD-CBD6-4127-82B4-51949EFF0BF5} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
+		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
 		{2CF69699-959A-44DC-A281-4E2596C25043} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
-		{961340C8-8C93-401D-A0A2-FF9EC61E5260} = {B5217BED-B0B7-408E-81B7-877DE2BF9036}
+		{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
 		{633B1C4C-4823-47BE-9A01-A665F3118C8C} = {B5217BED-B0B7-408E-81B7-877DE2BF9036}
 		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF} = {B5217BED-B0B7-408E-81B7-877DE2BF9036}
-		{C7D1F0DD-CBD6-4127-82B4-51949EFF0BF5} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7} = {B5217BED-B0B7-408E-81B7-877DE2BF9036}
-		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
+		{961340C8-8C93-401D-A0A2-FF9EC61E5260} = {B5217BED-B0B7-408E-81B7-877DE2BF9036}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = ImageProcessorConsole\ImageProcessorConsole.csproj
-	EndGlobalSection
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = ImageProcessor.vsmdi
 	EndGlobalSection
 EndGlobal
