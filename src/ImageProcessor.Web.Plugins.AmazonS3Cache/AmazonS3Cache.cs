@@ -1,11 +1,21 @@
-﻿namespace ImageProcessor.Web.Plugins.AmazonS3Cache
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="AmazonS3Cache.cs" company="">
+//   Copyright (c) .
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   Provides an <see cref="IImageCache" /> implementation that uses Amazon S3 storage.
+//   The cache is self healing and cleaning.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace ImageProcessor.Web.Plugins.AmazonS3Cache
 {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Net;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
@@ -16,17 +26,13 @@
     using ImageProcessor.Web.Helpers;
     using ImageProcessor.Web.HttpModules;
 
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Blob;
-
     using Amazon;
-    using Amazon.Runtime;
     using Amazon.S3;
     using Amazon.S3.Model;
     using Amazon.S3.Transfer;
 
     /// <summary>
-    /// Provides an <see cref="IImageCache"/> implementation that uses Azure blob storage.
+    /// Provides an <see cref="IImageCache"/> implementation that uses Amazon S3 storage.
     /// The cache is self healing and cleaning.
     /// </summary>
     public class AmazonS3Cache : ImageCacheBase
@@ -48,7 +54,7 @@
             typeof(ImageProcessingModule).Assembly.GetName().Version.ToString();
 
         /// <summary>
-        /// The cloud cached S3 container.
+        /// The Amazon S3 client.
         /// </summary>
         private readonly AmazonS3Client s3ClientCache;
 
@@ -57,20 +63,37 @@
         /// </summary>
         private readonly string cachedCdnRoot;
 
+        /// <summary>
+        /// Return false if Amazon S3 Access Key, Secret Key or Bucket Name are empty strings.
+        /// </summary>
         private bool AwsIsValid
         {
             get
             {
-                return !string.IsNullOrWhiteSpace(AwsAccessKey) && !string.IsNullOrWhiteSpace(AwsBucketName)
+                return !string.IsNullOrWhiteSpace(AwsAccessKey) && !string.IsNullOrWhiteSpace(AwsSecretKey)
                        && !string.IsNullOrWhiteSpace(AwsBucketName);
             }
         }
 
+        /// <summary>
+        /// Amazon S3 Access Key.
+        /// </summary>
         private string AwsAccessKey { get; set; }
 
+        /// <summary>
+        /// Amazon S3 Secret Key.
+        /// </summary>
         private string AwsSecretKey { get; set; }
 
+        /// <summary>
+        /// Amazon S3 Bucket Name.
+        /// </summary>
         private string AwsBucketName { get; set; }
+
+        /// <summary>
+        /// Amazon S3 Region Endpoint.
+        /// </summary>
+        private RegionEndpoint AwsRegionEndpoint { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmazonS3Cache"/> class.
@@ -90,11 +113,16 @@
             this.AwsAccessKey = this.Settings["awsAccessKey"];
             this.AwsSecretKey = this.Settings["awsSecretKey"];
             this.AwsBucketName = this.Settings["awsBucketName"];
+            this.AwsRegionEndpoint = GetRegionEndpoint();
 
             if (AwsIsValid)
             {
                 // Create S3 client from AWS Access Key and AWS Secret Access Key.
-                this.s3ClientCache = new AmazonS3Client(this.AwsAccessKey, this.AwsSecretKey, RegionEndpoint.EUWest1);
+                this.s3ClientCache = new AmazonS3Client(this.AwsAccessKey, this.AwsSecretKey, this.AwsRegionEndpoint);
+            }
+            else
+            {
+                //throw new AmazonS3Exception();
             }
 
             this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
@@ -204,18 +232,8 @@
                 }
                 catch (AmazonS3Exception amazonS3Exception)
                 {
-                    if (amazonS3Exception.ErrorCode != null &&
-                    (amazonS3Exception.ErrorCode.Equals("InvalidAccessKeyId")
-                    ||
-                    amazonS3Exception.ErrorCode.Equals("InvalidSecurity")))
-                    {
-                        //"Check the provided AWS Credentials.");
-                        //"For service sign up go to http://aws.amazon.com/s3");
-                    }
-                    else
-                    {
-                        //"Error occurred. Message:'{0}' when writing an object" + amazonS3Exception.Message
-                    }
+                    //todo: handle exceptions?
+                    throw amazonS3Exception;
                 }
             }
         }
@@ -237,7 +255,6 @@
 
             List<S3Object> results = new List<S3Object>();
 
-            // Loop through the all the files in a non blocking fashion.
             ListObjectsResponse response = await this.s3ClientCache.ListObjectsAsync(request);
             results.AddRange(response.S3Objects);
 
@@ -327,18 +344,38 @@
             }
         }
 
-        public string GetFullPath(string path)
+
+        /// <summary>
+        /// Helper to get full path using CachedCdnRoot
+        /// </summary>
+        /// <param name="path">Web path to file's folder</param>
+        /// <param name="fileName">File name</param>
+        /// <returns>Key value</returns>
+        private string GetFullPath(string path)
         {
             return !path.StartsWith(this.cachedCdnRoot)
                        ? Path.Combine(this.cachedCdnRoot, path)
                        : path;
         }
 
-        protected string GetFileNameFromPath(string path)
+
+        /// <summary>
+        /// Helper to get file name from path
+        /// </summary>
+        /// <param name="path">Web path to file's folder</param>
+        /// <param name="fileName">File name</param>
+        /// <returns>Key value</returns>
+        private string GetFileNameFromPath(string path)
         {
             return Path.GetFileName(path);
         }
 
+
+        /// <summary>
+        /// Helper to get folder structure from amazon
+        /// </summary>
+        /// <param name="path">Web path to file's folder</param>
+        /// <returns>Key value</returns>
         protected string GetFolderStructureForAmazon(string path)
         {
             var output = Path.Combine(this.cachedCdnRoot, path.Split('\\').Count() > 1 ? Path.GetDirectoryName(path) : path);
@@ -371,6 +408,27 @@
             }
 
             return Path.Combine(path, fileName);
+        }
+
+        /// <summary>
+        /// Helper to get AWS Region Endpoint from configuration file
+        /// </summary>
+        /// <returns>Region Endpoint</returns>
+        private RegionEndpoint GetRegionEndpoint()
+        {
+            var regionEndpointAsString = this.Settings["awsBucketName"];
+
+            switch (regionEndpointAsString)
+            {
+                case "EUWest1":
+                    return RegionEndpoint.EUWest1;
+                    break;
+
+                //add more conditions
+                default:
+                    return RegionEndpoint.EUWest1;
+                    break;
+            }
         }
     }
 }
