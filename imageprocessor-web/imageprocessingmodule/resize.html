@@ -69,11 +69,15 @@ http://your-image?width=600&height=250&bgcolor=fff
         <li>Bottom</li>
         <li>Left</li>
     </ul>
+     <p>You may specify a center as a fraction from the left and top. Fractions are specified as a decimal between 0 and 1. 
+    This point will be as close to the center of your crop as possible while keeping the crop within the image</p>
     {% highlight xml %}
 <!--Standard-->
 http://your-image?width=600&height=250&mode=crop
 <!--Crop anchored to the top-->
 http://your-image?width=600&height=250&mode=crop&anchor=top
+<!-- Center -->
+http://your-image?width=600&height=250&mode=crop&center=0.25,0.30
     {% endhighlight %}
 
     <hr />
