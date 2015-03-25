@@ -13,11 +13,13 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.SqlClient;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Net;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
 
@@ -172,6 +174,42 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
 
             if (cachedImage == null)
             {
+                try
+                {
+                    var path = GetFolderStructureForAmazon(this.CachedPath);
+                    var filename = Path.GetFileName(this.CachedPath);
+                    var key = GetKey(path, filename);
+
+                    var objectMetaDataRequest = new GetObjectMetadataRequest
+                    {
+                        BucketName = this.AwsBucketName,
+                        Key = key,
+                    };
+
+                    var response = await s3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest);
+
+                    if (response != null)
+                    {
+                        cachedImage = new CachedImage
+                        {
+                            Key = key,
+                            Path = this.CachedPath,
+                            CreationTimeUtc = response.LastModified
+                                                      .ToUniversalTime()
+                        };
+
+                        CacheIndexer.Add(cachedImage);
+                    }
+                }
+                catch (Amazon.S3.AmazonS3Exception ex)
+                {
+                    // Nothing in S3 so we should return true.
+                    isUpdated = true;
+                }
+            }
+
+            if (cachedImage == null)
+            {
                 // Nothing in the cache so we should return true.
                 isUpdated = true;
             }
@@ -202,22 +240,15 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </returns>
         public override async Task AddImageToCacheAsync(Stream stream, string contentType)
         {
+            //TODO: remove this check? Should it just fail?
             if (AwsIsValid)
             {
-                var fullPath = GetFullPath(this.CachedPath);
-
-                // Check if the local file exsit
-                if (!File.Exists(fullPath))
-                {
-                    return;
-                }
-
                 try
                 {
                     var transferUtility = new TransferUtility(this.s3ClientCache);
 
                     var path = GetFolderStructureForAmazon(this.CachedPath);
-                    var filename = GetFileNameFromPath(this.CachedPath);
+                    var filename = Path.GetFileName(this.CachedPath);
                     var key = GetKey(path, filename);
 
                     var transferUtilityUploadRequest = new TransferUtilityUploadRequest
@@ -246,34 +277,62 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </returns>
         public override async Task TrimCacheAsync()
         {
+            //TODO: ListObjectsRequest doesn't seem to work
+            return;
+
             ListObjectsRequest request = new ListObjectsRequest
             {
                 BucketName = this.AwsBucketName,
-                Prefix = this.ImageProcessorCachePrefix,
-                Delimiter = @"/"
+                Prefix = ImageProcessorCachePrefix,
+                Delimiter = @"/",
             };
 
-            List<S3Object> results = new List<S3Object>();
-
-            ListObjectsResponse response = await this.s3ClientCache.ListObjectsAsync(request);
-            results.AddRange(response.S3Objects);
-
-            foreach (var file in response.S3Objects
-                                         .OrderBy(x => x.LastModified != null ? x.LastModified.ToUniversalTime() : new DateTime()))
+            try
             {
-                if (file.LastModified != null && !this.IsExpired(file.LastModified.ToUniversalTime()))
+                do
                 {
-                    break;
+                    var response = this.s3ClientCache.ListObjects(request);
+
+                    List<S3Object> results = new List<S3Object>();
+                    results.AddRange(response.S3Objects);
+
+                    foreach (var file in response.S3Objects
+                                                 .OrderBy(
+                                                          x =>
+                                                          x.LastModified != null
+                                                              ? x.LastModified.ToUniversalTime()
+                                                              : new DateTime()))
+                    {
+                        if (file.LastModified != null && !this.IsExpired(file.LastModified.ToUniversalTime()))
+                        {
+                            break;
+                        }
+
+                        CacheIndexer.Remove(file.Key);
+                        await this.s3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
+                        {
+                            BucketName = this.AwsBucketName,
+                            Key = file.Key
+                        });
+                    }
+
+                    // If response is truncated, set the marker to get the next 
+                    // set of keys.
+                    if (response.IsTruncated)
+                    {
+                        request.Marker = response.NextMarker;
+                    }
+                    else
+                    {
+                        request = null;
+                    }
                 }
+                while (request != null);
 
-                CacheIndexer.Remove(file.Key);
-                await this.s3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
-                {
-                    BucketName = this.AwsBucketName,
-                    Key = file.Key
-                });
             }
-
+            catch (Exception)
+            {
+            }
         }
 
         /// <summary>
@@ -340,34 +399,8 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
                 HttpStatusCode responseCode = response.StatusCode;
-                context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.RequestPath, false);
+                context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.RequestPath : this.CachedPath, false);
             }
-        }
-
-
-        /// <summary>
-        /// Helper to get full path using CachedCdnRoot
-        /// </summary>
-        /// <param name="path">Web path to file's folder</param>
-        /// <param name="fileName">File name</param>
-        /// <returns>Key value</returns>
-        private string GetFullPath(string path)
-        {
-            return !path.StartsWith(this.cachedCdnRoot)
-                       ? Path.Combine(this.cachedCdnRoot, path)
-                       : path;
-        }
-
-
-        /// <summary>
-        /// Helper to get file name from path
-        /// </summary>
-        /// <param name="path">Web path to file's folder</param>
-        /// <param name="fileName">File name</param>
-        /// <returns>Key value</returns>
-        private string GetFileNameFromPath(string path)
-        {
-            return Path.GetFileName(path);
         }
 
 
@@ -378,7 +411,8 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <returns>Key value</returns>
         protected string GetFolderStructureForAmazon(string path)
         {
-            var output = Path.Combine(this.cachedCdnRoot, path.Split('\\').Count() > 1 ? Path.GetDirectoryName(path) : path);
+            var output = path.Replace(this.cachedCdnRoot, string.Empty);
+            output = output.Replace(Path.GetFileName(output), string.Empty);
 
             if (output.StartsWith("/"))
             {
@@ -416,7 +450,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <returns>Region Endpoint</returns>
         private RegionEndpoint GetRegionEndpoint()
         {
-            var regionEndpointAsString = this.Settings["awsBucketName"];
+            var regionEndpointAsString = this.Settings["regionEndpoint"];
 
             switch (regionEndpointAsString)
             {
