@@ -21,8 +21,10 @@ namespace ImageProcessor
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Filters.EdgeDetection;
+    //using ImageProcessor.Imaging.Filters.ObjectDetection;
     using ImageProcessor.Imaging.Filters.Photo;
     using ImageProcessor.Imaging.Formats;
+    using ImageProcessor.Imaging.Helpers;
     using ImageProcessor.Processors;
     #endregion
 
@@ -64,9 +66,24 @@ namespace ImageProcessor
         /// Whether to preserve exif metadata. Defaults to false.
         /// </param>
         public ImageFactory(bool preserveExifData = false)
+            : this(preserveExifData, true)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageFactory"/> class.
+        /// </summary>
+        /// <param name="preserveExifData">
+        /// Whether to preserve exif metadata. Defaults to false.
+        /// </param>
+        /// <param name="fixGamma">
+        /// Whether to fix the gamma component of the image. Defaults to true.
+        /// </param>
+        public ImageFactory(bool preserveExifData, bool fixGamma)
         {
             this.PreserveExifData = preserveExifData;
             this.ExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
+            this.FixGamma = fixGamma;
         }
         #endregion
 
@@ -110,6 +127,16 @@ namespace ImageProcessor
         /// Gets or sets a value indicating whether to preserve exif metadata.
         /// </summary>
         public bool PreserveExifData { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to fix the gamma component of the current image.
+        /// </summary>
+        public bool FixGamma { get; set; }
+
+        /// <summary>
+        /// Gets or the current gamma value.
+        /// </summary>
+        public float CurrentGamma { get; private set; }
 
         /// <summary>
         /// Gets or sets the exif property items.
@@ -167,6 +194,13 @@ namespace ImageProcessor
             // Set the other properties.
             format.Quality = DefaultQuality;
             format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
+
+            IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
+            if (imageFormat != null)
+            {
+                imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
+            }
+
             this.backupFormat = format;
             this.CurrentImageFormat = format;
 
@@ -178,6 +212,12 @@ namespace ImageProcessor
             }
 
             this.ShouldProcess = true;
+
+            // Normalize the gamma component of the image.
+            if (this.FixGamma)
+            {
+                this.Gamma(2.2F);
+            }
 
             return this;
         }
@@ -223,6 +263,13 @@ namespace ImageProcessor
                     // Set the other properties.
                     format.Quality = DefaultQuality;
                     format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
+
+                    IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
+                    if (imageFormat != null)
+                    {
+                        imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
+                    }
+
                     this.backupFormat = format;
                     this.CurrentImageFormat = format;
 
@@ -233,6 +280,12 @@ namespace ImageProcessor
                     }
 
                     this.ShouldProcess = true;
+
+                    // Normalize the gamma component of the image.
+                    if (this.FixGamma)
+                    {
+                        this.Gamma(2.2F);
+                    }
                 }
             }
             else
@@ -290,10 +343,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Sanitize the input.
-                if (percentage > 100 || percentage < 0)
-                {
-                    percentage = 0;
-                }
+                percentage = ImageMaths.Clamp(percentage, 0, 100);
 
                 Alpha alpha = new Alpha { DynamicParameter = percentage };
                 this.CurrentImageFormat.ApplyProcessor(alpha.ProcessImage, this);
@@ -478,6 +528,17 @@ namespace ImageProcessor
             return this;
         }
 
+        //public ImageFactory DetectObjects(HaarCascade cascade, bool drawRectangles = true, Color color = default(Color))
+        //{
+        //    if (this.ShouldProcess)
+        //    {
+        //        DetectObjects detectObjects = new DetectObjects { DynamicParameter = cascade };
+        //        this.CurrentImageFormat.ApplyProcessor(detectObjects.ProcessImage, this);
+        //    }
+
+        //    return this;
+        //}
+
         /// <summary>
         /// Crops an image to the area of greatest entropy.
         /// </summary>
@@ -525,16 +586,27 @@ namespace ImageProcessor
         /// <param name="flipVertically">
         /// Whether to flip the image vertically.
         /// </param>
+        /// <param name="flipBoth">
+        /// Whether to flip the image both vertically and horizontally.
+        /// </param>
         /// <returns>
         /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
         /// </returns>
-        public ImageFactory Flip(bool flipVertically = false)
+        public ImageFactory Flip(bool flipVertically = false, bool flipBoth = false)
         {
             if (this.ShouldProcess)
             {
-                RotateFlipType rotateFlipType = flipVertically
-                    ? RotateFlipType.RotateNoneFlipY
-                    : RotateFlipType.RotateNoneFlipX;
+                RotateFlipType rotateFlipType;
+                if (flipBoth)
+                {
+                    rotateFlipType = RotateFlipType.RotateNoneFlipXY;
+                }
+                else
+                {
+                    rotateFlipType = flipVertically
+                        ? RotateFlipType.RotateNoneFlipY
+                        : RotateFlipType.RotateNoneFlipX;
+                }
 
                 Flip flip = new Flip { DynamicParameter = rotateFlipType };
                 this.CurrentImageFormat.ApplyProcessor(flip.ProcessImage, this);
@@ -555,6 +627,33 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 this.CurrentImageFormat = format;
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adjust the gamma (intensity of the light) component of the given image.
+        /// </summary>
+        /// <param name="value">
+        /// The value to adjust the gamma by (typically between .2 and 5).
+        /// </param>
+        /// <returns>
+        /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
+        /// </returns>
+        public ImageFactory Gamma(float value)
+        {
+            if (this.ShouldProcess)
+            {
+                // Sanitize the input.
+                if (value > 5 || value < .1)
+                {
+                    value = 2.2F;
+                }
+
+                this.CurrentGamma = value;
+                Gamma gamma = new Gamma { DynamicParameter = value };
+                this.CurrentImageFormat.ApplyProcessor(gamma.ProcessImage, this);
             }
 
             return this;
@@ -1091,6 +1190,12 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
+                // Normalize the gamma component of the image.
+                if (this.FixGamma)
+                {
+                    this.Gamma(1 / 2.2F);
+                }
+
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image);
             }
 
@@ -1112,6 +1217,13 @@ namespace ImageProcessor
             {
                 // Allow the same stream to be used as for input.
                 stream.SetLength(0);
+
+                // Normalize the gamma component of the image.
+                if (this.FixGamma)
+                {
+                    this.Gamma(1 / 2.2F);
+                }
+
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image);
                 stream.Position = 0;
             }
