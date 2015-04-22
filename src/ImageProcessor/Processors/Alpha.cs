@@ -68,6 +68,7 @@ namespace ImageProcessor.Processors
                 int percentage = this.DynamicParameter;
 
                 newImage = new Bitmap(image);
+                newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                 newImage = Adjustments.Alpha(newImage, percentage);
 
                 image.Dispose();

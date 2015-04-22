@@ -5,6 +5,8 @@ Properties {
 	
 	# see appveyor.yml for usage
 	$BuildNumber = $null
+	$CoverallsRepoToken = $null
+	$AppVeyor = $null
 	
 	# Input and output paths
 	$BUILD_PATH = Resolve-Path "."
@@ -22,7 +24,8 @@ Properties {
 	# External binaries paths
 	$NUGET_EXE = Join-Path $SRC_PATH ".nuget\NuGet.exe"
 	$NUNIT_EXE = Join-Path $SRC_PATH "packages\NUnit.Runners.2.6.3\tools\nunit-console.exe"
-	$OPENCOVER_EXE = Join-Path $SRC_PATH "packages\OpenCover.4.5.3207\OpenCover.Console.exe"
+	$COVERALLS_EXE = Join-Path $SRC_PATH "packages\coveralls.io.1.3.2\tools\coveralls.net.exe"
+	$OPENCOVER_EXE = Join-Path $SRC_PATH "packages\OpenCover.4.5.3809-rc94\OpenCover.Console.exe"
 	$REPORTGEN_EXE = Join-Path $SRC_PATH "packages\ReportGenerator.1.9.1.0\ReportGenerator.exe"
 	$NUNITREPORT_EXE = Join-Path $BUILD_PATH "tools\NUnitHTMLReportGenerator.exe"
 	
@@ -39,7 +42,7 @@ Properties {
 Framework "4.0x86"
 FormatTaskName "-------- {0} --------"
 
-task default -depends Cleanup-Binaries, Set-VersionNumber, Build-Solution, Run-Tests, Generate-APIDoc, Generate-Nuget
+task default -depends Cleanup-Binaries, Set-VersionNumber, Build-Solution, Run-Tests, Run-Coverage, Generate-Nuget
 
 # cleans up the binaries output folder
 task Cleanup-Binaries {
@@ -151,16 +154,30 @@ task Run-Coverage -depends Build-Tests {
 		$TestDdlPath = Join-Path $TestDllFolder "$_.dll"
 		$CoverageOutputPath = Join-Path $TEST_RESULTS "$($_)_Coverage.xml"
 		
+		Write-Host "AppVeyor $AppVeyor"
+
+	    $appVeyor = ""
+	    if ($AppVeyor -ne $null -and $AppVeyor -ne "") {
+	        $appVeyor = " -appveyor"
+	    }
+
 		Write-Host "Running code coverage on project $_"
 		$coverageFilter = "-filter:+[*]* -[FluentAssertions*]* -[ImageProcessor]*Common.Exceptions -[ImageProcessor.UnitTests]* -[ImageProcessor.Web.UnitTests]*"
-		& $OPENCOVER_EXE -register:user -target:$NUNIT_EXE -targetargs:"$TestDdlPath /noshadow /nologo" -targetdir:$TestDllFolder -output:$CoverageOutputPath $coverageFilter
+		& $OPENCOVER_EXE -threshold:1 -oldstyle -register:user -target:$NUNIT_EXE -targetargs:"$TestDdlPath /noshadow /nologo" $appVeyor -targetdir:$TestDllFolder -output:$CoverageOutputPath $coverageFilter
 		
 		Write-Host "Transforming coverage results file to HTML"
-		& $REPORTGEN_EXE -reports:$CoverageOutputPath -targetdir:(Join-Path $TEST_RESULTS "Coverage\$_")
+		& $REPORTGEN_EXE -verbosity:Info -reports:$CoverageOutputPath -targetdir:(Join-Path $TEST_RESULTS "Coverage\$_")
+
+        Write-Host "CoverallsRepoToken $CoverallsRepoToken"
+
+	    if ($CoverallsRepoToken -ne $null -and $CoverallsRepoToken -ne "") {
+			Write-Host "Uploading coverage report to Coveralls.io"
+	        Exec { . $COVERALLS_EXE --opencover $CoverageOutputPath }
+	    }
 	}
 }
 
-# generates the API documentation
+# generates the API documentation. Disabled for now.
 task Generate-APIDoc -depends Build-Solution {
 	Write-Host "Generating API docs"
 
@@ -170,7 +187,7 @@ task Generate-APIDoc -depends Build-Solution {
 }
 
 # generates a Nuget package
-task Generate-Nuget -depends Set-VersionNumber, Build-Solution, Generate-APIDoc {
+task Generate-Nuget -depends Set-VersionNumber, Build-Solution {
 	Write-Host "Generating Nuget packages for each project"
 	
 	# Nuget doesn't create the output dir automatically...
