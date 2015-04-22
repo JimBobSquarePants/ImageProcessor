@@ -15,6 +15,8 @@ namespace ImageProcessor.Imaging.Helpers
     using System.Drawing.Imaging;
     using System.Threading.Tasks;
 
+    using ImageProcessor.Common.Extensions;
+
     /// <summary>
     /// Provides reusable adjustment methods to apply to images.
     /// </summary>
@@ -95,7 +97,7 @@ namespace ImageProcessor.Imaging.Helpers
             }
 
             float brightnessFactor = (float)threshold / 100;
-            Rectangle bounds = rectangle.HasValue ? rectangle.Value : new Rectangle(0, 0, source.Width, source.Height);
+            Rectangle bounds = rectangle ?? new Rectangle(0, 0, source.Width, source.Height);
 
             ColorMatrix colorMatrix =
                 new ColorMatrix(
@@ -144,7 +146,7 @@ namespace ImageProcessor.Imaging.Helpers
                 throw new ArgumentOutOfRangeException("threshold", "Threshold should be between -100 and 100.");
             }
 
-            Rectangle bounds = rectangle.HasValue ? rectangle.Value : new Rectangle(0, 0, source.Width, source.Height);
+            Rectangle bounds = rectangle ?? new Rectangle(0, 0, source.Width, source.Height);
 
             float contrastFactor = (float)threshold / 100;
 
@@ -173,6 +175,78 @@ namespace ImageProcessor.Imaging.Helpers
             }
 
             return (Bitmap)source;
+        }
+
+        /// <summary>
+        /// Adjust the gamma (intensity of the light) component of the given image.
+        /// </summary>
+        /// <param name="source">
+        /// The <see cref="Image"/> source to adjust.
+        /// </param>
+        /// <param name="value">
+        /// The value to adjust the gamma by (typically between .2 and 5).
+        /// </param>
+        /// <returns>
+        /// The <see cref="Bitmap"/> with the gamma adjusted.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if the value falls outside the acceptable range.
+        /// </exception>
+        public static Bitmap Gamma(Image source, float value)
+        {
+            if (value > 5 || value < .1)
+            {
+                throw new ArgumentOutOfRangeException("value", "Value should be between .1 and 5.");
+            }
+
+            int width = source.Width;
+            int height = source.Height;
+            Bitmap destination = new Bitmap(width, height);
+            destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+
+            byte[] ramp = new byte[256];
+            for (int x = 0; x < 256; ++x)
+            {
+                byte val = ((255.0 * Math.Pow(x / 255.0, value)) + 0.5).ToByte();
+                ramp[x] = val;
+            }
+
+            using (FastBitmap fastSource = new FastBitmap(source))
+            {
+                using (FastBitmap fastDestination = new FastBitmap(destination))
+                {
+                    Parallel.For(
+                        0,
+                        height,
+                        y =>
+                        {
+                            for (int x = 0; x < width; x++)
+                            {
+                                // ReSharper disable once AccessToDisposedClosure
+                                Color color = fastSource.GetPixel(x, y);
+                                byte r = ramp[color.R];
+                                byte g = ramp[color.G];
+                                byte b = ramp[color.B];
+
+                                // ReSharper disable once AccessToDisposedClosure
+                                fastDestination.SetPixel(x, y, Color.FromArgb(color.A, r, g, b));
+                            }
+                        });
+                }
+            }
+
+            //Rectangle rectangle = new Rectangle(0, 0, width, height);
+            //using (Graphics graphics = Graphics.FromImage(destination))
+            //{
+            //    using (ImageAttributes attributes = new ImageAttributes())
+            //    {
+            //        attributes.SetGamma(value);
+            //        graphics.DrawImage(source, rectangle, 0, 0, width, height, GraphicsUnit.Pixel, attributes);
+            //    }
+            //}
+
+            source.Dispose();
+            return destination;
         }
     }
 }

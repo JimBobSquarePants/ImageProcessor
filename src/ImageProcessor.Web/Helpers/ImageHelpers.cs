@@ -10,7 +10,6 @@
 
 namespace ImageProcessor.Web.Helpers
 {
-    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -78,7 +77,12 @@ namespace ImageProcessor.Web.Helpers
             {
                 // Test against the path minus the querystring so any other
                 // processors don't interere.
-                string trimmed = fullPath.Replace(queryString, string.Empty);
+                string trimmed = fullPath;
+                if (queryString != null)
+                {
+                    trimmed = trimmed.Replace(queryString, string.Empty);
+                }
+
                 match = FormatRegex.Match(trimmed);
             }
 

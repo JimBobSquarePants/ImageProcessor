@@ -126,9 +126,14 @@
   <ItemGroup>
     <Compile Include="Common\Extensions\AssemblyExtensions.cs" />
     <Compile Include="Common\Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Common\Extensions\RectangleExtensions.cs" />
+    <Compile Include="Common\Helpers\WriteLock.cs" />
+    <Compile Include="Common\Helpers\UpgradeableReadLock.cs" />
+    <Compile Include="Common\Helpers\TypeFinder.cs" />
     <Compile Include="Configuration\ImageProcessorBootstrapper.cs" />
     <Compile Include="Common\Exceptions\ImageProcessingException.cs" />
     <Compile Include="Common\Extensions\DoubleExtensions.cs" />
+    <Compile Include="Common\Helpers\IOHelper.cs" />
     <Compile Include="Configuration\NativeBinaryFactory.cs" />
     <Compile Include="Configuration\NativeMethods.cs" />
     <Compile Include="Imaging\Colors\CmykColor.cs" />
@@ -164,6 +169,7 @@
     <Compile Include="Imaging\AnchorPosition.cs" />
     <Compile Include="Imaging\Formats\IQuantizableImageFormat.cs" />
     <Compile Include="Imaging\Helpers\ImageMaths.cs" />
+    <Compile Include="Imaging\Helpers\PixelOperations.cs" />
     <Compile Include="Imaging\ImageLayer.cs" />
     <Compile Include="Imaging\MetaData\ExifPropertyTagType.cs" />
     <Compile Include="Imaging\Convolution.cs" />
@@ -216,6 +222,7 @@
     <Compile Include="Imaging\Resizer.cs" />
     <Compile Include="Imaging\RoundedCornerLayer.cs" />
     <Compile Include="Imaging\TextLayer.cs" />
+    <Compile Include="Processors\Gamma.cs" />
     <Compile Include="Processors\Alpha.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />
     <Compile Include="Processors\BackgroundColor.cs" />

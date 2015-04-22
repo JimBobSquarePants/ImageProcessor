@@ -1,4 +1,14 @@
-﻿namespace ImageProcessor.UnitTests.Imaging.Helpers
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ImageMathsUnitTests.cs" company="James South">
+//   Copyright (c) James South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   Test harness for the image math unit tests
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace ImageProcessor.UnitTests.Imaging.Helpers
 {
     using System.Drawing;
     using FluentAssertions;
@@ -45,7 +55,7 @@
         [TestCase(200, 100, 45, 2.12f)]
         [TestCase(600, 450, 20, 1.39f)]
         [TestCase(600, 450, 45, 1.64f)]
-        [TestCase(100, 200, -45, 1.22f)]
+        [TestCase(100, 200, -45, 2.12f)]
         public void RotationZoomIsCalculated(int imageWidth, int imageHeight, float angle, float expected)
         {
             float result = ImageMaths.ZoomAfterRotation(imageWidth, imageHeight, angle);
