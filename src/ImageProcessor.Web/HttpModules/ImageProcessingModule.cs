@@ -3,7 +3,11 @@
 //   Copyright (c) James South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
+// <summary>
+//   Processes any image requests within the web application.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace ImageProcessor.Web.HttpModules
 {
     using System;
@@ -45,9 +49,14 @@ namespace ImageProcessor.Web.HttpModules
         private const string CachedResponseFileDependency = "CACHED_IMAGE_DEPENDENCY_054F217C-11CF-49FF-8D2F-698E8E6EB58F";
 
         /// <summary>
-        /// The regular expression to search strings for.
+        /// The regular expression to search strings for presets with.
         /// </summary>
         private static readonly Regex PresetRegex = new Regex(@"preset=[^&]+", RegexOptions.Compiled);
+
+        /// <summary>
+        /// The regular expression to search strings for protocols with.
+        /// </summary>
+        private static readonly Regex ProtocolRegex = new Regex("http(s)?://", RegexOptions.Compiled);
 
         /// <summary>
         /// The assembly version.
@@ -295,39 +304,29 @@ namespace ImageProcessor.Web.HttpModules
             if (currentService != null)
             {
                 bool isFileLocal = currentService.IsFileLocalService;
-                bool hasMultiParams = request.Url.ToString().Count(f => f == '?') > 1;
-                string requestPath = string.Empty;
+                string url = request.Url.ToString();
+                bool isLegacy = ProtocolRegex.Matches(url).Count > 1;
+                bool hasMultiParams = url.Count(f => f == '?') > 1;
+                string requestPath;
                 string queryString = string.Empty;
                 string urlParameters = string.Empty;
 
                 // Legacy support. I'd like to remove this asap.
-                if (hasMultiParams)
+                if (isLegacy && hasMultiParams)
                 {
                     // We need to split the querystring to get the actual values we want.
-                    string urlDecode = HttpUtility.UrlDecode(request.QueryString.ToString());
+                    string[] paths = url.Split('?');
+                    requestPath = paths[1];
 
-                    if (!string.IsNullOrWhiteSpace(urlDecode))
+                    // Handle extension-less urls.
+                    if (paths.Length > 3)
                     {
-                        // UrlDecode seems to mess up in some circumstance.
-                        if (urlDecode.IndexOf("://", StringComparison.OrdinalIgnoreCase) == -1)
-                        {
-                            urlDecode = urlDecode.Replace(":/", "://");
-                        }
-
-                        string[] paths = urlDecode.Split('?');
-
-                        requestPath = paths[0];
-
-                        // Handle extension-less urls.
-                        if (paths.Length > 2)
-                        {
-                            queryString = paths[2];
-                            urlParameters = paths[1];
-                        }
-                        else if (paths.Length > 1)
-                        {
-                            queryString = paths[1];
-                        }
+                        queryString = paths[3];
+                        urlParameters = paths[2];
+                    }
+                    else if (paths.Length > 1)
+                    {
+                        queryString = paths[2];
                     }
                 }
                 else
@@ -335,17 +334,29 @@ namespace ImageProcessor.Web.HttpModules
                     if (string.IsNullOrWhiteSpace(currentService.Prefix))
                     {
                         requestPath = HostingEnvironment.MapPath(request.Path);
-                        queryString = HttpUtility.UrlDecode(request.QueryString.ToString());
+                        queryString = request.QueryString.ToString();
                     }
                     else
                     {
                         // Parse any protocol values from settings.
-                        string protocol = currentService.Settings["Protocol"] != null
+                        string protocol = currentService.Settings.ContainsKey("Protocol")
                                               ? currentService.Settings["Protocol"] + "://"
                                               : string.Empty;
 
-                        requestPath = protocol + request.Path.Replace(currentService.Prefix, string.Empty).TrimStart('/');
-                        queryString = HttpUtility.UrlDecode(request.QueryString.ToString());
+                        // Handle requests that require parameters.
+                        if (hasMultiParams)
+                        {
+                            string[] paths = url.Split('?');
+                            requestPath = protocol
+                                          + request.Path.Replace(currentService.Prefix, string.Empty).TrimStart('/')
+                                          + "?" + paths[1];
+                            queryString = paths[2];
+                        }
+                        else
+                        {
+                            requestPath = protocol + request.Path.Replace(currentService.Prefix, string.Empty).TrimStart('/');
+                            queryString = request.QueryString.ToString();
+                        }
                     }
                 }
 
@@ -358,6 +369,11 @@ namespace ImageProcessor.Web.HttpModules
                 // If the current service doesn't require a prefix, don't fetch it.
                 // Let the static file handler take over.
                 if (string.IsNullOrWhiteSpace(currentService.Prefix) && string.IsNullOrWhiteSpace(queryString))
+                {
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(requestPath))
                 {
                     return;
                 }
@@ -379,7 +395,7 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 // Check whether the path is valid for other requests.
-                if (resourcePath == null || !currentService.IsValidRequest(resourcePath.ToString()))
+                if (!currentService.IsValidRequest(resourcePath.ToString()))
                 {
                     return;
                 }
@@ -501,6 +517,16 @@ namespace ImageProcessor.Web.HttpModules
                 cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
 
                 this.imageCache = null;
+
+                if (!string.IsNullOrEmpty(context.Request.Headers["Origin"]))
+                {
+                    string origin = context.Request.Headers["Origin"];
+
+                    if (this.IsValidCorsRequest(origin))
+                    {
+                        response.AddHeader("Access-Control-Allow-Origin", origin);
+                    }
+                }
             }
         }
 
@@ -589,6 +615,57 @@ namespace ImageProcessor.Web.HttpModules
 
             // Return the file based service
             return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path));
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the current origin request passes sanitizing rules.
+        /// </summary>
+        /// <param name="path">
+        /// The image path.
+        /// </param>
+        /// <returns>
+        /// <c>True</c> if the request is valid; otherwise, <c>False</c>.
+        /// </returns>
+        private bool IsValidCorsRequest(string path)
+        {
+            ImageSecuritySection.CORSOriginElement origins =
+                ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
+
+            if (origins == null || origins.WhiteList == null)
+            {
+                return false;
+            }
+
+            // Check the url is from a whitelisted location.
+            Uri url = new Uri(path);
+            string upper = url.Host.ToUpperInvariant();
+
+            // Check for root or sub domain.
+            bool validUrl = false;
+            foreach (Uri uri in origins.WhiteList)
+            {
+                if (uri.ToString() == "*")
+                {
+                    return true;
+                }
+
+                if (!uri.IsAbsoluteUri)
+                {
+                    Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
+                    validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
+                }
+                else
+                {
+                    validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
+                }
+
+                if (validUrl)
+                {
+                    break;
+                }
+            }
+
+            return validUrl;
         }
         #endregion
     }

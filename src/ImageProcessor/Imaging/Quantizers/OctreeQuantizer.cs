@@ -16,6 +16,7 @@ namespace ImageProcessor.Imaging.Quantizers
     using System.Drawing;
     using System.Drawing.Imaging;
 
+    using ImageProcessor.Common.Extensions;
     using ImageProcessor.Imaging.Colors;
 
     /// <summary>
@@ -108,7 +109,7 @@ namespace ImageProcessor.Imaging.Quantizers
         /// </returns>
         protected override byte QuantizePixel(Color32* pixel)
         {
-            // The color at [_maxColors] is set to transparent
+            // The color at [maxColors] is set to transparent
             byte paletteIndex = (byte)this.maxColors;
 
             // Get the palette index if this non-transparent
@@ -506,8 +507,12 @@ namespace ImageProcessor.Imaging.Quantizers
                         // Consume the next palette index
                         this.paletteIndex = index++;
 
+                        byte r = (this.red / this.pixelCount).ToByte();
+                        byte g = (this.green / this.pixelCount).ToByte();
+                        byte b = (this.blue / this.pixelCount).ToByte();
+
                         // And set the color of the palette entry
-                        palette.Add(Color.FromArgb(this.red / this.pixelCount, this.green / this.pixelCount, this.blue / this.pixelCount));
+                        palette.Add(Color.FromArgb(r, g, b));
                     }
                     else
                     {
