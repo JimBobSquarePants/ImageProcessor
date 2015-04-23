@@ -10,7 +10,8 @@ sublinks: ["#usage|Usage","#example|Examples"]
 
 # BackgroundColor
 
-Changes the background color of the current image.</p>
+Changes the background color of the current image. This functionality is useful 
+for adding a background when resizing image formats without an alpha channel. 
 
 Requests are passed thus:
 {% highlight xml %}
@@ -29,10 +30,10 @@ http://your-image?bgcolor=purple
 
 ### Original
 
-![Original image]({{ site.baseurl }}/assets/img/rounded/beach.png)
+![Original image]({{ site.dynamicimageroot }}beach.jpg?width=600&height=300)
 
 ### Purple Background Color
 
-![Image with a purple background color applied]({{ site.baseurl }}/assets/img/bgcolor/beach.jpg)
+![Image with a purple background color applied]({{ site.dynamicimageroot }}beach.jpg?width=600&height=300&bgcolor=purple)
 
 </section>
