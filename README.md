@@ -1,6 +1,6 @@
 # ImageProcessor Documentation
 
-This is a very much work-in-process set of documentation located at http://imageprocessor.org. 
+This is a very much *work-in-process* set of documentation located at http://imageprocessor.org. 
 
 ### TODO
 
@@ -9,7 +9,7 @@ This is a very much work-in-process set of documentation located at http://image
 - [ ] Add "edit this page" links
 - [ ] Replace all static images with dynamic ones.
 
- ### Images
+### Images
 
  Demonstration images are found on the following url:
 
