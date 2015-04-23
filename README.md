@@ -4,19 +4,20 @@ This is a very much work-in-process set of documentation located at http://image
 
 ### TODO
 
-- Switch all pages over to use markdown.
-- Add documentation for missing features.
-- Add "edit this page" links
-- Replace all static images with dynamic ones.
+- [ ] Switch all pages over to use markdown.
+- [ ] Add documentation for missing features.
+- [ ] Add "edit this page" links
+- [ ] Replace all static images with dynamic ones.
 
  ### Images
 
  Demonstration images are found on the following url:
 
-     http://jamessouth.me/images/imageprocessor/samples/
+```
+http://jamessouth.me/images/imageprocessor/samples/
+```
 
- The following images are stored under that subdirectory for use:
-
+ The following images are stored under that subdirectory for use.
 - balloon.jpg
 - beach.jpg
 - beach2.jpg
