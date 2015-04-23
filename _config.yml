@@ -105,6 +105,7 @@ gems:
   - jekyll-redirect-from
 
 exclude:
+  - README.md
   - CNAME
   - src
   - node_modules
