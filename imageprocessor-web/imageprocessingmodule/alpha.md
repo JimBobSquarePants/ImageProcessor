@@ -26,9 +26,9 @@ http://your-image?alpha=50
 
 ### Original
 
-![Original image]({{ site.baseurl }}/assets/img/originals/balloon.jpg)
+![Original image]({{ site.dynamicimageroot }}balloon.jpg?width=600)
 
 ### 50% Alpha
 
-![Image with alpha transparency adjusted]({{ site.baseurl }}/assets/img/alpha/balloon.png)
+![Image with alpha transparency adjusted]({{ site.dynamicimageroot }}balloon.jpg?width=600&format=png&alpha=50)
 </section>
