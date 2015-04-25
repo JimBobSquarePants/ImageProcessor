@@ -66,6 +66,21 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private string cachedRewritePath;
 
         /// <summary>
+        /// gets reference or creates container
+        /// </summary>
+        /// <param name="cloudBlobClient">cloud blob client</param>
+        /// <param name="containerName">name of container</param>
+        /// <param name="accessType">access permissions ie. public</param>
+        /// <returns>container for cache items</returns>
+        private CloudBlobContainer CreateContainer(CloudBlobClient cloudBlobClient, string containerName, BlobContainerPublicAccessType accessType)
+        {
+            var container = cloudBlobClient.GetContainerReference(containerName);
+            container.CreateIfNotExists();
+            container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
+            return container;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobCache"/> class.
         /// </summary>
         /// <param name="requestPath">
@@ -87,7 +102,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             CloudBlobClient cloudCachedBlobClient = cloudCachedStorageAccount.CreateCloudBlobClient();
 
             // Retrieve references to a previously created containers.
-            this.cloudCachedBlobContainer = cloudCachedBlobClient.GetContainerReference(this.Settings["CachedBlobContainer"]);
+            this.cloudCachedBlobContainer = CreateContainer(cloudCachedBlobClient, this.Settings["CachedBlobContainer"], BlobContainerPublicAccessType.Blob);
 
             string sourceAccount = this.Settings.ContainsKey("SourceStorageAccount") ? this.Settings["SourceStorageAccount"] : string.Empty;
 
@@ -287,7 +302,9 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 {
                     string container = RemoteRegex.Replace(this.cloudSourceBlobContainer.Uri.ToString(), string.Empty);
                     string blobPath = RemoteRegex.Replace(this.RequestPath, string.Empty);
-                    blobPath = blobPath.Replace(container, string.Empty).TrimStart('/');
+                    blobPath = blobPath.Replace(container, string.Empty).TrimStart('/')
+                        //.Replace("127.0.0.1_10000", "127.0.0.1:10000")
+                        .FixDevelopmentStorageEmulatorUrl();
                     CloudBlockBlob blockBlob = this.cloudSourceBlobContainer.GetBlockBlobReference(blobPath);
 
                     if (await blockBlob.ExistsAsync())
