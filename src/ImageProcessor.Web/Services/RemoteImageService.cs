@@ -18,6 +18,7 @@ namespace ImageProcessor.Web.Services
     using System.Web;
 
     using ImageProcessor.Web.Helpers;
+    using ImageProcessor.Web.Extensions;
 
     /// <summary>
     /// The remote image service.
@@ -134,7 +135,9 @@ namespace ImageProcessor.Web.Services
         /// </returns>
         public async Task<byte[]> GetImage(object id)
         {
-            Uri uri = new Uri(id.ToString());
+            Uri uri = new Uri(id.ToString()
+                //.Replace("127.0.0.1_10000", "127.0.0.1:10000")
+                .FixDevelopmentStorageEmulatorUrl());
             RemoteFile remoteFile = new RemoteFile(uri)
             {
                 MaxDownloadSize = int.Parse(this.Settings["MaxBytes"]),
