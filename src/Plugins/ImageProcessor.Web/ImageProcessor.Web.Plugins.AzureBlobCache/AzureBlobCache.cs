@@ -66,21 +66,6 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private string cachedRewritePath;
 
         /// <summary>
-        /// gets reference or creates container
-        /// </summary>
-        /// <param name="cloudBlobClient">cloud blob client</param>
-        /// <param name="containerName">name of container</param>
-        /// <param name="accessType">access permissions ie. public</param>
-        /// <returns>container for cache items</returns>
-        private CloudBlobContainer CreateContainer(CloudBlobClient cloudBlobClient, string containerName, BlobContainerPublicAccessType accessType)
-        {
-            var container = cloudBlobClient.GetContainerReference(containerName);
-            container.CreateIfNotExists();
-            container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
-            return container;
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobCache"/> class.
         /// </summary>
         /// <param name="requestPath">
@@ -101,7 +86,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // Create the blob clients.
             CloudBlobClient cloudCachedBlobClient = cloudCachedStorageAccount.CreateCloudBlobClient();
 
-            // Retrieve references to a previously created containers.
+            // Retrieve references to a container.
             this.cloudCachedBlobContainer = CreateContainer(cloudCachedBlobClient, this.Settings["CachedBlobContainer"], BlobContainerPublicAccessType.Blob);
 
             string sourceAccount = this.Settings.ContainsKey("SourceStorageAccount") ? this.Settings["SourceStorageAccount"] : string.Empty;
@@ -360,5 +345,23 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                     false);
             }
         }
+
+        #region private methods
+        /// <summary>
+        /// gets reference or creates container
+        /// </summary>
+        /// <param name="cloudBlobClient">cloud blob client</param>
+        /// <param name="containerName">name of container</param>
+        /// <param name="accessType">access permissions ie. public</param>
+        /// <returns>container for cache items</returns>
+        private CloudBlobContainer CreateContainer(CloudBlobClient cloudBlobClient, string containerName, BlobContainerPublicAccessType accessType)
+        {
+            CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
+            container.CreateIfNotExists();
+            container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
+            return container;
+        }
+
+        #endregion
     }
 }
