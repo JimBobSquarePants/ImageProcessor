@@ -302,9 +302,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 {
                     string container = RemoteRegex.Replace(this.cloudSourceBlobContainer.Uri.ToString(), string.Empty);
                     string blobPath = RemoteRegex.Replace(this.RequestPath, string.Empty);
-                    blobPath = blobPath.Replace(container, string.Empty).TrimStart('/')
-                        //.Replace("127.0.0.1_10000", "127.0.0.1:10000")
-                        .FixDevelopmentStorageEmulatorUrl();
+                    blobPath = blobPath.Replace(container, string.Empty).TrimStart('/');
                     CloudBlockBlob blockBlob = this.cloudSourceBlobContainer.GetBlockBlobReference(blobPath);
 
                     if (await blockBlob.ExistsAsync())
