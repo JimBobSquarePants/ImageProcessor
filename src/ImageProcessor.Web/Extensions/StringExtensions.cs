@@ -138,17 +138,6 @@ namespace ImageProcessor.Web.Extensions
 
             return Uri.TryCreate(expression, UriKind.Relative, out uri) && uri.IsWellFormedOriginalString();
         }
-        /// <summary>
-        /// As url segments cannot contain : it will be replaced with _
-        /// However, we need the correct url for requesting local host on port 10000 where 
-        /// Development Storage Emulator is listening
-        /// </summary>
-        /// <param name="url">The <see cref="T:System.String">String</see> instance that this method extends.</param>
-        /// <returns>returns corrected url with host:port</returns>
-        public static string FixDevelopmentStorageEmulatorUrl(this string url)
-        {
-            return url.Replace("127.0.0.1_10000", "127.0.0.1:10000");
-        }
         #endregion
     }
 }
