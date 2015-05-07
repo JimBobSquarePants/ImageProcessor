@@ -38,6 +38,26 @@ namespace ImageProcessor.Imaging
         /// <summary>
         /// Anchors the position of the image to the right of it's bounding container.
         /// </summary>
-        Right
+        Right,
+
+        /// <summary>
+        /// Anchors the position of the image to the top left side of it's bounding container.
+        /// </summary>
+        TopLeft,
+
+        /// <summary>
+        /// Anchors the position of the image to the top right side of it's bounding container.
+        /// </summary>
+        TopRight,
+
+        /// <summary>
+        /// Anchors the position of the image to the bottom right side of it's bounding container.
+        /// </summary>
+        BottomRight,
+
+        /// <summary>
+        /// Anchors the position of the image to the bottom left side of it's bounding container.
+        /// </summary>
+        BottomLeft
     }
 }
