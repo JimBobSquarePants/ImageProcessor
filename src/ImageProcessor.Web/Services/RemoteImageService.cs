@@ -18,7 +18,6 @@ namespace ImageProcessor.Web.Services
     using System.Web;
 
     using ImageProcessor.Web.Helpers;
-    using ImageProcessor.Web.Extensions;
 
     /// <summary>
     /// The remote image service.
