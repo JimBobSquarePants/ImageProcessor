@@ -294,7 +294,7 @@ namespace ImageProcessor.Web.HttpModules
             HttpRequest request = context.Request;
 
             // Should we ignore this request?
-            if (request.RawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
+            if (request.Unvalidated.RawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
             {
                 return;
             }
@@ -364,7 +364,7 @@ namespace ImageProcessor.Web.HttpModules
                 queryString = this.ReplacePresetsInQueryString(queryString);
 
                 // Execute the handler which can change the querystring 
-                queryString = this.CheckQuerystringHandler(queryString, request.RawUrl);
+                queryString = this.CheckQuerystringHandler(queryString, request.Unvalidated.RawUrl);
 
                 // If the current service doesn't require a prefix, don't fetch it.
                 // Let the static file handler take over.
