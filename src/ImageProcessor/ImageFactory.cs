@@ -322,6 +322,12 @@ namespace ImageProcessor
                 // Set the other properties.
                 this.CurrentImageFormat = this.backupFormat;
                 this.CurrentImageFormat.Quality = DefaultQuality;
+
+                // Normalize the gamma component of the image.
+                if (this.FixGamma)
+                {
+                    this.Gamma(2.2F);
+                }
             }
 
             return this;
