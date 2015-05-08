@@ -157,9 +157,13 @@ namespace ImageProcessor.Imaging
                         switch (anchorPosition)
                         {
                             case AnchorPosition.Left:
+                            case AnchorPosition.TopLeft:
+                            case AnchorPosition.BottomLeft:
                                 destinationX = 0;
                                 break;
                             case AnchorPosition.Right:
+                            case AnchorPosition.TopRight:
+                            case AnchorPosition.BottomRight:
                                 destinationX = (int)(width - (sourceWidth * ratio));
                                 break;
                             default:
@@ -175,9 +179,13 @@ namespace ImageProcessor.Imaging
                         switch (anchorPosition)
                         {
                             case AnchorPosition.Top:
+                            case AnchorPosition.TopLeft:
+                            case AnchorPosition.TopRight:
                                 destinationY = 0;
                                 break;
                             case AnchorPosition.Bottom:
+                            case AnchorPosition.BottomLeft:
+                            case AnchorPosition.BottomRight:
                                 destinationY = (int)(height - (sourceHeight * ratio));
                                 break;
                             default:
@@ -217,9 +225,13 @@ namespace ImageProcessor.Imaging
                             switch (anchorPosition)
                             {
                                 case AnchorPosition.Top:
+                                case AnchorPosition.TopLeft:
+                                case AnchorPosition.TopRight:
                                     destinationY = 0;
                                     break;
                                 case AnchorPosition.Bottom:
+                                case AnchorPosition.BottomLeft:
+                                case AnchorPosition.BottomRight:
                                     destinationY = (int)(height - (sourceHeight * ratio));
                                     break;
                                 default:
@@ -254,9 +266,13 @@ namespace ImageProcessor.Imaging
                             switch (anchorPosition)
                             {
                                 case AnchorPosition.Left:
+                                case AnchorPosition.TopLeft:
+                                case AnchorPosition.BottomLeft:
                                     destinationX = 0;
                                     break;
                                 case AnchorPosition.Right:
+                                case AnchorPosition.TopRight:
+                                case AnchorPosition.BottomRight:
                                     destinationX = (int)(width - (sourceWidth * ratio));
                                     break;
                                 default:
