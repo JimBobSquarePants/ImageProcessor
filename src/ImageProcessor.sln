@@ -32,7 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B5217BED
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5D12E196-FB7A-4D97-B156-56901EF8084D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.AmazonS3Cache", "ImageProcessor.Web.Plugins.AmazonS3Cache\ImageProcessor.Web.Plugins.AmazonS3Cache.csproj", "{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.AmazonS3Cache", "Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AmazonS3Cache\ImageProcessor.Web.Plugins.AmazonS3Cache.csproj", "{A4BA5609-9679-4FD4-A5B9-E3E791FBFFC5}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
