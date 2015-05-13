@@ -1,8 +1,22 @@
-<caching currentCache="DiskCache">
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sets the default cache location and maximum number of days to store 
+     items in the cache -->
+<caching currentCache="AmazonS3Cache">
   <caches>
-    <cache name="DiskCache" type="ImageProcessor.Web.Caching.DiskCache, ImageProcessor.Web" maxDays="365">
+    <!-- The virtual path to the disk cache location. -->
+
+    <!--  <cache name="DiskCache" type="ImageProcessor.Web.Caching.DiskCache, ImageProcessor.Web" maxDays="365">
       <settings>
         <setting key="VirtualCachePath" value="~/app_data/cache"/>
+      </settings>
+    </cache>-->
+    <cache name="AmazonS3Cache" type="ImageProcessor.Web.Plugins.AmazonS3Cache.AmazonS3Cache, ImageProcessor.Web.Plugins.AmazonS3Cache" maxDays="365">
+      <settings>
+        <setting key="awsAccessKey" value="" />
+        <setting key="awsSecretKey" value="" />
+        <setting key="awsBucketName" value="" />
+        <setting key="CachedCDNRoot" value="" />
+        <setting key="regionEndpoint" value="EUWest1" />
       </settings>
     </cache>
   </caches>

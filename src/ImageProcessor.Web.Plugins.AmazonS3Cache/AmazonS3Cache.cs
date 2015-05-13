@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AmazonS3Cache.cs" company="James South">
 //   Copyright (c) James South.
 //   Licensed under the Apache License, Version 2.0.
@@ -13,25 +13,21 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.SqlClient;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Net;
-    using System.Text.RegularExpressions;
-    using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
-
-    using ImageProcessor.Web.Caching;
-    using ImageProcessor.Web.Extensions;
-    using ImageProcessor.Web.Helpers;
-    using ImageProcessor.Web.HttpModules;
 
     using Amazon;
     using Amazon.S3;
     using Amazon.S3.Model;
     using Amazon.S3.Transfer;
+
+    using ImageProcessor.Web.Caching;
+    using ImageProcessor.Web.Extensions;
+    using ImageProcessor.Web.Helpers;
 
     /// <summary>
     /// Provides an <see cref="IImageCache"/> implementation that uses Amazon S3 storage.
@@ -39,26 +35,12 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
     /// </summary>
     public class AmazonS3Cache : ImageCacheBase
     {
-        /// <summary>
-        /// Image Processor Cache folder in S3.
-        /// </summary>
-        private string ImageProcessorCachePrefix = @"imageprocessor_cache/";
-
-        /// <summary>
-        /// The regular expression for parsing a remote uri.
-        /// </summary>
-        private static readonly Regex RemoteRegex = new Regex("^http(s)?://", RegexOptions.Compiled);
-
-        /// <summary>
-        /// The assembly version.
-        /// </summary>
-        private static readonly string AssemblyVersion =
-            typeof(ImageProcessingModule).Assembly.GetName().Version.ToString();
+        #region Fields
 
         /// <summary>
         /// The Amazon S3 client.
         /// </summary>
-        private readonly AmazonS3Client s3ClientCache;
+        private readonly AmazonS3Client amazonS3ClientCache;
 
         /// <summary>
         /// The cached root url for a content delivery network.
@@ -66,39 +48,16 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         private readonly string cachedCdnRoot;
 
         /// <summary>
-        /// Return false if Amazon S3 Access Key, Secret Key or Bucket Name are empty strings.
+        /// Image Processor Cache folder in S3.
         /// </summary>
-        private bool AwsIsValid
-        {
-            get
-            {
-                return !string.IsNullOrWhiteSpace(AwsAccessKey) && !string.IsNullOrWhiteSpace(AwsSecretKey)
-                       && !string.IsNullOrWhiteSpace(AwsBucketName);
-            }
-        }
+        private string imageProcessorCachePrefix = @"imageprocessor_cache/";
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
-        /// Amazon S3 Access Key.
-        /// </summary>
-        private string AwsAccessKey { get; set; }
-
-        /// <summary>
-        /// Amazon S3 Secret Key.
-        /// </summary>
-        private string AwsSecretKey { get; set; }
-
-        /// <summary>
-        /// Amazon S3 Bucket Name.
-        /// </summary>
-        private string AwsBucketName { get; set; }
-
-        /// <summary>
-        /// Amazon S3 Region Endpoint.
-        /// </summary>
-        private RegionEndpoint AwsRegionEndpoint { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AmazonS3Cache"/> class.
+        /// Initialises a new instance of the <see cref="AmazonS3Cache"/> class.
         /// </summary>
         /// <param name="requestPath">
         /// The request path for the image.
@@ -120,17 +79,53 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             if (AwsIsValid)
             {
                 // Create S3 client from AWS Access Key and AWS Secret Access Key.
-                this.s3ClientCache = new AmazonS3Client(this.AwsAccessKey, this.AwsSecretKey, this.AwsRegionEndpoint);
-            }
-            else
-            {
-                //throw new AmazonS3Exception();
+                this.amazonS3ClientCache = new AmazonS3Client(this.AwsAccessKey, this.AwsSecretKey, this.AwsRegionEndpoint);
             }
 
             this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
                                      ? this.Settings["CachedCDNRoot"]
                                      : string.Empty;
         }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets Amazon S3 Access Key.
+        /// </summary>
+        private string AwsAccessKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets Amazon S3 Secret Key.
+        /// </summary>
+        private string AwsSecretKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets Amazon S3 Bucket Name.
+        /// </summary>
+        private string AwsBucketName { get; set; }
+
+        /// <summary>
+        /// Gets or sets Amazon S3 Region Endpoint.
+        /// </summary>
+        private RegionEndpoint AwsRegionEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether Amazon S3 Access Key, Secret Key or Bucket Name are empty strings: i.e. whether <see cref="AwsIsWalid"/>.
+        /// </summary>
+        private bool AwsIsValid
+        {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(AwsAccessKey) && !string.IsNullOrWhiteSpace(AwsSecretKey)
+                       && !string.IsNullOrWhiteSpace(AwsBucketName);
+            }
+        }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Gets a value indicating whether the image is new or updated in an asynchronous manner.
@@ -146,7 +141,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             // That gives us massive scope to store millions of files.
             string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
             this.CachedPath =
-                Path.Combine(this.cachedCdnRoot, this.ImageProcessorCachePrefix, pathFromKey, cachedFileName)
+                Path.Combine(this.cachedCdnRoot, this.imageProcessorCachePrefix, pathFromKey, cachedFileName)
                     .Replace(@"\", "/");
 
             bool isUpdated = false;
@@ -186,7 +181,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         Key = key,
                     };
 
-                    var response = await s3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest);
+                    var response = await amazonS3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest);
 
                     if (response != null)
                     {
@@ -240,33 +235,21 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </returns>
         public override async Task AddImageToCacheAsync(Stream stream, string contentType)
         {
-            //TODO: remove this check? Should it just fail?
-            if (AwsIsValid)
+            var transferUtility = new TransferUtility(this.amazonS3ClientCache);
+
+            var path = GetFolderStructureForAmazon(this.CachedPath);
+            var filename = Path.GetFileName(this.CachedPath);
+            var key = GetKey(path, filename);
+
+            var transferUtilityUploadRequest = new TransferUtilityUploadRequest
             {
-                try
-                {
-                    var transferUtility = new TransferUtility(this.s3ClientCache);
+                BucketName = this.AwsBucketName,
+                InputStream = stream,
+                Key = key,
+                CannedACL = S3CannedACL.PublicRead
+            };
 
-                    var path = GetFolderStructureForAmazon(this.CachedPath);
-                    var filename = Path.GetFileName(this.CachedPath);
-                    var key = GetKey(path, filename);
-
-                    var transferUtilityUploadRequest = new TransferUtilityUploadRequest
-                    {
-                        BucketName = this.AwsBucketName,
-                        InputStream = stream,
-                        Key = key,
-                        CannedACL = S3CannedACL.PublicRead
-                    };
-
-                    await transferUtility.UploadAsync(transferUtilityUploadRequest);
-                }
-                catch (AmazonS3Exception amazonS3Exception)
-                {
-                    //todo: handle exceptions?
-                    throw amazonS3Exception;
-                }
-            }
+            await transferUtility.UploadAsync(transferUtilityUploadRequest);
         }
 
         /// <summary>
@@ -277,13 +260,14 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </returns>
         public override async Task TrimCacheAsync()
         {
-            //TODO: ListObjectsRequest doesn't seem to work
+            // At the present time ListObjectsRequest doesn't work.
+            // TODO: find an alternative solution? 
             return;
 
             ListObjectsRequest request = new ListObjectsRequest
             {
                 BucketName = this.AwsBucketName,
-                Prefix = ImageProcessorCachePrefix,
+                Prefix = imageProcessorCachePrefix,
                 Delimiter = @"/",
             };
 
@@ -291,7 +275,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             {
                 do
                 {
-                    var response = this.s3ClientCache.ListObjects(request);
+                    var response = this.amazonS3ClientCache.ListObjects(request);
 
                     List<S3Object> results = new List<S3Object>();
                     results.AddRange(response.S3Objects);
@@ -309,7 +293,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         }
 
                         CacheIndexer.Remove(file.Key);
-                        await this.s3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
+                        await this.amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
                         {
                             BucketName = this.AwsBucketName,
                             Key = file.Key
@@ -328,10 +312,10 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                     }
                 }
                 while (request != null);
-
             }
             catch (Exception)
             {
+                return;
             }
         }
 
@@ -403,7 +387,6 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             }
         }
 
-
         /// <summary>
         /// Helper to get folder structure from amazon
         /// </summary>
@@ -458,11 +441,53 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                     return RegionEndpoint.EUWest1;
                     break;
 
-                //add more conditions
+                case "APNortheast1":
+                    return RegionEndpoint.APNortheast1;
+                    break;
+
+                case "APSoutheast1":
+                    return RegionEndpoint.APSoutheast1;
+                    break;
+
+                case "APSoutheast2":
+                    return RegionEndpoint.APSoutheast2;
+                    break;
+
+                case "CNNorth1":
+                    return RegionEndpoint.CNNorth1;
+                    break;
+
+                case "EUCentral1":
+                    return RegionEndpoint.EUCentral1;
+                    break;
+
+                case "SAEast1":
+                    return RegionEndpoint.SAEast1;
+                    break;
+
+                case "USEast1":
+                    return RegionEndpoint.USEast1;
+                    break;
+
+                case "USGovCloudWest1":
+                    return RegionEndpoint.USGovCloudWest1;
+                    break;
+
+                case "USWest1":
+                    return RegionEndpoint.USWest1;
+                    break;
+
+                case "USWest2":
+                    return RegionEndpoint.USWest2;
+                    break;
+
+                // Set EUWest1 as default RegionEndoint
                 default:
                     return RegionEndpoint.EUWest1;
                     break;
             }
         }
     }
+
+        #endregion
 }
