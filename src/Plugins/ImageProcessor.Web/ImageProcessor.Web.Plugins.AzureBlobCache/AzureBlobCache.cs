@@ -157,8 +157,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         {
                             Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                             Path = this.CachedPath,
-                            CreationTimeUtc =
-                                blockBlob.Properties.LastModified.Value.UtcDateTime
+                            CreationTimeUtc = blockBlob.Properties.LastModified.Value.UtcDateTime
                         };
 
                         CacheIndexer.Add(cachedImage);
@@ -346,22 +345,19 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             }
         }
 
-        #region private methods
         /// <summary>
-        /// gets reference or creates container
+        /// Returns the cache container, creating a new one if none exists.
         /// </summary>
-        /// <param name="cloudBlobClient">cloud blob client</param>
-        /// <param name="containerName">name of container</param>
-        /// <param name="accessType">access permissions ie. public</param>
-        /// <returns>container for cache items</returns>
-        private CloudBlobContainer CreateContainer(CloudBlobClient cloudBlobClient, string containerName, BlobContainerPublicAccessType accessType)
+        /// <param name="cloudBlobClient"><see cref="CloudBlobClient"/> where the container is stored.</param>
+        /// <param name="containerName">The name of the container.</param>
+        /// <param name="accessType"><see cref="BlobContainerPublicAccessType"/> indicating the access permissions.</param>
+        /// <returns>The <see cref="CloudBlobContainer"/></returns>
+        private static CloudBlobContainer CreateContainer(CloudBlobClient cloudBlobClient, string containerName, BlobContainerPublicAccessType accessType)
         {
             CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
             container.CreateIfNotExists();
             container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
             return container;
         }
-
-        #endregion
     }
 }
