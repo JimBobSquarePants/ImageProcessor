@@ -109,7 +109,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>The maximum number of days to store an image in the cache.</value>
             /// <remarks>Defaults to 365 if not set.</remarks>
             [ConfigurationProperty("maxDays", DefaultValue = "365", IsRequired = true)]
-            [IntegerValidator(ExcludeRange = false, MinValue = 0)]
+            [IntegerValidator(ExcludeRange = false, MinValue = -1)]
             public int MaxDays
             {
                 get
