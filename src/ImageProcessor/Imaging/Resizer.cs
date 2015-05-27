@@ -78,33 +78,15 @@ namespace ImageProcessor.Imaging
         /// <summary>
         /// Resizes the given image.
         /// </summary>
-        /// <param name="source">
-        /// The source <see cref="Image"/> to resize
-        /// </param>
-        /// <param name="width">
-        /// The width to resize the image to.
-        /// </param>
-        /// <param name="height">
-        /// The height to resize the image to.
-        /// </param>
-        /// <param name="maxWidth">
-        /// The default max width to resize the image to.
-        /// </param>
-        /// <param name="maxHeight">
-        /// The default max height to resize the image to.
-        /// </param>
-        /// <param name="restrictedSizes">
-        /// A <see cref="List{T}"/> containing image resizing restrictions.
-        /// </param>
-        /// <param name="resizeMode">
-        /// The mode with which to resize the image.
-        /// </param>
-        /// <param name="anchorPosition">
-        /// The anchor position to place the image at.
-        /// </param>
-        /// <param name="upscale">
-        /// Whether to allow up-scaling of images. (Default true)
-        /// </param>
+        /// <param name="source">The source <see cref="Image"/> to resize</param>
+        /// <param name="width">The width to resize the image to.</param>
+        /// <param name="height">The height to resize the image to.</param>
+        /// <param name="maxWidth">The default max width to resize the image to.</param>
+        /// <param name="maxHeight">The default max height to resize the image to.</param>
+        /// <param name="restrictedSizes">A <see cref="List{T}"/> containing image resizing restrictions.</param>
+        /// <param name="resizeMode">The mode with which to resize the image.</param>
+        /// <param name="anchorPosition">The anchor position to place the image at.</param>
+        /// <param name="upscale">Whether to allow up-scaling of images. (Default true)</param>
         /// <param name="centerCoordinates">
         /// If the resize mode is crop, you can set a specific center coordinate, use as alternative to anchorPosition
         /// </param>
