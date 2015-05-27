@@ -333,7 +333,9 @@ namespace ImageProcessor.Web.HttpModules
                 {
                     if (string.IsNullOrWhiteSpace(currentService.Prefix))
                     {
-                        requestPath = HostingEnvironment.MapPath(request.Path);
+                        requestPath = currentService.IsFileLocalService
+                            ? HostingEnvironment.MapPath(request.Path)
+                            : request.Path;
                         queryString = request.QueryString.ToString();
                     }
                     else
