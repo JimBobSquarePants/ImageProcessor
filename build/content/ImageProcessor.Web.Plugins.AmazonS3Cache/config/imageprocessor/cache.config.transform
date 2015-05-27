@@ -1,0 +1,14 @@
+<caching currentCache="AzureBlobCache">
+  <caches>
+    <cache name="AmazonS3Cache" type="ImageProcessor.Web.Plugins.AmazonS3Cache.AmazonS3Cache, ImageProcessor.Web.Plugins.AmazonS3Cache" maxDays="365">
+      <settings>
+        <setting key="AwsAccessKey" value="" />
+        <setting key="AwsSecretKey" value="" />
+        <setting key="AwsBucketName" value="" />
+        <setting key="CachedCDNRoot" value="" />
+        <setting key="RegionEndpoint" value="EUWest1" />
+      </settings>
+    </cache>
+  </caches>
+</caching>
+
