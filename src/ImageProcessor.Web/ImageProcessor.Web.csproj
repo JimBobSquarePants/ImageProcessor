@@ -67,6 +67,7 @@
     <Compile Include="Processors\Pixelate.cs" />
     <Compile Include="Processors\ReplaceColor.cs" />
     <Compile Include="Processors\RotateBounded.cs" />
+    <Compile Include="Services\CloudImageService.cs" />
     <Compile Include="Services\IImageService.cs" />
     <Compile Include="Caching\MemCache.cs" />
     <Compile Include="Caching\CacheIndexer.cs" />
