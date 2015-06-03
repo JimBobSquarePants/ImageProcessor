@@ -68,7 +68,7 @@ namespace ImageProcessor.Web.Helpers
             IWebGraphicsProcessor format = ImageProcessorConfiguration.Instance.GraphicsProcessors
                                            .FirstOrDefault(p => typeof(Format) == p.GetType());
 
-            if (format != null)
+            if (format != null && queryString != null)
             {
                 match = format.RegexPattern.Match(queryString);
             }
