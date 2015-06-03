@@ -68,7 +68,7 @@ namespace ImageProcessor.Web.Helpers
             IWebGraphicsProcessor format = ImageProcessorConfiguration.Instance.GraphicsProcessors
                                            .FirstOrDefault(p => typeof(Format) == p.GetType());
 
-            if (format != null)
+            if (format != null && queryString != null)
             {
                 match = format.RegexPattern.Match(queryString);
             }
@@ -78,7 +78,7 @@ namespace ImageProcessor.Web.Helpers
                 // Test against the path minus the querystring so any other
                 // processors don't interere.
                 string trimmed = fullPath;
-                if (queryString != null)
+                if (!string.IsNullOrEmpty(queryString))
                 {
                     trimmed = trimmed.Replace(queryString, string.Empty);
                 }
