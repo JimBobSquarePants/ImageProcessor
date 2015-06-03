@@ -615,8 +615,18 @@ namespace ImageProcessor.Web.HttpModules
                 return imageService;
             }
 
-            // Return the file based service
-            return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path));
+            // Return the file based service.
+            if (services.Any(s => s.GetType() == typeof(LocalFileImageService)))
+            {
+                IImageService service = services.First(s => s.GetType() == typeof(LocalFileImageService));
+                if (service.IsValidRequest(path))
+                {
+                    return service;
+                }
+            }
+
+            // Return the next unprefixed service.
+            return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path) && s.GetType() != typeof(LocalFileImageService));
         }
 
         /// <summary>
