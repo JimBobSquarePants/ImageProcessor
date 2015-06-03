@@ -46,11 +46,6 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         private readonly string cachedCdnRoot;
 
         /// <summary>
-        /// Image Processor Cache folder in S3.
-        /// </summary>
-        private string imageProcessorCachePrefix = @"imageprocessor_cache/";
-
-        /// <summary>
         /// The Amazon S3 Access Key.
         /// </summary>
         private readonly string awsAccessKey;
@@ -66,7 +61,12 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         private readonly string awsBucketName;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="AmazonS3Cache"/> class.
+        /// Image Processor Cache folder in S3.
+        /// </summary>
+        private string imageProcessorCachePrefix = @"imageprocessor_cache/";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AmazonS3Cache"/> class.
         /// </summary>
         /// <param name="requestPath">
         /// The request path for the image.
@@ -161,7 +161,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         Key = key,
                     };
 
-                    GetObjectMetadataResponse response = await amazonS3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest);
+                    GetObjectMetadataResponse response = await this.amazonS3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest);
 
                     if (response != null)
                     {
@@ -239,45 +239,26 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </returns>
         public override async Task TrimCacheAsync()
         {
-            // At the present time ListObjectsRequest doesn't work.
-            // TODO: find an alternative solution? 
-            return;
-
+            string path = this.GetFolderStructureForAmazon(this.CachedPath);
+            string directory = path.Substring(0, path.LastIndexOf('/'));
+            string parent = directory.Substring(0, directory.LastIndexOf('/') + 1);
+            
             ListObjectsRequest request = new ListObjectsRequest
             {
                 BucketName = this.awsBucketName,
-                Prefix = imageProcessorCachePrefix,
-                Delimiter = @"/",
+                Prefix = parent,
+                Delimiter = @"/"
             };
 
             try
             {
+                List<S3Object> results = new List<S3Object>();
+
                 do
                 {
-                    var response = this.amazonS3ClientCache.ListObjects(request);
+                    ListObjectsResponse response = await this.amazonS3ClientCache.ListObjectsAsync(request);
 
-                    List<S3Object> results = new List<S3Object>();
                     results.AddRange(response.S3Objects);
-
-                    foreach (var file in response.S3Objects
-                                                 .OrderBy(
-                                                          x =>
-                                                          x.LastModified != null
-                                                              ? x.LastModified.ToUniversalTime()
-                                                              : new DateTime()))
-                    {
-                        if (file.LastModified != null && !this.IsExpired(file.LastModified.ToUniversalTime()))
-                        {
-                            break;
-                        }
-
-                        CacheIndexer.Remove(file.Key);
-                        await this.amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
-                        {
-                            BucketName = this.awsBucketName,
-                            Key = file.Key
-                        });
-                    }
 
                     // If response is truncated, set the marker to get the next 
                     // set of keys.
@@ -291,10 +272,26 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                     }
                 }
                 while (request != null);
+
+                foreach (S3Object file in results.OrderBy(x => x.LastModified.ToUniversalTime()))
+                {
+                    if (!this.IsExpired(file.LastModified.ToUniversalTime()))
+                    {
+                        break;
+                    }
+
+                    CacheIndexer.Remove(file.Key);
+                    await this.amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
+                    {
+                        BucketName = this.awsBucketName,
+                        Key = file.Key
+                    });
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return;
+                // TODO: Remove try/catch.
+                throw ex;
             }
         }
 
@@ -327,7 +324,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                     }
                 }
 
-                // TODO: Pull from other cloud folder/bucket?
+                // TODO: Pull from other cloud folder/bucket to match the AzureBlobCache behaviour.
             }
             catch
             {
@@ -345,7 +342,6 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                  encryptedName,
                  !string.IsNullOrWhiteSpace(parsedExtension) ? parsedExtension.Replace(".", string.Empty) : "jpg");
 
-
             return cachedFileName;
         }
 
@@ -357,13 +353,16 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </param>
         public override void RewritePath(HttpContext context)
         {
+            // TODO: This doesn't look correct to me. Where is the CDN path?
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.CachedPath);
             request.Method = "HEAD";
 
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
                 HttpStatusCode responseCode = response.StatusCode;
-                context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.RequestPath : this.CachedPath, false);
+                context.Response.Redirect(
+                    responseCode == HttpStatusCode.NotFound ? this.RequestPath : this.CachedPath, 
+                    false);
             }
         }
 
@@ -374,7 +373,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <returns>Key value</returns>
         protected string GetFolderStructureForAmazon(string path)
         {
-            var output = path.Replace(this.cachedCdnRoot, string.Empty);
+            string output = path.Replace(this.cachedCdnRoot, string.Empty);
             output = output.Replace(Path.GetFileName(output), string.Empty);
 
             if (output.StartsWith("/"))
@@ -437,6 +436,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                     return RegionEndpoint.USWest1;
                 case "USWEST2":
                     return RegionEndpoint.USWest2;
+
                 // Set EUWest1 as default RegionEndoint
                 default:
                     return RegionEndpoint.EUWest1;
