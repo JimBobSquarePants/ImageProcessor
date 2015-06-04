@@ -156,10 +156,10 @@ namespace ImageProcessor.Web.HttpModules
             EventHandlerTaskAsyncHelper postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
             context.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
+            context.PostReleaseRequestState += this.PostReleaseRequestState;
+
             EventHandlerTaskAsyncHelper postProcessHelper = new EventHandlerTaskAsyncHelper(this.PostProcessImage);
             context.AddOnEndRequestAsync(postProcessHelper.BeginEventHandler, postProcessHelper.EndEventHandler);
-
-            context.PreSendRequestHeaders += this.ContextPreSendRequestHeaders;
         }
 
         /// <summary>
@@ -253,10 +253,14 @@ namespace ImageProcessor.Web.HttpModules
                     await Task.Run(() => handler(this, new PostProcessingEventArgs { CachedImagePath = cachedPath }));
                 }
             }
+
+            // Reset the cache.
+            this.imageCache = null;
         }
 
         /// <summary>
-        /// Occurs just before ASP.NET send HttpHeaders to the client.
+        /// Occurs when ASP.NET has completed executing all request event handlers and the request 
+        /// state data has been stored.
         /// </summary>
         /// <param name="sender">
         /// The source of the event.
@@ -264,7 +268,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <param name="e">
         /// An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.
         /// </param>
-        private void ContextPreSendRequestHeaders(object sender, EventArgs e)
+        private void PostReleaseRequestState(object sender, EventArgs e)
         {
             HttpContext context = ((HttpApplication)sender).Context;
 
@@ -517,8 +521,6 @@ namespace ImageProcessor.Web.HttpModules
                 cache.SetExpires(DateTime.Now.ToUniversalTime().AddDays(maxDays));
                 cache.SetMaxAge(new TimeSpan(maxDays, 0, 0, 0));
                 cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
-
-                this.imageCache = null;
 
                 if (!string.IsNullOrEmpty(context.Request.Headers["Origin"]))
                 {
