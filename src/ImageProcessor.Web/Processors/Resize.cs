@@ -30,7 +30,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"(width|height)=((.)?\d+|\d+(.\d+)?)+", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex(@"(width|height)=((.)?\d+|\d+(.\d+)?)+(px)?", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Resize"/> class.
@@ -131,17 +131,21 @@ namespace ImageProcessor.Web.Processors
             // First cater for single dimensions.
             if (width != null && height == null)
             {
+                width = width.Replace("px", string.Empty);
                 size = new Size((int)Math.Round(QueryParamParser.Instance.ParseValue<float>(width), Rounding), 0);
             }
 
             if (width == null && height != null)
             {
+                height = height.Replace("px", string.Empty);
                 size = new Size(0, (int)Math.Round(QueryParamParser.Instance.ParseValue<float>(height), Rounding));
             }
 
             // Both supplied
             if (width != null && height != null)
             {
+                width = width.Replace("px", string.Empty);
+                height = height.Replace("px", string.Empty);
                 size = new Size(
                     (int)Math.Round(QueryParamParser.Instance.ParseValue<float>(width), Rounding),
                     (int)Math.Round(QueryParamParser.Instance.ParseValue<float>(height), Rounding));
