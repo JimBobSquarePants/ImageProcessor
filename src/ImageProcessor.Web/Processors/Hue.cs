@@ -12,8 +12,6 @@ namespace ImageProcessor.Web.Processors
 {
     using System;
     using System.Collections.Specialized;
-    using System.Globalization;
-    using System.Text;
     using System.Text.RegularExpressions;
     using System.Web;
 
