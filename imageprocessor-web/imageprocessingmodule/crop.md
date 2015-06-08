@@ -26,7 +26,7 @@ http://your-image?crop=x,y,width,height
 <!--Percentage: 
     Current -  Each value is a decimal between 0 and 100. 
     Legacy - Each value is a decimal between 0 and 1. -->
-http://your-image?crop=left,top,right,bottom&cropmode=percent
+http://your-image?crop=left,top,right,bottom&cropmode=percentage
 {% endhighlight %}
 
 </section>
