@@ -156,10 +156,10 @@ namespace ImageProcessor.Web.HttpModules
             EventHandlerTaskAsyncHelper postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
             context.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
+            context.PostReleaseRequestState += this.PostReleaseRequestState;
+
             EventHandlerTaskAsyncHelper postProcessHelper = new EventHandlerTaskAsyncHelper(this.PostProcessImage);
             context.AddOnEndRequestAsync(postProcessHelper.BeginEventHandler, postProcessHelper.EndEventHandler);
-
-            context.PreSendRequestHeaders += this.ContextPreSendRequestHeaders;
         }
 
         /// <summary>
@@ -253,10 +253,14 @@ namespace ImageProcessor.Web.HttpModules
                     await Task.Run(() => handler(this, new PostProcessingEventArgs { CachedImagePath = cachedPath }));
                 }
             }
+
+            // Reset the cache.
+            this.imageCache = null;
         }
 
         /// <summary>
-        /// Occurs just before ASP.NET send HttpHeaders to the client.
+        /// Occurs when ASP.NET has completed executing all request event handlers and the request 
+        /// state data has been stored.
         /// </summary>
         /// <param name="sender">
         /// The source of the event.
@@ -264,7 +268,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <param name="e">
         /// An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.
         /// </param>
-        private void ContextPreSendRequestHeaders(object sender, EventArgs e)
+        private void PostReleaseRequestState(object sender, EventArgs e)
         {
             HttpContext context = ((HttpApplication)sender).Context;
 
@@ -294,7 +298,7 @@ namespace ImageProcessor.Web.HttpModules
             HttpRequest request = context.Request;
 
             // Should we ignore this request?
-            if (request.RawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
+            if (request.Unvalidated.RawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
             {
                 return;
             }
@@ -333,7 +337,9 @@ namespace ImageProcessor.Web.HttpModules
                 {
                     if (string.IsNullOrWhiteSpace(currentService.Prefix))
                     {
-                        requestPath = HostingEnvironment.MapPath(request.Path);
+                        requestPath = currentService.IsFileLocalService
+                            ? HostingEnvironment.MapPath(request.Path)
+                            : request.Path;
                         queryString = request.QueryString.ToString();
                     }
                     else
@@ -364,7 +370,7 @@ namespace ImageProcessor.Web.HttpModules
                 queryString = this.ReplacePresetsInQueryString(queryString);
 
                 // Execute the handler which can change the querystring 
-                queryString = this.CheckQuerystringHandler(queryString, request.RawUrl);
+                queryString = this.CheckQuerystringHandler(queryString, request.Unvalidated.RawUrl);
 
                 // If the current service doesn't require a prefix, don't fetch it.
                 // Let the static file handler take over.
@@ -516,8 +522,6 @@ namespace ImageProcessor.Web.HttpModules
                 cache.SetMaxAge(new TimeSpan(maxDays, 0, 0, 0));
                 cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
 
-                this.imageCache = null;
-
                 if (!string.IsNullOrEmpty(context.Request.Headers["Origin"]))
                 {
                     string origin = context.Request.Headers["Origin"];
@@ -613,8 +617,18 @@ namespace ImageProcessor.Web.HttpModules
                 return imageService;
             }
 
-            // Return the file based service
-            return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path));
+            // Return the file based service.
+            if (services.Any(s => s.GetType() == typeof(LocalFileImageService)))
+            {
+                IImageService service = services.First(s => s.GetType() == typeof(LocalFileImageService));
+                if (service.IsValidRequest(path))
+                {
+                    return service;
+                }
+            }
+
+            // Return the next unprefixed service.
+            return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path) && s.GetType() != typeof(LocalFileImageService));
         }
 
         /// <summary>

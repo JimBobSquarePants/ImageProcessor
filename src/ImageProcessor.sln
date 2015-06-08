@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B5217BED
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5D12E196-FB7A-4D97-B156-56901EF8084D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.AmazonS3Cache", "Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AmazonS3Cache\ImageProcessor.Web.Plugins.AmazonS3Cache.csproj", "{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		All|Any CPU = All|Any CPU
@@ -197,6 +199,21 @@ Global
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.All|Any CPU.ActiveCfg = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.All|Any CPU.Build.0 = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.All|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.All|Mixed Platforms.Build.0 = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.All|x86.ActiveCfg = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -209,6 +226,7 @@ Global
 		{C7D1F0DD-CBD6-4127-82B4-51949EFF0BF5} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7} = {B5217BED-B0B7-408E-81B7-877DE2BF9036}
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
+		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = ImageProcessorConsole\ImageProcessorConsole.csproj
