@@ -13,7 +13,7 @@
 
   <project>
     <name>ImageProcessor Web</name>
-    <version>4.3.2.0</version>
+    <version>4.3.3.0</version>
     <folder>..\src\ImageProcessor.Web</folder>
     <projfile>ImageProcessor.Web.csproj</projfile>
     <outputs>
@@ -41,7 +41,7 @@
 
   <project>
     <name>ImageProcessor Web Azure Blob Cache plugin</name>
-    <version>1.0.2.0</version>
+    <version>1.0.3.0</version>
     <folder>..\src\Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AzureBlobCache</folder>
     <projfile>ImageProcessor.Web.Plugins.AzureBlobCache.csproj</projfile>
     <outputs>
