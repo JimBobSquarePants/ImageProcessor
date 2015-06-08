@@ -99,7 +99,9 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 this.cloudSourceBlobContainer = cloudSourceBlobClient.GetContainerReference(this.Settings["SourceBlobContainer"]);
             }
 
-            this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot") ? this.Settings["CachedCDNRoot"] : string.Empty;
+            this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
+                                     ? this.Settings["CachedCDNRoot"]
+                                     : this.cloudCachedBlobContainer.Uri.ToString().TrimEnd(this.cloudCachedBlobContainer.Name.ToCharArray());
         }
 
         /// <summary>
