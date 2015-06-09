@@ -50,7 +50,7 @@ configuration files.
 <caching currentCache="AzureBlobCache">
   <caches>
     <!-- Disk cache configuration removed for brevity -->
-    <cache name="AzureBlobCache" type="ImageProcessor.Web.Plugins.AzureBlobCache, ImageProcessor.Web.Plugins.AzureBlobCache" maxDays="365">
+    <cache name="AzureBlobCache" type="ImageProcessor.Web.Plugins.AzureBlobCache.AzureBlobCache, ImageProcessor.Web.Plugins.AzureBlobCache" maxDays="365">
       <settings>
         <!-- The Account, Container and CDN details -->
         <setting key="CachedStorageAccount" value="DefaultEndpointsProtocol=https;AccountName=[CacheAccountName];AccountKey=[CacheAccountKey]"/>
