@@ -296,6 +296,64 @@ namespace ImageProcessor
             return this;
         }
 
+	    /// <summary>
+	    /// Loads the image to process from an array of bytes. Always call this method first.
+	    /// </summary>
+	    /// <param name="bytes">
+	    /// The <see cref="T:System.Byte"/> containing the image information.
+	    /// </param>
+	    /// <returns>
+	    /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
+	    /// </returns>
+		public ImageFactory Load(byte[] bytes)
+		{
+		    var memoryStream = new MemoryStream(bytes) { Position = 0 };
+			
+		    ISupportedImageFormat format = FormatUtilities.GetFormat(memoryStream);
+
+			if (format == null)
+			{
+				throw new ImageFormatException("Input stream is not a supported format.");
+			}
+			
+			// Set our image as the memory stream value.
+			this.Image = format.Load(memoryStream);
+
+			// Store the stream so we can dispose of it later.
+			this.InputStream = memoryStream;
+
+			// Set the other properties.
+			format.Quality = DefaultQuality;
+			format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
+
+			IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
+			if (imageFormat != null)
+			{
+				imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
+			}
+
+			this.backupFormat = format;
+			this.CurrentImageFormat = format;
+
+			// Always load the data.
+			// TODO. Some custom data doesn't seem to get copied by default methods.
+			foreach (int id in this.Image.PropertyIdList)
+			{
+				this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
+			}
+
+			this.ShouldProcess = true;
+
+			// Normalize the gamma component of the image.
+			if (this.FixGamma)
+			{
+				this.Gamma(2.2F);
+			}
+
+			return this;
+		}
+	    
+
         /// <summary>
         /// Resets the current image to its original loaded state.
         /// </summary>
