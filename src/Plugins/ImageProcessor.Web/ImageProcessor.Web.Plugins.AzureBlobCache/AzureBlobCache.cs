@@ -68,7 +68,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <summary>
         /// Determines if the CDN request is redirected or rewritten
         /// </summary>
-        private bool isRewrite;
+        private bool streamCachedImage;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobCache"/> class.
@@ -111,7 +111,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
             // but cation should be taken if not used with a CDN as it will add quite a bit of overhead to the site. 
             // See: https://github.com/JimBobSquarePants/ImageProcessor/issues/161
-            this.isRewrite = (this.Settings.ContainsKey("RewriteUrl") && this.Settings["RewriteUrl"].ToLower() == "true")
+            this.streamCachedImage = (this.Settings.ContainsKey("StreamCachedImage") && this.Settings["StreamCachedImage"].ToLower() == "true")
                                      ? true
                                      : false;
         }
@@ -349,7 +349,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.cachedRewritePath);
 
-            if (isRewrite)
+            if (streamCachedImage)
             {
                 // write the blob storage directly to the stream
                 request.Method = "GET";
