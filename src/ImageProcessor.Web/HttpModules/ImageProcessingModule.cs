@@ -555,7 +555,7 @@ namespace ImageProcessor.Web.HttpModules
 
                         // We use the processor config system to store the preset values.
                         string replacements = ImageProcessorConfiguration.Instance.GetPresetSettings(preset);
-                        queryString = Regex.Replace(queryString, preset, replacements ?? string.Empty);
+                        queryString = Regex.Replace(queryString, match.Value, replacements ?? string.Empty);
                     }
                 }
             }
