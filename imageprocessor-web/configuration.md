@@ -77,6 +77,14 @@ configuration file you can add your own image sources.
 <security>
   <services>
     <service name="LocalFileImageService" type="ImageProcessor.Web.Services.LocalFileImageService, ImageProcessor.Web"/>
+    <!--Disable the LocalFileImageService and enable this one when using virtual paths. -->
+    <!--<service name="CloudImageService" type="ImageProcessor.Web.Services.CloudImageService, ImageProcessor.Web">
+      <settings>
+        <setting key="MaxBytes" value="8194304"/>
+        <setting key="Timeout" value="30000"/>
+        <setting key="Host" value="http://yourhost.com/"/>
+      </settings>
+    </service>-->
     <service prefix="remote.axd" name="RemoteImageService" type="ImageProcessor.Web.Services.RemoteImageService, ImageProcessor.Web">
        <!-- The timeout for a request in milliseconds and the maximum 
             allowable download in bytes. -->
