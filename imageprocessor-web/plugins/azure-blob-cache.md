@@ -63,6 +63,12 @@ configuration files.
          -->
         <setting key="SourceStorageAccount" value=""/>
         <setting key="SourceBlobContainer" value=""/>
+        <!-- 
+            Optional settings facilitate streaming of the blob resource directly instead of a redirect. This is beneficial
+            for CDN purposes but caution should be taken if not used with a CDN as it will add quite a bit of overhead 
+            to the site. 
+         -->
+        <setting key="StreamCachedImage" value="false"/>
       </settings>
     </cache>
   </caches>
