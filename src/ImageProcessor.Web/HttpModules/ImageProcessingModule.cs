@@ -14,6 +14,7 @@ namespace ImageProcessor.Web.HttpModules
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
@@ -136,8 +137,119 @@ namespace ImageProcessor.Web.HttpModules
         /// </summary>
         public static event ProcessQuerystringEventHandler OnProcessQuerystring;
 
-        #region IHttpModule Members
+        /// <summary>
+        /// This will make the browser and server keep the output
+        /// in its cache and thereby improve performance.
+        /// </summary>
+        /// <param name="context">
+        /// the <see cref="T:System.Web.HttpContext">HttpContext</see> object that provides
+        /// references to the intrinsic server objects
+        /// </param>
+        /// <param name="responseType">The HTTP MIME type to send.</param>
+        /// <param name="dependencyPaths">The dependency path for the cache dependency.</param>
+        /// <param name="maxDays">The maximum number of days to store the image in the browser cache.</param>
+        /// <param name="statusCode">An optional status code to send to the response.</param>
+        public static void SetHeaders(
+            HttpContext context,
+            string responseType,
+            IEnumerable<string> dependencyPaths,
+            int maxDays,
+            HttpStatusCode? statusCode = null)
+        {
+            HttpResponse response = context.Response;
 
+            if (response.Headers["ImageProcessedBy"] == null)
+            {
+                response.AddHeader("ImageProcessedBy", "ImageProcessor.Web/" + AssemblyVersion);
+            }
+
+            HttpCachePolicy cache = response.Cache;
+            cache.SetCacheability(HttpCacheability.Public);
+            cache.VaryByHeaders["Accept-Encoding"] = true;
+
+            if (!string.IsNullOrWhiteSpace(responseType))
+            {
+                response.ContentType = responseType;
+            }
+
+            if (dependencyPaths != null)
+            {
+                context.Response.AddFileDependencies(dependencyPaths.ToArray());
+                cache.SetLastModifiedFromFileDependencies();
+            }
+
+            if (statusCode != null)
+            {
+                response.StatusCode = (int)statusCode;
+            }
+
+            cache.SetExpires(DateTime.Now.ToUniversalTime().AddDays(maxDays));
+            cache.SetMaxAge(new TimeSpan(maxDays, 0, 0, 0));
+            cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
+
+            AddCorsRequestHeaders(context);
+        }
+
+        /// <summary>
+        /// Adds response headers allowing Cross Origin Requests if the current origin request 
+        /// passes sanitizing rules.
+        /// </summary>
+        /// <param name="context">
+        /// the <see cref="T:System.Web.HttpContext">HttpContext</see> object that provides
+        /// references to the intrinsic server objects
+        /// </param>
+        public static void AddCorsRequestHeaders(HttpContext context)
+        {
+            if (!string.IsNullOrEmpty(context.Request.Headers["Origin"]))
+            {
+                string origin = context.Request.Headers["Origin"];
+
+                ImageSecuritySection.CORSOriginElement origins =
+                    ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
+
+                if (origins == null || origins.WhiteList == null)
+                {
+                    return;
+                }
+
+                // Check the url is from a whitelisted location.
+                Uri url = new Uri(origin);
+                string upper = url.Host.ToUpperInvariant();
+
+                // Check for root or sub domain.
+                bool validUrl = false;
+                foreach (Uri uri in origins.WhiteList)
+                {
+                    if (uri.ToString() == "*")
+                    {
+                        validUrl = true;
+                        break;
+                    }
+
+                    if (!uri.IsAbsoluteUri)
+                    {
+                        Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
+                        validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
+                    }
+                    else
+                    {
+                        validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
+                    }
+
+                    if (validUrl)
+                    {
+                        break;
+                    }
+                }
+
+                if (validUrl)
+                {
+                    context.Response.AddHeader("Access-Control-Allow-Origin", origin);
+                }
+            }
+        }
+
+        #region IHttpModule Members
         /// <summary>
         /// Initializes a module and prepares it to handle requests.
         /// </summary>
@@ -200,7 +312,6 @@ namespace ImageProcessor.Web.HttpModules
             // Note disposing is done.
             this.isDisposed = true;
         }
-
         #endregion
 
         /// <summary>
@@ -279,7 +390,10 @@ namespace ImageProcessor.Web.HttpModules
             List<string> dependencyFiles = dependencyFileObject as List<string>;
 
             // Set the headers
-            this.SetHeaders(context, responseType, dependencyFiles);
+            if (this.imageCache != null)
+            {
+                SetHeaders(context, responseType, dependencyFiles, this.imageCache.MaxDays);
+            }
         }
 
         #region Private
@@ -477,64 +591,6 @@ namespace ImageProcessor.Web.HttpModules
         }
 
         /// <summary>
-        /// This will make the browser and server keep the output
-        /// in its cache and thereby improve performance.
-        /// </summary>
-        /// <param name="context">
-        /// the <see cref="T:System.Web.HttpContext">HttpContext</see> object that provides
-        /// references to the intrinsic server objects
-        /// </param>
-        /// <param name="responseType">
-        /// The HTTP MIME type to send.
-        /// </param>
-        /// <param name="dependencyPaths">
-        /// The dependency path for the cache dependency.
-        /// </param>
-        private void SetHeaders(HttpContext context, string responseType, IEnumerable<string> dependencyPaths)
-        {
-            if (this.imageCache != null)
-            {
-                HttpResponse response = context.Response;
-
-                if (response.Headers["ImageProcessedBy"] == null)
-                {
-                    response.AddHeader("ImageProcessedBy", "ImageProcessor.Web/" + AssemblyVersion);
-                }
-
-                HttpCachePolicy cache = response.Cache;
-                cache.SetCacheability(HttpCacheability.Public);
-                cache.VaryByHeaders["Accept-Encoding"] = true;
-
-                if (!string.IsNullOrWhiteSpace(responseType))
-                {
-                    response.ContentType = responseType;
-                }
-
-                if (dependencyPaths != null)
-                {
-                    context.Response.AddFileDependencies(dependencyPaths.ToArray());
-                    cache.SetLastModifiedFromFileDependencies();
-                }
-
-                int maxDays = this.imageCache.MaxDays;
-
-                cache.SetExpires(DateTime.Now.ToUniversalTime().AddDays(maxDays));
-                cache.SetMaxAge(new TimeSpan(maxDays, 0, 0, 0));
-                cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
-
-                if (!string.IsNullOrEmpty(context.Request.Headers["Origin"]))
-                {
-                    string origin = context.Request.Headers["Origin"];
-
-                    if (this.IsValidCorsRequest(origin))
-                    {
-                        response.AddHeader("Access-Control-Allow-Origin", origin);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Replaces preset values stored in the configuration in the querystring.
         /// </summary>
         /// <param name="queryString">
@@ -629,57 +685,6 @@ namespace ImageProcessor.Web.HttpModules
 
             // Return the next unprefixed service.
             return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path) && s.GetType() != typeof(LocalFileImageService));
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the current origin request passes sanitizing rules.
-        /// </summary>
-        /// <param name="path">
-        /// The image path.
-        /// </param>
-        /// <returns>
-        /// <c>True</c> if the request is valid; otherwise, <c>False</c>.
-        /// </returns>
-        private bool IsValidCorsRequest(string path)
-        {
-            ImageSecuritySection.CORSOriginElement origins =
-                ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
-
-            if (origins == null || origins.WhiteList == null)
-            {
-                return false;
-            }
-
-            // Check the url is from a whitelisted location.
-            Uri url = new Uri(path);
-            string upper = url.Host.ToUpperInvariant();
-
-            // Check for root or sub domain.
-            bool validUrl = false;
-            foreach (Uri uri in origins.WhiteList)
-            {
-                if (uri.ToString() == "*")
-                {
-                    return true;
-                }
-
-                if (!uri.IsAbsoluteUri)
-                {
-                    Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
-                    validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
-                }
-                else
-                {
-                    validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
-                }
-
-                if (validUrl)
-                {
-                    break;
-                }
-            }
-
-            return validUrl;
         }
         #endregion
     }
