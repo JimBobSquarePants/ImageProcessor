@@ -40,7 +40,10 @@ namespace ImageProcessor.Imaging.Formats
         public static ISupportedImageFormat GetFormat(Stream stream)
         {
             // Reset the position of the stream to ensure we're reading the correct part.
-            stream.Position = 0;
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
 
             IEnumerable<ISupportedImageFormat> supportedImageFormats =
                 ImageProcessorBootstrapper.Instance.SupportedImageFormats;
@@ -57,7 +60,10 @@ namespace ImageProcessor.Imaging.Formats
                 {
                     if (header.SequenceEqual(buffer.Take(header.Length)))
                     {
-                        stream.Position = 0;
+                        if (stream.CanSeek)
+                        {
+                            stream.Position = 0;
+                        }
 
                         // Return a new instance as we want to use instance properties.
                         return Activator.CreateInstance(supportedImageFormat.GetType()) as ISupportedImageFormat;
@@ -65,7 +71,11 @@ namespace ImageProcessor.Imaging.Formats
                 }
             }
 
-            stream.Position = 0;
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
+
             return null;
         }
 

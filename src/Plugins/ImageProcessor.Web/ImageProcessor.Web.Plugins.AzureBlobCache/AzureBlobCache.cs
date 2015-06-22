@@ -61,9 +61,19 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private readonly string cachedCdnRoot;
 
         /// <summary>
+        /// Determines if the CDN request is redirected or rewritten
+        /// </summary>
+        private readonly bool streamCachedImage;
+
+        /// <summary>
         /// The cached rewrite path.
         /// </summary>
         private string cachedRewritePath;
+
+        /// <summary>
+        /// The content MIME type.
+        /// </summary>
+        private string mimeType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobCache"/> class.
@@ -102,6 +112,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
                                      ? this.Settings["CachedCDNRoot"]
                                      : this.cloudCachedBlobContainer.Uri.ToString().TrimEnd(this.cloudCachedBlobContainer.Name.ToCharArray());
+
+            // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
+            // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site. 
+            // See: https://github.com/JimBobSquarePants/ImageProcessor/issues/161
+            this.streamCachedImage = this.Settings.ContainsKey("StreamCachedImage") && this.Settings["StreamCachedImage"].ToLower() == "true";
         }
 
         /// <summary>
@@ -199,6 +214,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </returns>
         public override async Task AddImageToCacheAsync(Stream stream, string contentType)
         {
+            this.mimeType = contentType;
             string blobPath = this.CachedPath.Substring(this.cloudCachedBlobContainer.Uri.ToString().Length + 1);
             CloudBlockBlob blockBlob = this.cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
 
@@ -336,14 +352,35 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         public override void RewritePath(HttpContext context)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.cachedRewritePath);
-            request.Method = "HEAD";
 
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            if (this.streamCachedImage)
             {
-                HttpStatusCode responseCode = response.StatusCode;
-                context.Response.Redirect(
-                    responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath,
-                    false);
+                // Write the blob storage directly to the stream
+                request.Method = "GET";
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    Stream cachedStream = response.GetResponseStream();
+
+                    if (cachedStream != null)
+                    {
+                        HttpResponse contextResponse = context.Response;
+                        cachedStream.CopyTo(contextResponse.OutputStream);
+                        ImageProcessingModule.SetHeaders(context, this.mimeType, null, this.MaxDays, response.StatusCode);
+                    }
+                }
+            }
+            else
+            {
+                // Redirect the request to the blob URL
+                request.Method = "HEAD";
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    HttpStatusCode responseCode = response.StatusCode;
+                    ImageProcessingModule.AddCorsRequestHeaders(context);
+                    context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
+                }
             }
         }
 
