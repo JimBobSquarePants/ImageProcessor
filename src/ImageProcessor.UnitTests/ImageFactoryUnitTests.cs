@@ -77,22 +77,22 @@ namespace ImageProcessor.UnitTests
             }
         }
 
-		[Test]
-		public void ImageIsLoadedFromByteArray()
-		{
-			foreach (FileInfo file in this.ListInputFiles())
-			{
-				byte[] photoBytes = File.ReadAllBytes(file.FullName);
+        [Test]
+        public void ImageIsLoadedFromByteArray()
+        {
+            foreach (FileInfo file in this.ListInputFiles())
+            {
+                byte[] photoBytes = File.ReadAllBytes(file.FullName);
 
-				using (ImageFactory imageFactory = new ImageFactory())
-				{
-					imageFactory.Load(photoBytes);
+                using (ImageFactory imageFactory = new ImageFactory())
+                {
+                    imageFactory.Load(photoBytes);
 
-					imageFactory.ImagePath.Should().BeNull("because an image loaded from byte array should not have a file path");
-					imageFactory.Image.Should().NotBeNull("because the image should have been loaded");
-				}
-			}			
-		}
+                    imageFactory.ImagePath.Should().BeNull("because an image loaded from byte array should not have a file path");
+                    imageFactory.Image.Should().NotBeNull("because the image should have been loaded");
+                }
+            }
+        }
 
         /// <summary>
         /// Tests that the save method actually saves a file
