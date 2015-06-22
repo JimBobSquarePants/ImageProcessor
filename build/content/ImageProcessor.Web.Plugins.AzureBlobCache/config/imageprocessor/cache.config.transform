@@ -7,6 +7,7 @@
         <setting key="CachedCDNRoot" value="[CdnRootUrl]"/>
         <setting key="SourceStorageAccount" value=""/>
         <setting key="SourceBlobContainer" value=""/>
+        <setting key="StreamCachedImage" value="false"/>
       </settings>
     </cache>
   </caches>

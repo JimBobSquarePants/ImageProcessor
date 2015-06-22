@@ -21,7 +21,8 @@ namespace ImageProcessor
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Filters.EdgeDetection;
-    //using ImageProcessor.Imaging.Filters.ObjectDetection;
+
+    // using ImageProcessor.Imaging.Filters.ObjectDetection;
     using ImageProcessor.Imaging.Filters.Photo;
     using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Imaging.Helpers;
@@ -296,63 +297,61 @@ namespace ImageProcessor
             return this;
         }
 
-	    /// <summary>
-	    /// Loads the image to process from an array of bytes. Always call this method first.
-	    /// </summary>
-	    /// <param name="bytes">
-	    /// The <see cref="T:System.Byte"/> containing the image information.
-	    /// </param>
-	    /// <returns>
-	    /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
-	    /// </returns>
-		public ImageFactory Load(byte[] bytes)
-		{
-		    var memoryStream = new MemoryStream(bytes) { Position = 0 };
-			
-		    ISupportedImageFormat format = FormatUtilities.GetFormat(memoryStream);
+        /// <summary>
+        /// Loads the image to process from an array of bytes. Always call this method first.
+        /// </summary>
+        /// <param name="bytes">
+        /// The <see cref="T:System.Byte"/> containing the image information.
+        /// </param>
+        /// <returns>
+        /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
+        /// </returns>
+        public ImageFactory Load(byte[] bytes)
+        {
+            var memoryStream = new MemoryStream(bytes) { Position = 0 };
 
-			if (format == null)
-			{
-				throw new ImageFormatException("Input stream is not a supported format.");
-			}
-			
-			// Set our image as the memory stream value.
-			this.Image = format.Load(memoryStream);
+            ISupportedImageFormat format = FormatUtilities.GetFormat(memoryStream);
 
-			// Store the stream so we can dispose of it later.
-			this.InputStream = memoryStream;
+            if (format == null)
+            {
+                throw new ImageFormatException("Input stream is not a supported format.");
+            }
 
-			// Set the other properties.
-			format.Quality = DefaultQuality;
-			format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
+            // Set our image as the memory stream value.
+            this.Image = format.Load(memoryStream);
 
-			IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
-			if (imageFormat != null)
-			{
-				imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
-			}
+            // Store the stream so we can dispose of it later.
+            this.InputStream = memoryStream;
 
-			this.backupFormat = format;
-			this.CurrentImageFormat = format;
+            // Set the other properties.
+            format.Quality = DefaultQuality;
+            format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
 
-			// Always load the data.
-			// TODO. Some custom data doesn't seem to get copied by default methods.
-			foreach (int id in this.Image.PropertyIdList)
-			{
-				this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
-			}
+            IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
+            if (imageFormat != null)
+            {
+                imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
+            }
 
-			this.ShouldProcess = true;
+            this.backupFormat = format;
+            this.CurrentImageFormat = format;
 
-			// Normalize the gamma component of the image.
-			if (this.FixGamma)
-			{
-				this.Gamma(2.2F);
-			}
+            // Always load the data.
+            foreach (int id in this.Image.PropertyIdList)
+            {
+                this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
+            }
 
-			return this;
-		}
-	    
+            this.ShouldProcess = true;
+
+            // Normalize the gamma component of the image.
+            if (this.FixGamma)
+            {
+                this.Gamma(2.2F);
+            }
+
+            return this;
+        }
 
         /// <summary>
         /// Resets the current image to its original loaded state.
@@ -592,16 +591,15 @@ namespace ImageProcessor
             return this;
         }
 
-        //public ImageFactory DetectObjects(HaarCascade cascade, bool drawRectangles = true, Color color = default(Color))
-        //{
+        // public ImageFactory DetectObjects(HaarCascade cascade, bool drawRectangles = true, Color color = default(Color))
+        // {
         //    if (this.ShouldProcess)
         //    {
         //        DetectObjects detectObjects = new DetectObjects { DynamicParameter = cascade };
         //        this.CurrentImageFormat.ApplyProcessor(detectObjects.ProcessImage, this);
         //    }
-
-        //    return this;
-        //}
+        //     return this;
+        // }
 
         /// <summary>
         /// Crops an image to the area of greatest entropy.
