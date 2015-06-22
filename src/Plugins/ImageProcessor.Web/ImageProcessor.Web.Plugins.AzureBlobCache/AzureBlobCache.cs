@@ -66,6 +66,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private string cachedRewritePath;
 
         /// <summary>
+        /// Determines if the CDN request is redirected or rewritten
+        /// </summary>
+        private bool streamCachedImage;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobCache"/> class.
         /// </summary>
         /// <param name="requestPath">
@@ -102,6 +107,13 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
                                      ? this.Settings["CachedCDNRoot"]
                                      : this.cloudCachedBlobContainer.Uri.ToString().TrimEnd(this.cloudCachedBlobContainer.Name.ToCharArray());
+
+            // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
+            // but cation should be taken if not used with a CDN as it will add quite a bit of overhead to the site. 
+            // See: https://github.com/JimBobSquarePants/ImageProcessor/issues/161
+            this.streamCachedImage = (this.Settings.ContainsKey("StreamCachedImage") && this.Settings["StreamCachedImage"].ToLower() == "true")
+                                     ? true
+                                     : false;
         }
 
         /// <summary>
@@ -336,14 +348,28 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         public override void RewritePath(HttpContext context)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.cachedRewritePath);
-            request.Method = "HEAD";
 
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            if (streamCachedImage)
             {
-                HttpStatusCode responseCode = response.StatusCode;
-                context.Response.Redirect(
-                    responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath,
-                    false);
+                // write the blob storage directly to the stream
+                request.Method = "GET";
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    Stream cachedStream = response.GetResponseStream();
+                    cachedStream.CopyTo(context.Response.OutputStream);
+                }
+            }
+            else
+            {
+                // redirect the request to the blob URL
+                request.Method = "HEAD";
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    HttpStatusCode responseCode = response.StatusCode;
+                    context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
+                }
             }
         }
 
