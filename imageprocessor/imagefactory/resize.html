@@ -58,7 +58,7 @@ public ImageFactory Resize(ResizeLayer resizeLayer)
 
     <h3>Resize Pad</h3>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
-    the output is padded to match the new aspect ratio.</p>
+    the output is padded to match the new aspect ratio. Passing a single dimension will automatically preserve the aspect ratio of the original image.</p>
     <div class="alert">
      <h4>Important</h4>
         <p>
@@ -80,6 +80,6 @@ public ImageFactory Resize(ResizeLayer resizeLayer)
     
     <h3>Resize Stetch</h3>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
-    the output is streched to match the new aspect ratio.</p>
+    the output is stretched to match the new aspect ratio.</p>
     <img src="{{ site.baseurl }}/assets/img/resize/stretch/car.jpg" alt="Image stretched to fit the given dimension." />
 </section>
