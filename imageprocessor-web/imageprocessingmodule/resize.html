@@ -38,9 +38,21 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h2>Resize Pad</h2>
     <p>
         Passing a single dimension will automatically preserve the aspect ratio of the original image. If the requested aspect ratio is different then the
-        image will be padded to fit. Widths and heights can optionally also be passed as a ratio and you can fill the background color
+        image will be padded to fit. Widths and heights can optionally also be passed as a ratio and you can fill the <a href="../backgroundcolor">background color</a>
         for image types without transparency.
     </p>
+    <p>Pad mode also offers optional anchor positions:</p>
+    <ul>
+        <li>center (default)</li>
+        <li>top</li>
+        <li>right</li>
+        <li>bottom</li>
+        <li>left</li>
+        <li>topleft</li>
+        <li>topright</li>
+        <li>bottomleft</li>
+        <li>bottomright</li>
+    </ul>
     {% highlight xml %}
 <!--Automatic height based on width-->
 http://your-image?width=600
@@ -61,13 +73,19 @@ http://your-image?width=600&height=250&bgcolor=fff
     <hr />
 
     <h2>Resize Crop</h2>
+    <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
+    the output is cropped to match the new aspect ratio.</p>
     <p>Crop mode also offers optional anchor positions:</p>
     <ul>
-        <li>Center (default)</li>
-        <li>Top</li>
-        <li>Right</li>
-        <li>Bottom</li>
-        <li>Left</li>
+        <li>center (default)</li>
+        <li>top</li>
+        <li>right</li>
+        <li>bottom</li>
+        <li>left</li>
+        <li>topleft</li>
+        <li>topright</li>
+        <li>bottomleft</li>
+        <li>bottomright</li>
     </ul>
      <p>You may specify a center as a fraction from the left and top. Fractions are specified as a decimal between 0 and 1. 
     This point will be as close to the center of your crop as possible while keeping the crop within the image</p>
@@ -83,14 +101,16 @@ http://your-image?width=600&height=250&mode=crop&center=0.25,0.30
     <hr />
 
     <h2>Resize Max</h2>
-    <p>The maximum possible height or width is used that allows the correct aspect ratio.</p>
+    <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
+    the output is resized to the maximum possible value in each direction while aintaining the original aspect ratio.</p>
     {% highlight xml %}
 http://your-image?width=600&height=250&mode=max
     {% endhighlight %}
 
     <hr />
     <h2>Resize Stretch</h2>
-    <p>The image is stretched to wit the given dimensions.</p>
+    <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
+    the output is stretched to match the new aspect ratio.</p>
     {% highlight xml %}
 http://your-image?width=600&height=250&mode=stretch
     {% endhighlight %}
