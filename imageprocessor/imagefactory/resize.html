@@ -54,14 +54,29 @@ public ImageFactory Resize(ResizeLayer resizeLayer)
     <img src="{{ site.baseurl }}/assets/img/originals/car.jpg" alt="original image" />
 
     <h3>Resize Pad</h3>
+    <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
+    the output is padded to match the new aspect ratio.</p>
+    <div class="alert">
+     <h4>Important</h4>
+        <p>
+            Any padded areas in the output for image formats that do not contin an alpha channel will display as black 
+            (the default encoder output). To change this color to another use the <a href="backgroundcolor">BackgroundColor</a> method.
+        </p>
+    </div>
     <img src="{{ site.baseurl }}/assets/img/resize/pad/car.jpg" alt="Image resized with padding." />
 
     <h3>Resize Crop</h3>
+    <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
+    the output is cropped to match the new aspect ratio.</p>
     <img src="{{ site.baseurl }}/assets/img/resize/crop/car.jpg" alt="Image resized with cropping." />
 
     <h3>Resize Max</h3>
+    <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
+    the output is resized to the maximum possible value in each direction while aintaining the original aspect ratio.</p>
     <img src="{{ site.baseurl }}/assets/img/resize/max/car.jpg" alt="Image resized to fit the aspect ratio." />
     
     <h3>Resize Stetch</h3>
+    <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
+    the output is streched to match the new aspect ratio.</p>
     <img src="{{ site.baseurl }}/assets/img/resize/stretch/car.jpg" alt="Image stretched to fit the given dimension." />
 </section>
