@@ -37,7 +37,10 @@ public ImageFactory Resize(ResizeLayer resizeLayer)
                 <dt><strong>ResizeMode</strong></dt>
                 <dd>The <code>ImageProcessor.Imaging.ResizeMode</code> to apply to resized image.</dd>
                 <dt><strong>AnchorPosition</strong></dt>
-                <dd>The <code>ImageProcessor.Imaging.AnchorPosition</code> to apply to resized image.</dd>
+                <dd>
+                    The <code>ImageProcessor.Imaging.AnchorPosition</code> to apply to resized image. Applies to <code>ResizeMode.Pad</code>
+                    and <code>ResizeMode.Crop</code>
+                </dd>
                 <dt><strong>UpScale</strong></dt>
                 <dd>Whether to allow up-scaling of images. Defaults to <var>true</var></dd>
             </dl>
