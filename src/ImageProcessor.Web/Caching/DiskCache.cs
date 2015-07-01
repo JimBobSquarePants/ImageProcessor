@@ -159,7 +159,7 @@ namespace ImageProcessor.Web.Caching
             {
                 directoryInfo.Create();
             }
-
+            
             using (FileStream fileStream = File.Create(this.CachedPath))
             {
                 await stream.CopyToAsync(fileStream);
