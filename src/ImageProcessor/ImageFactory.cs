@@ -167,9 +167,6 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(Stream stream)
         {
-            // Reset the position of the stream to ensure we're reading the correct part.
-            stream.Position = 0;
-
             ISupportedImageFormat format = FormatUtilities.GetFormat(stream);
 
             if (format == null)
@@ -184,7 +181,12 @@ namespace ImageProcessor
             stream.CopyTo(memoryStream);
 
             // Set the position to 0 afterwards.
-            stream.Position = memoryStream.Position = 0;
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
+
+            memoryStream.Position = 0;
 
             // Set our image as the memory stream value.
             this.Image = format.Load(memoryStream);
@@ -253,7 +255,7 @@ namespace ImageProcessor
                     fileStream.CopyTo(memoryStream);
 
                     // Set the position to 0 afterwards.
-                    fileStream.Position = memoryStream.Position = 0;
+                    memoryStream.Position = 0;
 
                     // Set our image as the memory stream value.
                     this.Image = format.Load(memoryStream);
@@ -308,7 +310,7 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(byte[] bytes)
         {
-            var memoryStream = new MemoryStream(bytes) { Position = 0 };
+            MemoryStream memoryStream = new MemoryStream(bytes);
 
             ISupportedImageFormat format = FormatUtilities.GetFormat(memoryStream);
 
@@ -364,7 +366,10 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Set our new image as the memory stream value.
-                this.InputStream.Position = 0;
+                if (this.InputStream.CanSeek)
+                {
+                    this.InputStream.Position = 0;
+                }
 
 #if !__MonoCS__
                 Image newImage = Image.FromStream(this.InputStream, true);
@@ -1278,7 +1283,10 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Allow the same stream to be used as for input.
-                stream.SetLength(0);
+                if (stream.CanSeek)
+                {
+                    stream.SetLength(0);
+                }
 
                 // Normalize the gamma component of the image.
                 if (this.FixGamma)
@@ -1287,7 +1295,10 @@ namespace ImageProcessor
                 }
 
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image);
-                stream.Position = 0;
+                if (stream.CanSeek)
+                {
+                    stream.Position = 0;
+                }
             }
 
             return this;
