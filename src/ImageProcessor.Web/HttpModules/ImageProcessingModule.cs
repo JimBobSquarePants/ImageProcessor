@@ -69,6 +69,8 @@ namespace ImageProcessor.Web.HttpModules
         /// </summary>
         private static bool? preserveExifMetaData;
 
+        private static AsyncDuplicateLock locker = new AsyncDuplicateLock();
+
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
         /// </summary>
@@ -514,7 +516,8 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 string combined = requestPath + fullPath + queryString;
-                using (await PathLock.GetLock(combined).LockAsync())
+                //using (await PathLock.GetLock(combined).LockAsync())
+                using (await locker.LockAsync(combined))
                 {
                     // Create a new cache to help process and cache the request.
                     this.imageCache = (IImageCache)ImageProcessorConfiguration.Instance
