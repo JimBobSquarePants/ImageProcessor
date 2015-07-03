@@ -69,10 +69,7 @@ namespace ImageProcessor.Web.HttpModules
         /// </summary>
         private static bool? preserveExifMetaData;
 
-        /// <summary>
-        /// The locker for preventing duplicate requests.
-        /// </summary>
-        private readonly AsyncDuplicateLock locker = new AsyncDuplicateLock();
+        private static AsyncDuplicateLock locker = new AsyncDuplicateLock();
 
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -94,7 +91,6 @@ namespace ImageProcessor.Web.HttpModules
         #endregion
 
         #region Destructors
-
         /// <summary>
         /// Finalizes an instance of the <see cref="T:ImageProcessor.Web.HttpModules.ImageProcessingModule"/> class.
         /// </summary>
@@ -112,7 +108,6 @@ namespace ImageProcessor.Web.HttpModules
             // readability and maintainability.
             this.Dispose(false);
         }
-
         #endregion
 
         /// <summary>
@@ -520,21 +515,23 @@ namespace ImageProcessor.Web.HttpModules
                     return;
                 }
 
-                // Create a new cache to help process and cache the request.
-                this.imageCache = (IImageCache)ImageProcessorConfiguration.Instance
-                    .ImageCache.GetInstance(requestPath, fullPath, queryString);
-
-                // Is the file new or updated?
-                bool isNewOrUpdated = await this.imageCache.IsNewOrUpdatedAsync();
-                string cachedPath = this.imageCache.CachedPath;
-
-                // Only process if the file has been updated.
-                if (isNewOrUpdated)
+                string combined = requestPath + fullPath + queryString;
+                //using (await PathLock.GetLock(combined).LockAsync())
+                using (await locker.LockAsync(combined))
                 {
-                    // Process the image.
-                    using (ImageFactory imageFactory = new ImageFactory(preserveExifMetaData != null && preserveExifMetaData.Value))
+                    // Create a new cache to help process and cache the request.
+                    this.imageCache = (IImageCache)ImageProcessorConfiguration.Instance
+                        .ImageCache.GetInstance(requestPath, fullPath, queryString);
+
+                    // Is the file new or updated?
+                    bool isNewOrUpdated = await this.imageCache.IsNewOrUpdatedAsync();
+                    string cachedPath = this.imageCache.CachedPath;
+
+                    // Only process if the file has been updated.
+                    if (isNewOrUpdated)
                     {
-                        using (await this.locker.LockAsync(cachedPath))
+                        // Process the image.
+                        using (ImageFactory imageFactory = new ImageFactory(preserveExifMetaData != null && preserveExifMetaData.Value))
                         {
                             byte[] imageBuffer = await currentService.GetImage(resourcePath);
 
@@ -577,15 +574,15 @@ namespace ImageProcessor.Web.HttpModules
                             }
                         }
                     }
-                }
 
-                // The cached file is valid so just rewrite the path.
-                this.imageCache.RewritePath(context);
+                    // The cached file is valid so just rewrite the path.
+                    this.imageCache.RewritePath(context);
 
-                // Redirect if not a locally store file.
-                if (!new Uri(cachedPath).IsFile)
-                {
-                    context.ApplicationInstance.CompleteRequest();
+                    // Redirect if not a locally store file.
+                    if (!new Uri(cachedPath).IsFile)
+                    {
+                        context.ApplicationInstance.CompleteRequest();
+                    }
                 }
             }
         }

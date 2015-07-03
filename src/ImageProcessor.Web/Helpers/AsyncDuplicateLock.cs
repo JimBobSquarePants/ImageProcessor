@@ -4,130 +4,228 @@
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
-//   Throttles duplicate requests.
+//   The async duplicate lock prevents multiple asynchronous threads acting upon the same object
+//   with the given key at the same time. It is designed so that it does not block unique requests
+//   allowing a high throughput.
+//   <see href="http://stackoverflow.com/a/31194647/427899" />
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace ImageProcessor.Web.Helpers
 {
     using System;
-    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Throttles duplicate requests.
-    /// Based loosely on <see href="http://stackoverflow.com/a/21011273/427899"/>
+    /// The async duplicate lock prevents multiple asynchronous threads acting upon the same object
+    /// with the given key at the same time. It is designed so that it does not block unique requests
+    /// allowing a high throughput.
+    /// <see href="http://stackoverflow.com/a/31194647/427899"/>
     /// </summary>
-    public sealed class AsyncDuplicateLock
+    internal sealed class AsyncDuplicateLock
     {
         /// <summary>
-        /// The collection of semaphore slims.
+        /// A collection of reference counters used for tracking references to the same object.
         /// </summary>
-        private static readonly ConcurrentDictionary<object, SemaphoreSlim> SemaphoreSlims
-                                = new ConcurrentDictionary<object, SemaphoreSlim>();
+        private static readonly Dictionary<object, RefCounted<SemaphoreSlim>> SemaphoreSlims
+                              = new Dictionary<object, RefCounted<SemaphoreSlim>>();
 
         /// <summary>
-        /// Locks against the given key.
+        /// Locks the current thread asynchronously.
         /// </summary>
         /// <param name="key">
-        /// The key that identifies the current object.
+        /// The key identifying the specific object to lock against.
         /// </param>
         /// <returns>
-        /// The disposable <see cref="Task"/>.
+        /// The <see cref="IDisposable"/> that will release the lock.
         /// </returns>
         public IDisposable Lock(object key)
         {
-            DisposableScope releaser = new DisposableScope(
-            key,
-            s =>
-            {
-                SemaphoreSlim locker;
-                if (SemaphoreSlims.TryRemove(s, out locker))
-                {
-                    locker.Release();
-                    locker.Dispose();
-                }
-            });
-
-            SemaphoreSlim semaphore = SemaphoreSlims.GetOrAdd(key, new SemaphoreSlim(1, 1));
-            semaphore.Wait();
-            return releaser;
+            GetOrCreate(key).Wait();
+            return new Releaser(key);
         }
 
         /// <summary>
-        /// Asynchronously locks against the given key.
+        /// Locks the current thread asynchronously.
         /// </summary>
         /// <param name="key">
-        /// The key that identifies the current object.
+        /// The key identifying the specific object to lock against.
         /// </param>
         /// <returns>
-        /// The disposable <see cref="Task"/>.
+        /// The <see cref="Task{IDisposable}"/> that will release the lock.
         /// </returns>
-        public Task<IDisposable> LockAsync(object key)
+        public async Task<IDisposable> LockAsync(object key)
         {
-            DisposableScope releaser = new DisposableScope(
-            key,
-            s =>
-            {
-                SemaphoreSlim locker;
-                if (SemaphoreSlims.TryRemove(s, out locker))
-                {
-                    locker.Release();
-                    locker.Dispose();
-                }
-            });
-
-            Task<IDisposable> releaserTask = Task.FromResult(releaser as IDisposable);
-            SemaphoreSlim semaphore = SemaphoreSlims.GetOrAdd(key, new SemaphoreSlim(1, 1));
-
-            Task waitTask = semaphore.WaitAsync();
-
-            return waitTask.IsCompleted
-                       ? releaserTask
-                       : waitTask.ContinueWith(
-                           (_, r) => (IDisposable)r,
-                           releaser,
-                           CancellationToken.None,
-                           TaskContinuationOptions.ExecuteSynchronously,
-                           TaskScheduler.Default);
+            await GetOrCreate(key).WaitAsync().ConfigureAwait(false);
+            return new Releaser(key);
         }
 
         /// <summary>
-        /// The disposable scope.
+        /// Returns a <see cref="SemaphoreSlim"/> matching on the given key
+        ///  or a new one if none is found.
         /// </summary>
-        private sealed class DisposableScope : IDisposable
+        /// <param name="key">
+        /// The key identifying the semaphore.
+        /// </param>
+        /// <returns>
+        /// The <see cref="SemaphoreSlim"/>.
+        /// </returns>
+        private static SemaphoreSlim GetOrCreate(object key)
+        {
+            RefCounted<SemaphoreSlim> item;
+            lock (SemaphoreSlims)
+            {
+                if (SemaphoreSlims.TryGetValue(key, out item))
+                {
+                    ++item.RefCount;
+                }
+                else
+                {
+                    item = new RefCounted<SemaphoreSlim>(new SemaphoreSlim(1, 1));
+                    SemaphoreSlims[key] = item;
+                }
+            }
+
+            return item.Value;
+        }
+
+        /// <summary>
+        /// Tracks the number of references made against the given object.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The object to count references against.
+        /// </typeparam>
+        private sealed class RefCounted<T>
         {
             /// <summary>
-            /// The key
+            /// The object to count references against.
+            /// </summary>
+            private readonly T value;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RefCounted{T}"/> class.
+            /// </summary>
+            /// <param name="value">
+            /// The object to count references against.
+            /// </param>
+            public RefCounted(T value)
+            {
+                this.RefCount = 1;
+                this.value = value;
+            }
+
+            /// <summary>
+            /// Gets or sets the number of references.
+            /// </summary>
+            public int RefCount { get; set; }
+
+            /// <summary>
+            /// Gets the object to count references against.
+            /// </summary>
+            public T Value
+            {
+                get
+                {
+                    return this.value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The disposable releaser tasked with releasing the semaphore.
+        /// </summary>
+        private sealed class Releaser : IDisposable
+        {
+            /// <summary>
+            /// The key identifying the semaphore that limits the number of threads.
             /// </summary>
             private readonly object key;
 
             /// <summary>
-            /// The close scope action.
+            /// A value indicating whether this instance of the given entity has been disposed.
             /// </summary>
-            private readonly Action<object> closeScopeAction;
+            /// <value><see langword="true"/> if this instance has been disposed; otherwise, <see langword="false"/>.</value>
+            /// <remarks>
+            /// If the entity is disposed, it must not be disposed a second
+            /// time. The isDisposed field is set the first time the entity
+            /// is disposed. If the isDisposed field is true, then the Dispose()
+            /// method will not dispose again. This help not to prolong the entity's
+            /// life in the Garbage Collector.
+            /// </remarks>
+            private bool isDisposed;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="DisposableScope"/> class.
+            /// Initializes a new instance of the <see cref="Releaser"/> class.
             /// </summary>
             /// <param name="key">
-            /// The key.
+            /// The key identifying the semaphore that limits the number of threads.
             /// </param>
-            /// <param name="closeScopeAction">
-            /// The close scope action.
-            /// </param>
-            public DisposableScope(object key, Action<object> closeScopeAction)
+            public Releaser(object key)
             {
                 this.key = key;
-                this.closeScopeAction = closeScopeAction;
             }
 
             /// <summary>
-            /// The dispose.
+            /// Finalizes an instance of the <see cref="Releaser"/> class. 
+            /// </summary>
+            ~Releaser()
+            {
+                // Do not re-create Dispose clean-up code here.
+                // Calling Dispose(false) is optimal in terms of
+                // readability and maintainability.
+                this.Dispose(false);
+            }
+
+            /// <summary>
+            /// Disposes of the resources (other than memory) used by the module that implements <see cref="T:System.Web.IHttpModule"/>.
             /// </summary>
             public void Dispose()
             {
-                this.closeScopeAction(this.key);
+                this.Dispose(true);
+
+                // This object will be cleaned up by the Dispose method.
+                // Therefore, you should call GC.SuppressFinalize to
+                // take this object off the finalization queue
+                // and prevent finalization code for this object
+                // from executing a second time.
+                GC.SuppressFinalize(this);
+            }
+
+            /// <summary>
+            /// Disposes the object and frees resources for the Garbage Collector.
+            /// </summary>
+            /// <param name="disposing">
+            /// If true, the object gets disposed.
+            /// </param>
+            private void Dispose(bool disposing)
+            {
+                if (this.isDisposed)
+                {
+                    return;
+                }
+
+                if (disposing)
+                {
+                    RefCounted<SemaphoreSlim> item;
+                    lock (SemaphoreSlims)
+                    {
+                        item = SemaphoreSlims[this.key];
+                        --item.RefCount;
+                        if (item.RefCount == 0)
+                        {
+                            SemaphoreSlims.Remove(this.key);
+                        }
+                    }
+
+                    item.Value.Release();
+                }
+
+                // Call the appropriate methods to clean up
+                // unmanaged resources here.
+                // Note disposing is done.
+                this.isDisposed = true;
             }
         }
     }
