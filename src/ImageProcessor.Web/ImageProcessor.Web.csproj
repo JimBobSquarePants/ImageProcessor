@@ -52,8 +52,7 @@
     <Compile Include="Configuration\Shared\SettingElement.cs" />
     <Compile Include="Configuration\Shared\SettingElementCollection.cs" />
     <Compile Include="Extensions\TypeInitializationExtensions.cs" />
-    <Compile Include="Helpers\PathLock.cs" />
-    <Compile Include="Helpers\AsyncLock.cs" />
+    <Compile Include="Helpers\AsyncDuplicateLock.cs" />
     <Compile Include="Helpers\ProcessQueryStringEventArgs.cs" />
     <Compile Include="Helpers\QuerystringParser\FontFamilyConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\ExtendedColorTypeConverter.cs" />
