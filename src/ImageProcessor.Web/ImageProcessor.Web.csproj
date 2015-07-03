@@ -52,6 +52,7 @@
     <Compile Include="Configuration\Shared\SettingElement.cs" />
     <Compile Include="Configuration\Shared\SettingElementCollection.cs" />
     <Compile Include="Extensions\TypeInitializationExtensions.cs" />
+    <Compile Include="Helpers\AsyncDuplicateLock.cs" />
     <Compile Include="Helpers\ProcessQueryStringEventArgs.cs" />
     <Compile Include="Helpers\QuerystringParser\FontFamilyConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\ExtendedColorTypeConverter.cs" />
@@ -77,7 +78,6 @@
     <Compile Include="Configuration\ImageSecuritySection.cs" />
     <Compile Include="Extensions\DirectoryInfoExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Helpers\AsyncDuplicateLock.cs" />
     <Compile Include="Helpers\CommonParameterParserUtility.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Helpers\PostProcessingEventArgs.cs" />
