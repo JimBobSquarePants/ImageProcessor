@@ -17,7 +17,7 @@
         {
             ExtendedColorTypeConverter converter = new ExtendedColorTypeConverter();
             Color color = (Color)converter.ConvertFrom(null, null, input);
-            Assert.AreEqual(color.ToArgb(), Color.Blue.ToArgb());
+            Assert.AreEqual(Color.Blue.ToArgb(), color.ToArgb());
         }
     }
 }

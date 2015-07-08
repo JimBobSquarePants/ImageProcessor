@@ -74,7 +74,13 @@ namespace ImageProcessor.Web.Helpers
                 }
 
                 // Handle a,r,g,b
+                if (culture == null)
+                {
+                    culture = CultureInfo.InvariantCulture;
+                }
+
                 char separator = culture.TextInfo.ListSeparator[0];
+
                 if (colorText.Contains(separator.ToString()))
                 {
                     string[] components = colorText.Split(separator);
