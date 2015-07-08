@@ -121,23 +121,37 @@ namespace ImageProcessor.Web.Helpers
                         colorText = "#" + colorText;
                     }
 
-                    if (colorText.Length == 7)
+                    switch (colorText.Length)
                     {
-                        return Color.FromArgb(
-                            Convert.ToInt32(colorText.Substring(1, 2), 16),
-                            Convert.ToInt32(colorText.Substring(3, 2), 16),
-                            Convert.ToInt32(colorText.Substring(5, 2), 16));
+                        case 4:
+                            
+                            // 4 charcters eg: #0f0
+                            string r = char.ToString(colorText[1]);
+                            string g = char.ToString(colorText[2]);
+                            string b = char.ToString(colorText[3]);
+
+                            return Color.FromArgb(
+                                Convert.ToInt32(r + r, 16),
+                                Convert.ToInt32(g + g, 16),
+                                Convert.ToInt32(b + b, 16));
+
+                        case 7:
+                            
+                            // 7 charcters eg: #00ff00
+                            return Color.FromArgb(
+                                Convert.ToInt32(colorText.Substring(1, 2), 16),
+                                Convert.ToInt32(colorText.Substring(3, 2), 16),
+                                Convert.ToInt32(colorText.Substring(5, 2), 16));
+                            
+                        case 9:
+                            
+                            // 9 characters, starting with alpha eg: #ff00ff00
+                            return Color.FromArgb(
+                                Convert.ToInt32(colorText.Substring(1, 2), 16),
+                                Convert.ToInt32(colorText.Substring(3, 2), 16),
+                                Convert.ToInt32(colorText.Substring(5, 2), 16),
+                                Convert.ToInt32(colorText.Substring(7, 2), 16));
                     }
-
-                    // Length is 4
-                    string r = char.ToString(colorText[1]);
-                    string g = char.ToString(colorText[2]);
-                    string b = char.ToString(colorText[3]);
-
-                    return Color.FromArgb(
-                        Convert.ToInt32(r + r, 16),
-                        Convert.ToInt32(g + g, 16),
-                        Convert.ToInt32(b + b, 16));
                 }
 
                 // System color
