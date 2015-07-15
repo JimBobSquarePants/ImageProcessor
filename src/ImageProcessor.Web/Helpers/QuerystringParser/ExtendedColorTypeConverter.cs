@@ -74,9 +74,11 @@ namespace ImageProcessor.Web.Helpers
                 }
 
                 // Handle a,r,g,b
+                // Converter can be called externally.
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                 if (culture == null)
                 {
-                    culture = CultureInfo.InvariantCulture;
+                    culture = CultureInfo.CurrentCulture;
                 }
 
                 char separator = culture.TextInfo.ListSeparator[0];
@@ -99,10 +101,10 @@ namespace ImageProcessor.Web.Helpers
                         if (components.Length == 4)
                         {
                             return Color.FromArgb(
-                                    Convert.ToInt32(components[3]),
-                                    Convert.ToInt32(components[0]),
-                                    Convert.ToInt32(components[1]),
-                                    Convert.ToInt32(components[2]));
+                                Convert.ToInt32(components[3]),
+                                Convert.ToInt32(components[0]),
+                                Convert.ToInt32(components[1]),
+                                Convert.ToInt32(components[2]));
                         }
 
                         return Color.FromArgb(
