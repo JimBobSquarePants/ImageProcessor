@@ -125,7 +125,7 @@ namespace ImageProcessor.Common.Helpers
                             }
                             catch (Exception ex)
                             {
-                                if (ex is SecurityException || ex is BadImageFormatException)
+                                if (ex is SecurityException || ex is BadImageFormatException || ex is IOException)
                                 {
                                     // Swallow exception but allow debugging.
                                     Debug.WriteLine(ex.Message);
