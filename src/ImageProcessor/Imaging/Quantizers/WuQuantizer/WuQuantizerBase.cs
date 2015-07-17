@@ -137,8 +137,9 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
 
                     using (Graphics graphics = Graphics.FromImage(clone))
                     {
+                        graphics.PageUnit = GraphicsUnit.Pixel;
                         graphics.Clear(Color.Transparent);
-                        graphics.DrawImage(source, new Rectangle(0, 0, clone.Width, clone.Height));
+                        graphics.DrawImageUnscaled(source, new Rectangle(0, 0, clone.Width, clone.Height));
                     }
 
                     source.Dispose();

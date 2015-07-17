@@ -55,6 +55,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ExtendedColorTypeConverterTests.cs" />
     <Compile Include="Extensions\StringExtensionsUnitTests.cs" />
     <Compile Include="RegularExpressionUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

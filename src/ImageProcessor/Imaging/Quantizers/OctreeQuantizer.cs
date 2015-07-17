@@ -133,7 +133,7 @@ namespace ImageProcessor.Imaging.Quantizers
         protected override ColorPalette GetPalette(ColorPalette original)
         {
             // First off convert the Octree to maxColors colors
-            ArrayList palette = this.octree.Palletize(this.maxColors - 1);
+            ArrayList palette = this.octree.Palletize(Math.Max(this.maxColors - 1, 1));
 
             // Then convert the palette based on those colors
             for (int index = 0; index < palette.Count; index++)
