@@ -65,11 +65,14 @@ namespace ImageProcessor.Web.HttpModules
         private static readonly string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         /// <summary>
+        /// Ensures duplicate requests are atomic.
+        /// </summary>
+        private static readonly AsyncDuplicateLock Locker = new AsyncDuplicateLock();
+
+        /// <summary>
         /// Whether to preserve exif meta data.
         /// </summary>
         private static bool? preserveExifMetaData;
-
-        private static AsyncDuplicateLock locker = new AsyncDuplicateLock();
 
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -516,8 +519,7 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 string combined = requestPath + fullPath + queryString;
-                //using (await PathLock.GetLock(combined).LockAsync())
-                using (await locker.LockAsync(combined))
+                using (await Locker.LockAsync(combined))
                 {
                     // Create a new cache to help process and cache the request.
                     this.imageCache = (IImageCache)ImageProcessorConfiguration.Instance
