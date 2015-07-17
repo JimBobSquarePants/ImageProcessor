@@ -63,6 +63,7 @@ namespace ImageProcessor.PlayGround
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "Martin-Schoeller-Jack-Nicholson-Portrait.jpeg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "night-bridge.png"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "tree.jpg"));
+            FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "pixel.gif"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "blue-balloon.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "test2.png"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "120430.gif"));
@@ -73,15 +74,15 @@ namespace ImageProcessor.PlayGround
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png", ".jpg", ".jpeg");
            // IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif");
-            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png");
+            //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif", ".webp", ".bmp", ".jpg", ".png");
 
-            foreach (FileInfo fileInfo in files)
-            {
-                if (fileInfo.Name == "test5.jpg")
-                {
-                    continue;
-                }
+            //foreach (FileInfo fileInfo in files)
+            //{
+            //    if (fileInfo.Name == "test5.jpg")
+            //    {
+            //        continue;
+            //    }
 
             byte[] photoBytes = File.ReadAllBytes(fileInfo.FullName);
             Console.WriteLine("Processing: " + fileInfo.Name);
@@ -94,7 +95,7 @@ namespace ImageProcessor.PlayGround
             {
                 using (ImageFactory imageFactory = new ImageFactory(true, true))
                 {
-                    Size size = new Size(1920, 1920);
+                    Size size = new Size(270, 150);
                     //CropLayer cropLayer = new CropLayer(20, 20, 20, 20, ImageProcessor.Imaging.CropMode.Percentage);
                     ResizeLayer layer = new ResizeLayer(size, ResizeMode.Max, AnchorPosition.Center, false);
                     // TextLayer textLayer = new TextLayer()
@@ -133,7 +134,8 @@ namespace ImageProcessor.PlayGround
                         //.GaussianSharpen(3)
                         //.Saturation(20)
                         //.Resize(size)
-                        .Resize(layer)
+                        .Resize(size)
+                        .BackgroundColor(Color.Black)
                         // .Resize(new ResizeLayer(size, ResizeMode.Stretch))
                         //.DetectEdges(new SobelEdgeFilter(), true)
                         //.DetectEdges(new LaplacianOfGaussianEdgeFilter())
@@ -167,7 +169,7 @@ namespace ImageProcessor.PlayGround
             Console.WriteLine(@"Completed {0} in {1:s\.fff} secs {2}Peak memory usage was {3} bytes or {4} Mb.", fileInfo.Name, stopwatch.Elapsed, Environment.NewLine, peakWorkingSet64.ToString("#,#"), mB);
 
             //Console.WriteLine("Processed: " + fileInfo.Name + " in " + stopwatch.ElapsedMilliseconds + "ms");
-           }
+           //}
 
             Console.ReadLine();
         }
