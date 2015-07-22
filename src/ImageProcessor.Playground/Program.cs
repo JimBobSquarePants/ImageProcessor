@@ -63,7 +63,7 @@ namespace ImageProcessor.PlayGround
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "Martin-Schoeller-Jack-Nicholson-Portrait.jpeg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "night-bridge.png"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "tree.jpg"));
-            FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "pixel.gif"));
+            FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "1aaa.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "blue-balloon.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "test2.png"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "120430.gif"));
@@ -73,7 +73,7 @@ namespace ImageProcessor.PlayGround
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "cmyk.png"));
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png", ".jpg", ".jpeg");
-           // IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif");
+            // IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif", ".webp", ".bmp", ".jpg", ".png");
 
@@ -134,8 +134,9 @@ namespace ImageProcessor.PlayGround
                         //.GaussianSharpen(3)
                         //.Saturation(20)
                         //.Resize(size)
-                        .Resize(size)
-                        .BackgroundColor(Color.Black)
+                        //.Resize(size)
+                        //.BackgroundColor(Color.Black)
+                        .Resolution(250, 250)
                         // .Resize(new ResizeLayer(size, ResizeMode.Stretch))
                         //.DetectEdges(new SobelEdgeFilter(), true)
                         //.DetectEdges(new LaplacianOfGaussianEdgeFilter())
@@ -169,7 +170,7 @@ namespace ImageProcessor.PlayGround
             Console.WriteLine(@"Completed {0} in {1:s\.fff} secs {2}Peak memory usage was {3} bytes or {4} Mb.", fileInfo.Name, stopwatch.Elapsed, Environment.NewLine, peakWorkingSet64.ToString("#,#"), mB);
 
             //Console.WriteLine("Processed: " + fileInfo.Name + " in " + stopwatch.ElapsedMilliseconds + "ms");
-           //}
+            //}
 
             Console.ReadLine();
         }
