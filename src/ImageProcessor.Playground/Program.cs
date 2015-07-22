@@ -24,6 +24,7 @@ namespace ImageProcessor.PlayGround
     //using ImageProcessor.Imaging.Filters.ObjectDetection;
     using ImageProcessor.Imaging.Filters.Photo;
     using ImageProcessor.Imaging.Formats;
+    using ImageProcessor.Imaging.MetaData;
     using ImageProcessor.Processors;
     using ImageProcessor.Web.Caching;
 
@@ -136,7 +137,7 @@ namespace ImageProcessor.PlayGround
                         //.Resize(size)
                         //.Resize(size)
                         //.BackgroundColor(Color.Black)
-                        .Resolution(250, 250)
+                        .Resolution(250, 250, PropertyTagResolutionUnit.Cm)
                         // .Resize(new ResizeLayer(size, ResizeMode.Stretch))
                         //.DetectEdges(new SobelEdgeFilter(), true)
                         //.DetectEdges(new LaplacianOfGaussianEdgeFilter())
