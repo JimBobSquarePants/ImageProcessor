@@ -78,15 +78,15 @@ namespace ImageProcessor.Processors
                 // supports inches.
                 if (resolution.Item3 == PropertyTagResolutionUnit.Cm)
                 {
-                    float h = InchInCm * resolution.Item1;
-                    float v = InchInCm * resolution.Item2;
+                    float h = resolution.Item1 / InchInCm;
+                    float v = resolution.Item2 / InchInCm;
                     newImage.SetResolution(h, v);
                 }
                 else
                 {
                     newImage.SetResolution(resolution.Item1, resolution.Item2);
                 }
-               
+
                 image.Dispose();
                 image = newImage;
 
@@ -95,7 +95,7 @@ namespace ImageProcessor.Processors
                     // Set the horizontal EXIF data.
                     int horizontalKey = (int)ExifPropertyTag.XResolution;
                     PropertyItem horizontal = this.GetResolutionItem(horizontalKey, resolution.Item1);
-                    
+
                     // Set the vertical EXIF data.
                     int verticalKey = (int)ExifPropertyTag.YResolution;
                     PropertyItem vertical = this.GetResolutionItem(verticalKey, resolution.Item1);
