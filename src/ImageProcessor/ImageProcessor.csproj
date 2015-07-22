@@ -171,6 +171,8 @@
     <Compile Include="Imaging\Helpers\ImageMaths.cs" />
     <Compile Include="Imaging\Helpers\PixelOperations.cs" />
     <Compile Include="Imaging\ImageLayer.cs" />
+    <Compile Include="Imaging\MetaData\PropertyTagResolutionUnit.cs" />
+    <Compile Include="Imaging\MetaData\Int32Converter.cs" />
     <Compile Include="Imaging\MetaData\ExifPropertyTagType.cs" />
     <Compile Include="Imaging\Convolution.cs" />
     <Compile Include="Imaging\CropLayer.cs" />
@@ -222,6 +224,7 @@
     <Compile Include="Imaging\Resizer.cs" />
     <Compile Include="Imaging\RoundedCornerLayer.cs" />
     <Compile Include="Imaging\TextLayer.cs" />
+    <Compile Include="Processors\Dpi.cs" />
     <Compile Include="Processors\Gamma.cs" />
     <Compile Include="Processors\Alpha.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />

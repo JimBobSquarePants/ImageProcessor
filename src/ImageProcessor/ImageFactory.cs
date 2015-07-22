@@ -26,6 +26,7 @@ namespace ImageProcessor
     using ImageProcessor.Imaging.Filters.Photo;
     using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Imaging.Helpers;
+    using ImageProcessor.Imaging.MetaData;
     using ImageProcessor.Processors;
     #endregion
 
@@ -591,6 +592,39 @@ namespace ImageProcessor
             {
                 DetectEdges detectEdges = new DetectEdges { DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale) };
                 this.CurrentImageFormat.ApplyProcessor(detectEdges.ProcessImage, this);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the resolution of the image.
+        /// <remarks>
+        /// This method sets both the bitmap data and EXIF resolution if available.
+        /// </remarks>
+        /// </summary>
+        /// <param name="horizontal">The horizontal resolution.</param>
+        /// <param name="vertical">The vertical resolution.</param>
+        /// <param name="unit">
+        /// The unit of measure for the horizontal resolution and the vertical resolution. 
+        /// Defaults to inches
+        /// </param>
+        /// <returns>
+        /// The <see cref="ImageFactory"/>.
+        /// </returns>
+        public ImageFactory Resolution(int horizontal, int vertical, PropertyTagResolutionUnit unit = PropertyTagResolutionUnit.Inch)
+        {
+            if (this.ShouldProcess)
+            {
+                // Sanitize the input.
+                horizontal = ImageMaths.Clamp(horizontal, 0, int.MaxValue);
+                vertical = ImageMaths.Clamp(vertical, 0, int.MaxValue);
+
+                Tuple<int, int, PropertyTagResolutionUnit> resolution =
+                    new Tuple<int, int, PropertyTagResolutionUnit>(horizontal, vertical, unit);
+
+                Resolution dpi = new Resolution { DynamicParameter = resolution };
+                this.CurrentImageFormat.ApplyProcessor(dpi.ProcessImage, this);
             }
 
             return this;
