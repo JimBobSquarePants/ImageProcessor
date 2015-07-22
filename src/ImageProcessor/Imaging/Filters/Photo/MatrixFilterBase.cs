@@ -63,7 +63,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
         {
             unchecked
             {
-                int hashCode = GetType().Name.GetHashCode();
+                int hashCode = this.GetType().Name.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.Matrix.GetHashCode();
                 return hashCode;
             }
