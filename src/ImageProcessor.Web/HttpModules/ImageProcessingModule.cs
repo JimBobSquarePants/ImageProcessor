@@ -540,13 +540,22 @@ namespace ImageProcessor.Web.HttpModules
                             using (MemoryStream inStream = new MemoryStream(imageBuffer))
                             {
                                 // Process the Image
-                                using (MemoryStream outStream = new MemoryStream())
-                                {
-                                    imageFactory.Load(inStream).AutoProcess(queryString).Save(outStream);
+                                MemoryStream outStream = new MemoryStream();
 
-                                    // Add to the cache.
-                                    await this.imageCache.AddImageToCacheAsync(outStream, imageFactory.CurrentImageFormat.MimeType);
+                                imageFactory.Load(inStream).AutoProcess(queryString).Save(outStream);
+
+                                // Post process the image.
+                                if (ImageProcessorConfiguration.Instance.PostProcess)
+                                {
+                                    string extension = Path.GetExtension(cachedPath);
+                                    outStream = await PostProcessor.PostProcessor.PostProcessImageAsync(outStream, extension);
                                 }
+
+                                // Add to the cache.
+                                await this.imageCache.AddImageToCacheAsync(outStream, imageFactory.CurrentImageFormat.MimeType);
+
+                                // Cleanup
+                                outStream.Dispose();
                             }
 
                             // Store the cached path, response type, and cache dependency in the context for later retrieval.

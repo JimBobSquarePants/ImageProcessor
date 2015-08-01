@@ -24,19 +24,12 @@ namespace ImageProcessor.Web.PostProcessor
         /// <summary>
         /// Initializes a new instance of the <see cref="PostProcessingResultEventArgs"/> class.
         /// </summary>
-        /// <param name="originalFileName">The original file name.</param>
-        /// <param name="resultFileName">The result file name.</param>
-        public PostProcessingResultEventArgs(string originalFileName, string resultFileName)
+        /// <param name="resultFileName">The original file name.</param>
+        /// <param name="length">The original file length in bytes.</param>
+        public PostProcessingResultEventArgs(string resultFileName, long length)
         {
-            FileInfo original = new FileInfo(originalFileName);
             FileInfo result = new FileInfo(resultFileName);
-
-            if (original.Exists)
-            {
-                this.OriginalFileName = original.FullName;
-                this.OriginalFileSize = original.Length;
-            }
-
+            this.OriginalFileSize = length;
             if (result.Exists)
             {
                 this.ResultFileName = result.FullName;
@@ -48,11 +41,6 @@ namespace ImageProcessor.Web.PostProcessor
         /// Gets or sets the original file size in bytes.
         /// </summary>
         public long OriginalFileSize { get; set; }
-
-        /// <summary>
-        /// Gets or sets the original file name.
-        /// </summary>
-        public string OriginalFileName { get; set; }
 
         /// <summary>
         /// Gets or sets the result file size in bytes.
@@ -92,7 +80,7 @@ namespace ImageProcessor.Web.PostProcessor
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("Optimized " + Path.GetFileName(this.OriginalFileName));
+            stringBuilder.AppendLine("Optimized " + Path.GetFileName(this.ResultFileName));
             stringBuilder.AppendLine("Before: " + this.OriginalFileSize + " bytes");
             stringBuilder.AppendLine("After: " + this.ResultFileSize + " bytes");
             stringBuilder.AppendLine("Saving: " + this.Saving + " bytes / " + this.Percent + "%");

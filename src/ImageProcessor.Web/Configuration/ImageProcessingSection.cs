@@ -34,6 +34,17 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to use post processing optimization techniques
+        /// on the resultant images to further reduce file size.
+        /// </summary>
+        [ConfigurationProperty("postProcess", IsRequired = false, DefaultValue = true)]
+        public bool PostProcess
+        {
+            get { return (bool)this["postProcess"]; }
+            set { this["postProcess"] = value; }
+        }
+
+        /// <summary>
         /// Gets the <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.PresetElementCollection"/>.
         /// </summary>
         /// <value>
