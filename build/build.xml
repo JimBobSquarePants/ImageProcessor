@@ -29,17 +29,6 @@
   </project>
   
   <project>
-    <name>ImageProcessor Web PostProcessor</name>
-    <version>1.0.3.0</version>
-    <folder>..\src\ImageProcessor.Web.PostProcessor</folder>
-    <projfile>ImageProcessor.Web.PostProcessor.csproj</projfile>
-    <outputs>
-      <output folder="ImageProcessor.Web.PostProcessor\lib\net45" />
-    </outputs>
-    <nuspec>ImageProcessor.Web.PostProcessor.nuspec</nuspec>
-  </project>
-
-  <project>
     <name>ImageProcessor Web Azure Blob Cache plugin</name>
     <version>1.0.4.0</version>
     <folder>..\src\Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AzureBlobCache</folder>
