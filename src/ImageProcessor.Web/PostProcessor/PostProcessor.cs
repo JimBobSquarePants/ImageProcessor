@@ -26,55 +26,63 @@ namespace ImageProcessor.Web.PostProcessor
         /// <summary>
         /// Post processes the image asynchronously.
         /// </summary>
-        /// <param name="sourceFile">
-        /// The source file.
-        /// </param>
+        /// <param name="stream">The source image stream.</param>
+        /// <param name="extension">The image extension.</param>
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        public static async Task PostProcessImageAsync(string sourceFile)
+        public static async Task<MemoryStream> PostProcessImageAsync(MemoryStream stream, string extension)
         {
-            if (!new Uri(sourceFile).IsFile)
+            // Create a source temporary file with the correct extension.
+            long length = stream.Length;
+            string tempFile = Path.GetTempFileName();
+            string sourceFile = Path.ChangeExtension(tempFile, extension);
+            File.Move(tempFile, sourceFile);
+
+            // Save the input stream to a temp file for post processing.
+            using (FileStream fileStream = File.Create(sourceFile))
             {
-                return;
+                await stream.CopyToAsync(fileStream);
             }
 
-            string targetFile = Path.GetTempFileName();
-            PostProcessingResultEventArgs result = await RunProcess(sourceFile, targetFile);
+            PostProcessingResultEventArgs result = await RunProcess(sourceFile, length);
 
-            if (result != null && result.Saving > 0 && result.ResultFileSize > 0)
+            if (result != null && result.Saving > 0)
             {
-                File.Copy(result.ResultFileName, result.OriginalFileName, true);
-                File.Delete(result.ResultFileName);
+                using (FileStream fileStream = File.OpenRead(sourceFile))
+                {
+                    // Replace stream contents.
+                    stream.SetLength(0);
+                    await fileStream.CopyToAsync(stream);
+                }
             }
-            else
-            {
-                File.Delete(targetFile);
-            }
+
+            // Cleanup
+            File.Delete(sourceFile);
+
+            stream.Position = 0;
+
+            return stream;
         }
 
         /// <summary>
         /// Runs the process to optimize the images.
         /// </summary>
-        /// <param name="sourceFile">
-        /// The source file.
-        /// </param>
-        /// <param name="targetFile">
-        /// The target file.
-        /// </param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="length">The source file length in bytes.</param>
         /// <returns>
         /// The <see cref="Task{PostProcessingResultEventArgs}"/> containing post-processing information.
         /// </returns>
-        private static Task<PostProcessingResultEventArgs> RunProcess(string sourceFile, string targetFile)
+        private static Task<PostProcessingResultEventArgs> RunProcess(string sourceFile, long length)
         {
             TaskCompletionSource<PostProcessingResultEventArgs> tcs = new TaskCompletionSource<PostProcessingResultEventArgs>();
             ProcessStartInfo start = new ProcessStartInfo("cmd")
             {
                 WindowStyle = ProcessWindowStyle.Hidden,
-                WorkingDirectory = PostProcessorBootstrapper.WorkingPath,
-                Arguments = GetArguments(sourceFile, targetFile),
+                WorkingDirectory = PostProcessorBootstrapper.Instance.WorkingPath,
+                Arguments = GetArguments(sourceFile, length),
                 UseShellExecute = false,
-                CreateNoWindow = true,
+                CreateNoWindow = true
             };
 
             if (string.IsNullOrWhiteSpace(start.Arguments))
@@ -91,7 +99,7 @@ namespace ImageProcessor.Web.PostProcessor
 
             process.Exited += (sender, args) =>
             {
-                tcs.SetResult(new PostProcessingResultEventArgs(sourceFile, targetFile));
+                tcs.SetResult(new PostProcessingResultEventArgs(sourceFile, length));
                 process.Dispose();
             };
 
@@ -103,16 +111,12 @@ namespace ImageProcessor.Web.PostProcessor
         /// <summary>
         /// Gets the correct arguments to pass to the post-processor.
         /// </summary>
-        /// <param name="sourceFile">
-        /// The source file.
-        /// </param>
-        /// <param name="targetFile">
-        /// The target file.
-        /// </param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="length">The source file length in bytes.</param>
         /// <returns>
         /// The <see cref="string"/> containing the correct command arguments.
         /// </returns>
-        private static string GetArguments(string sourceFile, string targetFile)
+        private static string GetArguments(string sourceFile, long length)
         {
             if (!Uri.IsWellFormedUriString(sourceFile, UriKind.RelativeOrAbsolute) && !File.Exists(sourceFile))
             {
@@ -134,14 +138,22 @@ namespace ImageProcessor.Web.PostProcessor
             switch (ext)
             {
                 case ".png":
-                    return string.Format(CultureInfo.CurrentCulture, "/c png.cmd \"{0}\" \"{1}\"", sourceFile, targetFile);
+                    return string.Format(CultureInfo.CurrentCulture, "/c png.cmd \"{0}\"", sourceFile);
 
                 case ".jpg":
                 case ".jpeg":
-                    return string.Format(CultureInfo.CurrentCulture, "/c jpegtran -copy all -optimize -progressive \"{0}\" \"{1}\"", sourceFile, targetFile);
+
+                    // If it's greater than 10Kb use progressive
+                    // http://yuiblog.com/blog/2008/12/05/imageopt-4/
+                    if (length > 10000)
+                    {
+                        return string.Format(CultureInfo.CurrentCulture, "/c jpegtran -copy all -optimize -progressive \"{0}\" \"{0}\"", sourceFile);
+                    }
+
+                    return string.Format(CultureInfo.CurrentCulture, "/c jpegtran -copy all -optimize \"{0}\" \"{0}\"", sourceFile);
 
                 case ".gif":
-                    return string.Format(CultureInfo.CurrentCulture, "/c gifsicle --crop-transparency --no-comments --no-extensions --no-names --optimize=3 --batch \"{0}\" --output=\"{1}\"", sourceFile, targetFile);
+                    return string.Format(CultureInfo.CurrentCulture, "/c gifsicle --crop-transparency --no-comments --no-extensions --no-names --optimize=3 --batch \"{0}\" --output=\"{0}\"", sourceFile);
             }
 
             return null;
