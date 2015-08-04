@@ -74,9 +74,6 @@ namespace ImageProcessor.Processors
                     int rotationValue = factory.ExifPropertyItems[Orientation].Value[0];
                     switch (rotationValue)
                     {
-                        case 1: // Landscape, do nothing
-                            break;
-
                         case 8: // Rotated 90 right
                             // De-rotate:
                             newImage.RotateFlip(RotateFlipType.Rotate270FlipNone);

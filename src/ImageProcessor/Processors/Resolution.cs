@@ -90,7 +90,7 @@ namespace ImageProcessor.Processors
                 image.Dispose();
                 image = newImage;
 
-                if (factory.ExifPropertyItems.Any())
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
                 {
                     // Set the horizontal EXIF data.
                     int horizontalKey = (int)ExifPropertyTag.XResolution;
@@ -150,14 +150,14 @@ namespace ImageProcessor.Processors
             propertyItem.Type = type;
             Int32Converter numerator = resolution;
 
-            byte[] horizontalBytes =
+            byte[] resolutionBytes =
                         {
                             numerator.Byte1, numerator.Byte2, numerator.Byte3, numerator.Byte4, 
                             denominator.Byte1, denominator.Byte2, denominator.Byte3, denominator.Byte4
                         };
 
             propertyItem.Len = length;
-            propertyItem.Value = horizontalBytes;
+            propertyItem.Value = resolutionBytes;
 
             return propertyItem;
         }
