@@ -88,7 +88,7 @@ namespace ImageProcessor.Processors
                 {
                     // Find the maximum possible dimensions and resize the image.
                     ResizeLayer layer = new ResizeLayer(new Size(overlayWidth, overlayHeight), ResizeMode.Max);
-                    overlay = new Resizer(layer).ResizeImage(overlay);
+                    overlay = new Resizer(layer).ResizeImage(overlay, factory.FixGamma);
                     overlayWidth = overlay.Width;
                     overlayHeight = overlay.Height;
                 }

@@ -200,10 +200,11 @@ namespace ImageProcessor.Imaging.Filters.Artistic
 
                 // Yellow oversaturates the output.
                 int offset = this.distance;
-                float yellowMultiplier = this.distance * 1.334f;
-                float magentaMultiplier = this.distance * 1.667f;
+                float yellowMultiplier = this.distance * 1.587f;
+                float magentaMultiplier = this.distance * 2.176f;
                 float multiplier = this.distance * 2.2f;
                 float max = this.distance * (float)Math.Sqrt(2);
+                float magentaMax = this.distance * (float)Math.Sqrt(1.4545);
 
                 // Bump up the keyline max so that black looks black.
                 float keylineMax = max * (float)Math.Sqrt(2);
@@ -290,7 +291,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                                 {
                                     color = sourceBitmap.GetPixel(angledX, angledY);
                                     cmykColor = color;
-                                    brushWidth = Math.Min((cmykColor.M / 100f) * magentaMultiplier, max);
+                                    brushWidth = Math.Min((cmykColor.M / 100f) * magentaMultiplier, magentaMax);
                                     graphicsMagenta.FillEllipse(magentaBrush, angledX, angledY, brushWidth, brushWidth);
                                 }
 
