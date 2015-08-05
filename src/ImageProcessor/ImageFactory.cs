@@ -19,6 +19,7 @@ namespace ImageProcessor
     using System.IO;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Common.Extensions;
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Filters.EdgeDetection;
 
@@ -215,13 +216,12 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
-            this.ShouldProcess = true;
+            // Ensure the image is in the most efficient format.
+            Image formatted = this.Image.Copy();
+            this.Image.Dispose();
+            this.Image = formatted;
 
-            // Normalize the gamma component of the image.
-            if (this.FixGamma)
-            {
-                this.Gamma(2.2F);
-            }
+            this.ShouldProcess = true;
 
             return this;
         }
@@ -283,13 +283,12 @@ namespace ImageProcessor
                         this.ExifPropertyItems[propertyItem.Id] = propertyItem;
                     }
 
-                    this.ShouldProcess = true;
+                    // Ensure the image is in the most efficient format.
+                    Image formatted = this.Image.Copy();
+                    this.Image.Dispose();
+                    this.Image = formatted;
 
-                    // Normalize the gamma component of the image.
-                    if (this.FixGamma)
-                    {
-                        this.Gamma(2.2F);
-                    }
+                    this.ShouldProcess = true;
                 }
             }
             else
@@ -345,13 +344,12 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
-            this.ShouldProcess = true;
+            // Ensure the image is in the most efficient format.
+            Image formatted = this.Image.Copy();
+            this.Image.Dispose();
+            this.Image = formatted;
 
-            // Normalize the gamma component of the image.
-            if (this.FixGamma)
-            {
-                this.Gamma(2.2F);
-            }
+            this.ShouldProcess = true;
 
             return this;
         }
@@ -385,12 +383,6 @@ namespace ImageProcessor
                 // Set the other properties.
                 this.CurrentImageFormat = this.backupFormat;
                 this.CurrentImageFormat.Quality = DefaultQuality;
-
-                // Normalize the gamma component of the image.
-                if (this.FixGamma)
-                {
-                    this.Gamma(2.2F);
-                }
             }
 
             return this;
@@ -1291,12 +1283,6 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
-                // Normalize the gamma component of the image.
-                if (this.FixGamma)
-                {
-                    this.Gamma(1 / 2.2F);
-                }
-
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image);
             }
 
@@ -1320,12 +1306,6 @@ namespace ImageProcessor
                 if (stream.CanSeek)
                 {
                     stream.SetLength(0);
-                }
-
-                // Normalize the gamma component of the image.
-                if (this.FixGamma)
-                {
-                    this.Gamma(1 / 2.2F);
                 }
 
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image);
