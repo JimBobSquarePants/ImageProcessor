@@ -72,13 +72,6 @@ namespace ImageProcessor.Processors
                 Color original = parameters.Item1;
                 Color replacement = parameters.Item2;
 
-                // Ensure that color comparison takes any gamma adjustments into consideration.
-                if (factory.FixGamma || Math.Abs(factory.CurrentGamma) > 0)
-                {
-                    original = PixelOperations.Gamma(original, factory.CurrentGamma);
-                    replacement = PixelOperations.Gamma(replacement, factory.CurrentGamma);
-                }
-
                 byte originalR = original.R;
                 byte originalG = original.G;
                 byte originalB = original.B;
@@ -129,9 +122,9 @@ namespace ImageProcessor.Processors
                                         {
                                             // Ensure the values are within an acceptable byte range
                                             // and set the new value.
-                                            byte r = (originalR - currentR + replacementR).ToByte();
-                                            byte g = (originalG - currentG + replacementG).ToByte();
-                                            byte b = (originalB - currentB + replacementB).ToByte();
+                                            byte r = (originalR + currentR - replacementR).ToByte();
+                                            byte g = (originalG + currentG - replacementG).ToByte();
+                                            byte b = (originalB + currentB - replacementB).ToByte();
 
                                             // Allow replacement with transparent color.
                                             byte a = currentA;
