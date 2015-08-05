@@ -36,6 +36,7 @@ namespace ImageProcessor.Common.Extensions
         {
             if (FormatUtilities.IsAnimated(source))
             {
+                // TODO: Ensure that we handle other animated types.
                 GifDecoder decoder = new GifDecoder(source);
                 GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
                 foreach (GifFrame frame in decoder.GifFrames)
