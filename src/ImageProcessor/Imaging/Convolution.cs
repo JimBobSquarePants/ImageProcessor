@@ -379,6 +379,7 @@ namespace ImageProcessor.Imaging
                 }
             }
 
+            source.Dispose();
             return destination;
         }
 
