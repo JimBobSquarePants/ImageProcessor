@@ -64,7 +64,6 @@ namespace ImageProcessor.Processors
         public Image ProcessImage(ImageFactory factory)
         {
             const float InchInCm = 0.3937007874015748f;
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
@@ -72,23 +71,18 @@ namespace ImageProcessor.Processors
                 Tuple<int, int, PropertyTagResolutionUnit> resolution = this.DynamicParameter;
 
                 // Set the bitmap resolution data.
-                newImage = new Bitmap(image);
-
                 // Ensure that the resolution is recalculated for bitmap since it only 
                 // supports inches.
                 if (resolution.Item3 == PropertyTagResolutionUnit.Cm)
                 {
                     float h = resolution.Item1 / InchInCm;
                     float v = resolution.Item2 / InchInCm;
-                    newImage.SetResolution(h, v);
+                    ((Bitmap)image).SetResolution(h, v);
                 }
                 else
                 {
-                    newImage.SetResolution(resolution.Item1, resolution.Item2);
+                    ((Bitmap)image).SetResolution(resolution.Item1, resolution.Item2);
                 }
-
-                image.Dispose();
-                image = newImage;
 
                 if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
                 {
@@ -118,11 +112,6 @@ namespace ImageProcessor.Processors
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
 

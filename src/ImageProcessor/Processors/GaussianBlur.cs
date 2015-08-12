@@ -50,32 +50,20 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Bitmap image = (Bitmap)factory.Image;
 
             try
             {
-                newImage = new Bitmap(image);
                 GaussianLayer gaussianLayer = this.DynamicParameter;
-
                 Convolution convolution = new Convolution(gaussianLayer.Sigma) { Threshold = gaussianLayer.Threshold };
                 double[,] kernel = convolution.CreateGuassianBlurFilter(gaussianLayer.Size);
-                newImage = convolution.ProcessKernel(newImage, kernel);
 
-                image.Dispose();
-                image = newImage;
+                return convolution.ProcessKernel(image, kernel);
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
     }
 }
