@@ -178,7 +178,7 @@ namespace ImageProcessor.Web.Helpers
             }
             catch (WebException ex)
             {
-                if (response != null)
+                if (ex.Response != null)
                 {
                     HttpWebResponse errorResponse = (HttpWebResponse)ex.Response;
                     if (errorResponse.StatusCode == HttpStatusCode.NotFound)
