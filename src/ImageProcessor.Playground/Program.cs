@@ -52,7 +52,7 @@ namespace ImageProcessor.PlayGround
             }
 
             // Image mask = Image.FromFile(Path.Combine(resolvedPath, "mask.png"));
-            // Image overlay = Image.FromFile(Path.Combine(resolvedPath, "imageprocessor.128.png"));
+            Image overlay = Image.FromFile(Path.Combine(resolvedPath, "giphy.gif"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "2008.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "stretched.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "mountain.jpg"));
@@ -80,10 +80,10 @@ namespace ImageProcessor.PlayGround
 
             foreach (FileInfo fileInfo in files)
             {
-                if (fileInfo.Name == "test5.jpg")
-                {
-                    continue;
-                }
+                //if (fileInfo.Name != "night-bridge.png")
+                //{
+                //    continue;
+                //}
 
                 byte[] photoBytes = File.ReadAllBytes(fileInfo.FullName);
                 Console.WriteLine("Processing: " + fileInfo.Name);
@@ -94,21 +94,21 @@ namespace ImageProcessor.PlayGround
                 // ImageProcessor
                 using (MemoryStream inStream = new MemoryStream(photoBytes))
                 {
-                    using (ImageFactory imageFactory = new ImageFactory(true, false))
+                    using (ImageFactory imageFactory = new ImageFactory(true, true))
                     {
-                        Size size = new Size(800, 0);
-                        //CropLayer cropLayer = new CropLayer(20, 20, 20, 20, ImageProcessor.Imaging.CropMode.Percentage);
+                        Size size = new Size(500, 0);
+                        CropLayer cropLayer = new CropLayer(20, 20, 20, 20, ImageProcessor.Imaging.CropMode.Percentage);
                         //ResizeLayer layer = new ResizeLayer(size, ResizeMode.Max, AnchorPosition.Center, false);
-                        // TextLayer textLayer = new TextLayer()
-                        //{
-                        //    Text = "هناك حقيقة مثبتة منذ زمن",
-                        //    FontColor = Color.White,
-                        //    DropShadow = true,
-                        //    Vertical = true,
-                        //    //RightToLeft = true,
-                        //    //Position = new Point(5, 5)
+                        TextLayer textLayer = new TextLayer()
+                       {
+                           Text = "هناك حقيقة مثبتة منذ زمن",
+                           FontColor = Color.White,
+                           DropShadow = true,
+                           Vertical = true,
+                           //RightToLeft = true,
+                           //Position = new Point(5, 5)
 
-                        //};
+                       };
 
                         //ContentAwareResizeLayer layer = new ContentAwareResizeLayer(size)
                         //{
@@ -122,7 +122,7 @@ namespace ImageProcessor.PlayGround
                             //                Image = overlay,
                             //                Opacity = 50
                             //            })
-                            //.Alpha(50)
+                            //.Alpha(10)
                             //.BackgroundColor(Color.White)
                             //.Resize(new Size((int)(size.Width * 1.1), 0))
                             //.ContentAwareResize(layer)
@@ -130,7 +130,7 @@ namespace ImageProcessor.PlayGround
                             //.Mask(mask)
                             //.Format(new PngFormat())
                             //.BackgroundColor(Color.Cyan)
-                            //.Watermark(textLayer)
+                            .Watermark(textLayer)
                             //.ReplaceColor(Color.FromArgb(93, 136, 231), Color.FromArgb(94, 134, 78), 50)
                             //.GaussianSharpen(3)
                             //.Saturation(20)
@@ -144,12 +144,16 @@ namespace ImageProcessor.PlayGround
                             //.GaussianBlur(new GaussianLayer(10, 11))
                             //.EntropyCrop()
                             //.Gamma(2.2F)
-                            .Halftone()
+                            //.Halftone()
+                            //.Hue(180, true)
+                            //.Rotate(45)
                             //.RotateBounded(150, false)
+                            //.RoundedCorners(10)
+                            //.Vignette()
                             //.Crop(cropLayer)
                             //.Rotate(140)
                             //.Filter(MatrixFilters.Invert)
-                            //.Brightness(-5)
+                            //.Contrast(-25)
                             //.Contrast(50)
                             //.Filter(MatrixFilters.Comic)
                             //.Flip()

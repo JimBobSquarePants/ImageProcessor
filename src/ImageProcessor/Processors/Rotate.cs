@@ -60,7 +60,6 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
@@ -72,25 +71,16 @@ namespace ImageProcessor.Processors
                 float rotateAtY = Math.Abs(image.Height / 2);
 
                 // Create a rotated image.
-                newImage = this.RotateImage(image, rotateAtX, rotateAtY, angle);
+                image = this.RotateImage(image, rotateAtX, rotateAtY, angle);
 
-                image.Dispose();
-                image = newImage;
+                return image;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
 
-        #region Private Methods
         /// <summary>
         /// Rotates an image to the given angle at the given position.
         /// </summary>
@@ -135,8 +125,8 @@ namespace ImageProcessor.Processors
                 graphics.DrawImage(image, new PointF(x, y));
             }
 
+            image.Dispose();
             return newImage;
         }
-        #endregion
     }
 }

@@ -82,7 +82,7 @@ namespace ImageProcessor.Processors
 
                 using (FastBitmap fastBitmap = new FastBitmap(newImage))
                 {
-                    // Get the range of on the y-plane to choose from.
+                    // Get the range on the y-plane to choose from.
                     IEnumerable<int> range = EnumerableExtensions.SteppedRange(y, i => i < y + height && i < maxHeight, size);
 
                     Parallel.ForEach(

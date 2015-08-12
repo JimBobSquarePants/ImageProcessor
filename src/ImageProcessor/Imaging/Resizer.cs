@@ -135,7 +135,7 @@ namespace ImageProcessor.Imaging
             Bitmap linear = Adjustments.ToLinear(source.Copy());
 
             Bitmap resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
-            resized.SetResolution(resized.HorizontalResolution, resized.VerticalResolution);
+            resized.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             using (Graphics graphics = Graphics.FromImage(resized))
             {
