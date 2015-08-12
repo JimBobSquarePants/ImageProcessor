@@ -62,12 +62,10 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
             {
-                newImage = new Bitmap(image);
                 TextLayer textLayer = this.DynamicParameter;
                 string text = textLayer.Text;
                 int opacity = Math.Min((int)Math.Ceiling((textLayer.Opacity / 100f) * 255), 255);
@@ -80,10 +78,10 @@ namespace ImageProcessor.Processors
                 RotateFlipType? flipType = this.GetRotateFlipType(factory);
                 if (flipType.HasValue)
                 {
-                    newImage.RotateFlip(flipType.Value);
+                    image.RotateFlip(flipType.Value);
                 }
 
-                using (Graphics graphics = Graphics.FromImage(newImage))
+                using (Graphics graphics = Graphics.FromImage(image))
                 {
                     using (Font font = this.GetFont(textLayer.FontFamily, fontSize, fontStyle))
                     {
@@ -168,33 +166,25 @@ namespace ImageProcessor.Processors
 
                         if (value == RotateFlipType.Rotate270FlipNone)
                         {
-                            newImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
                         }
                         else if (value == RotateFlipType.Rotate90FlipNone)
                         {
-                            newImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                            image.RotateFlip(RotateFlipType.Rotate270FlipNone);
                         }
                         else
                         {
-                            newImage.RotateFlip(value);
+                            image.RotateFlip(value);
                         }
                     }
 
-                    image.Dispose();
-                    image = newImage;
+                    return image;
                 }
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
 
         /// <summary>

@@ -52,7 +52,6 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
@@ -63,9 +62,7 @@ namespace ImageProcessor.Processors
                 int width = image.Width;
                 int height = image.Height;
 
-                newImage = new Bitmap(image);
-
-                using (FastBitmap fastBitmap = new FastBitmap(newImage))
+                using (FastBitmap fastBitmap = new FastBitmap(image))
                 {
                     if (!rotate)
                     {
@@ -93,20 +90,12 @@ namespace ImageProcessor.Processors
                     }
                 }
 
-                image.Dispose();
-                image = newImage;
+                return image;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
     }
 }

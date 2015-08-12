@@ -61,7 +61,6 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
@@ -74,18 +73,12 @@ namespace ImageProcessor.Processors
                 bool bottomRight = roundedCornerLayer.BottomRight;
 
                 // Create a rounded image.
-                newImage = this.RoundCornerImage(image, radius, topLeft, topRight, bottomLeft, bottomRight);
+                image = this.RoundCornerImage(image, radius, topLeft, topRight, bottomLeft, bottomRight);
 
-                image.Dispose();
-                image = newImage;
+                return image;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
 
@@ -171,6 +164,7 @@ namespace ImageProcessor.Processors
                 }
             }
 
+            image.Dispose();
             return newImage;
         }
     }

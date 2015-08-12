@@ -59,28 +59,17 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
             {
                 RotateFlipType rotateFlipType = this.DynamicParameter;
 
-                newImage = new Bitmap(image);
-
                 // Flip
-                newImage.RotateFlip(rotateFlipType);
-
-                image.Dispose();
-                image = newImage;
+                image.RotateFlip(rotateFlipType);
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
 

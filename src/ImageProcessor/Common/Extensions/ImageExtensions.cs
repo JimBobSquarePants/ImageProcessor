@@ -42,6 +42,7 @@ namespace ImageProcessor.Common.Extensions
                 foreach (GifFrame frame in decoder.GifFrames)
                 {
                     frame.Image = ((Bitmap)frame.Image).Clone(new Rectangle(0, 0, frame.Image.Width, frame.Image.Height), format);
+                    ((Bitmap)frame.Image).SetResolution(source.HorizontalResolution, source.VerticalResolution);
                     encoder.AddFrame(frame);
                 }
 

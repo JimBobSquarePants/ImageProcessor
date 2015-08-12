@@ -65,6 +65,7 @@ namespace ImageProcessor.Processors
 
             try
             {
+                // TODO: Optimize this one day when I can break the API.
                 newImage = new Bitmap(image.Width, image.Height);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                 IMatrixFilter matrix = this.DynamicParameter;
