@@ -262,7 +262,7 @@ namespace ImageProcessor.Imaging.Helpers
                 return signal * 12.92f;
             }
 
-            return (float)((1 + a) * Math.Pow(signal, 1 / 2.4f));
+            return ((float)((1 + a) * Math.Pow(signal, 1 / 2.4f))) - a;
         }
     }
 }

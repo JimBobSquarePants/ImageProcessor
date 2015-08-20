@@ -15,9 +15,10 @@ namespace ImageProcessor.Imaging
     using System.Threading.Tasks;
 
     using ImageProcessor.Common.Extensions;
+    using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
-    /// Provides methods for applying blurring and sharpening effects to an image..
+    /// Provides methods for applying blurring and sharpening effects to an image.
     /// </summary>
     public class Convolution
     {
@@ -258,8 +259,9 @@ namespace ImageProcessor.Imaging
         /// </summary>
         /// <param name="source">The image to process.</param>
         /// <param name="kernel">The Gaussian kernel to use when performing the method</param>
+        /// <param name="fixGamma">Whether to process the image using the linear color space.</param>
         /// <returns>A processed bitmap.</returns>
-        public Bitmap ProcessKernel(Bitmap source, double[,] kernel)
+        public Bitmap ProcessKernel(Bitmap source, double[,] kernel, bool fixGamma)
         {
             int width = source.Width;
             int height = source.Height;
@@ -327,14 +329,20 @@ namespace ImageProcessor.Imaging
                                         if (offsetX < width)
                                         {
                                             // ReSharper disable once AccessToDisposedClosure
-                                            Color color = sourceBitmap.GetPixel(offsetX, offsetY);
+                                            Color sourceColor = sourceBitmap.GetPixel(offsetX, offsetY);
+
+                                            if (fixGamma)
+                                            {
+                                                sourceColor = PixelOperations.ToLinear(sourceColor);
+                                            }
+
                                             double k = kernel[i, j];
                                             divider += k;
 
-                                            red += k * color.R;
-                                            green += k * color.G;
-                                            blue += k * color.B;
-                                            alpha += k * color.A;
+                                            red += k * sourceColor.R;
+                                            green += k * sourceColor.G;
+                                            blue += k * sourceColor.B;
+                                            alpha += k * sourceColor.A;
 
                                             processedKernelSize++;
                                         }
@@ -372,8 +380,15 @@ namespace ImageProcessor.Imaging
                                 blue += threshold;
                                 alpha += threshold;
 
+                                Color destinationColor = Color.FromArgb(alpha.ToByte(), red.ToByte(), green.ToByte(), blue.ToByte());
+
+                                if (fixGamma)
+                                {
+                                    destinationColor = PixelOperations.ToSRGB(destinationColor);
+                                }
+
                                 // ReSharper disable once AccessToDisposedClosure
-                                destinationBitmap.SetPixel(x, y, Color.FromArgb(alpha.ToByte(), red.ToByte(), green.ToByte(), blue.ToByte()));
+                                destinationBitmap.SetPixel(x, y, destinationColor);
                             }
                         });
                 }
@@ -383,7 +398,6 @@ namespace ImageProcessor.Imaging
             return destination;
         }
 
-        #region Private
         /// <summary>
         /// Implementation of 1D Gaussian G(x) function
         /// </summary>
@@ -422,6 +436,5 @@ namespace ImageProcessor.Imaging
 
             return left * right;
         }
-        #endregion
     }
 }
