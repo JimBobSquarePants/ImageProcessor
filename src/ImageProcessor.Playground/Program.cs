@@ -65,116 +65,116 @@ namespace ImageProcessor.PlayGround
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "night-bridge.png"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "tree.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "gamma_dalai_lama_gray.jpg"));
-            //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "blue-balloon.jpg"));
+            //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "shift.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "test2.png"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "120430.gif"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "rickroll.original.gif"));
 
             //////FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "crop-base-300x200.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "cmyk.png"));
-            //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif");
+            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png", ".jpg", ".jpeg");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif");
-            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png");
+            //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif", ".webp", ".bmp", ".jpg", ".png");
 
             foreach (FileInfo fileInfo in files)
             {
-                //if (fileInfo.Name != "night-bridge.png")
-                //{
-                //    continue;
-                //}
+            //if (fileInfo.Name != "night-bridge.png")
+            //{
+            //    continue;
+            //}
 
-                byte[] photoBytes = File.ReadAllBytes(fileInfo.FullName);
-                Console.WriteLine("Processing: " + fileInfo.Name);
+            byte[] photoBytes = File.ReadAllBytes(fileInfo.FullName);
+            Console.WriteLine("Processing: " + fileInfo.Name);
 
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-                // ImageProcessor
-                using (MemoryStream inStream = new MemoryStream(photoBytes))
+            // ImageProcessor
+            using (MemoryStream inStream = new MemoryStream(photoBytes))
+            {
+                using (ImageFactory imageFactory = new ImageFactory(true, false))
                 {
-                    using (ImageFactory imageFactory = new ImageFactory(true, true))
-                    {
-                        Size size = new Size(500, 0);
-                        CropLayer cropLayer = new CropLayer(20, 20, 20, 20, ImageProcessor.Imaging.CropMode.Percentage);
-                        //ResizeLayer layer = new ResizeLayer(size, ResizeMode.Max, AnchorPosition.Center, false);
-                        TextLayer textLayer = new TextLayer()
-                       {
-                           Text = "هناك حقيقة مثبتة منذ زمن",
-                           FontColor = Color.White,
-                           DropShadow = true,
-                           Vertical = true,
-                           //RightToLeft = true,
-                           //Position = new Point(5, 5)
+                    Size size = new Size(400, 600);
+                    CropLayer cropLayer = new CropLayer(20, 20, 20, 20, ImageProcessor.Imaging.CropMode.Percentage);
+                    //ResizeLayer layer = new ResizeLayer(size, ResizeMode.Max, AnchorPosition.Center, false);
+                    TextLayer textLayer = new TextLayer()
+                   {
+                       Text = "هناك حقيقة مثبتة منذ زمن",
+                       FontColor = Color.White,
+                       DropShadow = true,
+                       Vertical = true,
+                       //RightToLeft = true,
+                       //Position = new Point(5, 5)
 
-                       };
+                   };
 
-                        //ContentAwareResizeLayer layer = new ContentAwareResizeLayer(size)
-                        //{
-                        //    ConvolutionType = ConvolutionType.Sobel
-                        //};
-                        // Load, resize, set the format and quality and save an image.
-                        imageFactory.Load(inStream)
-                            //.DetectObjects(EmbeddedHaarCascades.FrontFaceDefault)
-                            //.Overlay(new ImageLayer
-                            //            {
-                            //                Image = overlay,
-                            //                Opacity = 50
-                            //            })
-                            //.Alpha(10)
-                            //.BackgroundColor(Color.White)
-                            //.Resize(new Size((int)(size.Width * 1.1), 0))
-                            //.ContentAwareResize(layer)
-                            //.Constrain(size)
-                            //.Mask(mask)
-                            //.Format(new PngFormat())
-                            //.BackgroundColor(Color.Cyan)
-                            .Watermark(textLayer)
-                            //.ReplaceColor(Color.FromArgb(93, 136, 231), Color.FromArgb(94, 134, 78), 50)
-                            //.GaussianSharpen(3)
-                            //.Saturation(20)
-                            //.Resize(size)
-                            //.Resize(size)
-                            //.BackgroundColor(Color.Black)
-                            //.Resolution(250, 250, PropertyTagResolutionUnit.Cm)
-                            // .Resize(new ResizeLayer(size, ResizeMode.Stretch))
-                            //.DetectEdges(new SobelEdgeFilter(), true)
-                            //.DetectEdges(new LaplacianOfGaussianEdgeFilter())
-                            //.GaussianBlur(new GaussianLayer(10, 11))
-                            //.EntropyCrop()
-                            //.Gamma(2.2F)
-                            //.Halftone()
-                            //.Hue(180, true)
-                            //.Rotate(45)
-                            //.RotateBounded(150, false)
-                            //.RoundedCorners(10)
-                            //.Vignette()
-                            //.Crop(cropLayer)
-                            //.Rotate(140)
-                            //.Filter(MatrixFilters.Invert)
-                            //.Contrast(-25)
-                            //.Contrast(50)
-                            //.Filter(MatrixFilters.Comic)
-                            //.Flip()
-                            //.Filter(MatrixFilters.HiSatch)
-                            //.Pixelate(8)
-                            //.GaussianSharpen(10)
-                            //.Format(new PngFormat() { IsIndexed = true })
-                            //.Format(new PngFormat() )
-                            .Save(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), @"..\..\images\output", fileInfo.Name)));
-                        //.Save(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), @"..\..\images\output", Path.GetFileNameWithoutExtension(fileInfo.Name) + ".png")));
+                    //ContentAwareResizeLayer layer = new ContentAwareResizeLayer(size)
+                    //{
+                    //    ConvolutionType = ConvolutionType.Sobel
+                    //};
+                    // Load, resize, set the format and quality and save an image.
+                    imageFactory.Load(inStream)
+                        //.DetectObjects(EmbeddedHaarCascades.FrontFaceDefault)
+                        //.Overlay(new ImageLayer
+                        //            {
+                        //                Image = overlay,
+                        //                Opacity = 50
+                        //            })
+                        //.Alpha(10)
+                        //.BackgroundColor(Color.White)
+                        //.Resize(new Size((int)(size.Width * 1.1), 0))
+                        //.ContentAwareResize(layer)
+                        //.Constrain(size)
+                        //.Mask(mask)
+                        //.Format(new PngFormat())
+                        //.BackgroundColor(Color.Cyan)
+                        //.Watermark(textLayer)
+                        //.ReplaceColor(Color.FromArgb(93, 136, 231), Color.FromArgb(94, 134, 78), 50)
+                        //.GaussianSharpen(3)
+                        //.Saturation(20)
+                        .Resize(size)
+                        //.Resize(size)
+                        //.BackgroundColor(Color.Black)
+                        //.Resolution(250, 250, PropertyTagResolutionUnit.Cm)
+                        // .Resize(new ResizeLayer(size, ResizeMode.Stretch))
+                        //.DetectEdges(new SobelEdgeFilter(), true)
+                        //.DetectEdges(new LaplacianOfGaussianEdgeFilter())
+                        //.GaussianBlur(new GaussianLayer(10, 11))
+                        //.EntropyCrop()
+                        //.Gamma(2.2F)
+                        //.Halftone()
+                        //.Hue(180, true)
+                        //.Rotate(45)
+                        //.RotateBounded(150, false)
+                        //.RoundedCorners(10)
+                        //.Vignette()
+                        //.Crop(cropLayer)
+                        //.Rotate(140)
+                        //.Filter(MatrixFilters.Invert)
+                        //.Contrast(-25)
+                        //.Contrast(50)
+                        //.Filter(MatrixFilters.Comic)
+                        //.Flip()
+                        //.Filter(MatrixFilters.HiSatch)
+                        //.Pixelate(8)
+                        //.GaussianSharpen(10)
+                        //.Format(new PngFormat() { IsIndexed = true })
+                        //.Format(new PngFormat())
+                        .Save(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), @"..\..\images\output", fileInfo.Name)));
+                    //.Save(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), @"..\..\images\output", Path.GetFileNameWithoutExtension(fileInfo.Name) + ".png")));
 
-                        stopwatch.Stop();
-                    }
+                    stopwatch.Stop();
                 }
+            }
 
-                long peakWorkingSet64 = Process.GetCurrentProcess().PeakWorkingSet64;
-                float mB = peakWorkingSet64 / (float)1024 / 1024;
+            long peakWorkingSet64 = Process.GetCurrentProcess().PeakWorkingSet64;
+            float mB = peakWorkingSet64 / (float)1024 / 1024;
 
-                Console.WriteLine(@"Completed {0} in {1:s\.fff} secs {2}Peak memory usage was {3} bytes or {4} Mb.", fileInfo.Name, stopwatch.Elapsed, Environment.NewLine, peakWorkingSet64.ToString("#,#"), mB);
+            Console.WriteLine(@"Completed {0} in {1:s\.fff} secs {2}Peak memory usage was {3} bytes or {4} Mb.", fileInfo.Name, stopwatch.Elapsed, Environment.NewLine, peakWorkingSet64.ToString("#,#"), mB);
 
-                //Console.WriteLine("Processed: " + fileInfo.Name + " in " + stopwatch.ElapsedMilliseconds + "ms");
+            //Console.WriteLine("Processed: " + fileInfo.Name + " in " + stopwatch.ElapsedMilliseconds + "ms");
             }
 
             Console.ReadLine();
