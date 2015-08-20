@@ -1,4 +1,13 @@
-﻿
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="FastResizer.cs" company="James South">
+//   Copyright (c) James South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   Resizes images out with <see cref="System.Drawing" /> using well known algorithms.
+//   This allows us to work in parallel and avoid locking issues caused by GDI+
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace ImageProcessor.Imaging
 {
@@ -13,26 +22,22 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Resizes images out with <see cref="System.Drawing"/> using well known algorithms.
     /// This allows us to work in parallel and avoid locking issues caused by GDI+
-    /// Based on work by the AForge.NET framework <see href="https://github.com/cureos/aforge"/>.
     /// </summary>
-    public static class FastResizer
+    internal static class FastResizer
     {
         /// <summary>
         /// Resize an image using a bicubic interpolation algorithm.
         /// <remarks>
         /// The class implements image resizing filter using bicubic
-        /// interpolation algorithm. It uses bicubic kernel W(x) as described on
+        /// interpolation algorithm. It uses bicubic kernel as described on
         /// <see href="http://en.wikipedia.org/wiki/Bicubic_interpolation#Bicubic_convolution_algorithm">Wikipedia</see>
-        /// (coefficient <b>a</b> is set to <b>-0.5</b>).
         /// </remarks>
         /// </summary>
         /// <param name="source">The source image.</param>
         /// <param name="width">The width to resize to.</param>
         /// <param name="height">The height to resize to.</param>
         /// <param name="destinationRectangle">The position within the new image to place the pixels.</param>
-        /// <param name="fixGamma">
-        /// Whether to resize the image using the linear color space.
-        /// </param>
+        /// <param name="fixGamma">Whether to resize the image using the linear color space.</param>
         /// <returns>
         /// The resized <see cref="Bitmap"/>.
         /// </returns>
@@ -68,17 +73,17 @@ namespace ImageProcessor.Imaging
                        y =>
                        {
                            // Y coordinates of source points.
-                           double oy = ((y - startY) * heightFactor) - 0.5;
-                           int oy1 = (int)oy;
-                           double dy = oy - oy1;
+                           double originY = ((y - startY) * heightFactor) - 0.5;
+                           int originY1 = (int)originY;
+                           double dy = originY - originY1;
 
                            // For each row.
                            for (int x = startX; x < endX; x++)
                            {
                                // X coordinates of source points.
-                               double ox = ((x - startX) * widthFactor) - 0.5f;
-                               int ox1 = (int)ox;
-                               double dx = ox - ox1;
+                               double originX = ((x - startX) * widthFactor) - 0.5f;
+                               int originX1 = (int)originX;
+                               double dx = originX - originX1;
 
                                // Destination color components
                                double r = 0;
@@ -86,49 +91,49 @@ namespace ImageProcessor.Imaging
                                double b = 0;
                                double a = 0;
 
-                               for (int n = -1; n < 3; n++)
+                               for (int yy = -1; yy < 3; yy++)
                                {
                                    // Get Y cooefficient
-                                   double k1 = Interpolation.BiCubicKernel(dy - n);
+                                   double kernel1 = Interpolation.BiCubicKernel(dy - yy);
 
-                                   int oy2 = oy1 + n;
-                                   if (oy2 < 0)
+                                   int originY2 = originY1 + yy;
+                                   if (originY2 < 0)
                                    {
-                                       oy2 = 0;
+                                       originY2 = 0;
                                    }
 
-                                   if (oy2 > maxHeight)
+                                   if (originY2 > maxHeight)
                                    {
-                                       oy2 = maxHeight;
+                                       originY2 = maxHeight;
                                    }
 
-                                   for (int m = -1; m < 3; m++)
+                                   for (int xx = -1; xx < 3; xx++)
                                    {
                                        // Get X cooefficient
-                                       double k2 = k1 * Interpolation.BiCubicKernel(m - dx);
+                                       double kernel2 = kernel1 * Interpolation.BiCubicKernel(xx - dx);
 
-                                       int ox2 = ox1 + m;
-                                       if (ox2 < 0)
+                                       int originX2 = originX1 + xx;
+                                       if (originX2 < 0)
                                        {
-                                           ox2 = 0;
+                                           originX2 = 0;
                                        }
 
-                                       if (ox2 > maxWidth)
+                                       if (originX2 > maxWidth)
                                        {
-                                           ox2 = maxWidth;
+                                           originX2 = maxWidth;
                                        }
 
-                                       Color sourceColor = sourceBitmap.GetPixel(ox2, oy2);
+                                       Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
 
                                        if (fixGamma)
                                        {
                                            sourceColor = PixelOperations.ToLinear(sourceColor);
                                        }
 
-                                       r += k2 * sourceColor.R;
-                                       g += k2 * sourceColor.G;
-                                       b += k2 * sourceColor.B;
-                                       a += k2 * sourceColor.A;
+                                       r += kernel2 * sourceColor.R;
+                                       g += kernel2 * sourceColor.G;
+                                       b += kernel2 * sourceColor.B;
+                                       a += kernel2 * sourceColor.A;
                                    }
                                }
 
@@ -199,31 +204,31 @@ namespace ImageProcessor.Imaging
                        y =>
                        {
                            // Y coordinates of source points
-                           double oy = (y - startY) * heightFactor;
-                           int oy1 = (int)oy;
-                           int oy2 = (oy1 == maxHeight) ? oy1 : oy1 + 1;
-                           double dy1 = oy - oy1;
+                           double originY = (y - startY) * heightFactor;
+                           int originY1 = (int)originY;
+                           int originY2 = (originY1 == maxHeight) ? originY1 : originY1 + 1;
+                           double dy1 = originY - originY1;
                            double dy2 = 1.0 - dy1;
 
                            // Get temp pointers
-                           int tp1 = oy1;
-                           int tp2 = oy2;
+                           int temp1 = originY1;
+                           int temp2 = originY2;
 
                            // For every column.
                            for (int x = startX; x < endX; x++)
                            {
                                // X coordinates of source points
-                               double ox = (x - startX) * widthFactor;
-                               int ox1 = (int)ox;
-                               int ox2 = (ox1 == maxWidth) ? ox1 : ox1 + 1;
-                               double dx1 = ox - ox1;
+                               double originX = (x - startX) * widthFactor;
+                               int originX1 = (int)originX;
+                               int originX2 = (originX1 == maxWidth) ? originX1 : originX1 + 1;
+                               double dx1 = originX - originX1;
                                double dx2 = 1.0 - dx1;
 
                                // Get four pixels to sample from.
-                               Color sourceColor1 = sourceBitmap.GetPixel(ox1, tp1);
-                               Color sourceColor2 = sourceBitmap.GetPixel(ox2, tp1);
-                               Color sourceColor3 = sourceBitmap.GetPixel(ox1, tp2);
-                               Color sourceColor4 = sourceBitmap.GetPixel(ox2, tp2);
+                               Color sourceColor1 = sourceBitmap.GetPixel(originX1, temp1);
+                               Color sourceColor2 = sourceBitmap.GetPixel(originX2, temp1);
+                               Color sourceColor3 = sourceBitmap.GetPixel(originX1, temp2);
+                               Color sourceColor4 = sourceBitmap.GetPixel(originX2, temp2);
 
                                if (fixGamma)
                                {
@@ -333,17 +338,17 @@ namespace ImageProcessor.Imaging
                        y =>
                        {
                            // Y coordinates of source points.
-                           double oy = ((y - startY) * heightFactor) - 0.5;
-                           int oy1 = (int)oy;
-                           double dy = oy - oy1;
+                           double originY = ((y - startY) * heightFactor) - 0.5;
+                           int originY1 = (int)originY;
+                           double dy = originY - originY1;
 
                            // For each row.
                            for (int x = startX; x < endX; x++)
                            {
                                // X coordinates of source points.
-                               double ox = ((x - startX) * widthFactor) - 0.5f;
-                               int ox1 = (int)ox;
-                               double dx = ox - ox1;
+                               double originX = ((x - startX) * widthFactor) - 0.5f;
+                               int originX1 = (int)originX;
+                               double dx = originX - originX1;
 
                                // Destination color components
                                double r = 0;
@@ -356,15 +361,15 @@ namespace ImageProcessor.Imaging
                                    // Get Y cooefficient
                                    double k1 = Interpolation.LanczosKernel(dy - n);
 
-                                   int oy2 = oy1 + n;
-                                   if (oy2 < 0)
+                                   int originY2 = originY1 + n;
+                                   if (originY2 < 0)
                                    {
-                                       oy2 = 0;
+                                       originY2 = 0;
                                    }
 
-                                   if (oy2 > maxHeight)
+                                   if (originY2 > maxHeight)
                                    {
-                                       oy2 = maxHeight;
+                                       originY2 = maxHeight;
                                    }
 
                                    for (int m = -3; m < 6; m++)
@@ -372,19 +377,19 @@ namespace ImageProcessor.Imaging
                                        // Get X cooefficient
                                        double k2 = k1 * Interpolation.LanczosKernel(m - dx);
 
-                                       int ox2 = ox1 + m;
-                                       if (ox2 < 0)
+                                       int originX2 = originX1 + m;
+                                       if (originX2 < 0)
                                        {
-                                           ox2 = 0;
+                                           originX2 = 0;
                                        }
 
-                                       if (ox2 > maxWidth)
+                                       if (originX2 > maxWidth)
                                        {
-                                           ox2 = maxWidth;
+                                           originX2 = maxWidth;
                                        }
 
                                        // ReSharper disable once AccessToDisposedClosure
-                                       Color sourceColor = sourceBitmap.GetPixel(ox2, oy2);
+                                       Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
 
                                        if (fixGamma)
                                        {

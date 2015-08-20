@@ -115,8 +115,8 @@ namespace ImageProcessor.Imaging.Helpers
                 new ColorMatrix(
                     new[]
                         {
-                            new float[] { 1, 0, 0, 0, 0 }, 
-                            new float[] { 0, 1, 0, 0, 0 }, 
+                            new float[] { 1, 0, 0, 0, 0 },
+                            new float[] { 0, 1, 0, 0, 0 },
                             new float[] { 0, 0, 1, 0, 0 },
                             new float[] { 0, 0, 0, 1, 0 },
                             new[] { brightnessFactor, brightnessFactor, brightnessFactor, 0, 1 }
@@ -170,7 +170,7 @@ namespace ImageProcessor.Imaging.Helpers
                 new ColorMatrix(
                     new[]
                     {
-                        new[] { contrastFactor, 0, 0, 0, 0 }, 
+                        new[] { contrastFactor, 0, 0, 0, 0 },
                         new[] { 0, contrastFactor, 0, 0, 0 },
                         new[] { 0, 0, contrastFactor, 0, 0 },
                         new float[] { 0, 0, 0, 1, 0 },
@@ -395,7 +395,7 @@ namespace ImageProcessor.Imaging.Helpers
                 return signal * 12.92f;
             }
 
-            return (float)((1 + a) * Math.Pow(signal, 1 / 2.4f));
+            return ((float)((1 + a) * Math.Pow(signal, 1 / 2.4f))) - a;
         }
     }
 }
