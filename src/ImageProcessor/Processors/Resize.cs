@@ -89,7 +89,7 @@ namespace ImageProcessor.Processors
                 resizeLayer.MaxSize = maxSize;
 
                 Resizer resizer = new Resizer(resizeLayer);
-                newImage = resizer.ResizeImage(image);
+                newImage = resizer.ResizeImage(image, factory.FixGamma);
 
                 // Check that the original image has not been returned.
                 if (newImage != image)

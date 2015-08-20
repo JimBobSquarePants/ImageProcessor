@@ -61,7 +61,6 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
@@ -69,44 +68,30 @@ namespace ImageProcessor.Processors
                 const int Orientation = (int)ExifPropertyTag.Orientation;
                 if (!factory.PreserveExifData && factory.ExifPropertyItems.ContainsKey(Orientation))
                 {
-                    newImage = new Bitmap(image);
-
                     int rotationValue = factory.ExifPropertyItems[Orientation].Value[0];
                     switch (rotationValue)
                     {
-                        case 1: // Landscape, do nothing
-                            break;
-
                         case 8: // Rotated 90 right
                             // De-rotate:
-                            newImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                            image.RotateFlip(RotateFlipType.Rotate270FlipNone);
                             break;
 
                         case 3: // Bottoms up
-                            newImage.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                            image.RotateFlip(RotateFlipType.Rotate180FlipNone);
                             break;
 
                         case 6: // Rotated 90 left
-                            newImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
                             break;
                     }
-
-                    // Reassign the image.
-                    image.Dispose();
-                    image = newImage;
                 }
+
+                return image;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
     }
 }

@@ -63,23 +63,23 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
+            //Bitmap newImage = null;
             Image image = factory.Image;
 
             try
             {
-                newImage = new Bitmap(image);
+                //newImage = new Bitmap(image);
                 ImageLayer imageLayer = this.DynamicParameter;
                 Bitmap overlay = new Bitmap(imageLayer.Image);
 
                 // Set the resolution of the overlay and the image to match.
-                overlay.SetResolution(newImage.HorizontalResolution, newImage.VerticalResolution);
+                overlay.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                 Size size = imageLayer.Size;
                 int width = image.Width;
                 int height = image.Height;
-                int overlayWidth = size != Size.Empty ? Math.Min(image.Size.Width, size.Width) : Math.Min(image.Size.Width, overlay.Size.Width);
-                int overlayHeight = size != Size.Empty ? Math.Min(image.Size.Height, size.Height) : Math.Min(image.Size.Height, overlay.Size.Height);
+                int overlayWidth = size != Size.Empty ? Math.Min(width, size.Width) : Math.Min(width, overlay.Width);
+                int overlayHeight = size != Size.Empty ? Math.Min(height, size.Height) : Math.Min(height, overlay.Height);
 
                 Point? position = imageLayer.Position;
                 int opacity = imageLayer.Opacity;
@@ -88,7 +88,7 @@ namespace ImageProcessor.Processors
                 {
                     // Find the maximum possible dimensions and resize the image.
                     ResizeLayer layer = new ResizeLayer(new Size(overlayWidth, overlayHeight), ResizeMode.Max);
-                    overlay = new Resizer(layer).ResizeImage(overlay);
+                    overlay = new Resizer(layer).ResizeImage(overlay, factory.FixGamma);
                     overlayWidth = overlay.Width;
                     overlayHeight = overlay.Height;
                 }
@@ -103,7 +103,7 @@ namespace ImageProcessor.Processors
                     overlay = Adjustments.Alpha(overlay, opacity);
                 }
 
-                using (Graphics graphics = Graphics.FromImage(newImage))
+                using (Graphics graphics = Graphics.FromImage(image))
                 {
                     graphics.SmoothingMode = SmoothingMode.AntiAlias;
                     graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -122,15 +122,15 @@ namespace ImageProcessor.Processors
                     }
                 }
 
-                image.Dispose();
-                image = newImage;
+                //image.Dispose();
+                //image = newImage;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
+                //if (newImage != null)
+                //{
+                //    newImage.Dispose();
+                //}
 
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
