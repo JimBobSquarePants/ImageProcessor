@@ -58,7 +58,7 @@ namespace ImageProcessor.Processors
                 Convolution convolution = new Convolution(gaussianLayer.Sigma) { Threshold = gaussianLayer.Threshold };
                 double[,] kernel = convolution.CreateGuassianBlurFilter(gaussianLayer.Size);
 
-                return convolution.ProcessKernel(image, kernel);
+                return convolution.ProcessKernel(image, kernel, factory.FixGamma);
             }
             catch (Exception ex)
             {

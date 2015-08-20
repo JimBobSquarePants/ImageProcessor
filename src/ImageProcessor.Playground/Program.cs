@@ -72,9 +72,9 @@ namespace ImageProcessor.PlayGround
 
             //////FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "crop-base-300x200.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "cmyk.png"));
-            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif");
+            //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png", ".jpg", ".jpeg");
-            //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif");
+            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".png");
             //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif", ".webp", ".bmp", ".jpg", ".png");
 
@@ -94,9 +94,9 @@ namespace ImageProcessor.PlayGround
             // ImageProcessor
             using (MemoryStream inStream = new MemoryStream(photoBytes))
             {
-                using (ImageFactory imageFactory = new ImageFactory(true, false))
+                using (ImageFactory imageFactory = new ImageFactory(true, true))
                 {
-                    Size size = new Size(400, 600);
+                    Size size = new Size(400, 0);
                     CropLayer cropLayer = new CropLayer(20, 20, 20, 20, ImageProcessor.Imaging.CropMode.Percentage);
                     //ResizeLayer layer = new ResizeLayer(size, ResizeMode.Max, AnchorPosition.Center, false);
                     TextLayer textLayer = new TextLayer()
