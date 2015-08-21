@@ -63,7 +63,7 @@ namespace ImageProcessor.PlayGround
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "Arc-de-Triomphe-France.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "Martin-Schoeller-Jack-Nicholson-Portrait.jpeg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "night-bridge.png"));
-            //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "tree.jpg"));
+            //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "Calliphora_sp_Portrait.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "gamma_dalai_lama_gray.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "shift.jpg"));
             //FileInfo fileInfo = new FileInfo(Path.Combine(resolvedPath, "test2.png"));
@@ -134,6 +134,7 @@ namespace ImageProcessor.PlayGround
                         //.ReplaceColor(Color.FromArgb(93, 136, 231), Color.FromArgb(94, 134, 78), 50)
                         //.GaussianSharpen(3)
                         //.Saturation(20)
+                        //.GaussianBlur(new GaussianLayer(8))
                         .Resize(size)
                         //.Resize(size)
                         //.BackgroundColor(Color.Black)
