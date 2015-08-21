@@ -22,7 +22,7 @@ namespace ImageProcessor.Imaging
         /// <remarks>
         /// The function implements bicubic kernel W(x) as described on
         /// <a href="https://en.wikipedia.org/wiki/Lanczos_resampling#Algorithm">Wikipedia</a>
-        /// (coefficient <b>a</b> is set to <b>-0.5</b>).
+        /// (coefficient <c>a</c> is set to <c>-0.5</c>).
         /// </remarks>
         /// </summary>
         /// <param name="x">X value.</param> 

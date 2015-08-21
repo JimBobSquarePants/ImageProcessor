@@ -11,6 +11,8 @@
 
 namespace ImageProcessor.Imaging
 {
+    using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Drawing;
     using System.Drawing.Imaging;
@@ -51,6 +53,14 @@ namespace ImageProcessor.Imaging
             int endX = destinationRectangle.Width + startX;
             int endY = destinationRectangle.Height + startY;
 
+            // Scaling factors
+            double widthFactor = sourceWidth / (double)destinationRectangle.Width;
+            double heightFactor = sourceHeight / (double)destinationRectangle.Height;
+
+            // Width and height decreased by 1
+            int maxHeight = sourceHeight - 1;
+            int maxWidth = sourceWidth - 1;
+
             Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
@@ -58,14 +68,6 @@ namespace ImageProcessor.Imaging
             {
                 using (FastBitmap destinationBitmap = new FastBitmap(destination))
                 {
-                    // Scaling factors
-                    double widthFactor = sourceWidth / (double)destinationRectangle.Width;
-                    double heightFactor = sourceHeight / (double)destinationRectangle.Height;
-
-                    // Width and height decreased by 1
-                    int maxHeight = sourceHeight - 1;
-                    int maxWidth = sourceWidth - 1;
-
                     // For each column
                     Parallel.For(
                        startY,
@@ -155,6 +157,162 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
+        /// Resize an image using a bicubic interpolation algorithm.
+        /// <remarks>
+        /// The class implements image resizing filter using bicubic
+        /// interpolation algorithm. It uses bicubic kernel as described on
+        /// <see href="http://en.wikipedia.org/wiki/Bicubic_interpolation#Bicubic_convolution_algorithm">Wikipedia</see>
+        /// </remarks>
+        /// </summary>
+        /// <param name="source">The source image.</param>
+        /// <param name="width">The width to resize to.</param>
+        /// <param name="height">The height to resize to.</param>
+        /// <param name="destinationRectangle">The position within the new image to place the pixels.</param>
+        /// <param name="fixGamma">Whether to resize the image using the linear color space.</param>
+        /// <returns>
+        /// The resized <see cref="Bitmap"/>.
+        /// </returns>
+        [SuppressMessage("ReSharper", "AccessToDisposedClosure", Justification = "FastBitmap is incorrectly warned against.")]
+        public static Bitmap ResizeBicubicHighQuality(Bitmap source, int width, int height, Rectangle destinationRectangle, bool fixGamma)
+        {
+            int sourceWidth = source.Width;
+            int sourceHeight = source.Height;
+            int startX = destinationRectangle.X;
+            int startY = destinationRectangle.Y;
+            int endX = destinationRectangle.Width + startX;
+            int endY = destinationRectangle.Height + startY;
+
+            // Scaling factors
+            double widthFactor = sourceWidth / (double)destinationRectangle.Width;
+            double heightFactor = sourceHeight / (double)destinationRectangle.Height;
+
+            // Width and height decreased by 1
+            int maxHeight = sourceHeight - 1;
+            int maxWidth = sourceWidth - 1;
+
+            Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+
+            // The radius for pre blurring the images.
+            int radius = 0;
+            if (width <= 150 && height <= 150)
+            {
+                radius = 4;
+            }
+
+            using (FastBitmap sourceBitmap = new FastBitmap(source))
+            {
+                using (FastBitmap destinationBitmap = new FastBitmap(destination))
+                {
+                    // For each column
+                    Parallel.For(
+                       startY,
+                       endY,
+                       y =>
+                       {
+                           // Y coordinates of source points.
+                           double originY = ((y - startY) * heightFactor) - 0.5;
+                           int originY1 = (int)originY;
+                           double dy = originY - originY1;
+
+                           // Houses colors for blurring.
+                           Color[,] sourceColors = new Color[4, 4];
+
+                           // For each row.
+                           for (int x = startX; x < endX; x++)
+                           {
+                               // X coordinates of source points.
+                               double originX = ((x - startX) * widthFactor) - 0.5f;
+                               int originX1 = (int)originX;
+                               double dx = originX - originX1;
+
+                               // Destination color components
+                               double r = 0;
+                               double g = 0;
+                               double b = 0;
+                               double a = 0;
+
+                               for (int yy = -1; yy < 3; yy++)
+                               {
+                                   int originY2 = originY1 + yy;
+                                   if (originY2 < 0)
+                                   {
+                                       originY2 = 0;
+                                   }
+
+                                   if (originY2 > maxHeight)
+                                   {
+                                       originY2 = maxHeight;
+                                   }
+
+                                   for (int xx = -1; xx < 3; xx++)
+                                   {
+                                       int originX2 = originX1 + xx;
+                                       if (originX2 < 0)
+                                       {
+                                           originX2 = 0;
+                                       }
+
+                                       if (originX2 > maxWidth)
+                                       {
+                                           originX2 = maxWidth;
+                                       }
+
+                                       Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
+
+                                       sourceColors[xx + 1, yy + 1] = sourceColor;
+                                   }
+                               }
+
+                               // Blur the colors.
+                               if (radius > 0)
+                               {
+                                   sourceColors = BoxBlur(sourceColors, radius, fixGamma);
+                               }
+
+                               // Do the resize.
+                               for (int yy = -1; yy < 3; yy++)
+                               {
+                                   // Get Y cooefficient
+                                   double kernel1 = Interpolation.BiCubicKernel(dy - yy);
+
+                                   for (int xx = -1; xx < 3; xx++)
+                                   {
+                                       // Get X cooefficient
+                                       double kernel2 = kernel1 * Interpolation.BiCubicKernel(xx - dx);
+
+                                       Color sourceColor = sourceColors[xx + 1, yy + 1];
+
+                                       if (fixGamma)
+                                       {
+                                           sourceColor = PixelOperations.ToLinear(sourceColor);
+                                       }
+
+                                       r += kernel2 * sourceColor.R;
+                                       g += kernel2 * sourceColor.G;
+                                       b += kernel2 * sourceColor.B;
+                                       a += kernel2 * sourceColor.A;
+                                   }
+                               }
+
+                               Color destinationColor = Color.FromArgb(a.ToByte(), r.ToByte(), g.ToByte(), b.ToByte());
+
+                               if (fixGamma)
+                               {
+                                   destinationColor = PixelOperations.ToSRGB(destinationColor);
+                               }
+
+                               destinationBitmap.SetPixel(x, y, destinationColor);
+                           }
+                       });
+                }
+            }
+
+            source.Dispose();
+            return destination;
+        }
+
+        /// <summary>
         /// Resize an image using a bilinear interpolation algorithm.
         /// <remarks>
         /// The class implements image resizing filter using bilinear
@@ -166,9 +324,7 @@ namespace ImageProcessor.Imaging
         /// <param name="width">The width to resize to.</param>
         /// <param name="height">The height to resize to.</param>
         /// <param name="destinationRectangle">The position within the new image to place the pixels.</param>
-        /// <param name="fixGamma">
-        /// Whether to resize the image using the linear color space.
-        /// </param>
+        /// <param name="fixGamma">Whether to resize the image using the linear color space.</param>
         /// <returns>
         /// The resized <see cref="Bitmap"/>.
         /// </returns>
@@ -182,6 +338,14 @@ namespace ImageProcessor.Imaging
             int endX = destinationRectangle.Width + startX;
             int endY = destinationRectangle.Height + startY;
 
+            // Scaling factors
+            double widthFactor = sourceWidth / (double)destinationRectangle.Width;
+            double heightFactor = sourceHeight / (double)destinationRectangle.Height;
+
+            // Width and height decreased by 1
+            int maxHeight = sourceHeight - 1;
+            int maxWidth = sourceWidth - 1;
+
             Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
@@ -189,14 +353,6 @@ namespace ImageProcessor.Imaging
             {
                 using (FastBitmap destinationBitmap = new FastBitmap(destination))
                 {
-                    // Scaling factors
-                    double widthFactor = sourceWidth / (double)destinationRectangle.Width;
-                    double heightFactor = sourceHeight / (double)destinationRectangle.Height;
-
-                    // Width and height decreased by 1
-                    int maxHeight = sourceHeight - 1;
-                    int maxWidth = sourceWidth - 1;
-
                     // For each column
                     Parallel.For(
                        startY,
@@ -288,6 +444,65 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
+        /// Resize an image using a nearest neighbor algorithm.
+        /// <remarks>
+        /// The class implements image resizing filter using the nearest neighbor algorithms described on
+        /// <see href="https://en.wikipedia.org/wiki/Nearest-neighbor_interpolation">Wikipedia</see>.
+        /// </remarks>
+        /// </summary>
+        /// <param name="source">The source image.</param>
+        /// <param name="width">The width to resize to.</param>
+        /// <param name="height">The height to resize to.</param>
+        /// <param name="destinationRectangle">The position within the new image to place the pixels.</param>
+        /// <returns>
+        /// The resized <see cref="Bitmap"/>.
+        /// </returns>
+        [SuppressMessage("ReSharper", "AccessToDisposedClosure", Justification = "FastBitmap is incorrectly warned against.")]
+        public static Bitmap ResizeNearestNeighbor(Bitmap source, int width, int height, Rectangle destinationRectangle)
+        {
+            int sourceWidth = source.Width;
+            int sourceHeight = source.Height;
+            int startX = destinationRectangle.X;
+            int startY = destinationRectangle.Y;
+            int endX = destinationRectangle.Width + startX;
+            int endY = destinationRectangle.Height + startY;
+
+            // Scaling factors
+            double widthFactor = sourceWidth / (double)destinationRectangle.Width;
+            double heightFactor = sourceHeight / (double)destinationRectangle.Height;
+
+            Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+
+            using (FastBitmap sourceBitmap = new FastBitmap(source))
+            {
+                using (FastBitmap destinationBitmap = new FastBitmap(destination))
+                {
+                    // For each column
+                    Parallel.For(
+                       startY,
+                       endY,
+                       y =>
+                       {
+                           // Y coordinates of source points
+                           int originY = (int)((y - startY) * heightFactor);
+
+                           for (int x = startX; x < endX; x++)
+                           {
+                               // X coordinates of source points
+                               int originX = (int)((x - startX) * widthFactor);
+
+                               destinationBitmap.SetPixel(x, y, sourceBitmap.GetPixel(originX, originY));
+                           }
+                       });
+                }
+            }
+
+            source.Dispose();
+            return destination;
+        }
+
+        /// <summary>
         /// Resize an image using a Lanczos interpolation algorithm.
         /// <remarks>
         /// The class implements image resizing filter using Lanczos
@@ -300,9 +515,7 @@ namespace ImageProcessor.Imaging
         /// <param name="width">The width to resize to.</param>
         /// <param name="height">The height to resize to.</param>
         /// <param name="destinationRectangle">The position within the new image to place the pixels.</param>
-        /// <param name="fixGamma">
-        /// Whether to resize the image using the linear color space.
-        /// </param>
+        /// <param name="fixGamma">Whether to resize the image using the linear color space.</param>
         /// <returns>
         /// The resized <see cref="Bitmap"/>.
         /// </returns>
@@ -418,6 +631,140 @@ namespace ImageProcessor.Imaging
             }
 
             source.Dispose();
+            return destination;
+        }
+
+        /// <summary>
+        /// The box blur.
+        /// <see cref="http://blog.ivank.net/fastest-gaussian-blur.html"/>
+        /// </summary>
+        /// <param name="sourceColors">
+        /// The source colors.
+        /// </param>
+        /// <param name="radius">
+        /// The radius.
+        /// </param>
+        /// <param name="fixGamma">
+        /// The fix gamma.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:Color[,]"/>.
+        /// </returns>
+        private static Color[,] BoxBlur(Color[,] sourceColors, int radius, bool fixGamma)
+        {
+            sourceColors = BoxBlurHorizontal(sourceColors, radius, fixGamma);
+            sourceColors = BoxBlurVertical(sourceColors, radius, fixGamma);
+            return sourceColors;
+        }
+
+        private static Color[,] BoxBlurHorizontal(Color[,] colors, int radius, bool fixGamma)
+        {
+            int width = colors.GetLength(0);
+            int height = colors.GetLength(1);
+
+            Color[,] destination = new Color[width, height];
+
+            // For each column
+            for (int y = 0; y < height; y++)
+            {
+                // For each row
+                for (int x = 0; x < width; x++)
+                {
+                    int fx = Math.Max(0, x - radius);
+                    int tx = Math.Min(width, x + radius + 1);
+                    int red = 0;
+                    int green = 0;
+                    int blue = 0;
+                    int alpha = 0;
+
+                    for (int xx = fx; xx < tx; xx++)
+                    {
+                        Color sourceColor = colors[y, xx];
+
+                        if (fixGamma)
+                        {
+                            sourceColor = PixelOperations.ToLinear(sourceColor);
+                        }
+
+                        red += sourceColor.R;
+                        green += sourceColor.G;
+                        blue += sourceColor.B;
+                        alpha += sourceColor.A;
+                    }
+
+                    int divider = tx - fx;
+
+                    red /= divider;
+                    green /= divider;
+                    blue /= divider;
+                    alpha /= divider;
+
+                    Color destinationColor = Color.FromArgb(alpha, red, green, blue);
+
+                    if (fixGamma)
+                    {
+                        destinationColor = PixelOperations.ToSRGB(destinationColor);
+                    }
+
+                    destination[x, y] = destinationColor;
+                }
+            }
+
+            return destination;
+        }
+        private static Color[,] BoxBlurVertical(Color[,] colors, int radius, bool fixGamma)
+        {
+            int width = colors.GetLength(0);
+            int height = colors.GetLength(1);
+
+            Color[,] destination = new Color[width, height];
+
+            // For each column
+            for (int y = 0; y < height; y++)
+            {
+                // For each row
+                for (int x = 0; x < width; x++)
+                {
+                    int fy = Math.Max(0, y - radius);
+                    int ty = Math.Min(width, y + radius + 1);
+                    int red = 0;
+                    int green = 0;
+                    int blue = 0;
+                    int alpha = 0;
+
+                    for (int yy = fy; yy < ty; yy++)
+                    {
+                        Color sourceColor = colors[x, yy];
+
+                        if (fixGamma)
+                        {
+                            sourceColor = PixelOperations.ToLinear(sourceColor);
+                        }
+
+                        red += sourceColor.R;
+                        green += sourceColor.G;
+                        blue += sourceColor.B;
+                        alpha += sourceColor.A;
+                    }
+
+                    int divider = ty - fy;
+
+                    red /= divider;
+                    green /= divider;
+                    blue /= divider;
+                    alpha /= divider;
+
+                    Color destinationColor = Color.FromArgb(alpha, red, green, blue);
+
+                    if (fixGamma)
+                    {
+                        destinationColor = PixelOperations.ToSRGB(destinationColor);
+                    }
+
+                    destination[x, y] = destinationColor;
+                }
+            }
+
             return destination;
         }
     }
