@@ -183,7 +183,7 @@ namespace ImageProcessor.Web.Helpers
                     HttpWebResponse errorResponse = (HttpWebResponse)ex.Response;
                     if (errorResponse.StatusCode == HttpStatusCode.NotFound)
                     {
-                        throw new HttpException(404, "No image exists at " + this.Uri);
+                        throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + this.Uri);
                     }
                 }
 
