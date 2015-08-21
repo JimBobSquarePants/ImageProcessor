@@ -432,9 +432,7 @@ namespace ImageProcessor.Imaging
 
                     // Do the resize.
                     Rectangle destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
-
-                    // We are making it larger.
-                    newImage = FastResizer.ResizeBicubic((Bitmap)source, width, height, destination, linear);
+                    newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
 
                     //newImage = linear ? ResizeLinear(source, width, height, destination) : ResizeComposite(source, width, height, destination);
 
