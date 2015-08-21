@@ -36,8 +36,12 @@ namespace ImageProcessor.Web.UnitTests
         public void ExtendedColorTypeConverterParsesColors(string input)
         {
             ExtendedColorTypeConverter converter = new ExtendedColorTypeConverter();
-            Color color = (Color)converter.ConvertFrom(null, null, input);
-            Assert.AreEqual(Color.Blue.ToArgb(), color.ToArgb());
+            object convertFrom = converter.ConvertFrom(null, null, input);
+            if (convertFrom != null)
+            {
+                Color color = (Color)convertFrom;
+                Assert.AreEqual(Color.Blue.ToArgb(), color.ToArgb());
+            }
         }
     }
 }
