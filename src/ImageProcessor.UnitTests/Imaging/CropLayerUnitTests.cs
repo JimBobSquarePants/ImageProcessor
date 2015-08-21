@@ -6,8 +6,10 @@
 // --------------------------------------------------------------------------------------------------------------------
 namespace ImageProcessor.UnitTests.Imaging
 {
-    using ImageProcessor.Imaging;
     using FluentAssertions;
+
+    using ImageProcessor.Imaging;
+
     using NUnit.Framework;
 
     /// <summary>
