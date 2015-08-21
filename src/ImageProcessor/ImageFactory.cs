@@ -377,8 +377,11 @@ namespace ImageProcessor
 #endif
 
                 // Dispose and reassign the image.
+                // Ensure the image is in the most efficient format.
+                Image formatted = newImage.Copy();
+                newImage.Dispose();
                 this.Image.Dispose();
-                this.Image = newImage;
+                this.Image = formatted;
 
                 // Set the other properties.
                 this.CurrentImageFormat = this.backupFormat;

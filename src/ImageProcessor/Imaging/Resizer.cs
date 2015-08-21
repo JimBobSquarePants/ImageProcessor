@@ -19,6 +19,7 @@ namespace ImageProcessor.Imaging
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Common.Extensions;
+    using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
@@ -52,6 +53,11 @@ namespace ImageProcessor.Imaging
         /// Gets or sets the <see cref="ResizeLayer"/>.
         /// </summary>
         public ResizeLayer ResizeLayer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ISupportedImageFormat"/>.
+        /// </summary>
+        public ISupportedImageFormat ImageFormat { get; set; }
 
         /// <summary>
         /// Resizes the given image.
@@ -432,7 +438,15 @@ namespace ImageProcessor.Imaging
 
                     // Do the resize.
                     Rectangle destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
-                    newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
+
+                    if (this.ImageFormat is GifFormat || (this.ImageFormat is PngFormat && !((PngFormat)this.ImageFormat).IsIndexed))
+                    {
+                        newImage = FastResizer.ResizeBilinear((Bitmap)source, width, height, destination, linear);
+                    }
+                    else
+                    {
+                        newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
+                    }
 
                     //newImage = linear ? ResizeLinear(source, width, height, destination) : ResizeComposite(source, width, height, destination);
 
