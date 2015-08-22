@@ -1,4 +1,4 @@
-Properties {
+properties {
 	# call nuget.bat with these values as parameters
 	$NugetApiKey = $null
 	$NugetSource = $null
