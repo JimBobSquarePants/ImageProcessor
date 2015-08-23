@@ -224,14 +224,15 @@ task Publish-Myget {
 	Write-Host "MygetSource $MygetSource"	
 	Write-Host "AppVeyorPullRequestNumber $AppVeyorPullRequestNumber"
 	
-	if($AppVeyorPullRequestNumber -ne $null -and $AppVeyorPullRequestNumber -ne ""){
-		return
-	}
+	#if($AppVeyorPullRequestNumber -ne $null -and $AppVeyorPullRequestNumber -ne ""){
+	#	return
+	#}
 	
 	if ($MygetApiKey -eq $null -or $MygetApiKey -eq "") {
 		throw New-Object [System.ArgumentException] "You must provide a Myget API key as parameter: 'Invoke-psake Publish-Myget -properties @{`"MygetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
 	}
 	
+	Write-Host "Pushing packages to Myget"
 	Get-ChildItem $NUGET_OUTPUT -Filter "*.nugpkg" | % {
 		& $NUGET_EXE push $_ -ApiKey $MygetApiKey -Source $MygetSource
 	}
