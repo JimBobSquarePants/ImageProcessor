@@ -171,8 +171,6 @@ task Run-Coverage -depends Build-Tests {
 		Write-Host "Transforming coverage results file to HTML"
 		& $REPORTGEN_EXE -verbosity:Info -reports:$CoverageOutputPath -targetdir:(Join-Path $TEST_RESULTS "Coverage\$_")
 
-        Write-Host "CoverallsRepoToken $CoverallsRepoToken"
-
 	    if ($CoverallsRepoToken -ne $null -and $CoverallsRepoToken -ne "") {
 			Write-Host "Uploading coverage report to Coveralls.io"
 	        Exec { . $COVERALLS_EXE --opencover $CoverageOutputPath }
@@ -220,8 +218,6 @@ task Generate-Nuget -depends Set-VersionNumber, Build-Solution {
 # publishes the Myget on a feed
 task Publish-Myget {
 
-	Write-Host "MygetApiKey $MygetApiKey"	
-	Write-Host "MygetSource $MygetSource"	
 	Write-Host "AppVeyorPullRequestNumber $AppVeyorPullRequestNumber"
 	
 	#if($AppVeyorPullRequestNumber -ne $null -and $AppVeyorPullRequestNumber -ne ""){
@@ -234,6 +230,8 @@ task Publish-Myget {
 	
 	Write-Host "Pushing packages to Myget"
 	Get-ChildItem $NUGET_OUTPUT -Filter "*.nugpkg" | % {
+		Write-Host "Pushing $_.name"
+		
 		& $NUGET_EXE push $_ -ApiKey $MygetApiKey -Source $MygetSource
 	}
 }
