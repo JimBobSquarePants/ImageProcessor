@@ -12,6 +12,7 @@ namespace ImageProcessor.Imaging
 {
     using System;
     using System.Drawing;
+    using System.Drawing.Imaging;
     using System.Threading.Tasks;
 
     using ImageProcessor.Common.Extensions;
@@ -265,7 +266,7 @@ namespace ImageProcessor.Imaging
         {
             int width = source.Width;
             int height = source.Height;
-            Bitmap destination = new Bitmap(width, height);
+            Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             using (FastBitmap sourceBitmap = new FastBitmap(source))
