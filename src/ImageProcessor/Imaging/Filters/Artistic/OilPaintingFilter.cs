@@ -12,6 +12,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
 {
     using System;
     using System.Drawing;
+    using System.Drawing.Imaging;
     using System.Threading.Tasks;
 
     using ImageProcessor.Common.Extensions;
@@ -101,7 +102,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
 
             int radius = this.brushSize >> 1;
 
-            Bitmap destination = new Bitmap(width, height);
+            Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
             using (FastBitmap sourceBitmap = new FastBitmap(source))
             {
