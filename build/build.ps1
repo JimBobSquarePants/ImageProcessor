@@ -221,8 +221,9 @@ task Generate-Nuget -depends Set-VersionNumber, Build-Solution {
 task Publish-Myget {
 
 	Write-Host "MygetApiKey $MygetApiKey"	
+	Write-Host "MygetSource $MygetSource"	
 	
-	if($AppVeyorPullRequestNumber -neq $null){
+	if($AppVeyorPullRequestNumber -ne $null){
 		return
 	}
 	
@@ -237,7 +238,7 @@ task Publish-Myget {
 
 # publishes the Nuget on a feed
 task Publish-Nuget {
-	if($AppVeyorPullRequestNumber -neq $null){
+	if($AppVeyorPullRequestNumber -ne $null){
 		return
 	}
 		
