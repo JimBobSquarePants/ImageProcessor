@@ -222,8 +222,9 @@ task Publish-Myget {
 
 	Write-Host "MygetApiKey $MygetApiKey"	
 	Write-Host "MygetSource $MygetSource"	
+	Write-Host "AppVeyorPullRequestNumber $AppVeyorPullRequestNumber"
 	
-	if($AppVeyorPullRequestNumber -ne $null){
+	if($AppVeyorPullRequestNumber -ne $null -and $AppVeyorPullRequestNumber -ne ""){
 		return
 	}
 	
