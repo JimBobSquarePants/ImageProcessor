@@ -62,6 +62,4 @@ artifacts:
 on_success:
   - ps: Import-Module .\build\psake.psm1
   - ps: Invoke-Psake .\build\build.ps1 Publish-Myget -properties @{"MygetApiKey"=$env:MYGET_API_KEY;"MygetSource"=$env:MYGET_SOURCE}
-  on:
-  branch: master
   - ps: Invoke-Psake .\build\build.ps1 Publish-Nuget -properties @{"NugetApiKey"=$env:APIKEY;"NugetSource"=$env:SOURCE}
