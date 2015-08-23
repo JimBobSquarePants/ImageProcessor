@@ -1,5 +1,7 @@
 properties {
 	# call nuget.bat with these values as parameters
+	$MygetApiKey = $null
+	$MygetSource = $null
 	$NugetApiKey = $null
 	$NugetSource = $null
 	
@@ -214,7 +216,18 @@ task Generate-Nuget -depends Set-VersionNumber, Build-Solution {
 	}
 }
 
-# publishes the nuget on a feed
+# publishes the Myget on a feed
+task Publish-Myget {
+	if ($MygetApiKey -eq $null -or $MygetApiKey -eq "") {
+		throw New-Object [System.ArgumentException] "You must provide an API key as parameter: 'Invoke-psake Publish-Myget -properties @{`"MygetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
+	}
+	
+	Get-ChildItem $NUGET_OUTPUT -Filter "*.nugpkg" | % {
+		& $NUGET_EXE push $_ -ApiKey $MygetApiKey -Source $MygetSource
+	}
+}
+
+# publishes the Nuget on a feed
 task Publish-Nuget {
 	if ($NugetApiKey -eq $null -or $NugetApiKey -eq "") {
 		throw New-Object [System.ArgumentException] "You must provide an API key as parameter: 'Invoke-psake Publish-Nuget -properties @{`"NugetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
@@ -222,9 +235,9 @@ task Publish-Nuget {
 	
 	Get-ChildItem $NUGET_OUTPUT -Filter "*.nugpkg" | % {
 		if ($NugetSource -eq $null -or $NugetSource -eq "") {
-			& $NUGET_EXE push $_ -ApiKey $apikey -Source $NugetSource
+			& $NUGET_EXE push $_ -ApiKey $NugetApiKey -Source $NugetSource
 		} else {
-			& $NUGET_EXE push $_ -ApiKey $apikey
+			& $NUGET_EXE push $_ -ApiKey $NugetApiKey
 		}
 	}
 }
