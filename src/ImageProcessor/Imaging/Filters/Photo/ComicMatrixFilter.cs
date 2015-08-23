@@ -56,14 +56,14 @@ namespace ImageProcessor.Imaging.Filters.Photo
                     attributes.SetColorMatrix(ColorMatrixes.ComicHigh);
 
                     // Draw the image with the high comic colormatrix.
-                    highBitmap = new Bitmap(rectangle.Width, rectangle.Height);
+                    highBitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
                     highBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                     // Apply a oil painting filter to the image.
                     highBitmap = new OilPaintingFilter(3, 5).ApplyFilter((Bitmap)image);
 
                     // Draw the edges.
-                    edgeBitmap = new Bitmap(width, height);
+                    edgeBitmap = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
                     edgeBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                     edgeBitmap = Effects.Trace(image, edgeBitmap, 120);
 
@@ -73,7 +73,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
                     }
 
                     // Create a bitmap for overlaying.
-                    lowBitmap = new Bitmap(rectangle.Width, rectangle.Height);
+                    lowBitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
                     lowBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                     // Set the color matrix
@@ -87,7 +87,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
 
                     // We need to create a new image now with a pattern mask to paint it
                     // onto the other image with.
-                    patternBitmap = new Bitmap(rectangle.Width, rectangle.Height);
+                    patternBitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
                     patternBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                     // Create the pattern mask.

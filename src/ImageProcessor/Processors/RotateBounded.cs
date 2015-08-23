@@ -14,6 +14,8 @@ namespace ImageProcessor.Processors
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
+
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Helpers;
 
@@ -104,7 +106,7 @@ namespace ImageProcessor.Processors
             float rotateAtY = Math.Abs(image.Height / 2);
 
             // Create a new empty bitmap to hold rotated image
-            Bitmap newImage = new Bitmap(newSize.Width, newSize.Height);
+            Bitmap newImage = new Bitmap(newSize.Width, newSize.Height, PixelFormat.Format32bppPArgb);
             newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             // Make a graphics object from the empty bitmap
