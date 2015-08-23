@@ -10,6 +10,7 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Filters.Binarization;
@@ -66,7 +67,7 @@ namespace ImageProcessor.Processors
                 Rectangle rectangle = ImageMaths.GetFilteredBoundingRectangle(grey, 0);
                 grey.Dispose();
 
-                newImage = new Bitmap(rectangle.Width, rectangle.Height);
+                newImage = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                 using (Graphics graphics = Graphics.FromImage(newImage))
                 {

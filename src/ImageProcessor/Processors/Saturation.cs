@@ -81,7 +81,7 @@ namespace ImageProcessor.Processors
                 float saturationComplementG = 0.6094f * saturationComplement;
                 float saturationComplementB = 0.0820f * saturationComplement;
 
-                newImage = new Bitmap(image.Width, image.Height);
+                newImage = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppPArgb);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                 ColorMatrix colorMatrix =

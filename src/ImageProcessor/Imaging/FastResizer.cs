@@ -71,83 +71,93 @@ namespace ImageProcessor.Imaging
                     Parallel.For(
                        startY,
                        endY,
-                       y =>
-                       {
-                           // Y coordinates of source points.
-                           double originY = ((y - startY) * heightFactor) - 0.5;
-                           int originY1 = (int)originY;
-                           double dy = originY - originY1;
+                        y =>
+                        {
+                            if (y >= 0 && y < height)
+                            {
+                                // Y coordinates of source points.
+                                double originY = ((y - startY) * heightFactor) - 0.5;
+                                int originY1 = (int)originY;
+                                double dy = originY - originY1;
 
-                           // For each row.
-                           for (int x = startX; x < endX; x++)
-                           {
-                               // X coordinates of source points.
-                               double originX = ((x - startX) * widthFactor) - 0.5f;
-                               int originX1 = (int)originX;
-                               double dx = originX - originX1;
+                                // For each row.
+                                for (int x = startX; x < endX; x++)
+                                {
+                                    if (x >= 0 && x < width)
+                                    {
+                                        // X coordinates of source points.
+                                        double originX = ((x - startX) * widthFactor) - 0.5f;
+                                        int originX1 = (int)originX;
+                                        double dx = originX - originX1;
 
-                               // Destination color components
-                               double r = 0;
-                               double g = 0;
-                               double b = 0;
-                               double a = 0;
+                                        // Destination color components
+                                        double r = 0;
+                                        double g = 0;
+                                        double b = 0;
+                                        double a = 0;
 
-                               for (int yy = -1; yy < 3; yy++)
-                               {
-                                   // Get Y cooefficient
-                                   double kernel1 = Interpolation.BiCubicKernel(dy - yy);
+                                        for (int yy = -1; yy < 3; yy++)
+                                        {
+                                            // Get Y cooefficient
+                                            double kernel1 = Interpolation.BiCubicKernel(dy - yy);
 
-                                   int originY2 = originY1 + yy;
-                                   if (originY2 < 0)
-                                   {
-                                       originY2 = 0;
-                                   }
+                                            int originY2 = originY1 + yy;
+                                            if (originY2 < 0)
+                                            {
+                                                originY2 = 0;
+                                            }
 
-                                   if (originY2 > maxHeight)
-                                   {
-                                       originY2 = maxHeight;
-                                   }
+                                            if (originY2 > maxHeight)
+                                            {
+                                                originY2 = maxHeight;
+                                            }
 
-                                   for (int xx = -1; xx < 3; xx++)
-                                   {
-                                       // Get X cooefficient
-                                       double kernel2 = kernel1 * Interpolation.BiCubicKernel(xx - dx);
+                                            for (int xx = -1; xx < 3; xx++)
+                                            {
+                                                // Get X cooefficient
+                                                double kernel2 = kernel1 * Interpolation.BiCubicKernel(xx - dx);
 
-                                       int originX2 = originX1 + xx;
-                                       if (originX2 < 0)
-                                       {
-                                           originX2 = 0;
-                                       }
+                                                int originX2 = originX1 + xx;
+                                                if (originX2 < 0)
+                                                {
+                                                    originX2 = 0;
+                                                }
 
-                                       if (originX2 > maxWidth)
-                                       {
-                                           originX2 = maxWidth;
-                                       }
+                                                if (originX2 > maxWidth)
+                                                {
+                                                    originX2 = maxWidth;
+                                                }
 
-                                       Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
+                                                Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
 
-                                       if (fixGamma)
-                                       {
-                                           sourceColor = PixelOperations.ToLinear(sourceColor);
-                                       }
+                                                if (fixGamma)
+                                                {
+                                                    sourceColor = PixelOperations.ToLinear(sourceColor);
+                                                }
 
-                                       r += kernel2 * sourceColor.R;
-                                       g += kernel2 * sourceColor.G;
-                                       b += kernel2 * sourceColor.B;
-                                       a += kernel2 * sourceColor.A;
-                                   }
-                               }
+                                                r += kernel2 * sourceColor.R;
+                                                g += kernel2 * sourceColor.G;
+                                                b += kernel2 * sourceColor.B;
+                                                a += kernel2 * sourceColor.A;
+                                            }
+                                        }
 
-                               Color destinationColor = Color.FromArgb(a.ToByte(), r.ToByte(), g.ToByte(), b.ToByte());
+                                        Color destinationColor = Color.FromArgb(
+                                            a.ToByte(),
+                                            r.ToByte(),
+                                            g.ToByte(),
+                                            b.ToByte());
 
-                               if (fixGamma)
-                               {
-                                   destinationColor = PixelOperations.ToSRGB(destinationColor);
-                               }
+                                        if (fixGamma)
+                                        {
+                                            destinationColor = PixelOperations.ToSRGB(destinationColor);
+                                        }
 
-                               destinationBitmap.SetPixel(x, y, destinationColor);
-                           }
-                       });
+                                        destinationBitmap.SetPixel(x, y, destinationColor);
+                                    }
+                                }
+                            }
+                        });
                 }
             }
 
@@ -209,99 +219,109 @@ namespace ImageProcessor.Imaging
                        endY,
                        y =>
                        {
-                           // Y coordinates of source points.
-                           double originY = ((y - startY) * heightFactor) - 0.5;
-                           int originY1 = (int)originY;
-                           double dy = originY - originY1;
-
-                           // Houses colors for blurring.
-                           Color[,] sourceColors = new Color[4, 4];
-
-                           // For each row.
-                           for (int x = startX; x < endX; x++)
+                           if (y >= 0 && y < height)
                            {
-                               // X coordinates of source points.
-                               double originX = ((x - startX) * widthFactor) - 0.5f;
-                               int originX1 = (int)originX;
-                               double dx = originX - originX1;
+                               // Y coordinates of source points.
+                               double originY = ((y - startY) * heightFactor) - 0.5;
+                               int originY1 = (int)originY;
+                               double dy = originY - originY1;
 
-                               // Destination color components
-                               double r = 0;
-                               double g = 0;
-                               double b = 0;
-                               double a = 0;
+                               // Houses colors for blurring.
+                               Color[,] sourceColors = new Color[4, 4];
 
-                               for (int yy = -1; yy < 3; yy++)
+                               // For each row.
+                               for (int x = startX; x < endX; x++)
                                {
-                                   int originY2 = originY1 + yy;
-                                   if (originY2 < 0)
+                                   if (x >= 0 && x < width)
                                    {
-                                       originY2 = 0;
-                                   }
+                                       // X coordinates of source points.
+                                       double originX = ((x - startX) * widthFactor) - 0.5f;
+                                       int originX1 = (int)originX;
+                                       double dx = originX - originX1;
 
-                                   if (originY2 > maxHeight)
-                                   {
-                                       originY2 = maxHeight;
-                                   }
+                                       // Destination color components
+                                       double r = 0;
+                                       double g = 0;
+                                       double b = 0;
+                                       double a = 0;
 
-                                   for (int xx = -1; xx < 3; xx++)
-                                   {
-                                       int originX2 = originX1 + xx;
-                                       if (originX2 < 0)
+                                       for (int yy = -1; yy < 3; yy++)
                                        {
-                                           originX2 = 0;
+                                           int originY2 = originY1 + yy;
+                                           if (originY2 < 0)
+                                           {
+                                               originY2 = 0;
+                                           }
+
+                                           if (originY2 > maxHeight)
+                                           {
+                                               originY2 = maxHeight;
+                                           }
+
+                                           for (int xx = -1; xx < 3; xx++)
+                                           {
+                                               int originX2 = originX1 + xx;
+                                               if (originX2 < 0)
+                                               {
+                                                   originX2 = 0;
+                                               }
+
+                                               if (originX2 > maxWidth)
+                                               {
+                                                   originX2 = maxWidth;
+                                               }
+
+                                               Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
+
+                                               sourceColors[xx + 1, yy + 1] = sourceColor;
+                                           }
                                        }
 
-                                       if (originX2 > maxWidth)
+                                       // Blur the colors.
+                                       if (radius > 0)
                                        {
-                                           originX2 = maxWidth;
+                                           sourceColors = BoxBlur(sourceColors, radius, fixGamma);
                                        }
 
-                                       Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
+                                       // Do the resize.
+                                       for (int yy = -1; yy < 3; yy++)
+                                       {
+                                           // Get Y cooefficient
+                                           double kernel1 = Interpolation.BiCubicKernel(dy - yy);
 
-                                       sourceColors[xx + 1, yy + 1] = sourceColor;
-                                   }
-                               }
+                                           for (int xx = -1; xx < 3; xx++)
+                                           {
+                                               // Get X cooefficient
+                                               double kernel2 = kernel1 * Interpolation.BiCubicKernel(xx - dx);
 
-                               // Blur the colors.
-                               if (radius > 0)
-                               {
-                                   sourceColors = BoxBlur(sourceColors, radius, fixGamma);
-                               }
+                                               Color sourceColor = sourceColors[xx + 1, yy + 1];
 
-                               // Do the resize.
-                               for (int yy = -1; yy < 3; yy++)
-                               {
-                                   // Get Y cooefficient
-                                   double kernel1 = Interpolation.BiCubicKernel(dy - yy);
+                                               if (fixGamma)
+                                               {
+                                                   sourceColor = PixelOperations.ToLinear(sourceColor);
+                                               }
 
-                                   for (int xx = -1; xx < 3; xx++)
-                                   {
-                                       // Get X cooefficient
-                                       double kernel2 = kernel1 * Interpolation.BiCubicKernel(xx - dx);
+                                               r += kernel2 * sourceColor.R;
+                                               g += kernel2 * sourceColor.G;
+                                               b += kernel2 * sourceColor.B;
+                                               a += kernel2 * sourceColor.A;
+                                           }
+                                       }
 
-                                       Color sourceColor = sourceColors[xx + 1, yy + 1];
+                                       Color destinationColor = Color.FromArgb(
+                                           a.ToByte(),
+                                           r.ToByte(),
+                                           g.ToByte(),
+                                           b.ToByte());
 
                                        if (fixGamma)
                                        {
-                                           sourceColor = PixelOperations.ToLinear(sourceColor);
+                                           destinationColor = PixelOperations.ToSRGB(destinationColor);
                                        }
 
-                                       r += kernel2 * sourceColor.R;
-                                       g += kernel2 * sourceColor.G;
-                                       b += kernel2 * sourceColor.B;
-                                       a += kernel2 * sourceColor.A;
+                                       destinationBitmap.SetPixel(x, y, destinationColor);
                                    }
                                }
-
-                               Color destinationColor = Color.FromArgb(a.ToByte(), r.ToByte(), g.ToByte(), b.ToByte());
-
-                               if (fixGamma)
-                               {
-                                   destinationColor = PixelOperations.ToSRGB(destinationColor);
-                               }
-
-                               destinationBitmap.SetPixel(x, y, destinationColor);
                            }
                        });
                 }
@@ -354,87 +374,97 @@ namespace ImageProcessor.Imaging
                 {
                     // For each column
                     Parallel.For(
-                       startY,
-                       endY,
-                       y =>
-                       {
-                           // Y coordinates of source points
-                           double originY = (y - startY) * heightFactor;
-                           int originY1 = (int)originY;
-                           int originY2 = (originY1 == maxHeight) ? originY1 : originY1 + 1;
-                           double dy1 = originY - originY1;
-                           double dy2 = 1.0 - dy1;
+                        startY,
+                        endY,
+                        y =>
+                        {
+                            if (y >= 0 && y < height)
+                            {
+                                // Y coordinates of source points
+                                double originY = (y - startY) * heightFactor;
+                                int originY1 = (int)originY;
+                                int originY2 = (originY1 == maxHeight) ? originY1 : originY1 + 1;
+                                double dy1 = originY - originY1;
+                                double dy2 = 1.0 - dy1;
 
-                           // Get temp pointers
-                           int temp1 = originY1;
-                           int temp2 = originY2;
+                                // Get temp pointers
+                                int temp1 = originY1;
+                                int temp2 = originY2;
 
-                           // For every column.
-                           for (int x = startX; x < endX; x++)
-                           {
-                               // X coordinates of source points
-                               double originX = (x - startX) * widthFactor;
-                               int originX1 = (int)originX;
-                               int originX2 = (originX1 == maxWidth) ? originX1 : originX1 + 1;
-                               double dx1 = originX - originX1;
-                               double dx2 = 1.0 - dx1;
+                                // For every column.
+                                for (int x = startX; x < endX; x++)
+                                {
+                                    if (x >= 0 && x < width)
+                                    {
+                                        // X coordinates of source points
+                                        double originX = (x - startX) * widthFactor;
+                                        int originX1 = (int)originX;
+                                        int originX2 = (originX1 == maxWidth) ? originX1 : originX1 + 1;
+                                        double dx1 = originX - originX1;
+                                        double dx2 = 1.0 - dx1;
 
-                               // Get four pixels to sample from.
-                               Color sourceColor1 = sourceBitmap.GetPixel(originX1, temp1);
-                               Color sourceColor2 = sourceBitmap.GetPixel(originX2, temp1);
-                               Color sourceColor3 = sourceBitmap.GetPixel(originX1, temp2);
-                               Color sourceColor4 = sourceBitmap.GetPixel(originX2, temp2);
+                                        // Get four pixels to sample from.
+                                        Color sourceColor1 = sourceBitmap.GetPixel(originX1, temp1);
+                                        Color sourceColor2 = sourceBitmap.GetPixel(originX2, temp1);
+                                        Color sourceColor3 = sourceBitmap.GetPixel(originX1, temp2);
+                                        Color sourceColor4 = sourceBitmap.GetPixel(originX2, temp2);
 
-                               if (fixGamma)
-                               {
-                                   sourceColor1 = PixelOperations.ToLinear(sourceColor1);
-                                   sourceColor2 = PixelOperations.ToLinear(sourceColor2);
-                                   sourceColor3 = PixelOperations.ToLinear(sourceColor3);
-                                   sourceColor4 = PixelOperations.ToLinear(sourceColor4);
-                               }
+                                        if (fixGamma)
+                                        {
+                                            sourceColor1 = PixelOperations.ToLinear(sourceColor1);
+                                            sourceColor2 = PixelOperations.ToLinear(sourceColor2);
+                                            sourceColor3 = PixelOperations.ToLinear(sourceColor3);
+                                            sourceColor4 = PixelOperations.ToLinear(sourceColor4);
+                                        }
 
-                               // Get four points in red channel.
-                               int p1 = sourceColor1.R;
-                               int p2 = sourceColor2.R;
-                               int p3 = sourceColor3.R;
-                               int p4 = sourceColor4.R;
+                                        // Get four points in red channel.
+                                        int p1 = sourceColor1.R;
+                                        int p2 = sourceColor2.R;
+                                        int p3 = sourceColor3.R;
+                                        int p4 = sourceColor4.R;
 
-                               int r = (int)((dy2 * ((dx2 * p1) + (dx1 * p2))) + (dy1 * ((dx2 * p3) + (dx1 * p4))));
+                                        int r = (int)((dy2 * ((dx2 * p1) + (dx1 * p2))) + (dy1 * ((dx2 * p3) + (dx1 * p4))));
 
-                               // Get four points in green channel.
-                               p1 = sourceColor1.G;
-                               p2 = sourceColor2.G;
-                               p3 = sourceColor3.G;
-                               p4 = sourceColor4.G;
+                                        // Get four points in green channel.
+                                        p1 = sourceColor1.G;
+                                        p2 = sourceColor2.G;
+                                        p3 = sourceColor3.G;
+                                        p4 = sourceColor4.G;
 
-                               int g = (int)((dy2 * ((dx2 * p1) + (dx1 * p2))) + (dy1 * ((dx2 * p3) + (dx1 * p4))));
+                                        int g = (int)((dy2 * ((dx2 * p1) + (dx1 * p2))) + (dy1 * ((dx2 * p3) + (dx1 * p4))));
 
-                               // Get four points in blue channel
-                               p1 = sourceColor1.B;
-                               p2 = sourceColor2.B;
-                               p3 = sourceColor3.B;
-                               p4 = sourceColor4.B;
+                                        // Get four points in blue channel
+                                        p1 = sourceColor1.B;
+                                        p2 = sourceColor2.B;
+                                        p3 = sourceColor3.B;
+                                        p4 = sourceColor4.B;
 
-                               int b = (int)((dy2 * ((dx2 * p1) + (dx1 * p2))) + (dy1 * ((dx2 * p3) + (dx1 * p4))));
+                                        int b = (int)((dy2 * ((dx2 * p1) + (dx1 * p2))) + (dy1 * ((dx2 * p3) + (dx1 * p4))));
 
-                               // Get four points in alpha channel
-                               p1 = sourceColor1.A;
-                               p2 = sourceColor2.A;
-                               p3 = sourceColor3.A;
-                               p4 = sourceColor4.A;
+                                        // Get four points in alpha channel
+                                        p1 = sourceColor1.A;
+                                        p2 = sourceColor2.A;
+                                        p3 = sourceColor3.A;
+                                        p4 = sourceColor4.A;
 
-                               int a = (int)((dy2 * ((dx2 * p1) + (dx1 * p2))) + (dy1 * ((dx2 * p3) + (dx1 * p4))));
+                                        int a = (int)((dy2 * ((dx2 * p1) + (dx1 * p2))) + (dy1 * ((dx2 * p3) + (dx1 * p4))));
 
-                               Color destinationColor = Color.FromArgb(a.ToByte(), r.ToByte(), g.ToByte(), b.ToByte());
+                                        Color destinationColor = Color.FromArgb(
+                                            a.ToByte(),
+                                            r.ToByte(),
+                                            g.ToByte(),
+                                            b.ToByte());
 
-                               if (fixGamma)
-                               {
-                                   destinationColor = PixelOperations.ToSRGB(destinationColor);
-                               }
+                                        if (fixGamma)
+                                        {
+                                            destinationColor = PixelOperations.ToSRGB(destinationColor);
+                                        }
 
-                               destinationBitmap.SetPixel(x, y, destinationColor);
-                           }
-                       });
+                                        destinationBitmap.SetPixel(x, y, destinationColor);
+                                    }
+                                }
+                            }
+                        });
                 }
             }
 
@@ -481,19 +511,25 @@ namespace ImageProcessor.Imaging
                     Parallel.For(
                        startY,
                        endY,
-                       y =>
-                       {
-                           // Y coordinates of source points
-                           int originY = (int)((y - startY) * heightFactor);
+                        y =>
+                        {
+                            if (y >= 0 && y < height)
+                            {
+                                // Y coordinates of source points
+                                int originY = (int)((y - startY) * heightFactor);
 
-                           for (int x = startX; x < endX; x++)
-                           {
-                               // X coordinates of source points
-                               int originX = (int)((x - startX) * widthFactor);
+                                for (int x = startX; x < endX; x++)
+                                {
+                                    if (x >= 0 && x < width)
+                                    {
+                                        // X coordinates of source points
+                                        int originX = (int)((x - startX) * widthFactor);
 
-                               destinationBitmap.SetPixel(x, y, sourceBitmap.GetPixel(originX, originY));
-                           }
-                       });
+                                        destinationBitmap.SetPixel(x, y, sourceBitmap.GetPixel(originX, originY));
+                                    }
+                                }
+                            }
+                        });
                 }
             }
 
@@ -547,85 +583,95 @@ namespace ImageProcessor.Imaging
                     Parallel.For(
                        startY,
                        endY,
-                       y =>
-                       {
-                           // Y coordinates of source points.
-                           double originY = ((y - startY) * heightFactor) - 0.5;
-                           int originY1 = (int)originY;
-                           double dy = originY - originY1;
+                        y =>
+                        {
+                            if (y >= 0 && y < height)
+                            {
+                                // Y coordinates of source points.
+                                double originY = ((y - startY) * heightFactor) - 0.5;
+                                int originY1 = (int)originY;
+                                double dy = originY - originY1;
 
-                           // For each row.
-                           for (int x = startX; x < endX; x++)
-                           {
-                               // X coordinates of source points.
-                               double originX = ((x - startX) * widthFactor) - 0.5f;
-                               int originX1 = (int)originX;
-                               double dx = originX - originX1;
+                                // For each row.
+                                for (int x = startX; x < endX; x++)
+                                {
+                                    if (x >= 0 && x < width)
+                                    {
+                                        // X coordinates of source points.
+                                        double originX = ((x - startX) * widthFactor) - 0.5f;
+                                        int originX1 = (int)originX;
+                                        double dx = originX - originX1;
 
-                               // Destination color components
-                               double r = 0;
-                               double g = 0;
-                               double b = 0;
-                               double a = 0;
+                                        // Destination color components
+                                        double r = 0;
+                                        double g = 0;
+                                        double b = 0;
+                                        double a = 0;
 
-                               for (int n = -3; n < 6; n++)
-                               {
-                                   // Get Y cooefficient
-                                   double k1 = Interpolation.LanczosKernel(dy - n);
+                                        for (int n = -3; n < 6; n++)
+                                        {
+                                            // Get Y cooefficient
+                                            double k1 = Interpolation.LanczosKernel(dy - n);
 
-                                   int originY2 = originY1 + n;
-                                   if (originY2 < 0)
-                                   {
-                                       originY2 = 0;
-                                   }
+                                            int originY2 = originY1 + n;
+                                            if (originY2 < 0)
+                                            {
+                                                originY2 = 0;
+                                            }
 
-                                   if (originY2 > maxHeight)
-                                   {
-                                       originY2 = maxHeight;
-                                   }
+                                            if (originY2 > maxHeight)
+                                            {
+                                                originY2 = maxHeight;
+                                            }
 
-                                   for (int m = -3; m < 6; m++)
-                                   {
-                                       // Get X cooefficient
-                                       double k2 = k1 * Interpolation.LanczosKernel(m - dx);
+                                            for (int m = -3; m < 6; m++)
+                                            {
+                                                // Get X cooefficient
+                                                double k2 = k1 * Interpolation.LanczosKernel(m - dx);
 
-                                       int originX2 = originX1 + m;
-                                       if (originX2 < 0)
-                                       {
-                                           originX2 = 0;
-                                       }
+                                                int originX2 = originX1 + m;
+                                                if (originX2 < 0)
+                                                {
+                                                    originX2 = 0;
+                                                }
 
-                                       if (originX2 > maxWidth)
-                                       {
-                                           originX2 = maxWidth;
-                                       }
+                                                if (originX2 > maxWidth)
+                                                {
+                                                    originX2 = maxWidth;
+                                                }
 
-                                       // ReSharper disable once AccessToDisposedClosure
-                                       Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
+                                                // ReSharper disable once AccessToDisposedClosure
+                                                Color sourceColor = sourceBitmap.GetPixel(originX2, originY2);
 
-                                       if (fixGamma)
-                                       {
-                                           sourceColor = PixelOperations.ToLinear(sourceColor);
-                                       }
+                                                if (fixGamma)
+                                                {
+                                                    sourceColor = PixelOperations.ToLinear(sourceColor);
+                                                }
 
-                                       r += k2 * sourceColor.R;
-                                       g += k2 * sourceColor.G;
-                                       b += k2 * sourceColor.B;
-                                       a += k2 * sourceColor.A;
-                                   }
-                               }
+                                                r += k2 * sourceColor.R;
+                                                g += k2 * sourceColor.G;
+                                                b += k2 * sourceColor.B;
+                                                a += k2 * sourceColor.A;
+                                            }
+                                        }
 
-                               Color destinationColor = Color.FromArgb(a.ToByte(), r.ToByte(), g.ToByte(), b.ToByte());
+                                        Color destinationColor = Color.FromArgb(
+                                            a.ToByte(),
+                                            r.ToByte(),
+                                            g.ToByte(),
+                                            b.ToByte());
 
-                               if (fixGamma)
-                               {
-                                   destinationColor = PixelOperations.ToSRGB(destinationColor);
-                               }
+                                        if (fixGamma)
+                                        {
+                                            destinationColor = PixelOperations.ToSRGB(destinationColor);
+                                        }
 
-                               // ReSharper disable once AccessToDisposedClosure
-                               destinationBitmap.SetPixel(x, y, destinationColor);
-                           }
-                       });
+                                        // ReSharper disable once AccessToDisposedClosure
+                                        destinationBitmap.SetPixel(x, y, destinationColor);
+                                    }
+                                }
+                            }
+                        });
                 }
             }
 

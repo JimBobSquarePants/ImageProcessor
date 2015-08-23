@@ -13,6 +13,7 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Filters.Photo;
@@ -66,7 +67,7 @@ namespace ImageProcessor.Processors
             try
             {
                 // TODO: Optimize this one day when I can break the API.
-                newImage = new Bitmap(image.Width, image.Height);
+                newImage = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppPArgb);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                 IMatrixFilter matrix = this.DynamicParameter;
                 newImage = matrix.TransformImage(image, newImage);
