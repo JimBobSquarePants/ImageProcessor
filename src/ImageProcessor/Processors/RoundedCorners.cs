@@ -81,8 +81,6 @@ namespace ImageProcessor.Processors
             {
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
 
         /// <summary>

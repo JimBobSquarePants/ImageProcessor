@@ -12,7 +12,6 @@
 namespace ImageProcessor.Imaging
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Drawing;
     using System.Drawing.Imaging;
@@ -635,18 +634,12 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
-        /// The box blur.
-        /// <see cref="http://blog.ivank.net/fastest-gaussian-blur.html"/>
+        /// Performs a two dimensional fast box blur on the collection of colors.
+        /// <see href="http://blog.ivank.net/fastest-gaussian-blur.html"/>
         /// </summary>
-        /// <param name="sourceColors">
-        /// The source colors.
-        /// </param>
-        /// <param name="radius">
-        /// The radius.
-        /// </param>
-        /// <param name="fixGamma">
-        /// The fix gamma.
-        /// </param>
+        /// <param name="sourceColors">The source colors.</param>
+        /// <param name="radius">The radius to which to blur.</param>
+        /// <param name="fixGamma">Whether to blur the colors using the linear color space.</param>
         /// <returns>
         /// The <see cref="T:Color[,]"/>.
         /// </returns>
@@ -657,10 +650,20 @@ namespace ImageProcessor.Imaging
             return sourceColors;
         }
 
-        private static Color[,] BoxBlurHorizontal(Color[,] colors, int radius, bool fixGamma)
+        /// <summary>
+        /// Performs a horizontal fast box blur on the collection of colors.
+        /// <see href="http://blog.ivank.net/fastest-gaussian-blur.html"/>
+        /// </summary>
+        /// <param name="sourceColors">The source colors.</param>
+        /// <param name="radius">The radius to which to blur.</param>
+        /// <param name="fixGamma">Whether to blur the colors using the linear color space.</param>
+        /// <returns>
+        /// The <see cref="T:Color[,]"/>.
+        /// </returns>
+        private static Color[,] BoxBlurHorizontal(Color[,] sourceColors, int radius, bool fixGamma)
         {
-            int width = colors.GetLength(0);
-            int height = colors.GetLength(1);
+            int width = sourceColors.GetLength(0);
+            int height = sourceColors.GetLength(1);
 
             Color[,] destination = new Color[width, height];
 
@@ -679,7 +682,7 @@ namespace ImageProcessor.Imaging
 
                     for (int xx = fx; xx < tx; xx++)
                     {
-                        Color sourceColor = colors[y, xx];
+                        Color sourceColor = sourceColors[y, xx];
 
                         if (fixGamma)
                         {
@@ -712,10 +715,21 @@ namespace ImageProcessor.Imaging
 
             return destination;
         }
-        private static Color[,] BoxBlurVertical(Color[,] colors, int radius, bool fixGamma)
+
+        /// <summary>
+        /// Performs a vertical fast box blur on the collection of colors.
+        /// <see href="http://blog.ivank.net/fastest-gaussian-blur.html"/>
+        /// </summary>
+        /// <param name="sourceColors">The source colors.</param>
+        /// <param name="radius">The radius to which to blur.</param>
+        /// <param name="fixGamma">Whether to blur the colors using the linear color space.</param>
+        /// <returns>
+        /// The <see cref="T:Color[,]"/>.
+        /// </returns>
+        private static Color[,] BoxBlurVertical(Color[,] sourceColors, int radius, bool fixGamma)
         {
-            int width = colors.GetLength(0);
-            int height = colors.GetLength(1);
+            int width = sourceColors.GetLength(0);
+            int height = sourceColors.GetLength(1);
 
             Color[,] destination = new Color[width, height];
 
@@ -734,7 +748,7 @@ namespace ImageProcessor.Imaging
 
                     for (int yy = fy; yy < ty; yy++)
                     {
-                        Color sourceColor = colors[x, yy];
+                        Color sourceColor = sourceColors[x, yy];
 
                         if (fixGamma)
                         {
