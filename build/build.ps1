@@ -4,6 +4,7 @@ properties {
 	$MygetSource = $null
 	$NugetApiKey = $null
 	$NugetSource = $null
+	$AppVeyorPullRequestNumber = $null
 	
 	# see appveyor.yml for usage
 	$BuildNumber = $null
@@ -218,8 +219,15 @@ task Generate-Nuget -depends Set-VersionNumber, Build-Solution {
 
 # publishes the Myget on a feed
 task Publish-Myget {
+
+	Write-Host "MygetApiKey $MygetApiKey"	
+	
+	if($AppVeyorPullRequestNumber -neq $null){
+		return
+	}
+	
 	if ($MygetApiKey -eq $null -or $MygetApiKey -eq "") {
-		throw New-Object [System.ArgumentException] "You must provide an API key as parameter: 'Invoke-psake Publish-Myget -properties @{`"MygetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
+		throw New-Object [System.ArgumentException] "You must provide a Myget API key as parameter: 'Invoke-psake Publish-Myget -properties @{`"MygetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
 	}
 	
 	Get-ChildItem $NUGET_OUTPUT -Filter "*.nugpkg" | % {
@@ -229,8 +237,12 @@ task Publish-Myget {
 
 # publishes the Nuget on a feed
 task Publish-Nuget {
+	if($AppVeyorPullRequestNumber -neq $null){
+		return
+	}
+		
 	if ($NugetApiKey -eq $null -or $NugetApiKey -eq "") {
-		throw New-Object [System.ArgumentException] "You must provide an API key as parameter: 'Invoke-psake Publish-Nuget -properties @{`"NugetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
+		throw New-Object [System.ArgumentException] "You must provide a Nuget API key as parameter: 'Invoke-psake Publish-Nuget -properties @{`"NugetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
 	}
 	
 	Get-ChildItem $NUGET_OUTPUT -Filter "*.nugpkg" | % {
