@@ -445,11 +445,18 @@ namespace ImageProcessor.Imaging
                     }
                     else
                     {
-                        newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
+                        if (width < sourceWidth && height < sourceHeight)
+                        {
+                            newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
+                        }
+                        else
+                        {
+                            // Faster
+                            newImage = FastResizer.ResizeBilinear((Bitmap)source, width, height, destination, linear);
+                        }
                     }
 
-                    //newImage = linear ? ResizeLinear(source, width, height, destination) : ResizeComposite(source, width, height, destination);
-
+                    // newImage = linear ? ResizeLinear(source, width, height, destination) : ResizeComposite(source, width, height, destination);
                     // Reassign the image.
                     source.Dispose();
                     source = newImage;
