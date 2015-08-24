@@ -42,7 +42,7 @@ namespace ImageProcessor.PlayGround
             string outPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(root), OutputImages));
 
             DirectoryInfo di = new DirectoryInfo(inPath);
-            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".webp", ".bmp", ".png", ".tif");
+            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".png", ".tif");
 
             foreach (FileInfo fileInfo in files)
             {
