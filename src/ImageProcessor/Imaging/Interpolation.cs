@@ -21,7 +21,7 @@ namespace ImageProcessor.Imaging
         /// Returns a bicubic kernel for the given value.
         /// <remarks>
         /// The function implements bicubic kernel W(x) as described on
-        /// <a href="https://en.wikipedia.org/wiki/Lanczos_resampling#Algorithm">Wikipedia</a>
+        /// <see href="https://en.wikipedia.org/wiki/Lanczos_resampling#Algorithm">Wikipedia</see>
         /// (coefficient <c>a</c> is set to <c>-0.5</c>).
         /// </remarks>
         /// </summary>
@@ -54,6 +54,47 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
+        /// Returns a bicubic b-spline kernel for the given value.
+        /// <remarks>
+        /// The function implements bicubic kernel developed by Paul Bourke <see cref="http://paulbourke.net"/> 
+        /// described <see href="http://docs-hoffmann.de/bicubic03042002.pdf">here</see>
+        /// </remarks>
+        /// </summary>
+        /// <param name="x">X value.</param> 
+        /// <returns>
+        /// The <see cref="double"/> representing the bicubic coefficient.
+        /// </returns>
+        public static double BiCubicBSplineKernel(double x)
+        {
+            double r = 0;
+            double xplus2 = x + 2;
+            double xplus1 = x + 1;
+            double xminus1 = x - 1;
+
+            if (xplus2 > 0)
+            {
+                r += xplus2 * xplus2 * xplus2;
+            }
+
+            if (xplus1 > 0)
+            {
+                r -= 4 * xplus1 * xplus1 * xplus1;
+            }
+
+            if (x > 0)
+            {
+                r += 6 * x * x * x;
+            }
+
+            if (xminus1 > 0)
+            {
+                r -= 4 * xminus1 * xminus1 * xminus1;
+            }
+
+            return r / 6.0;
+        }
+
+        /// <summary>
         /// Returns a Lanczos kernel for the given value.
         /// <remarks>
         /// The function implements Lanczos kernel as described on
@@ -64,7 +105,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// The <see cref="double"/> representing the bicubic coefficient.
         /// </returns>
-        internal static double LanczosKernel(double x)
+        internal static double LanczosKernel3(double x)
         {
             if (x < 0)
             {
@@ -96,7 +137,7 @@ namespace ImageProcessor.Imaging
                 return Math.Sin(x) / x;
             }
 
-            return 1;
+            return 1.0;
         }
     }
 }
