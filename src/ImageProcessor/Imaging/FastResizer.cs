@@ -167,10 +167,10 @@ namespace ImageProcessor.Imaging
 
         /// <summary>
         /// Resize an image using a bicubic interpolation algorithm.
+        /// The image is preprocessed using a multi-pass box blur to reduce moiré when processing image less than 150x150.
         /// <remarks>
-        /// The class implements image resizing filter using bicubic
-        /// interpolation algorithm. It uses bicubic kernel as described on
-        /// <see href="http://en.wikipedia.org/wiki/Bicubic_interpolation#Bicubic_convolution_algorithm">Wikipedia</see>
+        /// The function implements bicubic kernel developed by Paul Bourke <see cref="http://paulbourke.net"/> 
+        /// described <see href="http://docs-hoffmann.de/bicubic03042002.pdf">here</see>
         /// </remarks>
         /// </summary>
         /// <param name="source">The source image.</param>
@@ -203,6 +203,7 @@ namespace ImageProcessor.Imaging
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             // The radius for pre blurring the images.
+            // We only apply this for very small images.
             int radius = 0;
             if (width <= 150 && height <= 150)
             {
@@ -287,12 +288,12 @@ namespace ImageProcessor.Imaging
                                        for (int yy = -1; yy < 3; yy++)
                                        {
                                            // Get Y cooefficient
-                                           double kernel1 = Interpolation.BiCubicKernel(dy - yy);
+                                           double kernel1 = Interpolation.BiCubicBSplineKernel(dy - yy);
 
                                            for (int xx = -1; xx < 3; xx++)
                                            {
                                                // Get X cooefficient
-                                               double kernel2 = kernel1 * Interpolation.BiCubicKernel(xx - dx);
+                                               double kernel2 = kernel1 * Interpolation.BiCubicBSplineKernel(xx - dx);
 
                                                Color sourceColor = sourceColors[xx + 1, yy + 1];
 
@@ -611,7 +612,7 @@ namespace ImageProcessor.Imaging
                                         for (int n = -3; n < 6; n++)
                                         {
                                             // Get Y cooefficient
-                                            double k1 = Interpolation.LanczosKernel(dy - n);
+                                            double k1 = Interpolation.LanczosKernel3(dy - n);
 
                                             int originY2 = originY1 + n;
                                             if (originY2 < 0)
@@ -627,7 +628,7 @@ namespace ImageProcessor.Imaging
                                             for (int m = -3; m < 6; m++)
                                             {
                                                 // Get X cooefficient
-                                                double k2 = k1 * Interpolation.LanczosKernel(m - dx);
+                                                double k2 = k1 * Interpolation.LanczosKernel3(m - dx);
 
                                                 int originX2 = originX1 + m;
                                                 if (originX2 < 0)
