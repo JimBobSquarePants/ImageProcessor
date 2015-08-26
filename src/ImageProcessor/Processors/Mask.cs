@@ -13,6 +13,7 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
@@ -87,6 +88,11 @@ namespace ImageProcessor.Processors
                     // First crop any bounding transparency.
                     using (Graphics graphics = Graphics.FromImage(maskCropped))
                     {
+                        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        graphics.CompositingQuality = CompositingQuality.HighQuality;
+
                         graphics.Clear(Color.Transparent);
                         graphics.DrawImage(
                                          mask,
@@ -103,6 +109,11 @@ namespace ImageProcessor.Processors
                     maskPositioned.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                     using (Graphics graphics = Graphics.FromImage(maskPositioned))
                     {
+                        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        graphics.CompositingQuality = CompositingQuality.HighQuality;
+
                         graphics.Clear(Color.Transparent);
 
                         if (position != null)
