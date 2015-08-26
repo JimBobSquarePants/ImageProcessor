@@ -68,7 +68,6 @@ namespace ImageProcessor.Processors
 
             try
             {
-                //newImage = new Bitmap(image);
                 ImageLayer imageLayer = this.DynamicParameter;
                 Bitmap overlay = new Bitmap(imageLayer.Image);
 
@@ -121,17 +120,9 @@ namespace ImageProcessor.Processors
                         graphics.DrawImage(overlay, new PointF(centered.X, centered.Y));
                     }
                 }
-
-                //image.Dispose();
-                //image = newImage;
             }
             catch (Exception ex)
             {
-                //if (newImage != null)
-                //{
-                //    newImage.Dispose();
-                //}
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
 
