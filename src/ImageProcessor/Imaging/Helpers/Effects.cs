@@ -173,8 +173,13 @@ namespace ImageProcessor.Imaging.Helpers
             clear.SetResolution(source.HorizontalResolution, source.VerticalResolution);
             using (Graphics graphics = Graphics.FromImage(clear))
             {
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
                 graphics.Clear(Color.Transparent);
-                graphics.DrawImage(toMask, 0, 0, width, height);
+
+                graphics.DrawImageUnscaled(toMask, 0, 0, width, height);
             }
 
             toMask.Dispose();
