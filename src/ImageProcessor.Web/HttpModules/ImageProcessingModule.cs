@@ -21,6 +21,7 @@ namespace ImageProcessor.Web.HttpModules
     using System.Web;
     using System.Web.Hosting;
 
+    using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Configuration;
     using ImageProcessor.Web.Extensions;
@@ -484,13 +485,6 @@ namespace ImageProcessor.Web.HttpModules
                 // Execute the handler which can change the querystring 
                 queryString = this.CheckQuerystringHandler(queryString, request.Unvalidated.RawUrl);
 
-                // If the current service doesn't require a prefix, don't fetch it.
-                // Let the static file handler take over.
-                if (string.IsNullOrWhiteSpace(currentService.Prefix) && string.IsNullOrWhiteSpace(queryString))
-                {
-                    return;
-                }
-
                 if (string.IsNullOrWhiteSpace(requestPath))
                 {
                     return;
@@ -536,13 +530,23 @@ namespace ImageProcessor.Web.HttpModules
                         using (ImageFactory imageFactory = new ImageFactory(preserveExifMetaData != null && preserveExifMetaData.Value))
                         {
                             byte[] imageBuffer = await currentService.GetImage(resourcePath);
+                            string mimeType;
 
                             using (MemoryStream inStream = new MemoryStream(imageBuffer))
                             {
                                 // Process the Image
                                 MemoryStream outStream = new MemoryStream();
 
-                                imageFactory.Load(inStream).AutoProcess(queryString).Save(outStream);
+                                if (!string.IsNullOrWhiteSpace(queryString))
+                                {
+                                    imageFactory.Load(inStream).AutoProcess(queryString).Save(outStream);
+                                    mimeType = imageFactory.CurrentImageFormat.MimeType;
+                                }
+                                else
+                                {
+                                    await inStream.CopyToAsync(outStream);
+                                    mimeType = FormatUtilities.GetFormat(outStream).MimeType;
+                                }
 
                                 // Post process the image.
                                 if (ImageProcessorConfiguration.Instance.PostProcess)
@@ -552,7 +556,7 @@ namespace ImageProcessor.Web.HttpModules
                                 }
 
                                 // Add to the cache.
-                                await this.imageCache.AddImageToCacheAsync(outStream, imageFactory.CurrentImageFormat.MimeType);
+                                await this.imageCache.AddImageToCacheAsync(outStream, mimeType);
 
                                 // Cleanup
                                 outStream.Dispose();
@@ -560,7 +564,7 @@ namespace ImageProcessor.Web.HttpModules
 
                             // Store the cached path, response type, and cache dependency in the context for later retrieval.
                             context.Items[CachedPathKey] = cachedPath;
-                            context.Items[CachedResponseTypeKey] = imageFactory.CurrentImageFormat.MimeType;
+                            context.Items[CachedResponseTypeKey] = mimeType;
                             bool isFileCached = new Uri(cachedPath).IsFile;
 
                             if (isFileLocal)
