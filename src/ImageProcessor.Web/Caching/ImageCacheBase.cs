@@ -15,6 +15,7 @@ namespace ImageProcessor.Web.Caching
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Net;
     using System.Threading.Tasks;
     using System.Web;
 
@@ -135,6 +136,19 @@ namespace ImageProcessor.Web.Caching
                         string creation = imageFileInfo.CreationTimeUtc.ToString(CultureInfo.InvariantCulture);
                         string length = imageFileInfo.Length.ToString(CultureInfo.InvariantCulture);
                         streamHash = string.Format("{0}{1}", creation, length);
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync()))
+                    {
+                        string lastModified = response.LastModified.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
+                        string length = response.ContentLength.ToString(CultureInfo.InvariantCulture);
+                        streamHash = string.Format("{0}{1}", lastModified, length);
                     }
                 }
             }
