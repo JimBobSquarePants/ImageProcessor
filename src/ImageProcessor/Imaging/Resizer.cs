@@ -445,7 +445,7 @@ namespace ImageProcessor.Imaging
                     }
                     else
                     {
-                        if (width < sourceWidth && height < sourceHeight)
+                        if (width <= sourceWidth && height <= sourceHeight)
                         {
                             newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
                         }
