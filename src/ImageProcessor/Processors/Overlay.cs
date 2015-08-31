@@ -63,7 +63,6 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            //Bitmap newImage = null;
             Image image = factory.Image;
 
             try
