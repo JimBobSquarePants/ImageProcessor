@@ -460,7 +460,7 @@ namespace ImageProcessor.Web.HttpModules
                         // Parse any protocol values from settings.
                         string protocol = currentService.Settings.ContainsKey("Protocol")
                                               ? currentService.Settings["Protocol"] + "://"
-                                              : string.Empty;
+                                              : currentService.GetType() == typeof(RemoteImageService) ? request.Url.Scheme + "://" : string.Empty;
 
                         // Handle requests that require parameters.
                         if (hasMultiParams)
