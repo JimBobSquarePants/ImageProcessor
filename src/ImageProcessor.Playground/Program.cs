@@ -19,6 +19,7 @@ namespace ImageProcessor.PlayGround
     using System.Linq;
 
     using ImageProcessor;
+    using ImageProcessor.Imaging;
 
     /// <summary>
     /// The program.
@@ -56,10 +57,12 @@ namespace ImageProcessor.PlayGround
                 using (MemoryStream inStream = new MemoryStream(photoBytes))
                 using (ImageFactory imageFactory = new ImageFactory(true, true))
                 {
-                    Size size = new Size(400, 0);
+                    Size size = new Size(100, 200);
+
+                    ResizeLayer layer = new ResizeLayer(size, ResizeMode.Min);
 
                     imageFactory.Load(inStream)
-                                .Resize(size)
+                                .Resize(layer)
                                 .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
 
                     stopwatch.Stop();
