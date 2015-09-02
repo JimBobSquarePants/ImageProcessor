@@ -48,7 +48,9 @@
     <Compile Include="Imaging\Formats\NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\Unmanaged\README.txt" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Unmanaged\x64\libwebp.dll" />
     <EmbeddedResource Include="Resources\Unmanaged\x86\libwebp.dll" />
