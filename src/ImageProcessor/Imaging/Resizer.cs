@@ -444,33 +444,40 @@ namespace ImageProcessor.Imaging
                 }
 
                 // Resize the image until the shortest side reaches the set given dimension.
-                //if (resizeMode == ResizeMode.Min)
-                //{
-                //    height = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
-                //    width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
+                if (resizeMode == ResizeMode.Min)
+                {
+                    height = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
+                    width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
 
-                //    // Integers must be cast to doubles to get needed precision
-                //    double ratio = (double)height / width;
-                //    double sourceRatio = (double)sourceHeight / sourceWidth;
+                    double sourceRatio = (double)sourceHeight / sourceWidth;
 
-                //    maxHeight = sourceHeight;
-                //    maxWidth = sourceWidth;
-                //    upscale = false;
+                    // Ensure we can't upscale.
+                    maxHeight = sourceHeight;
+                    maxWidth = sourceWidth;
+                    upscale = false;
 
-                //    if (sourceRatio < ratio)
-                //    {
-                //        destinationHeight = height;
-                //        destinationWidth = Convert.ToInt32(width / sourceRatio);
-                //        width = destinationWidth;
-                //    }
-                //    else
-                //    {
-                //        destinationHeight = Convert.ToInt32(height * sourceRatio);
-                //        height = destinationHeight;
-                //        destinationWidth = width;
-                //    }
+                    // Find the shortest distance to go.
+                    int widthDiff = sourceWidth - width;
+                    int heightDiff = sourceHeight - height;
 
-                //}
+                    if (widthDiff < heightDiff)
+                    {
+                        destinationHeight = Convert.ToInt32(width * sourceRatio);
+                        height = destinationHeight;
+                        destinationWidth = width;
+                    }
+                    else if (widthDiff > heightDiff)
+                    {
+                        destinationHeight = height;
+                        destinationWidth = Convert.ToInt32(height / sourceRatio);
+                        width = destinationWidth;
+                    }
+                    else
+                    {
+                        destinationWidth = width;
+                        destinationHeight = height;
+                    }
+                }
 
                 // If height or width is not passed we assume that the standard ratio is to be kept.
                 if (height == 0)
