@@ -78,22 +78,37 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <Content Include="Images\animated\animated-bird.gif" />
-    <Content Include="Images\animated\animated-meter.gif" />
-    <Content Include="Images\animated\animated-pattern.gif" />
-    <Content Include="Images\animated\animated-startrek.gif" />
+    <Content Include="Images\animated\animated-bird.gif" >
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\animated\animated-meter.gif" >
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\animated\animated-pattern.gif" >
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\animated\animated-startrek.gif" >
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\exif\autorotate.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\gamma\gamma-1.0-or-2.2.png" />
-    <Content Include="Images\gamma\gamma-dalai-lama-gray-tft.jpg" />
-    <Content Include="Images\gamma\gamma-dalai-lama-gray.jpg" />
-    <Content Include="Images\gamma\gamma-fly.jpg" />
-    <Content Include="Images\gamma\gamma-saturn.jpg" />
-    <Content Include="Images\icc-profiles\cmyk-profile-euroscale.jpg">
+    <Content Include="Images\gamma\gamma-1.0-or-2.2.png" >
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\color-modes\cmyk.jpg">
+    <Content Include="Images\gamma\gamma-dalai-lama-gray-tft.jpg" >
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\gamma\gamma-dalai-lama-gray.jpg" >
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\gamma\gamma-fly.jpg" >
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\gamma\gamma-saturn.jpg" >
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icc-profiles\cmyk-profile-euroscale.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\exif\exif-Tulips.jpg">
@@ -135,16 +150,12 @@
     <Content Include="Images\icc-profiles\profile-srgb.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Images\color-modes\srgb.jpg">
+    <Content Include="Images\imageprocessor\mask\mask.png" >
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\color-modes\srgb.png">
+    <Content Include="Images\imageprocessor\overlay\monster.png" >
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\imageprocessor\mask\mask.png" />
-    <Content Include="Images\imageprocessor\overlay\monster.png" />
     <Content Include="Images\stretched.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
