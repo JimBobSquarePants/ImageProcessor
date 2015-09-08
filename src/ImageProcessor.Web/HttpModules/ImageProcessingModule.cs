@@ -467,13 +467,13 @@ namespace ImageProcessor.Web.HttpModules
                         {
                             string[] paths = url.Split('?');
                             requestPath = protocol
-                                          + request.Path.Replace(currentService.Prefix, string.Empty).TrimStart('/')
+                                          + request.Path.TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/')
                                           + "?" + paths[1];
                             queryString = paths[2];
                         }
                         else
                         {
-                            requestPath = protocol + request.Path.Replace(currentService.Prefix, string.Empty).TrimStart('/');
+                            requestPath = protocol + request.Path.TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/');
                             queryString = request.QueryString.ToString();
                         }
                     }
