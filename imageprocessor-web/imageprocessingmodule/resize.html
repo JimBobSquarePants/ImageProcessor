@@ -120,17 +120,17 @@ http://your-image?width=600&height=250&mode=stretch
 <section id="example">
     <h1>Examples</h1>
     <h3>Original</h3>
-    <img src="{{ site.baseurl }}/assets/img/originals/car.jpg" alt="original image" />
+    <img src="{{ site.dynamicimageroot }}car.jpg?width=600" alt="original image" />
 
     <h3>Resize Pad</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/pad/car.jpg" alt="Image resized with padding." />
+    <img src="{{ site.dynamicimageroot }}car.jpg?width=600&height=400" alt="Image resized with padding." />
 
     <h3>Resize Crop</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/crop/car.jpg" alt="Image resized with cropping." />
+    <img src="{{ site.dynamicimageroot }}car.jpg?width=600&height=400&mode=crop" alt="Image resized with cropping." />
 
     <h3>Resize Max</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/max/car.jpg" alt="Image resized to fit the aspect ratio." />
+    <img src="{{ site.dynamicimageroot }}car.jpg?width=600&height=400&mode=max" alt="Image resized to fit the aspect ratio." />
 
     <h3>Resize Stretch</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/stretch/car.jpg" alt="Image stretched to fit the given dimension." />
+    <img src="{{ site.dynamicimageroot }}car.jpg?width=600&height=400&mode=stretch" alt="Image stretched to fit the given dimension." />
 </section>
