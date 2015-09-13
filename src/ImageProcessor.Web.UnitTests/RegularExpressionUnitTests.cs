@@ -29,12 +29,8 @@ namespace ImageProcessor.Web.UnitTests
         /// <summary>
         /// The alpha regex unit test.
         /// </summary>
-        /// <param name="input">
-        /// The input string.
-        /// </param>
-        /// <param name="expected">
-        /// The expected result.
-        /// </param>
+        /// <param name="input">The input string.</param>
+        /// <param name="expected">The expected result.</param>
         [Test]
         [TestCase("alpha=66", 66)]
         [TestCase("alpha=101", 100)]
@@ -51,12 +47,8 @@ namespace ImageProcessor.Web.UnitTests
         /// <summary>
         /// The contrast regex unit test.
         /// </summary>
-        /// <param name="input">
-        /// The input string.
-        /// </param>
-        /// <param name="expected">
-        /// The expected result.
-        /// </param>
+        /// <param name="input">The input string.</param>
+        /// <param name="expected">The expected result.</param>
         [Test]
         [TestCase("brightness=56", 56)]
         [TestCase("brightness=84", 84)]
@@ -77,12 +69,8 @@ namespace ImageProcessor.Web.UnitTests
         /// <summary>
         /// The contrast regex unit test.
         /// </summary>
-        /// <param name="input">
-        /// The input string.
-        /// </param>
-        /// <param name="expected">
-        /// The expected result.
-        /// </param>
+        /// <param name="input">The input string.</param>
+        /// <param name="expected">The expected result.</param>
         [Test]
         [TestCase("contrast=56", 56)]
         [TestCase("contrast=84", 84)]
@@ -101,6 +89,25 @@ namespace ImageProcessor.Web.UnitTests
         }
 
         /// <summary>
+        /// Tests that the crop regex matches correctly.
+        /// </summary>
+        /// <param name="input">The input string.</param>
+        /// <param name="expected">The expected result.</param>
+        [TestCase("crop=0,0,15,30", 0)]
+        [TestCase("entropycrop=0,0,15,30", int.MaxValue)]
+        [TestCase("resizecrop=0,0,15,30", int.MaxValue)]
+        [TestCase("weightedcrop=0,0,15,30", int.MaxValue)]
+        [TestCase("?crop=0,0,15,30", 1)]
+        [TestCase("&crop=0,0,15,30", 1)]
+        public void TestCropRegexMatches(string input, int expected)
+        {
+            Processors.Crop crop = new Processors.Crop();
+            int index = crop.MatchRegexIndex(input);
+
+            Assert.AreEqual(expected, index);
+        }
+
+        /// <summary>
         /// The rotate regex unit test.
         /// </summary>
         [Test]
@@ -112,6 +119,7 @@ namespace ImageProcessor.Web.UnitTests
                     "crop=0,0,150,300", new CropLayer(0, 0, 150, 300, CropMode.Pixels)
                 },
                 {
+                    // ReSharper disable once RedundantArgumentDefaultValue
                     "crop=0.1,0.1,.2,.2&cropmode=percentage", new CropLayer(0.1f, 0.1f, 0.2f, 0.2f, CropMode.Percentage)
                 }
             };
@@ -179,12 +187,8 @@ namespace ImageProcessor.Web.UnitTests
         /// <summary>
         /// The format regex unit test.
         /// </summary>
-        /// <param name="input">
-        /// The input querystring.
-        /// </param>
-        /// <param name="expected">
-        /// The expected type.
-        /// </param>
+        /// <param name="input">The input querystring.</param>
+        /// <param name="expected">The expected type.</param>
         [Test]
         [TestCase("format=bmp", typeof(BitmapFormat))]
         [TestCase("format=png", typeof(PngFormat))]
@@ -205,12 +209,8 @@ namespace ImageProcessor.Web.UnitTests
         /// <summary>
         /// The quality regex unit test.
         /// </summary>
-        /// <param name="input">
-        /// The input.
-        /// </param>
-        /// <param name="expected">
-        /// The expected result.
-        /// </param>
+        /// <param name="input">The input.</param>
+        /// <param name="expected">The expected result.</param>
         [Test]
         [TestCase("quality=56", 56)]
         [TestCase("quality=84", 84)]
@@ -230,12 +230,8 @@ namespace ImageProcessor.Web.UnitTests
         /// <summary>
         /// The meta regex unit test.
         /// </summary>
-        /// <param name="input">
-        /// The input.
-        /// </param>
-        /// <param name="expected">
-        /// The expected result.
-        /// </param>
+        /// <param name="input">The input.</param>
+        /// <param name="expected">The expected result.</param>
         [Test]
         [TestCase("meta=true", true)]
         [TestCase("meta=false", false)]
@@ -294,12 +290,8 @@ namespace ImageProcessor.Web.UnitTests
         /// <summary>
         /// The rotate regex unit test.
         /// </summary>
-        /// <param name="input">
-        /// The input string.
-        /// </param>
-        /// <param name="expected">
-        /// The expected result.
-        /// </param>
+        /// <param name="input">The input string.</param>
+        /// <param name="expected">The expected result.</param>
         [Test]
         [TestCase("rotate=0", 0F)]
         [TestCase("rotate=270", 270F)]
@@ -344,12 +336,8 @@ namespace ImageProcessor.Web.UnitTests
         /// <summary>
         /// The saturation regex unit test.
         /// </summary>
-        /// <param name="input">
-        /// The input string.
-        /// </param>
-        /// <param name="expected">
-        /// The expected result.
-        /// </param>
+        /// <param name="input">The input string.</param>
+        /// <param name="expected">The expected result.</param>
         [Test]
         [TestCase("saturation=56", 56)]
         [TestCase("saturation=84", 84)]
