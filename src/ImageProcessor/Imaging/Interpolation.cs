@@ -56,7 +56,7 @@ namespace ImageProcessor.Imaging
         /// <summary>
         /// Returns a bicubic b-spline kernel for the given value.
         /// <remarks>
-        /// The function implements bicubic kernel developed by Paul Bourke <see cref="http://paulbourke.net"/> 
+        /// The function implements bicubic kernel developed by Paul Bourke <see href="http://paulbourke.net"/> 
         /// described <see href="http://docs-hoffmann.de/bicubic03042002.pdf">here</see>
         /// </remarks>
         /// </summary>
