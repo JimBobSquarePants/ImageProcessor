@@ -106,9 +106,9 @@ namespace ImageProcessor.Common.Extensions
         /// <returns>The <see cref="FileInfo"/></returns>
         public static FileInfo GetAssemblyFile(this AssemblyName assemblyName)
         {
-            var codeBase = assemblyName.CodeBase;
-            var uri = new Uri(codeBase);
-            var path = uri.LocalPath;
+            string codeBase = assemblyName.CodeBase;
+            Uri uri = new Uri(codeBase);
+            string path = uri.LocalPath;
             return new FileInfo(path);
         }
     }
