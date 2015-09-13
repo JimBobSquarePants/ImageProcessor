@@ -169,7 +169,7 @@ namespace ImageProcessor.Imaging
         /// Resize an image using a bicubic interpolation algorithm.
         /// The image is preprocessed using a multi-pass box blur to reduce moiré when processing image less than 150x150.
         /// <remarks>
-        /// The function implements bicubic kernel developed by Paul Bourke <see cref="http://paulbourke.net"/> 
+        /// The function implements bicubic kernel developed by Paul Bourke <see href="http://paulbourke.net"/> 
         /// described <see href="http://docs-hoffmann.de/bicubic03042002.pdf">here</see>
         /// </remarks>
         /// </summary>
