@@ -101,7 +101,7 @@ namespace ImageProcessor.Imaging
         /// <see href="https://en.wikipedia.org/wiki/Lanczos_resampling#Algorithm">Wikipedia</see>
         /// </remarks>
         /// </summary>
-        /// <param name="x">X value.</param> 
+        /// <param name="x">The value to return the kernel for.</param> 
         /// <returns>
         /// The <see cref="double"/> representing the bicubic coefficient.
         /// </returns>
@@ -131,13 +131,32 @@ namespace ImageProcessor.Imaging
         /// </returns>
         private static double SinC(double x)
         {
-            if (Math.Abs(x) > .0001)
+            const double Epsilon = .0001;
+
+            if (Math.Abs(x) > Epsilon)
             {
                 x *= Math.PI;
-                return Math.Sin(x) / x;
+                return Clean(Math.Sin(x) / x);
             }
 
             return 1.0;
+        }
+
+        /// <summary>
+        /// Ensures that any passed double is correctly rounded to zero
+        /// </summary>
+        /// <param name="x">The value to clean.</param>
+        /// The <see cref="double"/>.
+        private static double Clean(double x)
+        {
+            const double Epsilon = .0001;
+
+            if (Math.Abs(x) < Epsilon)
+            {
+                return 0.0;
+            }
+
+            return x;
         }
     }
 }
