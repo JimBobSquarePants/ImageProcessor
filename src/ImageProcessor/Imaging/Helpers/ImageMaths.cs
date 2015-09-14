@@ -281,7 +281,7 @@ namespace ImageProcessor.Imaging.Helpers
 
         /// <summary>
         /// Rotates one point around another
-        /// <see href="http://stackoverflow.com/questions/13695317/rotate-a-point-around-another-point"/>
+        /// <see href="http://stackoverflow.com/a/13695630/82333"/>
         /// </summary>
         /// <param name="pointToRotate">The point to rotate.</param>
         /// <param name="angleInDegrees">The rotation angle in degrees.</param>
@@ -299,11 +299,13 @@ namespace ImageProcessor.Imaging.Helpers
             return new Point
             {
                 X =
-                    (int)((cosTheta * (pointToRotate.X - center.X)) -
-                          ((sinTheta * (pointToRotate.Y - center.Y)) + center.X)),
+                    (int)
+                    (cosTheta * (pointToRotate.X - center.X) -
+                    sinTheta * (pointToRotate.Y - center.Y) + center.X),
                 Y =
-                    (int)((sinTheta * (pointToRotate.X - center.X)) +
-                          ((cosTheta * (pointToRotate.Y - center.Y)) + center.Y))
+                    (int)
+                    (sinTheta * (pointToRotate.X - center.X) +
+                    cosTheta * (pointToRotate.Y - center.Y) + center.Y)
             };
         }
 
