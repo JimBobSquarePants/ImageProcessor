@@ -146,5 +146,131 @@ namespace ImageProcessor.UnitTests.Imaging.Helpers
                 Assert.That(rotatePoint, Is.EqualTo(new Point(expectedX, expectedY)));
             }
         }
+
+        /// <summary>
+        /// The when get bounding rotated rectangle.
+        /// </summary>
+        [TestFixture]
+        public class WhenGetBoundingRotatedRectangle
+        {
+            /// <summary>
+            /// The then should return rotated rectangle at 00 and 5 by 5 given 5 by 5 and degrees.
+            /// </summary>
+            /// <param name="degrees">
+            /// The degrees.
+            /// </param>
+            [Test]
+            [TestCase(0)]
+            [TestCase(90)]
+            [TestCase(180)]
+            [TestCase(270)]
+            [TestCase(360)]
+            public void ThenShouldReturnRotatedRectangleAt00And5By5Given5By5AndDegrees(int degrees)
+            {
+                // Arrange // Act
+                var rectangle = ImageMaths.GetBoundingRotatedRectangle(5, 5, degrees);
+
+                // Assert
+                Assert.That(rectangle, Is.EqualTo(new Rectangle(0, 0, 5, 5)));
+            }
+
+            /// <summary>
+            /// The then should return rotated rectangle at 00 and 7 by 7 given 5 by 5 and degrees.
+            /// </summary>
+            /// <param name="degrees">
+            /// The degrees.
+            /// </param>
+            [Test]
+            [TestCase(45)]
+            [TestCase(135)]
+            [TestCase(225)]
+            [TestCase(315)]
+            public void ThenShouldReturnRotatedRectangleAt00And7By7Given5By5AndDegrees(int degrees)
+            {
+                // Arrange // Act
+                var rectangle = ImageMaths.GetBoundingRotatedRectangle(5, 5, degrees);
+
+                // Assert
+                Assert.That(rectangle, Is.EqualTo(new Rectangle(0, 0, 7, 7)));
+            }
+
+            /// <summary>
+            /// The then return rotated rectangle at 00 and 2 by 5 given 52 and 90 degrees.
+            /// </summary>
+            /// <param name="degrees">
+            /// The degrees.
+            /// </param>
+            [Test]
+            [TestCase(90)]
+            [TestCase(270)]
+            public void ThenReturnRotatedRectangleAt00And2By5Given52And90Degrees(int degrees)
+            {
+                // Arrange // Act
+                var rectangle = ImageMaths.GetBoundingRotatedRectangle(5, 2, degrees);
+
+                // Assert
+                Assert.That(rectangle, Is.EqualTo(new Rectangle(0, 0, 2, 5)));
+            }
+
+            /// <summary>
+            /// The then return rotated rectangle at 00 and 5 by 2 given 52 and 180 degrees.
+            /// </summary>
+            /// <param name="degrees">
+            /// The degrees.
+            /// </param>
+            [Test]
+            [TestCase(180)]
+            [TestCase(360)]
+            public void ThenReturnRotatedRectangleAt00And5By2Given52And180Degrees(int degrees)
+            {
+                // Arrange // Act
+                var rectangle = ImageMaths.GetBoundingRotatedRectangle(5, 2, degrees);
+
+                // Assert
+                Assert.That(rectangle, Is.EqualTo(new Rectangle(0, 0, 5, 2)));
+            }
+        }
+
+        /// <summary>
+        /// The when get bounding rectangle.
+        /// </summary>
+        [TestFixture]
+        public class WhenGetBoundingRectangle
+        {
+            /// <summary>
+            /// The then should be at 00 and 5 by 5 given points 5 units apart.
+            /// </summary>
+            /// <param name="pointX1">
+            /// The point x 1.
+            /// </param>
+            /// <param name="pointY1">
+            /// The point y 1.
+            /// </param>
+            /// <param name="pointX2">
+            /// The point x 2.
+            /// </param>
+            /// <param name="pointY2">
+            /// The point y 2.
+            /// </param>
+            [Test]
+            [TestCase(0, 0, 5, 5)]
+            [TestCase(5, 5, 10, 10)]
+            [TestCase(7, 7, 12, 12)]
+            [TestCase(5, 10, 10, 15)]
+            [TestCase(200, 200, 205, 205)]
+            public void ThenShouldBeAt00And5By5GivenPoints5UnitsApart(int pointX1, int pointY1, int pointX2, int pointY2)
+            {
+                // Arrange // Act
+                var rectangle = ImageMaths.GetBoundingRectangle(
+                    new Point(pointX1, pointY1), 
+                    new Point(pointX2, pointY2));
+
+                // Assert
+                Assert.That(
+                    rectangle, 
+                    Is.EqualTo(new Rectangle(pointX1, pointY1, pointX2 - pointX1, pointY2 - pointY1)));
+            }
+
+        }
     }
 }
