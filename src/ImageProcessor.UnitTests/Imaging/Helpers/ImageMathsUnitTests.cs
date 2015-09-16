@@ -146,5 +146,46 @@ namespace ImageProcessor.UnitTests.Imaging.Helpers
                 Assert.That(rotatePoint, Is.EqualTo(new Point(expectedX, expectedY)));
             }
         }
+
+        /// <summary>
+        /// The when to points.
+        /// </summary>
+        [TestFixture]
+        public class WhenToPoints
+        {
+            /// <summary>
+            /// The then should convert to 4 points given rectangle.
+            /// </summary>
+            /// <param name="x">
+            /// The x.
+            /// </param>
+            /// <param name="y">
+            /// The y.
+            /// </param>
+            /// <param name="width">
+            /// The width.
+            /// </param>
+            /// <param name="height">
+            /// The height.
+            /// </param>
+            [Test]
+            [TestCase(0, 0, 10, 10)]
+            [TestCase(5, 5, 10, 10)]
+            [TestCase(1000, 1000, 100, 500)]
+            [TestCase(1, 1, 1, 1)]
+            public void ThenShouldConvertTo4PointsGivenRectangle(int x, int y, int width, int height)
+            {
+                // Arrange
+                var rectangle = new Rectangle(x, y, width, height);
+
+                // Act
+                var points = ImageMaths.ToPoints(rectangle);
+                
+                // Assert
+                Assert.That(
+                    points,
+                    Is.EquivalentTo(new[] { new Point(x, y), new Point(x + width, y), new Point(x, y + height), new Point(x + width, y + height), }));
+            }
+        }
     }
 }
