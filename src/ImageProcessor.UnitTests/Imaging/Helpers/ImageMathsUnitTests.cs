@@ -11,11 +11,14 @@
 namespace ImageProcessor.UnitTests.Imaging.Helpers
 {
     using System.Drawing;
+
     using FluentAssertions;
     using FluentAssertions.Equivalency;
 
     using ImageProcessor.Imaging.Helpers;
+
     using NUnit.Framework;
+    using NUnit.Framework.Constraints;
 
     /// <summary>
     /// Test harness for the image math unit tests
@@ -41,7 +44,12 @@ namespace ImageProcessor.UnitTests.Imaging.Helpers
             [TestCase(100, 100, 30, 137, 137)]
             [TestCase(100, 200, 50, 217, 205)]
             [TestCase(100, 200, -50, 217, 205)]
-            public void BoundingRotatedRectangleIsCalculated(int width, int height, float angle, int expectedWidth, int expectedHeight)
+            public void BoundingRotatedRectangleIsCalculated(
+                int width,
+                int height,
+                float angle,
+                int expectedWidth,
+                int expectedHeight)
             {
                 Rectangle result = ImageMaths.GetBoundingRotatedRectangle(width, height, angle);
 
@@ -68,11 +76,17 @@ namespace ImageProcessor.UnitTests.Imaging.Helpers
             {
                 float result = ImageMaths.ZoomAfterRotation(imageWidth, imageHeight, angle);
 
-                result.Should().BeApproximately(expected, 0.01f, "because the zoom level after rotation should have been calculated");
+                result.Should()
+                    .BeApproximately(
+                        expected,
+                        0.01f,
+                        "because the zoom level after rotation should have been calculated");
 
-                result.Should().BePositive("because we're always zooming in so the zoom level should always be positive");
+                result.Should()
+                    .BePositive("because we're always zooming in so the zoom level should always be positive");
 
-                result.Should().BeGreaterOrEqualTo(1, "because the zoom should always increase the size and not reduce it");
+                result.Should()
+                    .BeGreaterOrEqualTo(1, "because the zoom should always increase the size and not reduce it");
             }
         }
 
@@ -102,7 +116,11 @@ namespace ImageProcessor.UnitTests.Imaging.Helpers
             [TestCase(25, 0, 0, 25)]
             [TestCase(0, 25, -25, 0)]
             [TestCase(-25, 0, 0, -25)]
-            public void ThenShouldReturnPointWithX2AndY2GivenNullCenterPointAndPointToRotateXAndY(int pointToRotateX, int pointToRotateY, int expectedX, int expectedY)
+            public void ThenShouldReturnPointWithX2AndY2GivenNullCenterPointAndPointToRotateXAndY(
+                int pointToRotateX,
+                int pointToRotateY,
+                int expectedX,
+                int expectedY)
             {
                 // Arrange
                 var pointToRotate = new Point(pointToRotateX, pointToRotateY);
@@ -134,7 +152,11 @@ namespace ImageProcessor.UnitTests.Imaging.Helpers
             [TestCase(30, -25, 25, -20)]
             [TestCase(25, -20, 20, -25)]
             [TestCase(20, -25, 25, -30)]
-            public void ThenShouldReturnPointWithX2AndY2GivenCenterPoint25AndNegative25AndPointToRotateXAndY(int pointToRotateX, int pointToRotateY, int expectedX, int expectedY)
+            public void ThenShouldReturnPointWithX2AndY2GivenCenterPoint25AndNegative25AndPointToRotateXAndY(
+                int pointToRotateX,
+                int pointToRotateY,
+                int expectedX,
+                int expectedY)
             {
                 // Arrange
                 var pointToRotate = new Point(pointToRotateX, pointToRotateY);
@@ -258,19 +280,69 @@ namespace ImageProcessor.UnitTests.Imaging.Helpers
             [TestCase(7, 7, 12, 12)]
             [TestCase(5, 10, 10, 15)]
             [TestCase(200, 200, 205, 205)]
-            public void ThenShouldBeAt00And5By5GivenPoints5UnitsApart(int pointX1, int pointY1, int pointX2, int pointY2)
+            public void ThenShouldBeAt00And5By5GivenPoints5UnitsApart(
+                int pointX1,
+                int pointY1,
+                int pointX2,
+                int pointY2)
             {
                 // Arrange // Act
                 var rectangle = ImageMaths.GetBoundingRectangle(
-                    new Point(pointX1, pointY1), 
+                    new Point(pointX1, pointY1),
                     new Point(pointX2, pointY2));
 
                 // Assert
                 Assert.That(
-                    rectangle, 
+                    rectangle,
                     Is.EqualTo(new Rectangle(pointX1, pointY1, pointX2 - pointX1, pointY2 - pointY1)));
             }
 
+            /// <summary>
+            /// The when to points.
+            /// </summary>
+            [TestFixture]
+            public class WhenToPoints
+            {
+                /// <summary>
+                /// The then should convert to 4 points given rectangle.
+                /// </summary>
+                /// <param name="x">
+                /// The x.
+                /// </param>
+                /// <param name="y">
+                /// The y.
+                /// </param>
+                /// <param name="width">
+                /// The width.
+                /// </param>
+                /// <param name="height">
+                /// The height.
+                /// </param>
+                [Test]
+                [TestCase(0, 0, 10, 10)]
+                [TestCase(5, 5, 10, 10)]
+                [TestCase(1000, 1000, 100, 500)]
+                [TestCase(1, 1, 1, 1)]
+                public void ThenShouldConvertTo4PointsGivenRectangle(int x, int y, int width, int height)
+                {
+                    // Arrange
+                    var rectangle = new Rectangle(x, y, width, height);
+
+                    // Act
+                    var points = ImageMaths.ToPoints(rectangle);
+
+                    // Assert
+                    var collectionEquivalentConstraint = Is.EquivalentTo(
+                        new[]
+                            {
+                                new Point(x, y), new Point(x + width, y), new Point(x, y + height),
+                                new Point(x + width, y + height),
+                            });
+                    Assert.That(
+                        points,
+                        collectionEquivalentConstraint);
+                }
+            }
         }
     }
 }
