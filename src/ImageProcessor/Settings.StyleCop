@@ -3,17 +3,24 @@
     <CollectionProperty Name="RecognizedWords">
       <Value>Accord</Value>
       <Value>argb</Value>
+      <Value>ascii</Value>
       <Value>bicubic</Value>
       <Value>bitstream</Value>
       <Value>bpp</Value>
       <Value>dd</Value>
       <Value>ddd</Value>
       <Value>dllimport</Value>
+      <Value>endianness</Value>
       <Value>gps</Value>
+      <Value>Gravell</Value>
       <Value>Haar</Value>
+      <Value>int</Value>
+      <Value>Kamey</Value>
       <Value>Kayyali</Value>
       <Value>Lanczos</Value>
       <Value>Laplacian</Value>
+      <Value>Mc</Value>
+      <Value>McKamey</Value>
       <Value>mmmm</Value>
       <Value>orig</Value>
       <Value>quantizable</Value>

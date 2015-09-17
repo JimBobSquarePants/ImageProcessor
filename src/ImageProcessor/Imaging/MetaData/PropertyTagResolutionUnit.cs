@@ -17,7 +17,7 @@ namespace ImageProcessor.Imaging.MetaData
     /// supported by Windows GDI+.
     /// <see href="https://msdn.microsoft.com/en-us/library/ms534416(v=vs.85).aspx#_gdiplus_constant_propertytagresolutionunit"/>
     /// </summary>
-    public enum PropertyTagResolutionUnit
+    public enum PropertyTagResolutionUnit : ushort
     {
         /// <summary>
         /// The resolution is measured in pixels per inch.
