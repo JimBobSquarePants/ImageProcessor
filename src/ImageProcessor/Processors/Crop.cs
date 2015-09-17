@@ -15,9 +15,11 @@ namespace ImageProcessor.Processors
     using System.Drawing;
     using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
+    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Crops an image to the given directions.
@@ -138,6 +140,15 @@ namespace ImageProcessor.Processors
                     // Reassign the image.
                     image.Dispose();
                     image = newImage;
+
+                    if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                    {
+                        // Set the width EXIF data.
+                        factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);
+
+                        // Set the height EXIF data.
+                        factory.SetPropertyItem(ExifPropertyTag.ImageHeight, (ushort)image.Height);
+                    }
                 }
             }
             catch (Exception ex)

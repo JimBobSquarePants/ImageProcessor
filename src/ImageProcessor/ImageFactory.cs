@@ -4,13 +4,12 @@
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
-//   Encapsulates methods for processing image files.
+//   Encapsulates methods for processing image files in a fluent manner.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace ImageProcessor
 {
-    #region Using
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -29,10 +28,9 @@ namespace ImageProcessor
     using ImageProcessor.Imaging.Helpers;
     using ImageProcessor.Imaging.MetaData;
     using ImageProcessor.Processors;
-    #endregion
 
     /// <summary>
-    /// Encapsulates methods for processing image files.
+    /// Encapsulates methods for processing image files in a fluent manner.
     /// </summary>
     public class ImageFactory : IDisposable
     {
@@ -46,6 +44,12 @@ namespace ImageProcessor
         /// The backup supported image format.
         /// </summary>
         private ISupportedImageFormat backupFormat;
+
+        /// <summary>
+        /// The backup collection of property items containing EXIF metadata.
+        /// </summary>
+        private ConcurrentDictionary<int, PropertyItem> backupExifPropertyItems
+            = new ConcurrentDictionary<int, PropertyItem>();
 
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -86,6 +90,7 @@ namespace ImageProcessor
         {
             this.PreserveExifData = preserveExifData;
             this.ExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
+            this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
             this.FixGamma = fixGamma;
         }
         #endregion
@@ -142,7 +147,7 @@ namespace ImageProcessor
         public float CurrentGamma { get; private set; }
 
         /// <summary>
-        /// Gets or sets the exif property items.
+        /// Gets or sets the collection of property items containing EXIF metadata.
         /// </summary>
         public ConcurrentDictionary<int, PropertyItem> ExifPropertyItems { get; set; }
 
@@ -216,6 +221,8 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
+            this.backupExifPropertyItems = this.ExifPropertyItems;
+
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy();
             this.Image.Dispose();
@@ -282,6 +289,8 @@ namespace ImageProcessor
                     {
                         this.ExifPropertyItems[propertyItem.Id] = propertyItem;
                     }
+
+                    this.backupExifPropertyItems = this.ExifPropertyItems;
 
                     // Ensure the image is in the most efficient format.
                     Image formatted = this.Image.Copy();
@@ -385,6 +394,7 @@ namespace ImageProcessor
 
                 // Set the other properties.
                 this.CurrentImageFormat = this.backupFormat;
+                this.ExifPropertyItems = this.backupExifPropertyItems;
                 this.CurrentImageFormat.Quality = DefaultQuality;
             }
 
