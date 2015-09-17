@@ -68,6 +68,8 @@
     <Compile Include="Imaging\FastBitmapUnitTests.cs" />
     <Compile Include="Imaging\Filters\Photo\MatrixFilterBaseTests.cs" />
     <Compile Include="Imaging\Helpers\ImageMathsUnitTests.cs" />
+    <Compile Include="Metadata\TestBigEndianBitConverter.cs" />
+    <Compile Include="Metadata\TestLittleEndianBitConverter.cs" />
     <Compile Include="Processors\MetaTests.cs" />
     <Compile Include="Processors\QualityTests.cs" />
   </ItemGroup>

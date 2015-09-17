@@ -15,9 +15,11 @@ namespace ImageProcessor.Processors
     using System.Drawing;
     using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
+    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Helpers;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Encapsulates the methods to rotate an image without expanding the canvas.
@@ -55,6 +57,15 @@ namespace ImageProcessor.Processors
 
                 // Create a rotated image.
                 image = this.RotateImage(image, rotateParams.Item1, rotateParams.Item2);
+
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                {
+                    // Set the width EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);
+
+                    // Set the height EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageHeight, (ushort)image.Height);
+                }
 
                 return image;
             }
