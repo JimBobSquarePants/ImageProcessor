@@ -11,11 +11,13 @@ namespace ImageProcessor.Processors
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Filters.Binarization;
     using ImageProcessor.Imaging.Filters.EdgeDetection;
     using ImageProcessor.Imaging.Helpers;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Performs a crop on an image to the area of greatest entropy.
@@ -84,6 +86,15 @@ namespace ImageProcessor.Processors
                 // Reassign the image.
                 image.Dispose();
                 image = newImage;
+
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                {
+                    // Set the width EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);
+
+                    // Set the height EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageHeight, (ushort)image.Height);
+                }
             }
             catch (Exception ex)
             {

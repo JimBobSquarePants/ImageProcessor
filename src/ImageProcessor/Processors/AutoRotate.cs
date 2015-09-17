@@ -6,6 +6,9 @@
 // <summary>
 //   Performs auto-rotation to ensure that EXIF defined rotation is reflected in
 //   the final image.
+//   <remarks>
+//   <see href="http://sylvana.net/jpegcrop/exif_orientation.html" />
+//   </remarks>
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -21,6 +24,9 @@ namespace ImageProcessor.Processors
     /// <summary>
     /// Performs auto-rotation to ensure that EXIF defined rotation is reflected in 
     /// the final image.
+    /// <remarks>
+    /// <see href="http://sylvana.net/jpegcrop/exif_orientation.html"/>
+    /// </remarks>
     /// </summary>
     public class AutoRotate : IGraphicsProcessor
     {
@@ -71,17 +77,29 @@ namespace ImageProcessor.Processors
                     int rotationValue = factory.ExifPropertyItems[Orientation].Value[0];
                     switch (rotationValue)
                     {
-                        case 8: // Rotated 90 right
-                            // De-rotate:
+                        case 8:
+                            // Rotated 90 right
                             image.RotateFlip(RotateFlipType.Rotate270FlipNone);
                             break;
 
-                        case 3: // Bottoms up
-                            image.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                        case 7: // Rotated 90 right, flip horizontally
+                            image.RotateFlip(RotateFlipType.Rotate270FlipX);
                             break;
 
                         case 6: // Rotated 90 left
                             image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                            break;
+
+                        case 5: // Rotated 90 left, flip horizontally
+                            image.RotateFlip(RotateFlipType.Rotate90FlipX);
+                            break;
+
+                        case 3: // Rotate 180 left
+                            image.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                            break;
+
+                        case 2: // Flip horizontally
+                            image.RotateFlip(RotateFlipType.RotateNoneFlipX);
                             break;
                     }
                 }

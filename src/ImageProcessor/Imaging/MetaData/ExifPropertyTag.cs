@@ -703,7 +703,7 @@ namespace ImageProcessor.Imaging.MetaData
 
         /// <summary>
         /// Luminance table. The luminance table and the chrominance table are used to control JPEG quality. 
-        /// A valid luminance or chrominance table has 64 entries of type <see cref="ExifPropertyTagType.Int16"/>. 
+        /// A valid luminance or chrominance table has 64 entries of type <see cref="ExifPropertyTagType.UShort"/>. 
         /// If an image has either a luminance table or a chrominance table, then it must have both tables.
         /// </summary>
         LuminanceTable = 0x5090,

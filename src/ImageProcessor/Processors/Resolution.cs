@@ -13,11 +13,9 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Drawing.Imaging;
     using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
-    using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
@@ -75,9 +73,9 @@ namespace ImageProcessor.Processors
                 // supports inches.
                 if (resolution.Item3 == PropertyTagResolutionUnit.Cm)
                 {
-                    float h = resolution.Item1 / InchInCm;
-                    float v = resolution.Item2 / InchInCm;
-                    ((Bitmap)image).SetResolution(h, v);
+                    float horizontal = resolution.Item1 / InchInCm;
+                    float vertical = resolution.Item2 / InchInCm;
+                    ((Bitmap)image).SetResolution(horizontal, vertical);
                 }
                 else
                 {
@@ -87,27 +85,16 @@ namespace ImageProcessor.Processors
                 if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
                 {
                     // Set the horizontal EXIF data.
-                    int horizontalKey = (int)ExifPropertyTag.XResolution;
-                    PropertyItem horizontal = this.GetResolutionItem(horizontalKey, resolution.Item1);
+                    Rational<uint> horizontalRational = new Rational<uint>((uint)resolution.Item1, 1);
+                    factory.SetPropertyItem(ExifPropertyTag.XResolution, horizontalRational);
 
                     // Set the vertical EXIF data.
-                    int verticalKey = (int)ExifPropertyTag.YResolution;
-                    PropertyItem vertical = this.GetResolutionItem(verticalKey, resolution.Item1);
+                    Rational<uint> verticalRational = new Rational<uint>((uint)resolution.Item2, 1);
+                    factory.SetPropertyItem(ExifPropertyTag.YResolution, verticalRational);
 
-                    factory.ExifPropertyItems[horizontalKey] = horizontal;
-                    factory.ExifPropertyItems[verticalKey] = vertical;
-
-                    // Set the unit data
-                    int unitKey = (int)ExifPropertyTag.ResolutionUnit;
-                    PropertyItem unit = FormatUtilities.CreatePropertyItem();
-                    unit.Id = unitKey;
-                    unit.Len = 2;
-                    unit.Type = (short)ExifPropertyTagType.Int16;
-                    Int32Converter measure = (int)resolution.Item3;
-                    unit.Value = new[] { measure.Byte1, measure.Byte2 };
-
-                    // TODO: Create nice streamline getter/setters for EXIF.
-                    factory.ExifPropertyItems[unitKey] = unit;
+                    // Set the unit EXIF data
+                    ushort units = (ushort)resolution.Item3;
+                    factory.SetPropertyItem(ExifPropertyTag.ResolutionUnit, units);
                 }
             }
             catch (Exception ex)
@@ -116,39 +103,6 @@ namespace ImageProcessor.Processors
             }
 
             return image;
-        }
-
-        /// <summary>
-        /// Gets a <see cref="PropertyItem"/> for the given resolution and direction.
-        /// </summary>
-        /// <param name="id">
-        /// The id of the tag that sets the direction.
-        /// </param>
-        /// <param name="resolution">The resolution.</param>
-        /// <returns>
-        /// The <see cref="PropertyItem"/>.
-        /// </returns>
-        private PropertyItem GetResolutionItem(int id, int resolution)
-        {
-            int length = 8;
-            short type = (short)ExifPropertyTagType.Rational;
-            Int32Converter denominator = 1;
-
-            PropertyItem propertyItem = FormatUtilities.CreatePropertyItem();
-            propertyItem.Id = id;
-            propertyItem.Type = type;
-            Int32Converter numerator = resolution;
-
-            byte[] resolutionBytes =
-                        {
-                            numerator.Byte1, numerator.Byte2, numerator.Byte3, numerator.Byte4, 
-                            denominator.Byte1, denominator.Byte2, denominator.Byte3, denominator.Byte4
-                        };
-
-            propertyItem.Len = length;
-            propertyItem.Value = resolutionBytes;
-
-            return propertyItem;
         }
     }
 }
