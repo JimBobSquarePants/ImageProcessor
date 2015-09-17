@@ -1,6 +1,16 @@
-﻿namespace ImageProcessor.UnitTests.Extensions
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="FloatExtensionsUnitTests.cs" company="James South">
+//   Copyright (c) James South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   The float extensions unit tests.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace ImageProcessor.UnitTests.Extensions
 {
-    using ImageProcessor.Common.Extensions;
+    using Common.Extensions;
 
     using NUnit.Framework;
 
