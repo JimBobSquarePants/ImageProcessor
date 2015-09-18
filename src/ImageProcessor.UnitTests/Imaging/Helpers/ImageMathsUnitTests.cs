@@ -10,6 +10,7 @@
 
 namespace ImageProcessor.UnitTests.Imaging.Helpers
 {
+    using System;
     using System.Drawing;
 
     using FluentAssertions;
@@ -343,6 +344,65 @@ namespace ImageProcessor.UnitTests.Imaging.Helpers
                         collectionEquivalentConstraint);
                 }
             }
+        }
+
+        /// <summary>
+        /// The when clamp.
+        /// </summary>
+        [TestFixture]
+        public class WhenClamp
+        {
+            /// <summary>
+            /// The then should use min value given value less than min.
+            /// </summary>
+            /// <param name="minValue">
+            /// The min value.
+            /// </param>
+            /// <param name="value">
+            /// The value.
+            /// </param>
+            [Test]
+            [TestCase(0, -1)]
+            [TestCase(0, -5)]
+            [TestCase(0, -10)]
+            [TestCase(0, -1000)]
+            [TestCase(250, -1000)]
+            [TestCase(500, 500)]
+            public void ThenShouldUseMinValueGivenValueLessThanMin(int minValue, int value)
+            {
+                // Arrange //Act
+                var result = ImageMaths.Clamp(value, minValue, int.MaxValue);
+
+                // Assert
+                Assert.That(result, Is.EqualTo(minValue));
+            }
+
+            /// <summary>
+            /// The then should use max value given value greater than max.
+            /// </summary>
+            /// <param name="maxValue">
+            /// The max value.
+            /// </param>
+            /// <param name="value">
+            /// The value.
+            /// </param>
+            [Test]
+            [TestCase(2000, 10000)]
+            [TestCase(1000, 20000)]
+            [TestCase(5, 10)]
+            [TestCase(0, 10)]
+            [TestCase(-1000, 2000)]
+            [TestCase(-500, 501)]
+            [TestCase(-501, -500)]
+            public void ThenShouldUseMaxValueGivenValueGreaterThanMax(int maxValue, int value)
+            {
+                // Arrange //Act
+                var result = ImageMaths.Clamp(value, int.MinValue, maxValue);
+
+                // Assert
+                Assert.That(result, Is.EqualTo(maxValue));
+            }
+
         }
     }
 }
