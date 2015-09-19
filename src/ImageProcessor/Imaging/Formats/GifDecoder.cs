@@ -56,9 +56,11 @@ namespace ImageProcessor.Imaging.Formats
 
                         // Find the frame
                         image.SelectActiveFrame(FrameDimension.Time, i);
-
+                        Bitmap frame = new Bitmap(image);
+                        frame.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+                        
                         // TODO: Get positions.
-                        gifFrames.Add(new GifFrame { Delay = delay, Image = new Bitmap(image) });
+                        gifFrames.Add(new GifFrame { Delay = delay, Image = frame });
 
                         // Reset the position.
                         if (i == last)
