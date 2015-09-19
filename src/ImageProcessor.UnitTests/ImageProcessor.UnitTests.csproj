@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="AssertionHelpers.cs" />
     <Compile Include="Configuration\ImageProcessorBootstrapperTests.cs" />
+    <Compile Include="Extensions\EnumerableExtensionsUnitTests.cs" />
     <Compile Include="Extensions\FloatExtensionsUnitTests.cs" />
     <Compile Include="ImageFactoryUnitTests.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
