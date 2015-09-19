@@ -1,0 +1,25 @@
+---
+permalink: imageprocessor/imagefactory/resolution/
+redirect_from: "imageprocessor/imagefactory/resolution.html"
+
+title: Resolution
+subheading: Resolution
+sublinks: ["#usage|Usage","#example|Examples"]
+---
+<section id="usage">
+    <h1>Resolution</h1>
+    <p>
+        Changes the horizontal and vertical resolution of the image. If EXIF metadata is to be preserved
+        the information contained within will also be updated to match.
+    </p>
+    <div class="alert" role="alert">
+        <p>Added version 2.3.0</p>
+    </div>
+</section>
+<hr/>
+<section id="example">
+    <h1>Example</h1>
+    {% highlight c# %}
+public ImageFactory Resolution(300, 300)
+    {% endhighlight %}
+</section>
