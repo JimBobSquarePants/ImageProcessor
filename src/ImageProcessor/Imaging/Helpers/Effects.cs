@@ -140,6 +140,7 @@ namespace ImageProcessor.Imaging.Helpers
             int height = mask.Height;
 
             Bitmap toMask = new Bitmap(source);
+            toMask.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             // Loop through and replace the alpha channel
             using (FastBitmap maskBitmap = new FastBitmap(mask))

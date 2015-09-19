@@ -79,6 +79,7 @@ namespace ImageProcessor.Processors
                 int maxHeight = image.Height;
 
                 newImage = new Bitmap(image);
+                newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                 using (FastBitmap fastBitmap = new FastBitmap(newImage))
                 {
