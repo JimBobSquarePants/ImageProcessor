@@ -263,7 +263,7 @@ nav[role="navigation"] [data-dropdown-target] {
 
     .breadcrumb li {
         display: inline-block;
-        text-transform: capitalize;
+        text-transform: uppercase;
     }
 
 nav[role="complementary"] a {
@@ -315,6 +315,17 @@ footer[role="contentinfo"] {
 button > .fa,
 a > .fa {
     margin-right: .5rem;
+}
+
+article [rel="subsection"]{
+   font-size: 1.5rem;
+   margin: 1.245rem 0;
+}
+
+[rel="subsection"] > .fa,
+[rel="chapter"] > .fa{
+    margin-left: .5rem;
+    margin-right: .25rem;
 }
 
 /*==||=============================================================

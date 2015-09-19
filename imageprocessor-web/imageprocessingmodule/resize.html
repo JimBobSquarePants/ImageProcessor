@@ -14,10 +14,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <strong>ImageProcessor.Web</strong> allows you to scale images both up and down with an excellent quality to size ratio.
         A maximum width and height can be set in the configuration to help protect you from <abbr title="Denial of service">DoS</abbr> attacks.
     </p>
-    <p>Four different types of resizing methods are available:</p>
+    <p>Six different types of resizing methods are available:</p>
     <ul>
         <li>Pad (default)</li>
+        <li>BoxPad</li>
         <li>Crop</li>
+        <li>Min</li>
         <li>Max</li>
         <li>Stretch</li>
     </ul>
@@ -38,7 +40,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h2>Resize Pad</h2>
     <p>
         Passing a single dimension will automatically preserve the aspect ratio of the original image. If the requested aspect ratio is different then the
-        image will be padded to fit. Widths and heights can optionally also be passed as a ratio and you can fill the <a href="../backgroundcolor">background color</a>
+        image will be padded to fit. Widths and heights can optionally also be passed as a ratio and you can fill the <a href="../backgroundcolor" rel="chapter">background color<i class="fa fa-file-text-o"></i></a>
         for image types without transparency.
     </p>
     <p>Pad mode also offers optional anchor positions:</p>
@@ -71,7 +73,6 @@ http://your-image?width=600&height=250&bgcolor=fff
     {% endhighlight %}
 
     <hr />
-
 
     <h2>Resize Crop</h2>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
@@ -108,6 +109,13 @@ http://your-image?width=600&height=250&mode=crop&center=0.25,0.30
 http://your-image?width=600&height=250&mode=max
     {% endhighlight %}
 
+    <h2>Resize Max</h2>
+    <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
+    the output is resized to the maximum possible value in each direction while aintaining the original aspect ratio.</p>
+    {% highlight xml %}
+http://your-image?width=600&height=250&mode=max
+    {% endhighlight %}
+
     <hr />
     <h2>Resize Stretch</h2>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
@@ -120,17 +128,35 @@ http://your-image?width=600&height=250&mode=stretch
 <section id="example">
     <h1>Examples</h1>
     <h3>Original</h3>
-    <img src="{{ site.dynamicimageroot }}car.jpg?width=600" alt="original image" />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg" alt="original image" />
+
+    <hr />
 
     <h3>Resize Pad</h3>
-    <img src="{{ site.dynamicimageroot }}car.jpg?width=600&height=400" alt="Image resized with padding." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500" alt="Image resized with padding." />
+
+    <hr />
+
+    <h3>Resize BoxPad</h3>
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=boxpad" alt="Image resized with padding." />
+
+    <hr />
 
     <h3>Resize Crop</h3>
-    <img src="{{ site.dynamicimageroot }}car.jpg?width=600&height=400&mode=crop" alt="Image resized with cropping." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=300&height=300&mode=crop" alt="Image resized with cropping." />
+
+    <hr />
+
+    <h3>Resize Min</h3>
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=min" alt="Image resized to fit the aspect ratio." />
+
+    <hr />
 
     <h3>Resize Max</h3>
-    <img src="{{ site.dynamicimageroot }}car.jpg?width=600&height=400&mode=max" alt="Image resized to fit the aspect ratio." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=max" alt="Image resized to fit the aspect ratio." />
+
+    <hr />
 
     <h3>Resize Stretch</h3>
-    <img src="{{ site.dynamicimageroot }}car.jpg?width=600&height=400&mode=stretch" alt="Image stretched to fit the given dimension." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=stretch" alt="Image stretched to fit the given dimension." />
 </section>
