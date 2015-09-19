@@ -227,6 +227,67 @@ namespace ImageProcessor.Imaging
                 int destinationX = 0;
                 int destinationY = 0;
 
+                // Change the destination rectangle coordinates if box padding.
+                if (resizeMode == ResizeMode.BoxPad)
+                {
+                    height = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
+                    width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
+
+                    // Only calculate if upscaling. 
+                    if (sourceWidth < width || sourceHeight < height)
+                    {
+                        destinationWidth = sourceWidth;
+                        destinationHeight = sourceHeight;
+
+                        upscale = true;
+
+                        switch (anchorPosition)
+                        {
+                            case AnchorPosition.Left:
+                                destinationY = (height - sourceHeight) / 2;
+                                destinationX = 0;
+                                break;
+                            case AnchorPosition.Right:
+                                destinationY = (height - sourceHeight) / 2;
+                                destinationX = width - sourceWidth;
+                                break;
+                            case AnchorPosition.TopRight:
+                                destinationY = 0;
+                                destinationX = width - sourceWidth;
+                                break;
+                            case AnchorPosition.Top:
+                                destinationY = 0;
+                                destinationX = (width - sourceWidth) / 2;
+                                break;
+                            case AnchorPosition.TopLeft:
+                                destinationY = 0;
+                                destinationX = 0;
+                                break;
+                            case AnchorPosition.BottomRight:
+                                destinationY = height - sourceHeight;
+                                destinationX = width - sourceWidth;
+                                break;
+                            case AnchorPosition.Bottom:
+                                destinationY = height - sourceHeight;
+                                destinationX = (width - sourceWidth) / 2;
+                                break;
+                            case AnchorPosition.BottomLeft:
+                                destinationY = height - sourceHeight;
+                                destinationX = 0;
+                                break;
+                            default:
+                                destinationY = (height - sourceHeight) / 2;
+                                destinationX = (width - sourceWidth) / 2;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // Switch to pad mode to downscale and calculate from there. 
+                        resizeMode = ResizeMode.Pad;
+                    }
+                }
+
                 // Change the destination rectangle coordinates if padding and
                 // there has been a set width and height.
                 if (resizeMode == ResizeMode.Pad && width > 0 && height > 0)
@@ -276,59 +337,6 @@ namespace ImageProcessor.Imaging
                                 destinationY = (int)((height - (sourceHeight * ratio)) / 2);
                                 break;
                         }
-                    }
-                }
-
-
-                // Change the destination rectangle coordinates if box padding.
-                if (resizeMode == ResizeMode.BoxPad)
-                {
-                    height = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
-                    width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
-
-                    destinationWidth = sourceWidth;
-                    destinationHeight = sourceHeight;
-
-                    upscale = true;
-
-                    switch (anchorPosition)
-                    {
-                        case AnchorPosition.Left:
-                            destinationY = (height - sourceHeight) / 2;
-                            destinationX = 0;
-                            break;
-                        case AnchorPosition.Right:
-                            destinationY = (height - sourceHeight) / 2;
-                            destinationX = width - sourceWidth;
-                            break;
-                        case AnchorPosition.TopRight:
-                            destinationY = 0;
-                            destinationX = width - sourceWidth;
-                            break;
-                        case AnchorPosition.Top:
-                            destinationY = 0;
-                            destinationX = (width - sourceWidth) / 2;
-                            break;
-                        case AnchorPosition.TopLeft:
-                            destinationY = 0;
-                            destinationX = 0;
-                            break;
-                        case AnchorPosition.BottomRight:
-                            destinationY = height - sourceHeight;
-                            destinationX = width - sourceWidth;
-                            break;
-                        case AnchorPosition.Bottom:
-                            destinationY = height - sourceHeight;
-                            destinationX = (width - sourceWidth) / 2;
-                            break;
-                        case AnchorPosition.BottomLeft:
-                            destinationY = height - sourceHeight;
-                            destinationX = 0;
-                            break;
-                        default:
-                            destinationY = (height - sourceHeight) / 2;
-                            destinationX = (width - sourceWidth) / 2;
-                            break;
                     }
                 }
 
@@ -546,6 +554,7 @@ namespace ImageProcessor.Imaging
                     //}
 
                     newImage = linear ? ResizeLinear(source, width, height, destination) : ResizeComposite(source, width, height, destination);
+
                     // Reassign the image.
                     source.Dispose();
                     source = newImage;
