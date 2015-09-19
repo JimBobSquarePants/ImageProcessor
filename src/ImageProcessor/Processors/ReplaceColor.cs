@@ -93,6 +93,7 @@ namespace ImageProcessor.Processors
                 byte maxB = (originalB + fuzziness).ToByte();
 
                 newImage = new Bitmap(image);
+                newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                 int width = image.Width;
                 int height = image.Height;
 
