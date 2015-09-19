@@ -60,7 +60,14 @@ namespace ImageProcessor.Imaging.MetaData
                 value += '\0';
             }
 
-            return Encoding.ASCII.GetBytes(value);
+            byte[] bytes = Encoding.ASCII.GetBytes(value);
+
+            if (!this.IsLittleEndian())
+            {
+                Array.Reverse(bytes);
+            }
+
+            return bytes;
         }
 
         /// <summary>
