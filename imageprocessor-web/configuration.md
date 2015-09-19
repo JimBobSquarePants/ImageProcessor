@@ -75,6 +75,16 @@ configuration file you can add your own image sources.
 
 {% highlight xml %}
 <security>
+  <!--Added v4.3.0 -->
+  <cors>
+    <whitelist>
+      <!--
+      Demo: Adding a url will send cors headers to that requesting url.
+            "*" acts as a universal selector.
+      -->
+      <add url="http://imageprocessor.org"/>
+    </whitelist>
+  </cors>
   <services>
     <service name="LocalFileImageService" type="ImageProcessor.Web.Services.LocalFileImageService, ImageProcessor.Web"/>
     <!--Disable the LocalFileImageService and enable this one when using virtual paths. -->
@@ -117,7 +127,7 @@ prior to that the config is as follows.
      milliseconds, the maximum allowable download in bytes and the prefix to use so that ImageProcessor can recognize 
      a remote request. -->
 <security allowRemoteDownloads="true" timeout="300000" maxBytes="4194304" remotePrefix="/remote.axd">
-  <!-- Sets allowable domains to process images from. -->
+  <!-- Demo: Sets allowable domains to process images from. -->
   <whiteList>
     <add url="http://images.mymovies.net"/>
     <add url="http://maps.googleapis.com" extensionLess="true" imageFormat=".png"/>
@@ -172,8 +182,9 @@ Sources for image processors are plugin based. That means by implementing the `I
 the web implementaion in the configuration file you can add your own image processor.
 
 {% highlight xml %}
-<processing preserveExifMetaData="false">
-  <!-- Presets that allow you to reduce code in your markup. 
+<!--Postprocessing - Added version 4.4.0 optimizes the output images for the web.-->
+<processing preserveExifMetaData="false" postProcess="true">
+  <!-- Demo: Presets that allow you to reduce code in your markup. 
        Note the use of &#038; to escape ampersands. -->
   <presets>
     <preset name="demo" value="width=300&#038;height=150&#038;bgcolor=transparent"/>
