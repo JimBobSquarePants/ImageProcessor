@@ -77,5 +77,25 @@ namespace ImageProcessor.UnitTests.Extensions
                 Assert.Throws<ArgumentOutOfRangeException>(() => EnumerableExtensions.SteppedRange(0, -9, -3));
             }
         }
+
+        /// <summary>
+        /// The when stepped range with function.
+        /// </summary>
+        [TestFixture]
+        public class WhenSteppedRangeWithFunction
+        {
+            /// <summary>
+            /// The then return 0 to 9 given function 0 then i less than 10 then 1.
+            /// </summary>
+            [Test]
+            public void ThenReturn0To9GivenFunction0ThenILessThan10Then1()
+            {
+                // Arrange // Act
+                var enumerable = EnumerableExtensions.SteppedRange(0, i => i < 10, 1);
+
+                // Assert
+                Assert.That(enumerable, Is.EquivalentTo(new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+            }
+        }
     }
 }
