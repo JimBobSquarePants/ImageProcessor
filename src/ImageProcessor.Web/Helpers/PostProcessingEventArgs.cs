@@ -11,12 +11,18 @@
 namespace ImageProcessor.Web.Helpers
 {
     using System;
+    using System.Web;
 
     /// <summary>
     /// The post processing event arguments.
     /// </summary>
     public class PostProcessingEventArgs : EventArgs
     {
+        /// <summary>
+        /// Gets or sets the current request context.
+        /// </summary>
+        public HttpContext Context { get; set; }
+
         /// <summary>
         /// Gets or sets the cached image path.
         /// </summary>

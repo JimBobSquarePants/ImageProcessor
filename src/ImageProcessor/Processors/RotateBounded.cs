@@ -14,8 +14,12 @@ namespace ImageProcessor.Processors
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
+    using System.Linq;
+
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Helpers;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Encapsulates the methods to rotate an image without expanding the canvas.
@@ -45,7 +49,6 @@ namespace ImageProcessor.Processors
         /// </remarks>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
@@ -53,22 +56,23 @@ namespace ImageProcessor.Processors
                 Tuple<float, bool> rotateParams = this.DynamicParameter;
 
                 // Create a rotated image.
-                newImage = this.RotateImage(image, rotateParams.Item1, rotateParams.Item2);
+                image = this.RotateImage(image, rotateParams.Item1, rotateParams.Item2);
 
-                image.Dispose();
-                image = newImage;
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                {
+                    // Set the width EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);
+
+                    // Set the height EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageHeight, (ushort)image.Height);
+                }
+
+                return image;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
 
         /// <summary>
@@ -104,8 +108,8 @@ namespace ImageProcessor.Processors
             // if we don't keep the image dimensions, calculate the new ones
             if (!keepSize)
             {
-                newSize.Width = (int)Math.Floor(newSize.Width / zoom);
-                newSize.Height = (int)Math.Floor(newSize.Height / zoom);
+                newSize.Width = Math.Max(1, (int)Math.Floor(newSize.Width / zoom));
+                newSize.Height = Math.Max(1, (int)Math.Floor(newSize.Height / zoom));
             }
 
             // Center of the image
@@ -113,7 +117,7 @@ namespace ImageProcessor.Processors
             float rotateAtY = Math.Abs(image.Height / 2);
 
             // Create a new empty bitmap to hold rotated image
-            Bitmap newImage = new Bitmap(newSize.Width, newSize.Height);
+            Bitmap newImage = new Bitmap(newSize.Width, newSize.Height, PixelFormat.Format32bppPArgb);
             newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             // Make a graphics object from the empty bitmap
@@ -163,6 +167,7 @@ namespace ImageProcessor.Processors
                 }
             }
 
+            image.Dispose();
             return newImage;
         }
     }

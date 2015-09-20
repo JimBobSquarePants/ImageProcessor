@@ -58,6 +58,8 @@
   <ItemGroup>
     <Compile Include="AssertionHelpers.cs" />
     <Compile Include="Configuration\ImageProcessorBootstrapperTests.cs" />
+    <Compile Include="Extensions\EnumerableExtensionsUnitTests.cs" />
+    <Compile Include="Extensions\FloatExtensionsUnitTests.cs" />
     <Compile Include="ImageFactoryUnitTests.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -66,7 +68,12 @@
     <Compile Include="Imaging\ColorUnitTests.cs" />
     <Compile Include="Imaging\CropLayerUnitTests.cs" />
     <Compile Include="Imaging\FastBitmapUnitTests.cs" />
+    <Compile Include="Imaging\Filters\Photo\MatrixFilterBaseTests.cs" />
     <Compile Include="Imaging\Helpers\ImageMathsUnitTests.cs" />
+    <Compile Include="Metadata\TestBigEndianBitConverter.cs" />
+    <Compile Include="Metadata\TestLittleEndianBitConverter.cs" />
+    <Compile Include="Processors\MetaTests.cs" />
+    <Compile Include="Processors\QualityTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -77,13 +84,37 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="Images\animated\animated-bird.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\animated\animated-meter.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\animated\animated-pattern.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\animated\animated-startrek.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\exif\autorotate.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\icc-profiles\cmyk-profile-euroscale.jpg">
+    <Content Include="Images\gamma\gamma-1.0-or-2.2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\color-modes\cmyk.jpg">
+    <Content Include="Images\gamma\gamma-dalai-lama-gray-tft.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\gamma\gamma-dalai-lama-gray.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\gamma\gamma-fly.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\gamma\gamma-saturn.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icc-profiles\cmyk-profile-euroscale.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\exif\exif-Tulips.jpg">
@@ -110,9 +141,6 @@
     <Content Include="Images\format-Penguins.tif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\format-animated.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Images\color-tests\hi-color.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -128,12 +156,10 @@
     <Content Include="Images\icc-profiles\profile-srgb.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Images\color-modes\srgb.jpg">
+    <Content Include="Images\imageprocessor\mask\mask.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\color-modes\srgb.png">
+    <Content Include="Images\imageprocessor\overlay\monster.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\stretched.jpg">
@@ -150,7 +176,9 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Imaging\Formats\" />
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup />
 </Project>

@@ -118,6 +118,18 @@ namespace ImageProcessor.Web.Configuration
                 return GetImageProcessingSection().PreserveExifMetaData;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether to use post processing optimization techniques
+        /// on the resultant images to further reduce file size.
+        /// </summary>
+        public bool PostProcess
+        {
+            get
+            {
+                return GetImageProcessingSection().PostProcess;
+            }
+        }
         #endregion
 
         #region Methods
@@ -197,7 +209,11 @@ namespace ImageProcessor.Web.Configuration
                         // Add the available settings.
                         foreach (IWebGraphicsProcessor webProcessor in this.GraphicsProcessors)
                         {
-                            webProcessor.Processor.Settings = this.GetPluginSettings(webProcessor.GetType().Name);
+                            Dictionary<string, string> settings = this.GetPluginSettings(webProcessor.GetType().Name);
+                            if (settings.Any())
+                            {
+                                webProcessor.Processor.Settings = settings;
+                            }
                         }
                     }
                     catch (ReflectionTypeLoadException)
@@ -237,7 +253,11 @@ namespace ImageProcessor.Web.Configuration
             // Add the available settings.
             foreach (IWebGraphicsProcessor webProcessor in this.GraphicsProcessors)
             {
-                webProcessor.Processor.Settings = this.GetPluginSettings(webProcessor.GetType().Name);
+                Dictionary<string, string> settings = this.GetPluginSettings(webProcessor.GetType().Name);
+                if (settings.Any())
+                {
+                    webProcessor.Processor.Settings = settings;
+                }
             }
         }
 
@@ -301,8 +321,18 @@ namespace ImageProcessor.Web.Configuration
                         foreach (IImageService service in this.ImageServices)
                         {
                             string name = service.GetType().Name;
-                            service.Settings = this.GetServiceSettings(name);
-                            service.WhiteList = this.GetServiceWhitelist(name);
+                            Dictionary<string, string> settings = this.GetServiceSettings(name);
+                            if (settings.Any())
+                            {
+                                service.Settings = settings;
+                            }
+
+                            Uri[] whitelist = this.GetServiceWhitelist(name);
+
+                            if (whitelist.Any())
+                            {
+                                service.WhiteList = this.GetServiceWhitelist(name);
+                            }
                         }
                     }
                     catch (ReflectionTypeLoadException)
@@ -352,8 +382,18 @@ namespace ImageProcessor.Web.Configuration
             foreach (IImageService service in this.ImageServices)
             {
                 string name = service.GetType().Name;
-                service.Settings = this.GetServiceSettings(name);
-                service.WhiteList = this.GetServiceWhitelist(name);
+                Dictionary<string, string> settings = this.GetServiceSettings(name);
+                if (settings.Any())
+                {
+                    service.Settings = settings;
+                }
+
+                Uri[] whitelist = this.GetServiceWhitelist(name);
+
+                if (whitelist.Any())
+                {
+                    service.WhiteList = this.GetServiceWhitelist(name);
+                }
             }
         }
 

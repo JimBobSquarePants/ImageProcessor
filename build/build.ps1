@@ -1,7 +1,10 @@
-Properties {
+properties {
 	# call nuget.bat with these values as parameters
+	$MygetApiKey = $null
+	$MygetSource = $null
 	$NugetApiKey = $null
 	$NugetSource = $null
+	$AppVeyorPullRequestNumber = $null
 	
 	# see appveyor.yml for usage
 	$BuildNumber = $null
@@ -168,8 +171,6 @@ task Run-Coverage -depends Build-Tests {
 		Write-Host "Transforming coverage results file to HTML"
 		& $REPORTGEN_EXE -verbosity:Info -reports:$CoverageOutputPath -targetdir:(Join-Path $TEST_RESULTS "Coverage\$_")
 
-        Write-Host "CoverallsRepoToken $CoverallsRepoToken"
-
 	    if ($CoverallsRepoToken -ne $null -and $CoverallsRepoToken -ne "") {
 			Write-Host "Uploading coverage report to Coveralls.io"
 	        Exec { . $COVERALLS_EXE --opencover $CoverageOutputPath }
@@ -214,17 +215,42 @@ task Generate-Nuget -depends Set-VersionNumber, Build-Solution {
 	}
 }
 
-# publishes the nuget on a feed
+# publishes the Myget on a feed
+task Publish-Myget {
+
+	Write-Host "AppVeyorPullRequestNumber $AppVeyorPullRequestNumber"
+	
+	#if($AppVeyorPullRequestNumber -ne $null -and $AppVeyorPullRequestNumber -ne ""){
+	#	return
+	#}
+	
+	if ($MygetApiKey -eq $null -or $MygetApiKey -eq "") {
+		throw New-Object [System.ArgumentException] "You must provide a Myget API key as parameter: 'Invoke-psake Publish-Myget -properties @{`"MygetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
+	}
+	
+	Write-Host "Pushing packages to Myget"
+	Get-ChildItem $NUGET_OUTPUT -Filter "*.nugpkg" | % {
+		Write-Host "Pushing $_.name"
+		
+		& $NUGET_EXE push $_ -ApiKey $MygetApiKey -Source $MygetSource
+	}
+}
+
+# publishes the Nuget on a feed
 task Publish-Nuget {
+	if($AppVeyorPullRequestNumber -ne $null){
+		return
+	}
+		
 	if ($NugetApiKey -eq $null -or $NugetApiKey -eq "") {
-		throw New-Object [System.ArgumentException] "You must provide an API key as parameter: 'Invoke-psake Publish-Nuget -properties @{`"NugetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
+		throw New-Object [System.ArgumentException] "You must provide a Nuget API key as parameter: 'Invoke-psake Publish-Nuget -properties @{`"NugetApiKey`"=`"YOURAPIKEY`"}' ; or add a APIKEY environment variable to AppVeyor"
 	}
 	
 	Get-ChildItem $NUGET_OUTPUT -Filter "*.nugpkg" | % {
 		if ($NugetSource -eq $null -or $NugetSource -eq "") {
-			& $NUGET_EXE push $_ -ApiKey $apikey -Source $NugetSource
+			& $NUGET_EXE push $_ -ApiKey $NugetApiKey -Source $NugetSource
 		} else {
-			& $NUGET_EXE push $_ -ApiKey $apikey
+			& $NUGET_EXE push $_ -ApiKey $NugetApiKey
 		}
 	}
 }

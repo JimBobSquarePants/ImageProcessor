@@ -13,6 +13,7 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
 
@@ -59,7 +60,7 @@ namespace ImageProcessor.Processors
                 int height = image.Height;
 
                 Color backgroundColor = this.DynamicParameter;
-                newImage = new Bitmap(width, height);
+                newImage = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                 // Make a graphics object from the empty bitmap.

@@ -60,29 +60,17 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
             {
                 int threshold = (int)this.DynamicParameter;
-                newImage = new Bitmap(image);
-                newImage = Adjustments.Contrast(newImage, threshold);
-
-                image.Dispose();
-                image = newImage;
+                return Adjustments.Contrast(image, threshold);
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
     }
 }
