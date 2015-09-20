@@ -15,6 +15,7 @@ namespace ImageProcessor.Web.Processors
     using System.Collections.Specialized;
     using System.Drawing;
     using System.IO;
+    using System.Net;
     using System.Text.RegularExpressions;
     using System.Web;
     using System.Web.Hosting;
@@ -112,10 +113,17 @@ namespace ImageProcessor.Web.Processors
                 if (imagePath != null)
                 {
                     imagePath = Path.Combine(imagePath, input);
-                    using (ImageFactory factory = new ImageFactory())
+                    try
                     {
-                        factory.Load(imagePath);
-                        image = new Bitmap(factory.Image);
+                        using (ImageFactory factory = new ImageFactory())
+                        {
+                            factory.Load(imagePath);
+                            image = new Bitmap(factory.Image);
+                        }
+                    }
+                    catch 
+                    {
+                        throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + imagePath);
                     }
                 }
             }

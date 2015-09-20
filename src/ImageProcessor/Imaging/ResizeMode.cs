@@ -17,6 +17,7 @@ namespace ImageProcessor.Imaging
     {
         /// <summary>
         /// Pads the resized image to fit the bounds of its container.
+        /// If only one dimension is passed, will maintain the original aspect ratio.
         /// </summary>
         Pad,
 
@@ -31,8 +32,22 @@ namespace ImageProcessor.Imaging
         Crop,
 
         /// <summary>
-        /// Constrains the resized image to fit the bounds of its container.
+        /// Constrains the resized image to fit the bounds of its container maintaining
+        /// the original aspect ratio. 
         /// </summary>
-        Max
+        Max,
+
+        /// <summary>
+        /// Resizes the image until the shortest side reaches the set given dimension.
+        /// Sets <see cref="ResizeLayer.Upscale"/> to <c>false</c> only allowing downscaling.
+        /// </summary>
+        Min,
+
+        /// <summary>
+        /// Pads the image to fit the bound of the container without resizing the 
+        /// original source. Sets <see cref="ResizeLayer.Upscale"/> to <c>true</c>.
+        /// When downscaling, performs the same functionality as <see cref="ResizeMode.Pad"/>
+        /// </summary>
+        BoxPad
     }
 }

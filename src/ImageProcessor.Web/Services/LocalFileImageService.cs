@@ -13,6 +13,7 @@ namespace ImageProcessor.Web.Services
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net;
     using System.Threading.Tasks;
     using System.Web;
 
@@ -103,7 +104,7 @@ namespace ImageProcessor.Web.Services
 
             if (!fileInfo.Exists)
             {
-                throw new HttpException(404, "No image exists at " + path);
+                throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + path);
             }
 
             using (FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))

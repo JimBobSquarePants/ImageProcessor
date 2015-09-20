@@ -14,9 +14,11 @@ namespace ImageProcessor.Processors
     using System.Collections.Generic;
     using System.Drawing;
     using System.Globalization;
+    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Resizes an image to the given dimensions.
@@ -88,8 +90,8 @@ namespace ImageProcessor.Processors
 
                 resizeLayer.MaxSize = maxSize;
 
-                Resizer resizer = new Resizer(resizeLayer);
-                newImage = resizer.ResizeImage(image);
+                Resizer resizer = new Resizer(resizeLayer) { ImageFormat = factory.CurrentImageFormat };
+                newImage = resizer.ResizeImage(image, factory.FixGamma);
 
                 // Check that the original image has not been returned.
                 if (newImage != image)
@@ -97,6 +99,15 @@ namespace ImageProcessor.Processors
                     // Reassign the image.
                     image.Dispose();
                     image = newImage;
+
+                    if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                    {
+                        // Set the width EXIF data.
+                        factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);
+
+                        // Set the height EXIF data.
+                        factory.SetPropertyItem(ExifPropertyTag.ImageHeight, (ushort)image.Height);
+                    }
                 }
             }
             catch (Exception ex)

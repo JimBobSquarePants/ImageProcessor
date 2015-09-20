@@ -13,8 +13,10 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Flips an image horizontally or vertically.
@@ -59,28 +61,26 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
             {
                 RotateFlipType rotateFlipType = this.DynamicParameter;
 
-                newImage = new Bitmap(image);
-
                 // Flip
-                newImage.RotateFlip(rotateFlipType);
+                image.RotateFlip(rotateFlipType);
 
-                image.Dispose();
-                image = newImage;
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                {
+                    // Set the width EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);
+
+                    // Set the height EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageHeight, (ushort)image.Height);
+                }
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
 

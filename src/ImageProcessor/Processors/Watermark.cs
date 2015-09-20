@@ -17,6 +17,7 @@ namespace ImageProcessor.Processors
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Encapsulates methods to add a watermark text overlay to an image.
@@ -61,12 +62,10 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
             {
-                newImage = new Bitmap(image);
                 TextLayer textLayer = this.DynamicParameter;
                 string text = textLayer.Text;
                 int opacity = Math.Min((int)Math.Ceiling((textLayer.Opacity / 100f) * 255), 255);
@@ -74,7 +73,15 @@ namespace ImageProcessor.Processors
                 FontStyle fontStyle = textLayer.Style;
                 bool fallbackUsed = false;
 
-                using (Graphics graphics = Graphics.FromImage(newImage))
+                // We want to make sure that any orientation Metadata is updated to ensure watermarks 
+                // are written correctly.
+                RotateFlipType? flipType = this.GetRotateFlipType(factory);
+                if (flipType.HasValue)
+                {
+                    image.RotateFlip(flipType.Value);
+                }
+
+                using (Graphics graphics = Graphics.FromImage(image))
                 {
                     using (Font font = this.GetFont(textLayer.FontFamily, fontSize, fontStyle))
                     {
@@ -110,7 +117,6 @@ namespace ImageProcessor.Processors
 
                                 // Create bounds for the text.
                                 RectangleF bounds;
-
                                 if (textLayer.DropShadow)
                                 {
                                     // Shadow opacity should change with the base opacity.
@@ -153,21 +159,32 @@ namespace ImageProcessor.Processors
                         }
                     }
 
-                    image.Dispose();
-                    image = newImage;
+                    // Flip the image back.
+                    if (flipType.HasValue)
+                    {
+                        RotateFlipType value = flipType.Value;
+
+                        if (value == RotateFlipType.Rotate270FlipNone)
+                        {
+                            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                        }
+                        else if (value == RotateFlipType.Rotate90FlipNone)
+                        {
+                            image.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                        }
+                        else
+                        {
+                            image.RotateFlip(value);
+                        }
+                    }
+
+                    return image;
                 }
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
 
         /// <summary>
@@ -227,6 +244,37 @@ namespace ImageProcessor.Processors
             if (textLayer.RightToLeft)
             {
                 return StringFormatFlags.DirectionRightToLeft;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the correct <see cref="Nullable{RotateFlipType}"/> to ensure that the watermarked image is 
+        /// correct orientation when the watermark is applied.
+        /// </summary>
+        /// <param name="factory">The current <see cref="ImageFactory"/>.</param>
+        /// <returns>
+        /// The <see cref="Nullable{RotateFlipType}"/>.
+        /// </returns>
+        private RotateFlipType? GetRotateFlipType(ImageFactory factory)
+        {
+            const int Orientation = (int)ExifPropertyTag.Orientation;
+            if (factory.PreserveExifData && factory.ExifPropertyItems.ContainsKey(Orientation))
+            {
+                int rotationValue = factory.ExifPropertyItems[Orientation].Value[0];
+                switch (rotationValue)
+                {
+                    case 8: // Rotated 90 right
+                        // De-rotate:
+                        return RotateFlipType.Rotate270FlipNone;
+
+                    case 3: // Bottoms up
+                        return RotateFlipType.Rotate180FlipNone;
+
+                    case 6: // Rotated 90 left
+                        return RotateFlipType.Rotate90FlipNone;
+                }
             }
 
             return null;

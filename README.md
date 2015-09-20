@@ -6,7 +6,7 @@
 |:--------|:--------|
 |**Debug**|[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor)|
 |**Release**|[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr/branch/Master?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor/branch/Master)|
-|**Coverage Report**|[![Coverage Status](https://coveralls.io/repos/JimBobSquarePants/ImageProcessor/badge.svg)](https://coveralls.io/r/JimBobSquarePants/ImageProcessor?branch=V2)|
+|**Coverage Report**|[![Coverage Status](https://coveralls.io/repos/JimBobSquarePants/ImageProcessor/badge.svg?branch=V2&service=github)](https://coveralls.io/r/JimBobSquarePants/ImageProcessor?branch=V2)|
 
 ### Latest Releases
 |Library           |Version           |Downloads         |
@@ -42,7 +42,7 @@ I want the next version of ImageProcessor to run on all devices. Sadly it looks 
 ImageProcessor's documentation, included in this repo in the gh-pages branch, is built with [Jekyll](http://jekyllrb.com) and publicly hosted on GitHub Pages at <http://imageprocessor.org>. The docs may also be run locally.
 
 ### Running documentation locally
-1. If necessary, [install Jekyll](http://jekyllrb.com/docs/installation) (requires v2.2.x).
+1. If necessary, [install Jekyll](http://jekyllrb.com/docs/installation) (requires v2.5.3x).
   - **Windows users:** Read [this unofficial guide](https://github.com/juthilo/run-jekyll-on-windows/) to get Jekyll up and running without problems. 
 2. From the root `/ImageProcessor` directory, run `jekyll serve` in the command line.
 3. Open <http://localhost:4000> in your browser to navigate to your site.

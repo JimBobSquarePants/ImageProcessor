@@ -14,8 +14,11 @@ namespace ImageProcessor.Processors
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
+    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Encapsulates methods to rotate an image.
@@ -60,7 +63,6 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
@@ -72,25 +74,25 @@ namespace ImageProcessor.Processors
                 float rotateAtY = Math.Abs(image.Height / 2);
 
                 // Create a rotated image.
-                newImage = this.RotateImage(image, rotateAtX, rotateAtY, angle);
+                image = this.RotateImage(image, rotateAtX, rotateAtY, angle);
 
-                image.Dispose();
-                image = newImage;
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                {
+                    // Set the width EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);
+
+                    // Set the height EXIF data.
+                    factory.SetPropertyItem(ExifPropertyTag.ImageHeight, (ushort)image.Height);
+                }
+
+                return image;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
 
-        #region Private Methods
         /// <summary>
         /// Rotates an image to the given angle at the given position.
         /// </summary>
@@ -110,7 +112,7 @@ namespace ImageProcessor.Processors
             int y = (newSize.Height - image.Height) / 2;
 
             // Create a new empty bitmap to hold rotated image
-            Bitmap newImage = new Bitmap(newSize.Width, newSize.Height);
+            Bitmap newImage = new Bitmap(newSize.Width, newSize.Height, PixelFormat.Format32bppPArgb);
             newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             // Make a graphics object from the empty bitmap
@@ -135,8 +137,8 @@ namespace ImageProcessor.Processors
                 graphics.DrawImage(image, new PointF(x, y));
             }
 
+            image.Dispose();
             return newImage;
         }
-        #endregion
     }
 }

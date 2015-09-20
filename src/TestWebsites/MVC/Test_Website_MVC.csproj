@@ -22,6 +22,12 @@
     <IISExpressUseClassicPipelineMode />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -157,10 +163,6 @@
     <ProjectReference Include="..\..\Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AzureBlobCache\ImageProcessor.Web.Plugins.AzureBlobCache.csproj">
       <Project>{3c805e4c-d679-43f8-8c43-8909cdb4d4d7}</Project>
       <Name>ImageProcessor.Web.Plugins.AzureBlobCache</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ImageProcessor.Web.PostProcessor\ImageProcessor.Web.PostProcessor.csproj">
-      <Project>{55d08737-7d7e-4995-8892-bd9f944329e6}</Project>
-      <Name>ImageProcessor.Web.PostProcessor</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ImageProcessor.Web\ImageProcessor.Web.csproj">
       <Project>{d011a778-59c8-4bfa-a770-c350216bf161}</Project>

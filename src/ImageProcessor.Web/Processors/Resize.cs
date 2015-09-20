@@ -15,6 +15,7 @@ namespace ImageProcessor.Web.Processors
     using System.Collections.Specialized;
     using System.Drawing;
     using System.Linq;
+    using System.Net;
     using System.Text.RegularExpressions;
     using System.Web;
 
@@ -100,8 +101,34 @@ namespace ImageProcessor.Web.Processors
                 // Correctly parse any restrictions.
                 string restrictions;
                 this.Processor.Settings.TryGetValue("RestrictTo", out restrictions);
-                ((ImageProcessor.Processors.Resize)this.Processor).RestrictedSizes = this.ParseRestrictions(
-                    restrictions);
+
+                List<Size> restrictedSizes = this.ParseRestrictions(restrictions);
+
+                if (restrictedSizes != null && restrictedSizes.Any())
+                {
+                    bool reject = true;
+                    foreach (Size restrictedSize in restrictedSizes)
+                    {
+                        if (restrictedSize.Height == 0 || restrictedSize.Width == 0)
+                        {
+                            if (restrictedSize.Width == size.Width || restrictedSize.Height == size.Height)
+                            {
+                                reject = false;
+                            }
+                        }
+                        else if (restrictedSize.Width == size.Width && restrictedSize.Height == size.Height)
+                        {
+                            reject = false;
+                        }
+                    }
+
+                    if (reject)
+                    {
+                        throw new HttpException((int)HttpStatusCode.Forbidden, string.Format("The given size: {0}x{1} is not allowed.", size.Width, size.Height));
+                    }
+                }
+
+                ((ImageProcessor.Processors.Resize)this.Processor).RestrictedSizes = this.ParseRestrictions(restrictions);
             }
 
             return this.SortOrder;

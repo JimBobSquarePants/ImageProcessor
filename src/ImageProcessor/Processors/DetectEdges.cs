@@ -60,7 +60,6 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
             Tuple<IEdgeFilter, bool> parameters = this.DynamicParameter;
             IEdgeFilter filter = parameters.Item1;
@@ -71,24 +70,14 @@ namespace ImageProcessor.Processors
                 ConvolutionFilter convolutionFilter = new ConvolutionFilter(filter, greyscale);
 
                 // Check and assign the correct method. Don't use reflection for speed.
-                newImage = filter is I2DEdgeFilter
+                return filter is I2DEdgeFilter
                     ? convolutionFilter.Process2DFilter((Bitmap)image)
                     : convolutionFilter.ProcessFilter((Bitmap)image);
-
-                image.Dispose();
-                image = newImage;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
     }
 }

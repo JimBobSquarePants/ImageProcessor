@@ -101,7 +101,7 @@ namespace ImageProcessor.Configuration
                 b =>
                 {
                     IntPtr pointer;
-                    string folder = Is64BitEnvironment ? "x64" : "x86";
+                    string folder = this.Is64BitEnvironment ? "x64" : "x86";
                     Assembly assembly = Assembly.GetExecutingAssembly();
                     string targetBasePath = new Uri(assembly.Location).LocalPath;
                     string targetPath = Path.GetFullPath(Path.Combine(targetBasePath, "..\\" + folder + "\\" + name));

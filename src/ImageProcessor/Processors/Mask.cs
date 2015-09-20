@@ -13,6 +13,8 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Colors;
@@ -74,18 +76,24 @@ namespace ImageProcessor.Processors
                 int height = image.Height;
                 Tuple<Image, Point?> parameters = this.DynamicParameter;
                 mask = new Bitmap(parameters.Item1);
+                mask.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                 Point? position = parameters.Item2;
 
                 if (mask.Size != image.Size)
                 {
                     Rectangle parent = new Rectangle(0, 0, width, height);
                     Rectangle child = ImageMaths.GetFilteredBoundingRectangle(mask, 0, RgbaComponent.A);
-                    maskCropped = new Bitmap(child.Width, child.Height);
+                    maskCropped = new Bitmap(child.Width, child.Height, PixelFormat.Format32bppPArgb);
                     maskCropped.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                     // First crop any bounding transparency.
                     using (Graphics graphics = Graphics.FromImage(maskCropped))
                     {
+                        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        graphics.CompositingQuality = CompositingQuality.HighQuality;
+
                         graphics.Clear(Color.Transparent);
                         graphics.DrawImage(
                                          mask,
@@ -98,10 +106,15 @@ namespace ImageProcessor.Processors
                     }
 
                     // Now position the mask in an image of the same dimensions as the original.
-                    maskPositioned = new Bitmap(width, height);
+                    maskPositioned = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
                     maskPositioned.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                     using (Graphics graphics = Graphics.FromImage(maskPositioned))
                     {
+                        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        graphics.CompositingQuality = CompositingQuality.HighQuality;
+
                         graphics.Clear(Color.Transparent);
 
                         if (position != null)
