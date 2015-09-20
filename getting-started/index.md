@@ -13,6 +13,9 @@ subheading: An introduction to ImageProcessor, how to use it, with installation 
 The simplest and fastest way to get the ImageProcessor libraries is to install them via Nuget.
 
 {% include getting-started/nuget-links.html %}
+
+Once installed, simply build your solution. 
+
 </section>
 ---
 <section>

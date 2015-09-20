@@ -14,10 +14,12 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <strong>ImageProcessor.Web</strong> allows you to scale images both up and down with an excellent quality to size ratio.
         A maximum width and height can be set in the configuration to help protect you from <abbr title="Denial of service">DoS</abbr> attacks.
     </p>
-    <p>Four different types of resizing methods are available:</p>
+    <p>Six different types of resizing methods are available:</p>
     <ul>
         <li>Pad (default)</li>
+        <li>BoxPad (Added v4.4.0)</li>
         <li>Crop</li>
+        <li>Min (Added v4.4.0)</li>
         <li>Max</li>
         <li>Stretch</li>
     </ul>
@@ -29,7 +31,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
         </p>
         <p>
             To turn off upscaling simply append the value
-            <code>upscale=false</code> to your request url. (This does not affect stretched images).
+            <code>upscale=false</code> to your request url. (This does not affect stretched, boxpad, nor min modes).
         </p>
     </div>
     <p>
@@ -37,9 +39,10 @@ sublinks: ["#usage|Usage","#example|Examples"]
     </p>
     <h2>Resize Pad</h2>
     <p>
-        Passing a single dimension will automatically preserve the aspect ratio of the original image. If the requested aspect ratio is different then the
-        image will be padded to fit. Widths and heights can optionally also be passed as a ratio and you can fill the <a href="../backgroundcolor">background color</a>
-        for image types without transparency.
+        Passing a single dimension will automatically preserve the aspect ratio of the original image. 
+        If the requested aspect ratio is different then the image will be padded to fit. Widths and heights 
+        can optionally also be passed as a ratio. You can recolour the <a href="../backgroundcolor" rel="chapter">background color<i class="fa fa-file-text-o"></i></a>
+        of the padded area for image types without transparency from the default <var>black</var>.
     </p>
     <p>Pad mode also offers optional anchor positions:</p>
     <ul>
@@ -53,6 +56,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
         <li>bottomleft</li>
         <li>bottomright</li>
     </ul>
+    
     {% highlight xml %}
 <!--Automatic height based on width-->
 http://your-image?width=600
@@ -71,7 +75,45 @@ http://your-image?width=600&height=250&bgcolor=fff
     {% endhighlight %}
 
     <hr />
+    
+   <h2>Resize BoxPad</h2>
+    <p>
+        When upscaling an image the image pixels themselves are not resized, rather the image is padded to fit the given
+        dimensions. When downscaling the image is resized using the rules defined by <code>ResizeMode.Pad</code>.
+        You can recolour the <a href="../backgroundcolor" rel="chapter">background color<i class="fa fa-file-text-o"></i></a>
+        of the padded area for image types without transparency from the default <var>black</var>.
+    </p>
+    <p>BoxPad mode also offers optional anchor positions:</p>
+    <ul>
+        <li>center (default)</li>
+        <li>top</li>
+        <li>right</li>
+        <li>bottom</li>
+        <li>left</li>
+        <li>topleft</li>
+        <li>topright</li>
+        <li>bottomleft</li>
+        <li>bottomright</li>
+    </ul>
+    
+    {% highlight xml %}
+<!--Automatic height based on width-->
+http://your-image?width=600&mode=boxpad
+<!--Automatic width based on height-->
+http://your-image?height=250&mode=boxpad
+<!--Both dimensions specified-->
+http://your-image?width=600&height=250&mode=boxpad
+<!--Both dimensions specified with the image anchored to the top-->
+http://your-image?width=600&height=250&anchor=top&mode=boxpad
+<!--Height ratio passed for automatic scaling-->
+http://your-image?width=600&heightratio=0.416&mode=boxpad
+<!--Width ratio passed for automatic scaling-->
+http://your-image?widthratio=2.4&height=250&mode=boxpad
+<!--Background color added to padded image-->
+http://your-image?width=600&height=250&mode=boxpad&bgcolor=fff
+    {% endhighlight %}
 
+    <hr />
 
     <h2>Resize Crop</h2>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
@@ -92,11 +134,22 @@ http://your-image?width=600&height=250&bgcolor=fff
     This point will be as close to the center of your crop as possible while keeping the crop within the image</p>
     {% highlight xml %}
 <!--Standard-->
-http://your-image?width=600&height=250&mode=crop
+http://your-image?width=300&height=300&mode=crop
 <!--Crop anchored to the top-->
-http://your-image?width=600&height=250&mode=crop&anchor=top
+http://your-image?width=300&height=300&mode=crop&anchor=top
 <!-- Center -->
-http://your-image?width=600&height=250&mode=crop&center=0.25,0.30
+http://your-image?width=300&height=300&mode=crop&center=0.25,0.30
+    {% endhighlight %}
+
+    <hr />
+
+    <h2>Resize Min</h2>
+    <p>Resizes the image until the shortest side reaches the set given dimension. 
+       This will maintain the aspect ratio of the original image. Upscaling is disabled in this mode and the
+       original image will be returned if attempted.
+    </p>
+    {% highlight xml %}
+http://your-image?width=500&height=500&mode=min
     {% endhighlight %}
 
     <hr />
@@ -105,32 +158,51 @@ http://your-image?width=600&height=250&mode=crop&center=0.25,0.30
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
     the output is resized to the maximum possible value in each direction while aintaining the original aspect ratio.</p>
     {% highlight xml %}
-http://your-image?width=600&height=250&mode=max
+http://your-image?width=500&height=500&mode=max
     {% endhighlight %}
 
     <hr />
+    
     <h2>Resize Stretch</h2>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
     the output is stretched to match the new aspect ratio.</p>
     {% highlight xml %}
-http://your-image?width=600&height=250&mode=stretch
+http://your-image?width=500&height=500&mode=stretch
     {% endhighlight %}
 </section>
 <hr />
 <section id="example">
     <h1>Examples</h1>
     <h3>Original</h3>
-    <img src="{{ site.baseurl }}/assets/img/originals/car.jpg" alt="original image" />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg" alt="original image" />
+
+    <hr />
 
     <h3>Resize Pad</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/pad/car.jpg" alt="Image resized with padding." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500" alt="Image resized with padding." />
+
+    <hr />
+
+    <h3>Resize BoxPad</h3>
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=boxpad" alt="Image resized with padding." />
+
+    <hr />
 
     <h3>Resize Crop</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/crop/car.jpg" alt="Image resized with cropping." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=300&height=300&mode=crop" alt="Image resized with cropping." />
+
+    <hr />
+
+    <h3>Resize Min</h3>
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=min" alt="Image resized to fit the aspect ratio." />
+
+    <hr />
 
     <h3>Resize Max</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/max/car.jpg" alt="Image resized to fit the aspect ratio." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=max" alt="Image resized to fit the aspect ratio." />
+
+    <hr />
 
     <h3>Resize Stretch</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/stretch/car.jpg" alt="Image stretched to fit the given dimension." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=stretch" alt="Image stretched to fit the given dimension." />
 </section>

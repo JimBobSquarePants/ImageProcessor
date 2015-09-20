@@ -8,7 +8,10 @@ sublinks: ["#usage|Usage","#example|Examples"]
 ---
 <section id="usage">
     <h1>Resize</h1>
-    <p>Resizes the current image to the given dimensions.</p>
+    <p>
+        Resizes the current image to the given dimensions. If EXIF metadata is to be preserved
+        the information contained within will also be updated to match.
+    </p>
 
     {% highlight c# %}
 public ImageFactory Resize(Size size)
@@ -38,8 +41,8 @@ public ImageFactory Resize(ResizeLayer resizeLayer)
                 <dd>The <code>ImageProcessor.Imaging.ResizeMode</code> to apply to resized image.</dd>
                 <dt><strong>AnchorPosition</strong></dt>
                 <dd>
-                    The <code>ImageProcessor.Imaging.AnchorPosition</code> to apply to resized image. Applies to <code>ResizeMode.Pad</code>
-                    and <code>ResizeMode.Crop</code>
+                    The <code>ImageProcessor.Imaging.AnchorPosition</code> to apply to resized image. Applies to <code>ResizeMode.Pad</code>,
+                    <code>ResizeMode.BoxPad</code>, and <code>ResizeMode.Crop</code>
                 </dd>
                 <dt><strong>UpScale</strong></dt>
                 <dd>Whether to allow up-scaling of images. Defaults to <var>true</var></dd>
@@ -54,7 +57,9 @@ public ImageFactory Resize(ResizeLayer resizeLayer)
 <section id="example">
     <h1>Examples</h1>
     <h3>Original</h3>
-    <img src="{{ site.baseurl }}/assets/img/originals/car.jpg" alt="original image" />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg" alt="original image" />
+
+    <hr/>
 
     <h3>Resize Pad</h3>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
@@ -63,23 +68,55 @@ public ImageFactory Resize(ResizeLayer resizeLayer)
      <h4>Important</h4>
         <p>
             Any padded areas in the output for image formats that do not contain an alpha channel will display as black 
-            (the default encoder output). To change this color to another use the <a href="../backgroundcolor">BackgroundColor</a> method.
+            (the default encoder output). To change this color to another use the <a href="../backgroundcolor" rel="chapter">BackgroundColor<i class="fa fa-file-text-o"></i></a> method.
         </p>
     </div>
-    <img src="{{ site.baseurl }}/assets/img/resize/pad/car.jpg" alt="Image resized with padding." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500" alt="Image resized with padding." />
+
+    <hr/>
+
+    <h3>Resize BoxPad</h3>
+    <p>
+        When upscaling an image the image pixels themselves are not resized, rather the image is padded to fit the given
+        dimensions. When downscaling the image is resized using the rules defined by <code>ResizeMode.Pad</code>.
+    </p>
+    <div class="alert">
+     <h4>Important</h4>
+        <p>
+            Any padded areas in the output for image formats that do not contain an alpha channel will display as black 
+            (the default encoder output). To change this color to another use the <a href="../backgroundcolor" rel="chapter">BackgroundColor<i class="fa fa-file-text-o"></i></a> method.
+        </p>
+    </div>
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=boxpad" alt="Image resized with padding." />
+
+    <hr/>
 
     <h3>Resize Crop</h3>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
     the output is cropped to match the new aspect ratio.</p>
-    <img src="{{ site.baseurl }}/assets/img/resize/crop/car.jpg" alt="Image resized with cropping." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=300&height=300&mode=crop" alt="Image resized with cropping." />
+
+    <hr/>
+
+    <h3>Resize Min</h3>
+    <p>
+       Resizes the image until the shortest side reaches the set given dimension. 
+       This will maintain the aspect ratio of the original image. Upscaling is disabled in this mode and the
+       original image will be returned if attempted.
+    </p>
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=min" alt="Image resized to fit the aspect ratio." />
+    
+    <hr/>
 
     <h3>Resize Max</h3>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
     the output is resized to the maximum possible value in each direction while aintaining the original aspect ratio.</p>
-    <img src="{{ site.baseurl }}/assets/img/resize/max/car.jpg" alt="Image resized to fit the aspect ratio." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=max" alt="Image resized to fit the aspect ratio." />
+    
+    <hr/>
     
     <h3>Resize Stetch</h3>
     <p>Resizes the image to the given dimensions. If the set dimensions do not match the aspect ratio of the original image then 
     the output is stretched to match the new aspect ratio.</p>
-    <img src="{{ site.baseurl }}/assets/img/resize/stretch/car.jpg" alt="Image stretched to fit the given dimension." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=stretch" alt="Image stretched to fit the given dimensions." />
 </section>

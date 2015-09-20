@@ -13,7 +13,8 @@ sublinks:
     <h1>ImageProcessor.Web</h1>
     <p>
         <strong>ImageProcessor.Web</strong> is a web extension to ImageProcessor that allows the developer to perform image
-        manipulation using a Url API of querystring parameters as instructions.
+        manipulation using a Url API of querystring parameters as instructions. The output of this process is highly optimised
+        for the web to ensure that your websites' performance remains high. 
     </p>
     <p>
         This works by adding a configurable HttpModule to your website which intercepts local and remote image requests,
@@ -30,11 +31,11 @@ sublinks:
         For a list of the Url API methods follow the link here:
         <br />
         <br />
-        <a href="imageprocessingmodule/#methods" role="button" class="download"
+        <a href="imageprocessingmodule/#methods" rel="subsection"
            data-ga-category="Landing Page Actions"
            data-ga-action="Landing Page Links"
            data-ga-label="Web API Link">
-            <i class="fa fa-cogs"></i>ImageProcessingModule
+            ImageProcessingModule<i class="fa fa-file-text-o"></i>
         </a>
     </p>
 
@@ -51,14 +52,16 @@ sublinks:
         allow for retrieval, processing and caching of images from multiple sources.
     </p>
 
-    <p>Details of those configuration files can be found in the <a href="configuration/">configuration</a> documentation.</p>
+    <p>Details of those configuration files can be found in the <a href="configuration/" rel="chapter">configuration<i class="fa fa-file-text-o"></i></a> documentation.</p>
 
     <div class="alert">
         <p>
             As of <strong>ImageProcessor.Web v3.2.0</strong> configuration outwith the <code>Web.Config</code> file is not installed automatically.
             Instead default configuration matching the values below is built into the system. To overwrite these settings install the nuget package:
-            <code>Install-Package ImageProcessor.Web.Config</code>
         </p>
+     {% highlight c# %}
+Install-Package ImageProcessor.Web.Config
+    {% endhighlight %}
     </div>
 </section>
 <hr />
@@ -69,6 +72,6 @@ sublinks:
         to extend almost every aspect of the library from plugins to caching giving you complete control over your setup.
     </p>
 
-    <p>Details of those interfaces can be found in the <a href="extending/">extending</a> documentation.</p>
+    <p>Details of those interfaces can be found in the <a href="extending/" rel="chapter">extending<i class="fa fa-file-text-o"></i></a> documentation.</p>
 </section>
 
