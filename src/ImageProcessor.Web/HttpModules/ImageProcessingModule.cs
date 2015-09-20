@@ -252,12 +252,12 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Initializes a module and prepares it to handle requests.
         /// </summary>
-        /// <param name="context">
+        /// <param name="application">
         /// An <see cref="T:System.Web.HttpApplication"/> that provides
         /// access to the methods, properties, and events common to all
         /// application objects within an ASP.NET application
         /// </param>
-        public void Init(HttpApplication context)
+        public void Init(HttpApplication application)
         {
             if (preserveExifMetaData == null)
             {
@@ -265,12 +265,12 @@ namespace ImageProcessor.Web.HttpModules
             }
 
             EventHandlerTaskAsyncHelper postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
-            context.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
+            application.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
-            context.PostReleaseRequestState += this.PostReleaseRequestState;
+            application.PostReleaseRequestState += this.PostReleaseRequestState;
 
             EventHandlerTaskAsyncHelper postProcessHelper = new EventHandlerTaskAsyncHelper(this.PostProcessImage);
-            context.AddOnEndRequestAsync(postProcessHelper.BeginEventHandler, postProcessHelper.EndEventHandler);
+            application.AddOnEndRequestAsync(postProcessHelper.BeginEventHandler, postProcessHelper.EndEventHandler);
         }
 
         /// <summary>
@@ -360,7 +360,14 @@ namespace ImageProcessor.Web.HttpModules
                 if (handler != null)
                 {
                     context.Items[CachedPathKey] = null;
-                    await Task.Run(() => handler(this, new PostProcessingEventArgs { CachedImagePath = cachedPath }));
+                    await Task.Run(
+                        () => handler(
+                            this,
+                            new PostProcessingEventArgs
+                                {
+                                    Context = context,
+                                    CachedImagePath = cachedPath
+                                }));
                 }
             }
 
@@ -483,7 +490,7 @@ namespace ImageProcessor.Web.HttpModules
                 queryString = this.ReplacePresetsInQueryString(queryString);
 
                 // Execute the handler which can change the querystring 
-                queryString = this.CheckQuerystringHandler(queryString, request.Unvalidated.RawUrl);
+                queryString = this.CheckQuerystringHandler(context, queryString, request.Unvalidated.RawUrl);
 
                 if (string.IsNullOrWhiteSpace(requestPath))
                 {
@@ -634,22 +641,24 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Checks if there is a handler that changes the querystring and executes that handler.
         /// </summary>
-        /// <param name="queryString">
-        /// The query string.
-        /// </param>
-        /// <param name="rawUrl">
-        /// The raw request url.
-        /// </param>
+        /// <param name="context">The current request context.</param>
+        /// <param name="queryString">The query string.</param>
+        /// <param name="rawUrl">The raw request url.</param>
         /// <returns>
         /// The <see cref="string"/> containing the updated querystring.
         /// </returns>
-        private string CheckQuerystringHandler(string queryString, string rawUrl)
+        private string CheckQuerystringHandler(HttpContext context, string queryString, string rawUrl)
         {
             // Fire the process querystring event.
             ProcessQuerystringEventHandler handler = OnProcessQuerystring;
             if (handler != null)
             {
-                ProcessQueryStringEventArgs args = new ProcessQueryStringEventArgs { Querystring = queryString ?? string.Empty, RawUrl = rawUrl ?? string.Empty };
+                ProcessQueryStringEventArgs args = new ProcessQueryStringEventArgs
+                {
+                    Context = context,
+                    Querystring = queryString ?? string.Empty,
+                    RawUrl = rawUrl ?? string.Empty
+                };
                 queryString = handler(this, args);
             }
 
