@@ -4,13 +4,12 @@
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
-//   Encapsulates methods for processing image files.
+//   Encapsulates methods for processing image files in a fluent manner.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace ImageProcessor
 {
-    #region Using
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -19,6 +18,7 @@ namespace ImageProcessor
     using System.IO;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Common.Extensions;
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Filters.EdgeDetection;
 
@@ -26,11 +26,11 @@ namespace ImageProcessor
     using ImageProcessor.Imaging.Filters.Photo;
     using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Imaging.Helpers;
+    using ImageProcessor.Imaging.MetaData;
     using ImageProcessor.Processors;
-    #endregion
 
     /// <summary>
-    /// Encapsulates methods for processing image files.
+    /// Encapsulates methods for processing image files in a fluent manner.
     /// </summary>
     public class ImageFactory : IDisposable
     {
@@ -44,6 +44,12 @@ namespace ImageProcessor
         /// The backup supported image format.
         /// </summary>
         private ISupportedImageFormat backupFormat;
+
+        /// <summary>
+        /// The backup collection of property items containing EXIF metadata.
+        /// </summary>
+        private ConcurrentDictionary<int, PropertyItem> backupExifPropertyItems
+            = new ConcurrentDictionary<int, PropertyItem>();
 
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -84,6 +90,7 @@ namespace ImageProcessor
         {
             this.PreserveExifData = preserveExifData;
             this.ExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
+            this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
             this.FixGamma = fixGamma;
         }
         #endregion
@@ -140,7 +147,7 @@ namespace ImageProcessor
         public float CurrentGamma { get; private set; }
 
         /// <summary>
-        /// Gets or sets the exif property items.
+        /// Gets or sets the collection of property items containing EXIF metadata.
         /// </summary>
         public ConcurrentDictionary<int, PropertyItem> ExifPropertyItems { get; set; }
 
@@ -214,13 +221,14 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
-            this.ShouldProcess = true;
+            this.backupExifPropertyItems = this.ExifPropertyItems;
 
-            // Normalize the gamma component of the image.
-            if (this.FixGamma)
-            {
-                this.Gamma(2.2F);
-            }
+            // Ensure the image is in the most efficient format.
+            Image formatted = this.Image.Copy();
+            this.Image.Dispose();
+            this.Image = formatted;
+
+            this.ShouldProcess = true;
 
             return this;
         }
@@ -282,13 +290,14 @@ namespace ImageProcessor
                         this.ExifPropertyItems[propertyItem.Id] = propertyItem;
                     }
 
-                    this.ShouldProcess = true;
+                    this.backupExifPropertyItems = this.ExifPropertyItems;
 
-                    // Normalize the gamma component of the image.
-                    if (this.FixGamma)
-                    {
-                        this.Gamma(2.2F);
-                    }
+                    // Ensure the image is in the most efficient format.
+                    Image formatted = this.Image.Copy();
+                    this.Image.Dispose();
+                    this.Image = formatted;
+
+                    this.ShouldProcess = true;
                 }
             }
             else
@@ -344,13 +353,12 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
-            this.ShouldProcess = true;
+            // Ensure the image is in the most efficient format.
+            Image formatted = this.Image.Copy();
+            this.Image.Dispose();
+            this.Image = formatted;
 
-            // Normalize the gamma component of the image.
-            if (this.FixGamma)
-            {
-                this.Gamma(2.2F);
-            }
+            this.ShouldProcess = true;
 
             return this;
         }
@@ -378,18 +386,16 @@ namespace ImageProcessor
 #endif
 
                 // Dispose and reassign the image.
+                // Ensure the image is in the most efficient format.
+                Image formatted = newImage.Copy();
+                newImage.Dispose();
                 this.Image.Dispose();
-                this.Image = newImage;
+                this.Image = formatted;
 
                 // Set the other properties.
                 this.CurrentImageFormat = this.backupFormat;
+                this.ExifPropertyItems = this.backupExifPropertyItems;
                 this.CurrentImageFormat.Quality = DefaultQuality;
-
-                // Normalize the gamma component of the image.
-                if (this.FixGamma)
-                {
-                    this.Gamma(2.2F);
-                }
             }
 
             return this;
@@ -591,6 +597,39 @@ namespace ImageProcessor
             {
                 DetectEdges detectEdges = new DetectEdges { DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale) };
                 this.CurrentImageFormat.ApplyProcessor(detectEdges.ProcessImage, this);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the resolution of the image.
+        /// <remarks>
+        /// This method sets both the bitmap data and EXIF resolution if available.
+        /// </remarks>
+        /// </summary>
+        /// <param name="horizontal">The horizontal resolution.</param>
+        /// <param name="vertical">The vertical resolution.</param>
+        /// <param name="unit">
+        /// The unit of measure for the horizontal resolution and the vertical resolution. 
+        /// Defaults to inches
+        /// </param>
+        /// <returns>
+        /// The <see cref="ImageFactory"/>.
+        /// </returns>
+        public ImageFactory Resolution(int horizontal, int vertical, PropertyTagResolutionUnit unit = PropertyTagResolutionUnit.Inch)
+        {
+            if (this.ShouldProcess)
+            {
+                // Sanitize the input.
+                horizontal = ImageMaths.Clamp(horizontal, 0, int.MaxValue);
+                vertical = ImageMaths.Clamp(vertical, 0, int.MaxValue);
+
+                Tuple<int, int, PropertyTagResolutionUnit> resolution =
+                    new Tuple<int, int, PropertyTagResolutionUnit>(horizontal, vertical, unit);
+
+                Resolution dpi = new Resolution { DynamicParameter = resolution };
+                this.CurrentImageFormat.ApplyProcessor(dpi.ProcessImage, this);
             }
 
             return this;
@@ -1257,12 +1296,6 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
-                // Normalize the gamma component of the image.
-                if (this.FixGamma)
-                {
-                    this.Gamma(1 / 2.2F);
-                }
-
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image);
             }
 
@@ -1286,12 +1319,6 @@ namespace ImageProcessor
                 if (stream.CanSeek)
                 {
                     stream.SetLength(0);
-                }
-
-                // Normalize the gamma component of the image.
-                if (this.FixGamma)
-                {
-                    this.Gamma(1 / 2.2F);
                 }
 
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image);

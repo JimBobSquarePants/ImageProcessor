@@ -21,6 +21,7 @@ namespace ImageProcessor.Web.HttpModules
     using System.Web;
     using System.Web.Hosting;
 
+    using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Configuration;
     using ImageProcessor.Web.Extensions;
@@ -251,12 +252,12 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Initializes a module and prepares it to handle requests.
         /// </summary>
-        /// <param name="context">
+        /// <param name="application">
         /// An <see cref="T:System.Web.HttpApplication"/> that provides
         /// access to the methods, properties, and events common to all
         /// application objects within an ASP.NET application
         /// </param>
-        public void Init(HttpApplication context)
+        public void Init(HttpApplication application)
         {
             if (preserveExifMetaData == null)
             {
@@ -264,12 +265,12 @@ namespace ImageProcessor.Web.HttpModules
             }
 
             EventHandlerTaskAsyncHelper postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
-            context.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
+            application.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
-            context.PostReleaseRequestState += this.PostReleaseRequestState;
+            application.PostReleaseRequestState += this.PostReleaseRequestState;
 
             EventHandlerTaskAsyncHelper postProcessHelper = new EventHandlerTaskAsyncHelper(this.PostProcessImage);
-            context.AddOnEndRequestAsync(postProcessHelper.BeginEventHandler, postProcessHelper.EndEventHandler);
+            application.AddOnEndRequestAsync(postProcessHelper.BeginEventHandler, postProcessHelper.EndEventHandler);
         }
 
         /// <summary>
@@ -359,7 +360,14 @@ namespace ImageProcessor.Web.HttpModules
                 if (handler != null)
                 {
                     context.Items[CachedPathKey] = null;
-                    await Task.Run(() => handler(this, new PostProcessingEventArgs { CachedImagePath = cachedPath }));
+                    await Task.Run(
+                        () => handler(
+                            this,
+                            new PostProcessingEventArgs
+                                {
+                                    Context = context,
+                                    CachedImagePath = cachedPath
+                                }));
                 }
             }
 
@@ -459,20 +467,20 @@ namespace ImageProcessor.Web.HttpModules
                         // Parse any protocol values from settings.
                         string protocol = currentService.Settings.ContainsKey("Protocol")
                                               ? currentService.Settings["Protocol"] + "://"
-                                              : string.Empty;
+                                              : currentService.GetType() == typeof(RemoteImageService) ? request.Url.Scheme + "://" : string.Empty;
 
                         // Handle requests that require parameters.
                         if (hasMultiParams)
                         {
                             string[] paths = url.Split('?');
                             requestPath = protocol
-                                          + request.Path.Replace(currentService.Prefix, string.Empty).TrimStart('/')
+                                          + request.Path.TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/')
                                           + "?" + paths[1];
                             queryString = paths[2];
                         }
                         else
                         {
-                            requestPath = protocol + request.Path.Replace(currentService.Prefix, string.Empty).TrimStart('/');
+                            requestPath = protocol + request.Path.TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/');
                             queryString = request.QueryString.ToString();
                         }
                     }
@@ -482,14 +490,7 @@ namespace ImageProcessor.Web.HttpModules
                 queryString = this.ReplacePresetsInQueryString(queryString);
 
                 // Execute the handler which can change the querystring 
-                queryString = this.CheckQuerystringHandler(queryString, request.Unvalidated.RawUrl);
-
-                // If the current service doesn't require a prefix, don't fetch it.
-                // Let the static file handler take over.
-                if (string.IsNullOrWhiteSpace(currentService.Prefix) && string.IsNullOrWhiteSpace(queryString))
-                {
-                    return;
-                }
+                queryString = this.CheckQuerystringHandler(context, queryString, request.Unvalidated.RawUrl);
 
                 if (string.IsNullOrWhiteSpace(requestPath))
                 {
@@ -536,22 +537,41 @@ namespace ImageProcessor.Web.HttpModules
                         using (ImageFactory imageFactory = new ImageFactory(preserveExifMetaData != null && preserveExifMetaData.Value))
                         {
                             byte[] imageBuffer = await currentService.GetImage(resourcePath);
+                            string mimeType;
 
                             using (MemoryStream inStream = new MemoryStream(imageBuffer))
                             {
                                 // Process the Image
-                                using (MemoryStream outStream = new MemoryStream())
+                                MemoryStream outStream = new MemoryStream();
+
+                                if (!string.IsNullOrWhiteSpace(queryString))
                                 {
                                     imageFactory.Load(inStream).AutoProcess(queryString).Save(outStream);
-
-                                    // Add to the cache.
-                                    await this.imageCache.AddImageToCacheAsync(outStream, imageFactory.CurrentImageFormat.MimeType);
+                                    mimeType = imageFactory.CurrentImageFormat.MimeType;
                                 }
+                                else
+                                {
+                                    await inStream.CopyToAsync(outStream);
+                                    mimeType = FormatUtilities.GetFormat(outStream).MimeType;
+                                }
+
+                                // Post process the image.
+                                if (ImageProcessorConfiguration.Instance.PostProcess)
+                                {
+                                    string extension = Path.GetExtension(cachedPath);
+                                    outStream = await PostProcessor.PostProcessor.PostProcessImageAsync(outStream, extension);
+                                }
+
+                                // Add to the cache.
+                                await this.imageCache.AddImageToCacheAsync(outStream, mimeType);
+
+                                // Cleanup
+                                outStream.Dispose();
                             }
 
                             // Store the cached path, response type, and cache dependency in the context for later retrieval.
                             context.Items[CachedPathKey] = cachedPath;
-                            context.Items[CachedResponseTypeKey] = imageFactory.CurrentImageFormat.MimeType;
+                            context.Items[CachedResponseTypeKey] = mimeType;
                             bool isFileCached = new Uri(cachedPath).IsFile;
 
                             if (isFileLocal)
@@ -621,22 +641,24 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Checks if there is a handler that changes the querystring and executes that handler.
         /// </summary>
-        /// <param name="queryString">
-        /// The query string.
-        /// </param>
-        /// <param name="rawUrl">
-        /// The raw request url.
-        /// </param>
+        /// <param name="context">The current request context.</param>
+        /// <param name="queryString">The query string.</param>
+        /// <param name="rawUrl">The raw request url.</param>
         /// <returns>
         /// The <see cref="string"/> containing the updated querystring.
         /// </returns>
-        private string CheckQuerystringHandler(string queryString, string rawUrl)
+        private string CheckQuerystringHandler(HttpContext context, string queryString, string rawUrl)
         {
             // Fire the process querystring event.
             ProcessQuerystringEventHandler handler = OnProcessQuerystring;
             if (handler != null)
             {
-                ProcessQueryStringEventArgs args = new ProcessQueryStringEventArgs { Querystring = queryString ?? string.Empty, RawUrl = rawUrl ?? string.Empty };
+                ProcessQueryStringEventArgs args = new ProcessQueryStringEventArgs
+                {
+                    Context = context,
+                    Querystring = queryString ?? string.Empty,
+                    RawUrl = rawUrl ?? string.Empty
+                };
                 queryString = handler(this, args);
             }
 

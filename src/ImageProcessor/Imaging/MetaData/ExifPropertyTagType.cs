@@ -17,7 +17,9 @@ namespace ImageProcessor.Imaging.MetaData
     /// </summary>
     public enum ExifPropertyTagType : short
     {
-        /// <summary>Specifies that the value data member is an array of bytes.</summary>
+        /// <summary>
+        /// Specifies that the value data member is an array of bytes.
+        /// </summary>
         Byte = 1,
 
         /// <summary>
@@ -28,10 +30,10 @@ namespace ImageProcessor.Imaging.MetaData
         ASCII = 2,
 
         /// <summary>Specifies that the value data member is an array of unsigned short (16-bit) integers.</summary>
-        Int16 = 3,
+        UShort = 3,
 
         /// <summary>Specifies that the value data member is an array of unsigned long (32-bit) integers.</summary>
-        Int32 = 4,
+        ULong = 4,
 
         /// <summary>
         /// Specifies that the value data member is an array of pairs of unsigned long integers. Each pair represents a
@@ -42,12 +44,12 @@ namespace ImageProcessor.Imaging.MetaData
         /// <summary>
         /// Specifies that the value data member is an array of bytes that can hold values of any data type.
         /// </summary>
-        Undefined = 7,
+        Undefined = 6,
 
         /// <summary>
         /// Specifies that the value data member is an array of signed long (32-bit) integers.
         /// </summary>
-        SLONG = 9,
+        SLong = 7,
 
         /// <summary>
         /// Specifies that the value data member is an array of pairs of signed long integers. Each pair represents a

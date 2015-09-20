@@ -25,7 +25,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NET45</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\ImageProcessor.XML</DocumentationFile>
@@ -125,7 +125,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Extensions\AssemblyExtensions.cs" />
+    <Compile Include="Common\Extensions\FloatExtensions.cs" />
     <Compile Include="Common\Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Common\Extensions\ImageExtensions.cs" />
     <Compile Include="Common\Extensions\RectangleExtensions.cs" />
     <Compile Include="Common\Helpers\WriteLock.cs" />
     <Compile Include="Common\Helpers\UpgradeableReadLock.cs" />
@@ -136,6 +138,11 @@
     <Compile Include="Common\Helpers\IOHelper.cs" />
     <Compile Include="Configuration\NativeBinaryFactory.cs" />
     <Compile Include="Configuration\NativeMethods.cs" />
+    <Compile Include="Imaging\Helpers\Converters\BigEndianBitConverter.cs" />
+    <Compile Include="Imaging\Helpers\Converters\Endianness.cs" />
+    <Compile Include="Imaging\Helpers\Converters\LittleEndianBitConverter.cs" />
+    <Compile Include="Imaging\Helpers\Converters\EndianBitConverter.cs" />
+    <Compile Include="Imaging\Interpolation.cs" />
     <Compile Include="Imaging\Colors\CmykColor.cs" />
     <Compile Include="Imaging\Colors\Color32.cs">
       <SubType>Code</SubType>
@@ -171,6 +178,11 @@
     <Compile Include="Imaging\Helpers\ImageMaths.cs" />
     <Compile Include="Imaging\Helpers\PixelOperations.cs" />
     <Compile Include="Imaging\ImageLayer.cs" />
+    <Compile Include="Imaging\MetaData\Rational.cs" />
+    <Compile Include="Imaging\MetaData\ExifBitConverter.cs" />
+    <Compile Include="Imaging\MetaData\ImageFactoryMetaExtensions.cs" />
+    <Compile Include="Imaging\MetaData\PropertyTagResolutionUnit.cs" />
+    <Compile Include="Imaging\MetaData\Int32Converter.cs" />
     <Compile Include="Imaging\MetaData\ExifPropertyTagType.cs" />
     <Compile Include="Imaging\Convolution.cs" />
     <Compile Include="Imaging\CropLayer.cs" />
@@ -220,8 +232,10 @@
     <Compile Include="Imaging\Filters\Photo\IMatrixFilter.cs" />
     <Compile Include="Imaging\ResizeMode.cs" />
     <Compile Include="Imaging\Resizer.cs" />
+    <Compile Include="Imaging\FastResizer.cs" />
     <Compile Include="Imaging\RoundedCornerLayer.cs" />
     <Compile Include="Imaging\TextLayer.cs" />
+    <Compile Include="Processors\Resolution.cs" />
     <Compile Include="Processors\Gamma.cs" />
     <Compile Include="Processors\Alpha.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />

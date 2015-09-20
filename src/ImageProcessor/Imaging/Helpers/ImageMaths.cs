@@ -78,23 +78,11 @@ namespace ImageProcessor.Imaging.Helpers
         /// Returns value indicating whether the given number is with in the minimum and maximum
         /// given range.
         /// </summary>
-        /// <param name="value">
-        /// The The value to clamp.
-        /// </param>
-        /// <param name="min">
-        /// If <paramref name="include"/> 
-        /// The minimum range value.
-        /// </param>
-        /// <param name="max">
-        /// The maximum range value.
-        /// </param>
-        /// <param name="include">
-        /// Whether to include the minimum and maximum values.
-        /// Defaults to true.
-        /// </param>
-        /// <typeparam name="T">
-        /// The <see cref="System.Type"/> to test.
-        /// </typeparam>
+        /// <param name="value">The The value to clamp.</param>
+        /// <param name="min">If <paramref name="include"/>The minimum range value.</param>
+        /// <param name="max">The maximum range value.</param>
+        /// <param name="include">Whether to include the minimum and maximum values. Defaults to true.</param>
+        /// <typeparam name="T">The <see cref="System.Type"/> to test.</typeparam>
         /// <returns>
         /// True if the value falls within the maximum and minimum; otherwise, false.
         /// </returns>
@@ -293,7 +281,7 @@ namespace ImageProcessor.Imaging.Helpers
 
         /// <summary>
         /// Rotates one point around another
-        /// <see href="http://stackoverflow.com/questions/13695317/rotate-a-point-around-another-point"/>
+        /// <see href="http://stackoverflow.com/a/13695630/82333"/>
         /// </summary>
         /// <param name="pointToRotate">The point to rotate.</param>
         /// <param name="angleInDegrees">The rotation angle in degrees.</param>
@@ -311,11 +299,13 @@ namespace ImageProcessor.Imaging.Helpers
             return new Point
             {
                 X =
-                    (int)((cosTheta * (pointToRotate.X - center.X)) -
-                          ((sinTheta * (pointToRotate.Y - center.Y)) + center.X)),
+                    (int)
+                    (cosTheta * (pointToRotate.X - center.X) -
+                    sinTheta * (pointToRotate.Y - center.Y) + center.X),
                 Y =
-                    (int)((sinTheta * (pointToRotate.X - center.X)) +
-                          ((cosTheta * (pointToRotate.Y - center.Y)) + center.Y))
+                    (int)
+                    (sinTheta * (pointToRotate.X - center.X) +
+                    cosTheta * (pointToRotate.Y - center.Y) + center.Y)
             };
         }
 

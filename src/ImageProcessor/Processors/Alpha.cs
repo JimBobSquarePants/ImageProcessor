@@ -60,31 +60,17 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
             {
                 int percentage = this.DynamicParameter;
-
-                newImage = new Bitmap(image);
-                newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-                newImage = Adjustments.Alpha(newImage, percentage);
-
-                image.Dispose();
-                image = newImage;
+                return Adjustments.Alpha(image, percentage);
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
     }
 }

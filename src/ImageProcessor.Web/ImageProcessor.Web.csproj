@@ -59,6 +59,11 @@
     <Compile Include="Helpers\QuerystringParser\QueryParamParser.cs" />
     <Compile Include="Helpers\QuerystringParser\GenericArrayTypeConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\GenericListTypeConverter.cs" />
+    <Compile Include="PostProcessor\PostProcessingResultEventArgs.cs" />
+    <Compile Include="PostProcessor\PostProcessor.cs" />
+    <Compile Include="PostProcessor\PostProcessorBootstrapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Processors\DetectEdges.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />
     <Compile Include="Processors\Halftone.cs" />
@@ -125,6 +130,27 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Configuration\Resources\security.config.transform" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PostProcessor\Resources\Unmanaged\x64\gifsicle.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PostProcessor\Resources\Unmanaged\x86\gifsicle.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PostProcessor\Resources\Unmanaged\x86\jpegtran.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PostProcessor\Resources\Unmanaged\x86\png.cmd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PostProcessor\Resources\Unmanaged\x86\pngout.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PostProcessor\Resources\Unmanaged\README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PostProcessor\Resources\Unmanaged\x86\pngquant.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

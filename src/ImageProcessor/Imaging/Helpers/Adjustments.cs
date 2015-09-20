@@ -23,6 +23,18 @@ namespace ImageProcessor.Imaging.Helpers
     public static class Adjustments
     {
         /// <summary>
+        /// The array of bytes representing each possible value of color component
+        /// converted from sRGB to the linear color space.
+        /// </summary>
+        private static readonly Lazy<byte[]> LinearBytes = new Lazy<byte[]>(GetLinearBytes);
+
+        /// <summary>
+        /// The array of bytes representing each possible value of color component
+        /// converted from linear to the sRGB color space.
+        /// </summary>
+        private static readonly Lazy<byte[]> SRGBBytes = new Lazy<byte[]>(GetSRGBBytes);
+
+        /// <summary>
         /// Adjusts the alpha component of the given image.
         /// </summary>
         /// <param name="source">
@@ -103,8 +115,8 @@ namespace ImageProcessor.Imaging.Helpers
                 new ColorMatrix(
                     new[]
                         {
-                            new float[] { 1, 0, 0, 0, 0 }, 
-                            new float[] { 0, 1, 0, 0, 0 }, 
+                            new float[] { 1, 0, 0, 0, 0 },
+                            new float[] { 0, 1, 0, 0, 0 },
                             new float[] { 0, 0, 1, 0, 0 },
                             new float[] { 0, 0, 0, 1, 0 },
                             new[] { brightnessFactor, brightnessFactor, brightnessFactor, 0, 1 }
@@ -158,7 +170,7 @@ namespace ImageProcessor.Imaging.Helpers
                 new ColorMatrix(
                     new[]
                     {
-                        new[] { contrastFactor, 0, 0, 0, 0 }, 
+                        new[] { contrastFactor, 0, 0, 0, 0 },
                         new[] { 0, contrastFactor, 0, 0, 0 },
                         new[] { 0, 0, contrastFactor, 0, 0 },
                         new float[] { 0, 0, 0, 1, 0 },
@@ -199,23 +211,191 @@ namespace ImageProcessor.Imaging.Helpers
                 throw new ArgumentOutOfRangeException("value", "Value should be between .1 and 5.");
             }
 
-            int width = source.Width;
-            int height = source.Height;
-            Bitmap destination = new Bitmap(width, height);
-            destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
-
-            Rectangle rectangle = new Rectangle(0, 0, width, height);
-            using (Graphics graphics = Graphics.FromImage(destination))
+            byte[] ramp = new byte[256];
+            for (int x = 0; x < 256; ++x)
             {
-                using (ImageAttributes attributes = new ImageAttributes())
-                {
-                    attributes.SetGamma(value);
-                    graphics.DrawImage(source, rectangle, 0, 0, width, height, GraphicsUnit.Pixel, attributes);
-                }
+                byte val = ((255.0 * Math.Pow(x / 255.0, value)) + 0.5).ToByte();
+                ramp[x] = val;
             }
 
-            source.Dispose();
-            return destination;
+            int width = source.Width;
+            int height = source.Height;
+
+            using (FastBitmap bitmap = new FastBitmap(source))
+            {
+                Parallel.For(
+                    0,
+                    height,
+                    y =>
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            // ReSharper disable once AccessToDisposedClosure
+                            Color composite = bitmap.GetPixel(x, y);
+                            Color linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
+                            // ReSharper disable once AccessToDisposedClosure
+                            bitmap.SetPixel(x, y, linear);
+                        }
+                    });
+            }
+
+            return (Bitmap)source;
+        }
+
+        /// <summary>
+        /// Converts an image from an sRGB color-space to the equivalent linear color-space.
+        /// </summary>
+        /// <param name="source">
+        /// The <see cref="Image"/> source to convert.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Bitmap"/>.
+        /// </returns>
+        public static Bitmap ToLinear(Image source)
+        {
+            // Create only once and lazily. 
+            byte[] ramp = LinearBytes.Value;
+
+            int width = source.Width;
+            int height = source.Height;
+
+            using (FastBitmap bitmap = new FastBitmap(source))
+            {
+                Parallel.For(
+                    0,
+                    height,
+                    y =>
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            // ReSharper disable once AccessToDisposedClosure
+                            Color composite = bitmap.GetPixel(x, y);
+                            Color linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
+                            // ReSharper disable once AccessToDisposedClosure
+                            bitmap.SetPixel(x, y, linear);
+                        }
+                    });
+            }
+
+            return (Bitmap)source;
+        }
+
+        /// <summary>
+        /// Converts an image from a linear color-space to the equivalent sRGB color-space.
+        /// </summary>
+        /// <param name="source">
+        /// The <see cref="Image"/> source to convert.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Bitmap"/>.
+        /// </returns>
+        public static Bitmap ToSRGB(Image source)
+        {
+            // Create only once and lazily. 
+            byte[] ramp = SRGBBytes.Value;
+
+            int width = source.Width;
+            int height = source.Height;
+
+            using (FastBitmap bitmap = new FastBitmap(source))
+            {
+                Parallel.For(
+                    0,
+                    height,
+                    y =>
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            // ReSharper disable once AccessToDisposedClosure
+                            Color composite = bitmap.GetPixel(x, y);
+                            Color linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
+                            // ReSharper disable once AccessToDisposedClosure
+                            bitmap.SetPixel(x, y, linear);
+                        }
+                    });
+            }
+
+            return (Bitmap)source;
+        }
+
+        /// <summary>
+        /// Gets an array of bytes representing each possible value of color component
+        /// converted from sRGB to the linear color space.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="T:byte[]"/>.
+        /// </returns>
+        private static byte[] GetLinearBytes()
+        {
+            byte[] ramp = new byte[256];
+            for (int x = 0; x < 256; ++x)
+            {
+                byte val = (255f * SRGBToLinear(x / 255f)).ToByte();
+                ramp[x] = val;
+            }
+
+            return ramp;
+        }
+
+        /// <summary>
+        /// Gets an array of bytes representing each possible value of color component
+        /// converted from linear to the sRGB color space.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="T:byte[]"/>.
+        /// </returns>
+        private static byte[] GetSRGBBytes()
+        {
+            byte[] ramp = new byte[256];
+            for (int x = 0; x < 256; ++x)
+            {
+                byte val = (255f * LinearToSRGB(x / 255f)).ToByte();
+                ramp[x] = val;
+            }
+
+            return ramp;
+        }
+
+        /// <summary>
+        /// Gets the correct linear value from an sRGB signal.
+        /// <see href="http://www.4p8.com/eric.brasseur/gamma.html#formulas"/>
+        /// <see href="http://entropymine.com/imageworsener/srgbformula/"/>
+        /// </summary>
+        /// <param name="signal">The signal value to convert.</param>
+        /// <returns>
+        /// The <see cref="float"/>.
+        /// </returns>
+        private static float SRGBToLinear(float signal)
+        {
+            float a = 0.055f;
+
+            if (signal <= 0.04045)
+            {
+                return signal / 12.92f;
+            }
+
+            return (float)Math.Pow((signal + a) / (1 + a), 2.4);
+        }
+
+        /// <summary>
+        /// Gets the correct sRGB value from an linear signal.
+        /// <see href="http://www.4p8.com/eric.brasseur/gamma.html#formulas"/>
+        /// <see href="http://entropymine.com/imageworsener/srgbformula/"/>
+        /// </summary>
+        /// <param name="signal">The signal value to convert.</param>
+        /// <returns>
+        /// The <see cref="float"/>.
+        /// </returns>
+        private static float LinearToSRGB(float signal)
+        {
+            float a = 0.055f;
+
+            if (signal <= 0.0031308)
+            {
+                return signal * 12.92f;
+            }
+
+            return ((float)((1 + a) * Math.Pow(signal, 1 / 2.4f))) - a;
         }
     }
 }
