@@ -8,7 +8,7 @@
 //   <remarks>
 //   Adapted from Miscellaneous Utility Library <see href="http://jonskeet.uk/csharp/miscutil/" />
 //   This product includes software developed by Jon Skeet and Marc Gravell. Contact <see href="mailto:skeet@pobox.com" />, or see
-//   <see cref="http://www.pobox.com/~skeet/" />.
+//   <see href="http://www.pobox.com/~skeet/" />.
 //   </remarks>
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ namespace ImageProcessor.Imaging.Helpers
     /// <remarks>
     /// Adapted from Miscellaneous Utility Library <see href="http://jonskeet.uk/csharp/miscutil/"/>
     /// This product includes software developed by Jon Skeet and Marc Gravell. Contact <see href="mailto:skeet@pobox.com"/>, or see 
-    /// <see cref="http://www.pobox.com/~skeet/"/>.
+    /// <see href="http://www.pobox.com/~skeet/"/>.
     /// </remarks>
     /// </summary>
     [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:ElementsMustAppearInTheCorrectOrder", Justification = "Reviewed. Suppression is OK here. Better readability.")]

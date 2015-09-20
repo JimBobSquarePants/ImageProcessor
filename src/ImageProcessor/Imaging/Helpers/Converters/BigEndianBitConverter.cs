@@ -1,8 +1,28 @@
-﻿namespace ImageProcessor.Imaging.Helpers
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="BigEndianBitConverter.cs" company="James South">
+//   Copyright (c) James South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   Implementation of EndianBitConverter which converts to/from big-endian
+//   byte arrays.
+//   <remarks>
+//   Adapted from Miscellaneous Utility Library <see href="http://jonskeet.uk/csharp/miscutil/" />
+//   This product includes software developed by Jon Skeet and Marc Gravell. Contact <see href="mailto:skeet@pobox.com" />, or see
+//   <see href="http://www.pobox.com/~skeet/" />.
+//   </remarks>
+// </summary>
+
+namespace ImageProcessor.Imaging.Helpers
 {
     /// <summary>
-    /// Implementation of EndianBitConverter which converts to/from big-endian
-    /// byte arrays.
+    ///   Implementation of EndianBitConverter which converts to/from big-endian
+    ///   byte arrays.
+    ///   <remarks>
+    ///   Adapted from Miscellaneous Utility Library <see href="http://jonskeet.uk/csharp/miscutil/" />
+    ///   This product includes software developed by Jon Skeet and Marc Gravell. Contact <see href="mailto:skeet@pobox.com" />, or see
+    ///   <see href="http://www.pobox.com/~skeet/" />.
+    ///   </remarks>
     /// </summary>
     internal sealed class BigEndianBitConverter : EndianBitConverter
     {
