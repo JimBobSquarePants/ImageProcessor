@@ -124,7 +124,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// </summary>
         /// <param name="value">The value to parse.</param>
         /// <returns>
-        /// The <see cref="T"/>
+        /// The <see cref="Rational{T}"/>
         /// </returns>
         private delegate T ParseDelegate(string value);
 
