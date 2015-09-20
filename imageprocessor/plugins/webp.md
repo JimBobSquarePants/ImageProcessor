@@ -26,7 +26,7 @@ WebP lossy images are 25-34% smaller in size compared to JPEG images at equivale
 WebP supports lossless transparency (also known as alpha channel) with just 22% additional bytes. 
 Transparency is also supported with lossy compression and typically provides 3x smaller file sizes compared to PNG when lossy compression is acceptable for the red/green/blue color channels.
 
-WebP support is added by adding an implementation of [ISupportedImageFormat](../extending/#isupportedimageformat) to the solution for ImageProcessor to load automatically.
+WebP support is added by adding an implementation of <a href="../extending/#isupportedimageformat" rel="chapter">ISupportedImageFormat<i class="fa fa-file-text-o"></i></a> to the solution for ImageProcessor to load automatically.
 
 <div class="alert" role="alert">
 

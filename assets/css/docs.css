@@ -263,7 +263,7 @@ nav[role="navigation"] [data-dropdown-target] {
 
     .breadcrumb li {
         display: inline-block;
-        text-transform: capitalize;
+        text-transform: uppercase;
     }
 
 nav[role="complementary"] a {
@@ -317,6 +317,17 @@ a > .fa {
     margin-right: .5rem;
 }
 
+article [rel="subsection"]{
+   font-size: 1.5rem;
+   margin: 1.245rem 0;
+}
+
+[rel="subsection"] > .fa,
+[rel="chapter"] > .fa{
+    margin-left: .5rem;
+    margin-right: .25rem;
+}
+
 /*==||=============================================================
  * Utilities
  *=================================================================
@@ -332,7 +343,10 @@ a > .fa {
     box-shadow: rgba(0, 0, 0, 0.3) 0 2px 5px 0;
 }
 
-
+.shadow-alt {
+    -webkit-box-shadow: rgba(0, 0, 0, 0.15) 0 2px 5px 0;
+    box-shadow: rgba(0, 0, 0, 0.15) 0 2px 5px 0;
+}
 
 /*
  * Force the spans to break words on the pre tag

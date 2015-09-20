@@ -10,7 +10,7 @@ sublinks: ["#usage|Usage","#example|Examples"]
     <h1>Constrain</h1>
     <p>
         Constrains the current image, resizing it to fit within the given dimensions whilst keeping its aspect ratio.
-        Produces the same output as the <a href="resize.html">Resize</a> method using <var>ResizeMode.Max</var>
+        Produces the same output as the <a href="resize.html" rel="chapter">Resize<i class="fa fa-file-text-o"></i></a> method using <var>ResizeMode.Max</var>
     </p>
 
     {% highlight c# %}
@@ -28,9 +28,9 @@ public ImageFactory Constrain(Size size)
 <section id="example">
     <h1>Examples</h1>
     <h3>Original</h3>
-    <img src="{{ site.baseurl }}/assets/img/originals/car.jpg" alt="original image" />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg" alt="original image" />
 
     <h3>Constrain</h3>
-    <img src="{{ site.baseurl }}/assets/img/resize/max/car.jpg" alt="Image resized to fit the aspect ratio." />
+    <img src="{{ site.dynamicimageroot }}car-small.jpg?width=500&height=500&mode=max" alt="Image resized to fit the aspect ratio." />
 </section>
 
