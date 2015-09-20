@@ -79,10 +79,11 @@ namespace ImageProcessor.Processors
                 int maxHeight = image.Height;
 
                 newImage = new Bitmap(image);
+                newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                 using (FastBitmap fastBitmap = new FastBitmap(newImage))
                 {
-                    // Get the range of on the y-plane to choose from.
+                    // Get the range on the y-plane to choose from.
                     IEnumerable<int> range = EnumerableExtensions.SteppedRange(y, i => i < y + height && i < maxHeight, size);
 
                     Parallel.ForEach(

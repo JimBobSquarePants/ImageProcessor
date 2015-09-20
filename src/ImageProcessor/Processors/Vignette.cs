@@ -61,31 +61,17 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
             {
                 Color baseColor = (Color)this.DynamicParameter;
-                newImage = new Bitmap(image);
-
-                newImage = Effects.Vignette(newImage, baseColor);
-
-                // Reassign the image.
-                image.Dispose();
-                image = newImage;
+                return Effects.Vignette(image, baseColor);
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
     }
 }

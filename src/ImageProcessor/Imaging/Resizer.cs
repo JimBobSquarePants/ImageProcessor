@@ -18,6 +18,9 @@ namespace ImageProcessor.Imaging
     using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Common.Extensions;
+    using ImageProcessor.Imaging.Formats;
+    using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
     /// Provides methods to resize images.
@@ -52,15 +55,19 @@ namespace ImageProcessor.Imaging
         public ResizeLayer ResizeLayer { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="ISupportedImageFormat"/>.
+        /// </summary>
+        public ISupportedImageFormat ImageFormat { get; set; }
+
+        /// <summary>
         /// Resizes the given image.
         /// </summary>
-        /// <param name="source">
-        /// The source <see cref="Image"/> to resize
-        /// </param>
+        /// <param name="source">The source <see cref="Image"/> to resize.</param>
+        /// <param name="linear">Whether to resize the image using the linear color space.</param>
         /// <returns>
         /// The resized <see cref="Image"/>.
         /// </returns>
-        public Bitmap ResizeImage(Image source)
+        public Bitmap ResizeImage(Image source, bool linear)
         {
             int width = this.ResizeLayer.Size.Width;
             int height = this.ResizeLayer.Size.Height;
@@ -72,7 +79,100 @@ namespace ImageProcessor.Imaging
             int maxHeight = this.ResizeLayer.MaxSize.HasValue ? this.ResizeLayer.MaxSize.Value.Height : int.MaxValue;
             List<Size> restrictedSizes = this.ResizeLayer.RestrictedSizes;
 
-            return this.ResizeImage(source, width, height, maxWidth, maxHeight, restrictedSizes, mode, anchor, upscale, centerCoordinates);
+            return this.ResizeImage(source, width, height, maxWidth, maxHeight, restrictedSizes, mode, anchor, upscale, centerCoordinates, linear);
+        }
+
+        /// <summary>
+        /// Gets an image resized using the composite color space without any gamma correction adjustments.
+        /// </summary>
+        /// <param name="source">The source image.</param>
+        /// <param name="width">The width to resize to.</param>
+        /// <param name="height">The height to resize to.</param>
+        /// <param name="destination">The destination rectangle.</param>
+        /// <returns>
+        /// The <see cref="Bitmap"/>.
+        /// </returns>
+        private static Bitmap ResizeComposite(Image source, int width, int height, Rectangle destination)
+        {
+            Bitmap resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            resized.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+
+            using (Graphics graphics = Graphics.FromImage(resized))
+            {
+                // We want to use two different blending algorithms for enlargement/shrinking.
+                if (source.Width < width && source.Height < height)
+                {
+                    // We are making it larger.
+                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                }
+                else
+                {
+                    // We are making it smaller.
+                    graphics.SmoothingMode = SmoothingMode.None;
+                }
+
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+                    attributes.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(source, destination, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
+                }
+            }
+
+            return resized;
+        }
+
+        /// <summary>
+        /// Gets an image resized using the linear color space with gamma correction adjustments.
+        /// </summary>
+        /// <param name="source">The source image.</param>
+        /// <param name="width">The width to resize to.</param>
+        /// <param name="height">The height to resize to.</param>
+        /// <param name="destination">The destination rectangle.</param>
+        /// <returns>
+        /// The <see cref="Bitmap"/>.
+        /// </returns>
+        private static Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
+        {
+            // Adjust the gamma value so that the image is in the linear color space.
+            Bitmap linear = Adjustments.ToLinear(source.Copy());
+
+            Bitmap resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            resized.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+
+            using (Graphics graphics = Graphics.FromImage(resized))
+            {
+                // We want to use two different blending algorithms for enlargement/shrinking.
+                if (source.Width < width || source.Height < height)
+                {
+                    // We are making it larger.
+                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                }
+                else
+                {
+                    // We are making it smaller.
+                    graphics.SmoothingMode = SmoothingMode.None;
+                }
+
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+                    attributes.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(linear, destination, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
+                }
+            }
+
+            // Return to composite color space.
+            resized = Adjustments.ToSRGB(resized);
+
+            linear.Dispose();
+            return resized;
         }
 
         /// <summary>
@@ -90,6 +190,7 @@ namespace ImageProcessor.Imaging
         /// <param name="centerCoordinates">
         /// If the resize mode is crop, you can set a specific center coordinate, use as alternative to anchorPosition
         /// </param>
+        /// <param name="linear">Whether to resize the image using the linear color space.</param>
         /// <returns>
         /// The resized <see cref="Image"/>.
         /// </returns>
@@ -103,7 +204,8 @@ namespace ImageProcessor.Imaging
             ResizeMode resizeMode = ResizeMode.Pad,
             AnchorPosition anchorPosition = AnchorPosition.Center,
             bool upscale = true,
-            float[] centerCoordinates = null)
+            float[] centerCoordinates = null,
+            bool linear = false)
         {
             Bitmap newImage = null;
 
@@ -124,6 +226,67 @@ namespace ImageProcessor.Imaging
 
                 int destinationX = 0;
                 int destinationY = 0;
+
+                // Change the destination rectangle coordinates if box padding.
+                if (resizeMode == ResizeMode.BoxPad)
+                {
+                    height = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
+                    width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
+
+                    // Only calculate if upscaling. 
+                    if (sourceWidth < width || sourceHeight < height)
+                    {
+                        destinationWidth = sourceWidth;
+                        destinationHeight = sourceHeight;
+
+                        upscale = true;
+
+                        switch (anchorPosition)
+                        {
+                            case AnchorPosition.Left:
+                                destinationY = (height - sourceHeight) / 2;
+                                destinationX = 0;
+                                break;
+                            case AnchorPosition.Right:
+                                destinationY = (height - sourceHeight) / 2;
+                                destinationX = width - sourceWidth;
+                                break;
+                            case AnchorPosition.TopRight:
+                                destinationY = 0;
+                                destinationX = width - sourceWidth;
+                                break;
+                            case AnchorPosition.Top:
+                                destinationY = 0;
+                                destinationX = (width - sourceWidth) / 2;
+                                break;
+                            case AnchorPosition.TopLeft:
+                                destinationY = 0;
+                                destinationX = 0;
+                                break;
+                            case AnchorPosition.BottomRight:
+                                destinationY = height - sourceHeight;
+                                destinationX = width - sourceWidth;
+                                break;
+                            case AnchorPosition.Bottom:
+                                destinationY = height - sourceHeight;
+                                destinationX = (width - sourceWidth) / 2;
+                                break;
+                            case AnchorPosition.BottomLeft:
+                                destinationY = height - sourceHeight;
+                                destinationX = 0;
+                                break;
+                            default:
+                                destinationY = (height - sourceHeight) / 2;
+                                destinationX = (width - sourceWidth) / 2;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // Switch to pad mode to downscale and calculate from there. 
+                        resizeMode = ResizeMode.Pad;
+                    }
+                }
 
                 // Change the destination rectangle coordinates if padding and
                 // there has been a set width and height.
@@ -288,6 +451,42 @@ namespace ImageProcessor.Imaging
                     }
                 }
 
+                // Resize the image until the shortest side reaches the set given dimension.
+                if (resizeMode == ResizeMode.Min)
+                {
+                    height = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
+                    width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
+
+                    double sourceRatio = (double)sourceHeight / sourceWidth;
+
+                    // Ensure we can't upscale.
+                    maxHeight = sourceHeight;
+                    maxWidth = sourceWidth;
+                    upscale = false;
+
+                    // Find the shortest distance to go.
+                    int widthDiff = sourceWidth - width;
+                    int heightDiff = sourceHeight - height;
+
+                    if (widthDiff < heightDiff)
+                    {
+                        destinationHeight = Convert.ToInt32(width * sourceRatio);
+                        height = destinationHeight;
+                        destinationWidth = width;
+                    }
+                    else if (widthDiff > heightDiff)
+                    {
+                        destinationHeight = height;
+                        destinationWidth = Convert.ToInt32(height / sourceRatio);
+                        width = destinationWidth;
+                    }
+                    else
+                    {
+                        destinationWidth = width;
+                        destinationHeight = height;
+                    }
+                }
+
                 // If height or width is not passed we assume that the standard ratio is to be kept.
                 if (height == 0)
                 {
@@ -334,42 +533,31 @@ namespace ImageProcessor.Imaging
                         return (Bitmap)source;
                     }
 
-                    newImage = new Bitmap(width, height);
-                    newImage.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+                    // Do the resize.
+                    Rectangle destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
 
-                    using (Graphics graphics = Graphics.FromImage(newImage))
-                    {
-                        // We want to use two different blending algorithms for enlargement/shrinking.
-                        if (source.Width < destinationWidth && source.Height < destinationHeight)
-                        {
-                            // We are making it larger.
-                            graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                        }
-                        else
-                        {
-                            // We are making it smaller.
-                            graphics.SmoothingMode = SmoothingMode.None;
-                        }
+                    //if (this.ImageFormat is GifFormat || (this.ImageFormat is PngFormat && !((PngFormat)this.ImageFormat).IsIndexed))
+                    //{
+                    //    newImage = FastResizer.ResizeBilinear((Bitmap)source, width, height, destination, linear);
+                    //}
+                    //else
+                    //{
+                    //    if (width <= sourceWidth && height <= sourceHeight)
+                    //    {
+                    //        newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
+                    //    }
+                    //    else
+                    //    {
+                    //        // Faster
+                    //        newImage = FastResizer.ResizeBilinear((Bitmap)source, width, height, destination, linear);
+                    //    }
+                    //}
 
-                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                        graphics.CompositingQuality = CompositingQuality.HighQuality;
+                    newImage = linear ? ResizeLinear(source, width, height, destination) : ResizeComposite(source, width, height, destination);
 
-                        // An unwanted border appears when using InterpolationMode.HighQualityBicubic to resize the image
-                        // as the algorithm appears to be pulling averaging detail from surrounding pixels beyond the edge
-                        // of the image. Using the ImageAttributes class to specify that the pixels beyond are simply mirror
-                        // images of the pixels within solves this problem.
-                        using (ImageAttributes wrapMode = new ImageAttributes())
-                        {
-                            wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                            Rectangle destinationRectangle = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
-                            graphics.DrawImage(source, destinationRectangle, 0, 0, sourceWidth, sourceHeight, GraphicsUnit.Pixel, wrapMode);
-                        }
-
-                        // Reassign the image.
-                        source.Dispose();
-                        source = newImage;
-                    }
+                    // Reassign the image.
+                    source.Dispose();
+                    source = newImage;
                 }
             }
             catch (Exception ex)

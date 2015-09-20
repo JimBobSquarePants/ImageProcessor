@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1E656CDE-124D-4FAF-837C-0EF1E192D418}"
 	ProjectSection(SolutionItems) = preProject
@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1E656C
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B5217BED-B0B7-408E-81B7-877DE2BF9036}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5D12E196-FB7A-4D97-B156-56901EF8084D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor", "ImageProcessor\ImageProcessor.csproj", "{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}"
 EndProject
@@ -26,13 +30,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Plugins.Cair
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Playground", "ImageProcessor.Playground\ImageProcessor.Playground.csproj", "{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.PostProcessor", "ImageProcessor.Web.PostProcessor\ImageProcessor.Web.PostProcessor.csproj", "{55D08737-7D7E-4995-8892-BD9F944329E6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.AzureBlobCache", "Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AzureBlobCache\ImageProcessor.Web.Plugins.AzureBlobCache.csproj", "{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B5217BED-B0B7-408E-81B7-877DE2BF9036}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5D12E196-FB7A-4D97-B156-56901EF8084D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.AmazonS3Cache", "Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AmazonS3Cache\ImageProcessor.Web.Plugins.AmazonS3Cache.csproj", "{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}"
 EndProject
@@ -169,21 +167,6 @@ Global
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7}.Release|x86.ActiveCfg = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.All|Any CPU.ActiveCfg = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.All|Any CPU.Build.0 = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.All|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.All|Mixed Platforms.Build.0 = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.All|x86.ActiveCfg = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{55D08737-7D7E-4995-8892-BD9F944329E6}.Release|x86.ActiveCfg = Release|Any CPU
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.All|Any CPU.ActiveCfg = Release|Any CPU
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.All|Any CPU.Build.0 = Release|Any CPU
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}.All|Mixed Platforms.ActiveCfg = Release|Any CPU

@@ -13,6 +13,7 @@ namespace ImageProcessor.Imaging.Helpers
     using System;
     using System.Drawing;
     using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
     using System.Threading.Tasks;
 
     using ImageProcessor.Imaging.Filters.EdgeDetection;
@@ -139,6 +140,7 @@ namespace ImageProcessor.Imaging.Helpers
             int height = mask.Height;
 
             Bitmap toMask = new Bitmap(source);
+            toMask.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             // Loop through and replace the alpha channel
             using (FastBitmap maskBitmap = new FastBitmap(mask))
@@ -168,12 +170,17 @@ namespace ImageProcessor.Imaging.Helpers
             }
 
             // Ensure the background is cleared out on non alpha supporting formats.
-            Bitmap clear = new Bitmap(width, height);
+            Bitmap clear = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             clear.SetResolution(source.HorizontalResolution, source.VerticalResolution);
             using (Graphics graphics = Graphics.FromImage(clear))
             {
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
                 graphics.Clear(Color.Transparent);
-                graphics.DrawImage(toMask, 0, 0, width, height);
+
+                graphics.DrawImageUnscaled(toMask, 0, 0, width, height);
             }
 
             toMask.Dispose();

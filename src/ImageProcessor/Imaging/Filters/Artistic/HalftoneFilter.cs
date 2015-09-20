@@ -14,6 +14,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
     using System.Threading.Tasks;
 
     using ImageProcessor.Imaging.Colors;
@@ -176,7 +177,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
 
                 // Draw a slightly larger image, flipping the top/left pixels to prevent
                 // jagged edge of output.
-                padded = new Bitmap(width, height);
+                padded = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
                 padded.SetResolution(source.HorizontalResolution, source.VerticalResolution);
                 using (Graphics graphicsPadded = Graphics.FromImage(padded))
                 {
@@ -200,10 +201,11 @@ namespace ImageProcessor.Imaging.Filters.Artistic
 
                 // Yellow oversaturates the output.
                 int offset = this.distance;
-                float yellowMultiplier = this.distance * 1.334f;
-                float magentaMultiplier = this.distance * 1.667f;
+                float yellowMultiplier = this.distance * 1.587f;
+                float magentaMultiplier = this.distance * 2.176f;
                 float multiplier = this.distance * 2.2f;
                 float max = this.distance * (float)Math.Sqrt(2);
+                float magentaMax = this.distance * (float)Math.Sqrt(1.4545);
 
                 // Bump up the keyline max so that black looks black.
                 float keylineMax = max * (float)Math.Sqrt(2);
@@ -215,11 +217,11 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                 Brush yellowBrush = new SolidBrush(Color.FromArgb(255, 239, 0));
 
                 // Create our images.
-                cyan = new Bitmap(width, height);
-                magenta = new Bitmap(width, height);
-                yellow = new Bitmap(width, height);
-                keyline = new Bitmap(width, height);
-                newImage = new Bitmap(sourceWidth, sourceHeight);
+                cyan = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+                magenta = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+                yellow = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+                keyline = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+                newImage = new Bitmap(sourceWidth, sourceHeight, PixelFormat.Format32bppPArgb);
 
                 // Ensure the correct resolution is set.
                 cyan.SetResolution(source.HorizontalResolution, source.VerticalResolution);
@@ -290,7 +292,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                                 {
                                     color = sourceBitmap.GetPixel(angledX, angledY);
                                     cmykColor = color;
-                                    brushWidth = Math.Min((cmykColor.M / 100f) * magentaMultiplier, max);
+                                    brushWidth = Math.Min((cmykColor.M / 100f) * magentaMultiplier, magentaMax);
                                     graphicsMagenta.FillEllipse(magentaBrush, angledX, angledY, brushWidth, brushWidth);
                                 }
 

@@ -23,8 +23,6 @@ namespace ImageProcessor.Imaging
     /// </summary>
     public class ResizeLayer
     {
-        #region Constructors
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ResizeLayer"/> class.
         /// </summary>
@@ -68,9 +66,7 @@ namespace ImageProcessor.Imaging
             this.MaxSize = maxSize;
             this.RestrictedSizes = restrictedSizes ?? new List<Size>();
         }
-        #endregion
 
-        #region Properties
         /// <summary>
         /// Gets or sets the size.
         /// </summary>
@@ -98,6 +94,7 @@ namespace ImageProcessor.Imaging
 
         /// <summary>
         /// Gets or sets a value indicating whether to allow up-scaling of images.
+        /// For <see cref="T:ResizeMode.BoxPad"/> this is always true.
         /// </summary>
         public bool Upscale { get; set; }
 
@@ -105,7 +102,6 @@ namespace ImageProcessor.Imaging
         /// Gets or sets the center coordinates.
         /// </summary>
         public float[] CenterCoordinates { get; set; }
-        #endregion
 
         /// <summary>
         /// Returns a value that indicates whether the specified object is an 

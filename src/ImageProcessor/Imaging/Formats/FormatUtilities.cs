@@ -132,7 +132,7 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// Returns a value indicating whether the given image is indexed.
+        /// Returns a value indicating whether the given image is animated.
         /// </summary>
         /// <param name="image">
         /// The <see cref="System.Drawing.Image"/> to test.

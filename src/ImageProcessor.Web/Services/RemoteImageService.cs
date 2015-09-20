@@ -163,7 +163,7 @@ namespace ImageProcessor.Web.Services
                         }
                         else
                         {
-                            throw new HttpException(404, "No image exists at " + uri);
+                            throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + uri);
                         }
                     }
                 }

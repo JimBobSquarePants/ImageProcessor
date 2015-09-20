@@ -6,6 +6,9 @@
 // <summary>
 //   Performs auto-rotation to ensure that EXIF defined rotation is reflected in
 //   the final image.
+//   <remarks>
+//   <see href="http://sylvana.net/jpegcrop/exif_orientation.html" />
+//   </remarks>
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -21,6 +24,9 @@ namespace ImageProcessor.Processors
     /// <summary>
     /// Performs auto-rotation to ensure that EXIF defined rotation is reflected in 
     /// the final image.
+    /// <remarks>
+    /// <see href="http://sylvana.net/jpegcrop/exif_orientation.html"/>
+    /// </remarks>
     /// </summary>
     public class AutoRotate : IGraphicsProcessor
     {
@@ -61,7 +67,6 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap newImage = null;
             Image image = factory.Image;
 
             try
@@ -69,44 +74,42 @@ namespace ImageProcessor.Processors
                 const int Orientation = (int)ExifPropertyTag.Orientation;
                 if (!factory.PreserveExifData && factory.ExifPropertyItems.ContainsKey(Orientation))
                 {
-                    newImage = new Bitmap(image);
-
                     int rotationValue = factory.ExifPropertyItems[Orientation].Value[0];
                     switch (rotationValue)
                     {
-                        case 1: // Landscape, do nothing
+                        case 8:
+                            // Rotated 90 right
+                            image.RotateFlip(RotateFlipType.Rotate270FlipNone);
                             break;
 
-                        case 8: // Rotated 90 right
-                            // De-rotate:
-                            newImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
-                            break;
-
-                        case 3: // Bottoms up
-                            newImage.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                        case 7: // Rotated 90 right, flip horizontally
+                            image.RotateFlip(RotateFlipType.Rotate270FlipX);
                             break;
 
                         case 6: // Rotated 90 left
-                            newImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                            break;
+
+                        case 5: // Rotated 90 left, flip horizontally
+                            image.RotateFlip(RotateFlipType.Rotate90FlipX);
+                            break;
+
+                        case 3: // Rotate 180 left
+                            image.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                            break;
+
+                        case 2: // Flip horizontally
+                            image.RotateFlip(RotateFlipType.RotateNoneFlipX);
                             break;
                     }
-
-                    // Reassign the image.
-                    image.Dispose();
-                    image = newImage;
                 }
+
+                return image;
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
-
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
-
-            return image;
         }
     }
 }

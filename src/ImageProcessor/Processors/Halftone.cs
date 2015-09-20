@@ -13,6 +13,7 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Filters.Artistic;
@@ -77,7 +78,7 @@ namespace ImageProcessor.Processors
                 if (comicMode)
                 {
                     // Draw the edges.
-                    edgeBitmap = new Bitmap(width, height);
+                    edgeBitmap = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
                     edgeBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                     edgeBitmap = Effects.Trace(image, edgeBitmap, 120);
 

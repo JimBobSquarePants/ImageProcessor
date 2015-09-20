@@ -3,6 +3,7 @@
     <CollectionProperty Name="RecognizedWords">
       <Value>cdn</Value>
       <Value>dllimport</Value>
+      <Value>executables</Value>
       <Value>umbraco</Value>
     </CollectionProperty>
   </GlobalSettings>

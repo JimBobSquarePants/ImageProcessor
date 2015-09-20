@@ -28,7 +28,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"sharpen=[^&]", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex(@"\b(?!\W+)sharpen\b[=]", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GaussianSharpen"/> class.
