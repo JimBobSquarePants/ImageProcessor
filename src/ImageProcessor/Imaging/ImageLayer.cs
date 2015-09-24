@@ -48,15 +48,15 @@ namespace ImageProcessor.Imaging
 
         /// <summary>
         /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="TextLayer"/> object that is equivalent to 
-        /// this <see cref="TextLayer"/> object.
+        /// <see cref="ImageLayer"/> object that is equivalent to 
+        /// this <see cref="ImageLayer"/> object.
         /// </summary>
         /// <param name="obj">
         /// The object to test.
         /// </param>
         /// <returns>
-        /// True if the given object  is an <see cref="TextLayer"/> object that is equivalent to 
-        /// this <see cref="TextLayer"/> object; otherwise, false.
+        /// True if the given object  is an <see cref="ImageLayer"/> object that is equivalent to 
+        /// this <see cref="ImageLayer"/> object; otherwise, false.
         /// </returns>
         public override bool Equals(object obj)
         {
