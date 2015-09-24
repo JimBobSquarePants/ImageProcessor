@@ -71,6 +71,8 @@
     <Compile Include="Imaging\Filters\Photo\MatrixFilterBaseTests.cs" />
     <Compile Include="Imaging\Helpers\ImageMathsUnitTests.cs" />
     <Compile Include="Imaging\InterpolationUnitTests.cs" />
+    <Compile Include="Imaging\Quantizers\WuQuantizer\ColorMomentUnitTests.cs" />
+    <Compile Include="Imaging\ImageLayerUnitTests.cs" />
     <Compile Include="Metadata\TestBigEndianBitConverter.cs" />
     <Compile Include="Metadata\TestLittleEndianBitConverter.cs" />
     <Compile Include="Processors\MetaTests.cs" />
