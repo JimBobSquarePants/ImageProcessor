@@ -15,11 +15,31 @@ namespace ImageProcessor.Imaging.MetaData
 
     using ImageProcessor.Imaging.Helpers;
 
+    public interface IComputerArchitectureInfo
+    {
+        bool IsLittleEndian();
+    }
+
+    public class ComputerArchitectureInfo : IComputerArchitectureInfo
+    {
+        public bool IsLittleEndian()
+        {
+            return BitConverter.IsLittleEndian;
+        }
+    }
+
     /// <summary>
     /// The exif bit converter. Converts based on the endianness of the current machine.
     /// </summary>
     internal sealed class ExifBitConverter : EndianBitConverter
     {
+        private readonly IComputerArchitectureInfo computerArchitectureInfo;
+
+        public ExifBitConverter(IComputerArchitectureInfo computerArchitectureInfo)
+        {
+            this.computerArchitectureInfo = computerArchitectureInfo;
+        }
+
         /// <summary>
         /// Indicates the byte order ("endianness") in which data is converted using this class.
         /// </summary>
@@ -42,7 +62,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <returns>true if this converter is little-endian, false otherwise.</returns>
         public override bool IsLittleEndian()
         {
-            return BitConverter.IsLittleEndian;
+            return this.computerArchitectureInfo.IsLittleEndian();
         }
 
         /// <summary>
