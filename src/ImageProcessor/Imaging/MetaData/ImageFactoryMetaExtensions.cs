@@ -22,7 +22,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <summary>
         /// The converter for converting inputs into byte arrays.
         /// </summary>
-        private static readonly ExifBitConverter BitConverter = new ExifBitConverter();
+        private static readonly ExifBitConverter BitConverter = new ExifBitConverter(new ComputerArchitectureInfo());
 
         /// <summary>
         /// Sets a property item with the given id to the collection within the current
