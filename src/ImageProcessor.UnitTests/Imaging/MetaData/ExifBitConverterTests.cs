@@ -10,6 +10,7 @@
 
 namespace ImageProcessor.UnitTests.Imaging.MetaData
 {
+    using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.MetaData;
 
     using NUnit.Framework;
@@ -19,7 +20,9 @@ namespace ImageProcessor.UnitTests.Imaging.MetaData
     /// </summary>
     public class ExifBitConverterTests
     {
-
+        /// <summary>
+        /// The when get bytes.
+        /// </summary>
         [TestFixture]
         public class WhenGetBytes
         {
