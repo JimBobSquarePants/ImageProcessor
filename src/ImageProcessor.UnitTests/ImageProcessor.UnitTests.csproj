@@ -70,10 +70,12 @@
     <Compile Include="Imaging\FastBitmapUnitTests.cs" />
     <Compile Include="Imaging\Filters\Photo\MatrixFilterBaseTests.cs" />
     <Compile Include="Imaging\Helpers\ImageMathsUnitTests.cs" />
+    <Compile Include="Imaging\MetaData\ExifBitConverterTests.cs" />
     <Compile Include="Imaging\Quantizers\WuQuantizer\ColorMomentUnitTests.cs" />
     <Compile Include="Imaging\ImageLayerUnitTests.cs" />
     <Compile Include="Metadata\TestBigEndianBitConverter.cs" />
     <Compile Include="Metadata\TestLittleEndianBitConverter.cs" />
+    <Compile Include="Processors\FormatTests.cs" />
     <Compile Include="Processors\MetaTests.cs" />
     <Compile Include="Processors\QualityTests.cs" />
   </ItemGroup>
