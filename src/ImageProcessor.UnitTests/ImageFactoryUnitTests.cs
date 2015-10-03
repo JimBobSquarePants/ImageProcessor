@@ -651,7 +651,7 @@ namespace ImageProcessor.UnitTests
         public void ResolutionIsApplied()
         {
             int i = 0;
-            byte[] bytes = new ExifBitConverter().IsLittleEndian()
+            byte[] bytes = new ExifBitConverter(new ComputerArchitectureInfo()).IsLittleEndian()
                 ? new byte[] { 144, 1, 0, 0, 1, 0, 0, 0 }
                 : new byte[] { 0, 0, 0, 1, 0, 0, 1, 144 };
 
