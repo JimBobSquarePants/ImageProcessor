@@ -138,10 +138,12 @@
     <Compile Include="Common\Helpers\IOHelper.cs" />
     <Compile Include="Configuration\NativeBinaryFactory.cs" />
     <Compile Include="Configuration\NativeMethods.cs" />
+    <Compile Include="Imaging\ComputerArchitectureInfo.cs" />
     <Compile Include="Imaging\Helpers\Converters\BigEndianBitConverter.cs" />
     <Compile Include="Imaging\Helpers\Converters\Endianness.cs" />
     <Compile Include="Imaging\Helpers\Converters\LittleEndianBitConverter.cs" />
     <Compile Include="Imaging\Helpers\Converters\EndianBitConverter.cs" />
+    <Compile Include="Imaging\IComputerArchitectureInfo.cs" />
     <Compile Include="Imaging\Interpolation.cs" />
     <Compile Include="Imaging\Colors\CmykColor.cs" />
     <Compile Include="Imaging\Colors\Color32.cs">
