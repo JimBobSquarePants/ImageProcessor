@@ -15,26 +15,22 @@ namespace ImageProcessor.Imaging.MetaData
 
     using ImageProcessor.Imaging.Helpers;
 
-    public interface IComputerArchitectureInfo
-    {
-        bool IsLittleEndian();
-    }
-
-    public class ComputerArchitectureInfo : IComputerArchitectureInfo
-    {
-        public bool IsLittleEndian()
-        {
-            return BitConverter.IsLittleEndian;
-        }
-    }
-
     /// <summary>
     /// The exif bit converter. Converts based on the endianness of the current machine.
     /// </summary>
     internal sealed class ExifBitConverter : EndianBitConverter
     {
+        /// <summary>
+        /// The computer architecture info.
+        /// </summary>
         private readonly IComputerArchitectureInfo computerArchitectureInfo;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExifBitConverter"/> class.
+        /// </summary>
+        /// <param name="computerArchitectureInfo">
+        /// The computer architecture info.
+        /// </param>
         public ExifBitConverter(IComputerArchitectureInfo computerArchitectureInfo)
         {
             this.computerArchitectureInfo = computerArchitectureInfo;
