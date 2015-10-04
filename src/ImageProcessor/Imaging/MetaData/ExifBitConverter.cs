@@ -21,6 +21,22 @@ namespace ImageProcessor.Imaging.MetaData
     internal sealed class ExifBitConverter : EndianBitConverter
     {
         /// <summary>
+        /// The computer architecture info.
+        /// </summary>
+        private readonly IComputerArchitectureInfo computerArchitectureInfo;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExifBitConverter"/> class.
+        /// </summary>
+        /// <param name="computerArchitectureInfo">
+        /// The computer architecture info.
+        /// </param>
+        public ExifBitConverter(IComputerArchitectureInfo computerArchitectureInfo)
+        {
+            this.computerArchitectureInfo = computerArchitectureInfo;
+        }
+
+        /// <summary>
         /// Indicates the byte order ("endianness") in which data is converted using this class.
         /// </summary>
         public override Endianness Endianness
@@ -42,7 +58,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <returns>true if this converter is little-endian, false otherwise.</returns>
         public override bool IsLittleEndian()
         {
-            return BitConverter.IsLittleEndian;
+            return this.computerArchitectureInfo.IsLittleEndian();
         }
 
         /// <summary>
