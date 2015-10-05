@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="Extensions\DoubleExtensionsUnitTests.cs" />
     <Compile Include="Extensions\IntegerExtensionsUnitTests.cs" />
+    <Compile Include="Imaging\Colors\CmykColorTests.cs" />
     <Compile Include="Imaging\ColorUnitTests.cs" />
     <Compile Include="Imaging\CropLayerUnitTests.cs" />
     <Compile Include="Imaging\FastBitmapUnitTests.cs" />
