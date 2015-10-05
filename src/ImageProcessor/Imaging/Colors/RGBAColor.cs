@@ -270,21 +270,6 @@ namespace ImageProcessor.Imaging.Colors
         }
 
         /// <summary>
-        /// Allows the implicit conversion of an instance of <see cref="RgbaColor"/> to a 
-        /// <see cref="CmykColor"/>.
-        /// </summary>
-        /// <param name="rgbaColor">
-        /// The instance of <see cref="RgbaColor"/> to convert.
-        /// </param>
-        /// <returns>
-        /// An instance of <see cref="CmykColor"/>.
-        /// </returns>
-        public static implicit operator CmykColor(RgbaColor rgbaColor)
-        {
-            return CmykColor.FromColor(rgbaColor);
-        }
-
-        /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
