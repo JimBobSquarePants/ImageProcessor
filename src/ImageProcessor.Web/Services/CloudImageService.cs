@@ -111,8 +111,20 @@ namespace ImageProcessor.Web.Services
         public async Task<byte[]> GetImage(object id)
         {
             string host = this.Settings["Host"];
+            string container = this.Settings.ContainsKey("Container") ? this.Settings["Container"] : string.Empty;
             Uri baseUri = new Uri(host);
-            Uri uri = new Uri(baseUri, id.ToString());
+
+            string relativeResourceUrl = id.ToString();
+            if (!string.IsNullOrEmpty(container))
+            {
+                container = container.TrimEnd('/') + "/";
+                if (!relativeResourceUrl.StartsWith(container + "/"))
+                {
+                    relativeResourceUrl = container + relativeResourceUrl;
+                }
+            }
+
+            Uri uri = new Uri(baseUri, relativeResourceUrl);
             RemoteFile remoteFile = new RemoteFile(uri)
             {
                 MaxDownloadSize = int.Parse(this.Settings["MaxBytes"]),
