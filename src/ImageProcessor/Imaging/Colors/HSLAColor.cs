@@ -288,43 +288,6 @@ namespace ImageProcessor.Imaging.Colors
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="HslaColor"/> to a 
-        /// <see cref="RgbaColor"/>.
-        /// </summary>
-        /// <param name="hslaColor">
-        /// The instance of <see cref="HslaColor"/> to convert.
-        /// </param>
-        /// <returns>
-        /// An instance of <see cref="RgbaColor"/>.
-        /// </returns>
-        public static implicit operator RgbaColor(HslaColor hslaColor)
-        {
-            float r = 0, g = 0, b = 0;
-            if (Math.Abs(hslaColor.l - 0) > .0001)
-            {
-                if (Math.Abs(hslaColor.s - 0) <= .0001)
-                {
-                    r = g = b = hslaColor.l;
-                }
-                else
-                {
-                    float temp2 = GetTemp2(hslaColor);
-                    float temp1 = (2.0f * hslaColor.l) - temp2;
-
-                    r = GetColorComponent(temp1, temp2, hslaColor.h + (1.0f / 3.0f));
-                    g = GetColorComponent(temp1, temp2, hslaColor.h);
-                    b = GetColorComponent(temp1, temp2, hslaColor.h - (1.0f / 3.0f));
-                }
-            }
-
-            return RgbaColor.FromRgba(
-                Convert.ToByte(255 * r),
-                Convert.ToByte(255 * g),
-                Convert.ToByte(255 * b),
-                Convert.ToByte(255 * hslaColor.a));
-        }
-
-        /// <summary>
-        /// Allows the implicit conversion of an instance of <see cref="HslaColor"/> to a 
         /// <see cref="YCbCrColor"/>.
         /// </summary>
         /// <param name="hslaColor">
