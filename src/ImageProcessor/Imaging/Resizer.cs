@@ -92,7 +92,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// The <see cref="Bitmap"/>.
         /// </returns>
-        private static Bitmap ResizeComposite(Image source, int width, int height, Rectangle destination)
+        protected virtual Bitmap ResizeComposite(Image source, int width, int height, Rectangle destination)
         {
             Bitmap resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             resized.SetResolution(source.HorizontalResolution, source.VerticalResolution);
@@ -135,7 +135,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// The <see cref="Bitmap"/>.
         /// </returns>
-        private static Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
+        protected virtual Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
         {
             // Adjust the gamma value so that the image is in the linear color space.
             Bitmap linear = Adjustments.ToLinear(source.Copy());
