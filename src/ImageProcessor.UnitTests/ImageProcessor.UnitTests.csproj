@@ -71,6 +71,7 @@
     <Compile Include="Imaging\FastBitmapUnitTests.cs" />
     <Compile Include="Imaging\Filters\Photo\MatrixFilterBaseTests.cs" />
     <Compile Include="Imaging\Helpers\ImageMathsUnitTests.cs" />
+    <Compile Include="Imaging\Helpers\ResizerTests.cs" />
     <Compile Include="Imaging\MetaData\ExifBitConverterTests.cs" />
     <Compile Include="Imaging\Quantizers\WuQuantizer\ColorMomentUnitTests.cs" />
     <Compile Include="Imaging\ImageLayerUnitTests.cs" />
