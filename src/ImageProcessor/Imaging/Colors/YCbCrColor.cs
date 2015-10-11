@@ -201,21 +201,6 @@ namespace ImageProcessor.Imaging.Colors
         }
 
         /// <summary>
-        /// Allows the implicit conversion of an instance of <see cref="YCbCrColor"/> to a 
-        /// <see cref="RgbaColor"/>.
-        /// </summary>
-        /// <param name="ycbcrColor">
-        /// The instance of <see cref="YCbCrColor"/> to convert.
-        /// </param>
-        /// <returns>
-        /// An instance of <see cref="RgbaColor"/>.
-        /// </returns>
-        public static implicit operator RgbaColor(YCbCrColor ycbcrColor)
-        {
-            return RgbaColor.FromColor(ycbcrColor);
-        }
-
-        /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
