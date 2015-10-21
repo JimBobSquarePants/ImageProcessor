@@ -21,7 +21,7 @@ public ImageFactory Resize(Size size)
 
     <dl>
         <dt><strong>size</strong></dt>
-        <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to.</dd>
+        <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to. Passing a 0 for either dimension will omit that dimension.</dd>
     </dl>
 
     {% highlight c# %}
@@ -36,7 +36,7 @@ public ImageFactory Resize(ResizeLayer resizeLayer)
             The <code>ImageProcessor.Imaging.ResizeLayer</code> containing the following properties required to resize the image.
             <dl>
                 <dt><strong>Size</strong></dt>
-                <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to.</dd>
+                <dd>The <code>System.Drawing.Size</code> containing the width and height to set the image to. Passing a 0 for either dimension will omit that dimension.</dd>
                 <dt><strong>ResizeMode</strong></dt>
                 <dd>The <code>ImageProcessor.Imaging.ResizeMode</code> to apply to resized image.</dd>
                 <dt><strong>AnchorPosition</strong></dt>
