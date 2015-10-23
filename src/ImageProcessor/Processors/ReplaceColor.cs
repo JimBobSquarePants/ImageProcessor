@@ -121,21 +121,8 @@ namespace ImageProcessor.Processors
                                     {
                                         if (ImageMaths.InRange(currentB, minB, maxB))
                                         {
-                                            // Ensure the values are within an acceptable byte range
-                                            // and set the new value.
-                                            byte r = (originalR + currentR - replacementR).ToByte();
-                                            byte g = (originalG + currentG - replacementG).ToByte();
-                                            byte b = (originalB + currentB - replacementB).ToByte();
-
-                                            // Allow replacement with transparent color.
-                                            byte a = currentA;
-                                            if (originalA != replacementA)
-                                            {
-                                                a = replacementA;
-                                            }
-
                                             // ReSharper disable once AccessToDisposedClosure
-                                            fastBitmap.SetPixel(x, y, Color.FromArgb(a, r, g, b));
+                                            fastBitmap.SetPixel(x, y, Color.FromArgb(replacementA, replacementR, replacementG, replacementB));
                                         }
                                     }
                                 }
