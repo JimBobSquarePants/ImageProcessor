@@ -109,6 +109,7 @@ namespace ImageProcessor.Processors
                                 // Get the pixel color.
                                 // ReSharper disable once AccessToDisposedClosure
                                 Color currentColor = fastBitmap.GetPixel(x, y);
+
                                 byte currentR = currentColor.R;
                                 byte currentG = currentColor.G;
                                 byte currentB = currentColor.B;
@@ -123,9 +124,9 @@ namespace ImageProcessor.Processors
                                         {
                                             // Ensure the values are within an acceptable byte range
                                             // and set the new value.
-                                            byte r = (originalR + currentR - replacementR).ToByte();
-                                            byte g = (originalG + currentG - replacementG).ToByte();
-                                            byte b = (originalB + currentB - replacementB).ToByte();
+                                            byte r = (originalR - currentR + replacementR).ToByte();
+                                            byte g = (originalG - currentG + replacementG).ToByte();
+                                            byte b = (originalB - currentB + replacementB).ToByte();
 
                                             // Allow replacement with transparent color.
                                             byte a = currentA;
