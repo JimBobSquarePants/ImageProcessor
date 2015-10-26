@@ -121,7 +121,7 @@ namespace ImageProcessor.Imaging.Formats
                         {
                             // ReSharper disable once AccessToDisposedClosure
                             Color color = fastBitmap.GetPixel(x, y);
-                            colors.TryAdd(color, color);
+                            colors.GetOrAdd(color, color);
                         }
                     });
             }
