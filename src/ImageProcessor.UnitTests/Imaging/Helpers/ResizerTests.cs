@@ -5,20 +5,20 @@
     using FluentAssertions;
     using ImageProcessor.Imaging;
 
-    class ResizerTests
+    internal class ResizerTests
     {
         /// <summary>
         /// A Stub class to capture parameters passed to <see cref="Resizer.ResizeComposite"/> and <see cref="Resizer.ResizeLinear"/>
         /// </summary>
-        class StubedResizer : Resizer
+        private class StubbedResizer : Resizer
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="StubedResizer"/> class.
+            /// Initializes a new instance of the <see cref="StubbedResizer"/> class.
             /// </summary>
             /// <param name="resizeLayer">
             /// The <see cref="ResizeLayer"/>.
             /// </param>
-            public StubedResizer(ResizeLayer resizeLayer) : base(resizeLayer)
+            public StubbedResizer(ResizeLayer resizeLayer) : base(resizeLayer)
             {
             }
 
@@ -38,9 +38,9 @@
             /// </returns>
             protected override Bitmap ResizeComposite(Image source, int width, int height, Rectangle destination)
             {
-                ResizeWidth = width;
-                ResizeHeight = height;
-                ResizeDestination = destination;
+                this.ResizeWidth = width;
+                this.ResizeHeight = height;
+                this.ResizeDestination = destination;
 
                 return base.ResizeComposite(source, width, height, destination);
             }
@@ -61,9 +61,9 @@
             /// </returns>
             protected override Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
             {
-                ResizeWidth = width;
-                ResizeHeight = height;
-                ResizeDestination = destination;
+                this.ResizeWidth = width;
+                this.ResizeHeight = height;
+                this.ResizeDestination = destination;
 
                 return base.ResizeLinear(source, width, height, destination);
             }
@@ -76,12 +76,12 @@
             /// <summary>
             /// The height of the resized image
             /// </summary>
-            public int? ResizeHeight { get; private set; }
+            private int? ResizeHeight { get; set; }
 
             /// <summary>
             /// The width of the resized image
             /// </summary>
-            public int? ResizeWidth { get; private set; }
+            private int? ResizeWidth { get; set; }
         }
 
         /// <summary>
@@ -98,7 +98,7 @@
             /// <param name="destinationLeft">The left position where the resized image is placed</param>
             /// <param name="destinationTop">The top position where the resized image is placed</param>
             [Test]
-            [TestCase(50, 75, 17, 0,  Description = "Upscale")]
+            [TestCase(50, 75, 17, 0, Description = "Upscale")]
             [TestCase(50, 150, 33, 0, Description = "Downscaling height dimension")]
             [TestCase(150, 150, 0, 0, Description = "Downscaling both dimensions")]
             public void CorrectlyPlacesImageWhenPadding(
@@ -106,11 +106,11 @@
                 int height,
                 int destinationLeft,
                 int destinationTop)
-            
+
             {
-                const int newWidth = 100;
-                const int newHeight = 100;
-                var resizer = new StubedResizer(new ResizeLayer(new Size(newWidth, newHeight), ResizeMode.Pad));
+                const int NewWidth = 100;
+                const int NewHeight = 100;
+                StubbedResizer resizer = new StubbedResizer(new ResizeLayer(new Size(NewWidth, NewHeight), ResizeMode.Pad));
                 resizer
                     .ResizeImage(new Bitmap(width, height), false);
 
@@ -136,11 +136,10 @@
                 int destinationTop)
 
             {
-                const int newWidth = 100;
-                const int newHeight = 100;
-                var resizer = new StubedResizer(new ResizeLayer(new Size(newWidth, newHeight), ResizeMode.BoxPad));
-                resizer
-                    .ResizeImage(new Bitmap(width, height), false);
+                const int NewWidth = 100;
+                const int NewHeight = 100;
+                StubbedResizer resizer = new StubbedResizer(new ResizeLayer(new Size(NewWidth, NewHeight), ResizeMode.BoxPad));
+                resizer.ResizeImage(new Bitmap(width, height), false);
 
                 resizer.ResizeDestination.Top.Should().Be(destinationTop);
                 resizer.ResizeDestination.Left.Should().Be(destinationLeft);
