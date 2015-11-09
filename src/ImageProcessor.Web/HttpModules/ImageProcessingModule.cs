@@ -76,6 +76,11 @@ namespace ImageProcessor.Web.HttpModules
         private static bool? preserveExifMetaData;
 
         /// <summary>
+        /// Whether to perform gamma correction when performing processing.
+        /// </summary>
+        private static bool? fixGamma;
+
+        /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
         /// </summary>
         /// <value><see langword="true"/> if this instance has been disposed; otherwise, <see langword="false"/>.</value>
@@ -264,6 +269,11 @@ namespace ImageProcessor.Web.HttpModules
                 preserveExifMetaData = ImageProcessorConfiguration.Instance.PreserveExifMetaData;
             }
 
+            if (fixGamma == null)
+            {
+                fixGamma = ImageProcessorConfiguration.Instance.FixGamma;
+            }
+
             EventHandlerTaskAsyncHelper postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
             application.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
@@ -364,10 +374,10 @@ namespace ImageProcessor.Web.HttpModules
                         () => handler(
                             this,
                             new PostProcessingEventArgs
-                                {
-                                    Context = context,
-                                    CachedImagePath = cachedPath
-                                }));
+                            {
+                                Context = context,
+                                CachedImagePath = cachedPath
+                            }));
                 }
             }
 
@@ -534,7 +544,9 @@ namespace ImageProcessor.Web.HttpModules
                     if (isNewOrUpdated)
                     {
                         // Process the image.
-                        using (ImageFactory imageFactory = new ImageFactory(preserveExifMetaData != null && preserveExifMetaData.Value))
+                        bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
+                        bool gamma = fixGamma != null && fixGamma.Value;
+                        using (ImageFactory imageFactory = new ImageFactory(exif, gamma))
                         {
                             byte[] imageBuffer = await currentService.GetImage(resourcePath);
                             string mimeType;
