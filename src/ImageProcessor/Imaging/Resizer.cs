@@ -234,7 +234,7 @@ namespace ImageProcessor.Imaging
                     width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
 
                     // Only calculate if upscaling. 
-                    if (sourceWidth < width || sourceHeight < height)
+                    if (sourceWidth < width && sourceHeight < height)
                     {
                         destinationWidth = sourceWidth;
                         destinationHeight = sourceHeight;
@@ -536,24 +536,7 @@ namespace ImageProcessor.Imaging
                     // Do the resize.
                     Rectangle destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
 
-                    //if (this.ImageFormat is GifFormat || (this.ImageFormat is PngFormat && !((PngFormat)this.ImageFormat).IsIndexed))
-                    //{
-                    //    newImage = FastResizer.ResizeBilinear((Bitmap)source, width, height, destination, linear);
-                    //}
-                    //else
-                    //{
-                    //    if (width <= sourceWidth && height <= sourceHeight)
-                    //    {
-                    //        newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
-                    //    }
-                    //    else
-                    //    {
-                    //        // Faster
-                    //        newImage = FastResizer.ResizeBilinear((Bitmap)source, width, height, destination, linear);
-                    //    }
-                    //}
-
-                    newImage = linear ? ResizeLinear(source, width, height, destination) : ResizeComposite(source, width, height, destination);
+                    newImage = linear ? this.ResizeLinear(source, width, height, destination) : this.ResizeComposite(source, width, height, destination);
 
                     // Reassign the image.
                     source.Dispose();
