@@ -34,6 +34,17 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to convert images to a linear color space before
+        /// processing.
+        /// </summary>
+        [ConfigurationProperty("fixGamma", IsRequired = false, DefaultValue = false)]
+        public bool FixGamma
+        {
+            get { return (bool)this["fixGamma"]; }
+            set { this["fixGamma"] = value; }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to use post processing optimization techniques
         /// on the resultant images to further reduce file size.
         /// </summary>
