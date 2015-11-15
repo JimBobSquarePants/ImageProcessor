@@ -89,6 +89,7 @@
           "lib/net45/_._": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -745,6 +746,7 @@
           "lib/net45/_._": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -1425,6 +1427,7 @@
           "lib/net45/_._": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -2153,6 +2156,7 @@
           "lib/dotnet/Microsoft.VisualBasic.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -2977,6 +2981,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -4209,6 +4214,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -5486,6 +5492,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -6594,6 +6601,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -7724,6 +7732,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -8898,6 +8907,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -10049,6 +10059,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -11223,6 +11234,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -12374,6 +12386,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -13548,6 +13561,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.3.6": {},
       "StyleCop.Analyzers/1.0.0-beta015": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
@@ -15148,6 +15162,21 @@
         "ref/net46/Microsoft.Win32.Primitives.dll",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._"
+      ]
+    },
+    "NuSpec.ReferenceGenerator/1.3.6": {
+      "sha512": "yG6AlB31sYNXia+zXUazvwuDD5b9fCEZrtxe+4EYbieaGwtUNOl2bWKkfKVaWnx9Fv9Wvw2x/VYs43bszHrhHw==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "build/dotnet/NuSpec.ReferenceGenerator.targets",
+        "build/portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10/NuSpec.ReferenceGenerator.targets",
+        "NuSpec.ReferenceGenerator.nuspec",
+        "package/services/metadata/core-properties/ce265f07238948b889fc06c729ad2743.psmdcp",
+        "tools/RefGen.exe",
+        "tools/RefGen.exe.config",
+        "tools/RefGen.pdb"
       ]
     },
     "StyleCop.Analyzers/1.0.0-beta015": {
@@ -17239,6 +17268,7 @@
     "": [
       "Microsoft.NETCore >= 5.0.0",
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.0",
+      "NuSpec.ReferenceGenerator >= 1.3.6",
       "StyleCop.Analyzers >= 1.0.0-beta015"
     ],
     ".NETPlatform,Version=v5.0": []
