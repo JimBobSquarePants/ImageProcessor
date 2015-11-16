@@ -5,7 +5,7 @@
     "DNXCore,Version=v5.0": {
       "ImageProcessor/3.0.0": {
         "type": "project",
-        "framework": "DNXCore,Version=v5.0",
+        "framework": ".NETPlatform,Version=v5.0",
         "dependencies": {
           "Microsoft.CSharp": "4.0.0",
           "Microsoft.NETCore": "5.0.1-beta-23409",
@@ -1453,7 +1453,7 @@
     "DNXCore,Version=v5.0/win7-x86": {
       "ImageProcessor/3.0.0": {
         "type": "project",
-        "framework": "DNXCore,Version=v5.0",
+        "framework": ".NETPlatform,Version=v5.0",
         "dependencies": {
           "Microsoft.CSharp": "4.0.0",
           "Microsoft.NETCore": "5.0.1-beta-23409",
@@ -1783,8 +1783,8 @@
         "native": {
           "runtimes/win7-x86/native/API-MS-Win-Base-Util-L1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-com-l1-1-0.dll": {},
-          "runtimes/win7-x86/native/api-ms-win-core-comm-l1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-com-private-l1-1-0.dll": {},
+          "runtimes/win7-x86/native/api-ms-win-core-comm-l1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-console-l1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-console-l2-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-datetime-l1-1-0.dll": {},
@@ -1847,13 +1847,13 @@
           "runtimes/win7-x86/native/api-ms-win-core-shlwapi-obsolete-l1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-shutdown-l1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-shutdown-l1-1-1.dll": {},
-          "runtimes/win7-x86/native/API-MS-Win-Core-StringAnsi-L1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-string-l1-1-0.dll": {},
           "runtimes/win7-x86/native/API-MS-Win-Core-String-L2-1-0.dll": {},
-          "runtimes/win7-x86/native/api-ms-win-core-stringloader-l1-1-0.dll": {},
-          "runtimes/win7-x86/native/api-ms-win-core-stringloader-l1-1-1.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-string-obsolete-l1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-string-obsolete-l1-1-1.dll": {},
+          "runtimes/win7-x86/native/API-MS-Win-Core-StringAnsi-L1-1-0.dll": {},
+          "runtimes/win7-x86/native/api-ms-win-core-stringloader-l1-1-0.dll": {},
+          "runtimes/win7-x86/native/api-ms-win-core-stringloader-l1-1-1.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-synch-l1-1-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-synch-l1-2-0.dll": {},
           "runtimes/win7-x86/native/api-ms-win-core-sysinfo-l1-1-0.dll": {},
@@ -3438,7 +3438,7 @@
     "DNXCore,Version=v5.0/win7-x64": {
       "ImageProcessor/3.0.0": {
         "type": "project",
-        "framework": "DNXCore,Version=v5.0",
+        "framework": ".NETPlatform,Version=v5.0",
         "dependencies": {
           "Microsoft.CSharp": "4.0.0",
           "Microsoft.NETCore": "5.0.1-beta-23409",
@@ -3768,8 +3768,8 @@
         "native": {
           "runtimes/win7-x64/native/API-MS-Win-Base-Util-L1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-com-l1-1-0.dll": {},
-          "runtimes/win7-x64/native/api-ms-win-core-comm-l1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-com-private-l1-1-0.dll": {},
+          "runtimes/win7-x64/native/api-ms-win-core-comm-l1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-console-l1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-console-l2-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-datetime-l1-1-0.dll": {},
@@ -3832,13 +3832,13 @@
           "runtimes/win7-x64/native/api-ms-win-core-shlwapi-obsolete-l1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-shutdown-l1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-shutdown-l1-1-1.dll": {},
-          "runtimes/win7-x64/native/API-MS-Win-Core-StringAnsi-L1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-string-l1-1-0.dll": {},
           "runtimes/win7-x64/native/API-MS-Win-Core-String-L2-1-0.dll": {},
-          "runtimes/win7-x64/native/api-ms-win-core-stringloader-l1-1-0.dll": {},
-          "runtimes/win7-x64/native/api-ms-win-core-stringloader-l1-1-1.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-string-obsolete-l1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-string-obsolete-l1-1-1.dll": {},
+          "runtimes/win7-x64/native/API-MS-Win-Core-StringAnsi-L1-1-0.dll": {},
+          "runtimes/win7-x64/native/api-ms-win-core-stringloader-l1-1-0.dll": {},
+          "runtimes/win7-x64/native/api-ms-win-core-stringloader-l1-1-1.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-synch-l1-1-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-synch-l1-2-0.dll": {},
           "runtimes/win7-x64/native/api-ms-win-core-sysinfo-l1-1-0.dll": {},
@@ -6132,7 +6132,7 @@
     "Microsoft.Win32.Registry/4.0.0-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "H2aofhRjc3RSc9V0HfFBvbKrQabVWShfBZRAtUB+1hoDxThbnbJYNjG4UhHzkUQv4SmdOwg+8lHHd1WFHr7U0w==",
+      "sha512": "v1PMRQcZvyCTXKKpghk96avnJP1CoNs6Q3v22hZnnTiHqYUTyaqdqkjW5Xsj9XO60aJTBEpd5OyudgrqqDHBoQ==",
       "files": [
         "lib/DNXCore50/de/Microsoft.Win32.Registry.xml",
         "lib/DNXCore50/es/Microsoft.Win32.Registry.xml",
@@ -6178,7 +6178,7 @@
     "runtime.win7.System.Console/4.0.0-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "bVJW2cR1zoojRsJ/Zd4ETI/VCrn/9knetNYRR2Q4ktorU9a52F/8rQ7S3HeK04jMDBERGsjDc7Rj9u1GBSvU/w==",
+      "sha512": "NMFGQxP/3qlBYknm/9RcdlDNh7A+B+d1d3qaQlV7mHqjHmgB/IOEGWvToEl3PbVOZIq0kjdx7TbRmOJxW0aE0A==",
       "files": [
         "ref/dotnet/_._",
         "runtime.win7.System.Console.4.0.0-beta-23409.nupkg",
@@ -6234,7 +6234,7 @@
     "runtime.win7.System.Diagnostics.Process/4.1.0-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "hXKdXyMDMGkSwaOQOgNlQsJuROb0rs+B/nGdvEDQZLZj0J9mH2jZ1/sXOB6nfgm/quboh0/EhV8oqC/1pzmBog==",
+      "sha512": "WQ9fNSFkKk/aaKiVS9YA0b1W6CpXt60zvUY2HdmY5N9Js6h/mxhXavxCowYR9qVW95gqA42zcxb3FElWsCqqEw==",
       "files": [
         "lib/win8/_._",
         "lib/wp8/_._",
@@ -6259,7 +6259,7 @@
     "runtime.win7.System.Diagnostics.TraceSource/4.0.0-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "ZB/N8mqeHogDAmy8i6gLtGImUAO0KoduLI0vi4T1eKIloiXuEPcZmgPYmSKeh8Nb9I1IAqdYk1LTxmQN+cMISQ==",
+      "sha512": "SWRhj/cqDcpB2eHm7aeRx/UFsBDXFzb9gH5DhfffKWeFDj2QfRvdqtxERI/bzCrn1QeNB7Q6b3e80K5Aisr1QQ==",
       "files": [
         "lib/win8/_._",
         "lib/wp8/_._",
@@ -6400,7 +6400,7 @@
     "runtime.win7.System.Net.Sockets/4.1.0-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "70dL9Z3zg8wp65GcY6TfPZMZfR/mKZX4DMp2LT+zql+7Si77zBNNm4l+Ys8Jhjc+2ZQrHOhObDg0DLYPNVa6+Q==",
+      "sha512": "Ekmn+hRaoe9/0y6Qx/9d66t6wRm1dmeTRoPAfQx88nBYH3vbEIFAY1xT0Jxg2UsI6Rp4uRu4OuacGus6vsf2Pg==",
       "files": [
         "lib/DNXCore50/de/System.Net.Sockets.xml",
         "lib/DNXCore50/es/System.Net.Sockets.xml",
@@ -7059,7 +7059,7 @@
     "System.Diagnostics.TraceSource/4.0.0-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "3m+ELro6Ap9vQxAHQ/oEL4bu0j4O+v39s7IJrwg4IuaWU9ku6qr6Um/1AnP/uyK/6RIhAa6nQORX80pT+1zSvA==",
+      "sha512": "43qywT02IIcP3uRoIYndSa6tTalx2VIVulk7lTN++hFCpHvne8zrD7HNuBn8AnfgDWohEkO4kFbvCpiwbOSGhg==",
       "files": [
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
@@ -7784,7 +7784,7 @@
     "System.Net.Sockets/4.1.0-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "UALxIoOvd5QFGYEt+QIR7KivZbDO+OXVlHlmZ8iMwHTzdif+eYbWgLjpF2oa86OsMbOeVtTzOSFDn6xMTZ5YdQ==",
+      "sha512": "v+oQgsXYbwZal83dd5ryeSWYdXMydLqY90vc4CtAOPOcT8u8vC1W/tYou6GdR0HIKf6zt1PGFC5GkKi7Cj1HdA==",
       "files": [
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
@@ -8923,7 +8923,7 @@
     "System.Threading.Thread/4.0.0-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "YZ3FzKGch4QUtp7Uq+mtUBvVbSUpVKQyN0nvXDDReJ7hO8Q9Y6RtFXg5EL7x/Jy+ZIKmuXAHZsJoCXREwYX4Cw==",
+      "sha512": "P69kQVO3f9z2f7/vpSukvncQ8PJmxrNXl6w5mNb1FiS+HZES1MqKhDXz2yAiykqSPo+ND1qWISL6qD/hOrWeLw==",
       "files": [
         "lib/DNXCore50/System.Threading.Thread.dll",
         "lib/MonoAndroid10/_._",
@@ -8945,7 +8945,7 @@
     "System.Threading.ThreadPool/4.0.10-beta-23409": {
       "type": "package",
       "serviceable": true,
-      "sha512": "co1dfVV4h3XNEmwm3M4pTdXFsae3k7No01WiU0wePenoKpp4ovKFox9hJopQ+SepFadJlFBy8/nllFK7w93qqg==",
+      "sha512": "XeD7mDWCdLEWPGmX9zJ2XP/D9qe7g2JDxOcjPz9iOarHm/RriQWEAVLtOkQj/6WhosfYt2E8Q4okTB+mPNUhCA==",
       "files": [
         "lib/DNXCore50/System.Threading.ThreadPool.dll",
         "lib/MonoAndroid10/_._",
@@ -9218,8 +9218,8 @@
       "ImageProcessor >= 3.0.0-*",
       "Microsoft.NETCore >= 5.0.1-beta-23409",
       "Microsoft.NETCore.Platforms >= 1.0.1-beta-23409",
-      "xunit >= 2.1.0",
-      "xunit.runner.dnx >= 2.1.0-beta6-build191"
+      "xunit >= 2.1.0-*",
+      "xunit.runner.dnx >= 2.1.0-*"
     ],
     "DNXCore,Version=v5.0": [
       "Microsoft.CSharp >= 4.0.1-beta-23409",
