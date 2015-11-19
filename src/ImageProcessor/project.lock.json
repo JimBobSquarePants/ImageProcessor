@@ -144,7 +144,7 @@
           "lib/dotnet/Microsoft.VisualBasic.dll": {}
         }
       },
-      "StyleCop.Analyzers/1.0.0-beta015": {
+      "StyleCop.Analyzers/1.0.0-beta016": {
         "type": "package"
       },
       "System.AppContext/4.0.1-beta-23409": {
@@ -1071,7 +1071,7 @@
           "runtimes/win7-x86/native/clrcompression.dll": {}
         }
       },
-      "StyleCop.Analyzers/1.0.0-beta015": {
+      "StyleCop.Analyzers/1.0.0-beta016": {
         "type": "package"
       },
       "System.AppContext/4.0.1-beta-23409": {
@@ -2044,7 +2044,7 @@
           "runtimes/win7-x64/native/clrcompression.dll": {}
         }
       },
-      "StyleCop.Analyzers/1.0.0-beta015": {
+      "StyleCop.Analyzers/1.0.0-beta016": {
         "type": "package"
       },
       "System.AppContext/4.0.1-beta-23409": {
@@ -3174,17 +3174,15 @@
         "runtimes/win7-x86/native/clrcompression.dll"
       ]
     },
-    "StyleCop.Analyzers/1.0.0-beta015": {
+    "StyleCop.Analyzers/1.0.0-beta016": {
       "type": "package",
-      "sha512": "fkJr8G7IAfMP3mOIMn4ti43xJwXXbxUNKmUaoLWLnUE8LLC/BDI4RnoI7is2W6UT0rAa0LuUYXkaXaisW8Zspg==",
+      "sha512": "OUt2JLsSMTrgaci7Wj6rgcIbfuwXeuTfORMclQxWAi9VMk89yExmHn2iUt7lCv/f+cOYcxlmeo2RyvbWPdVhLg==",
       "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
         "analyzers/dotnet/cs/Newtonsoft.Json.dll",
         "analyzers/dotnet/cs/StyleCop.Analyzers.CodeFixes.dll",
         "analyzers/dotnet/cs/StyleCop.Analyzers.dll",
-        "build/StyleCop.Analyzers.targets",
-        "package/services/metadata/core-properties/a994a78fe9a646d8abde5ac2e45d152e.psmdcp",
+        "StyleCop.Analyzers.1.0.0-beta016.nupkg",
+        "StyleCop.Analyzers.1.0.0-beta016.nupkg.sha512",
         "StyleCop.Analyzers.nuspec",
         "tools/install.ps1",
         "tools/uninstall.ps1"
@@ -5061,7 +5059,7 @@
       "System.Runtime.Extensions >= 4.0.10",
       "System.Reflection >= 4.0.10",
       "System.IO >= 4.0.10",
-      "StyleCop.Analyzers >= 1.0.0-beta015",
+      "StyleCop.Analyzers >= 1.0.0-beta016",
       "Microsoft.NETCore >= 5.0.1-beta-23409",
       "Microsoft.NETCore.Platforms >= 1.0.1-beta-23409"
     ],
