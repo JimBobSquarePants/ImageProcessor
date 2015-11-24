@@ -8518,7 +8518,7 @@
     "System.Security.Cryptography.Algorithms/4.0.0-beta-23225": {
       "type": "package",
       "serviceable": true,
-      "sha512": "BvUX0qHC9DKP6kjhS6EvHFKSXiiTxPlNvni44x+QAKWsBPWZQLUJVNyiORdRZEqg1zKKV4UI3fo0WTgBIHAPhw==",
+      "sha512": "GjeU8uLxWigoEEtfD2aBtPLmskJNnanmUwNSNKdHHzIuGr69hwmSsaVA1IDJSQ1dX5WQY32v1O1MROCfEq/Seg==",
       "files": [
         "lib/DNXCore50/System.Security.Cryptography.Algorithms.dll",
         "lib/MonoAndroid10/_._",
@@ -8595,7 +8595,7 @@
     "System.Security.Cryptography.Primitives/4.0.0-beta-23225": {
       "type": "package",
       "serviceable": true,
-      "sha512": "+d/qgU+N70qzg5oE5x/7NC4Y6LPwGVFbcQRl4MggXJrjWtO/dbybLTpMr3hj07nl17Fj7GxGjpwRZaIGnpux/w==",
+      "sha512": "acOPCfkrkOFr/NAnA+hIOnY8yQZr94JzJ02heQDIqE0sFKyBITLbgQBoO+gTBVRxGr1o+oiYbFnXY0Q30+SACg==",
       "files": [
         "lib/DNXCore50/System.Security.Cryptography.Primitives.dll",
         "lib/MonoAndroid10/_._",
