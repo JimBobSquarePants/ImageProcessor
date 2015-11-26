@@ -174,13 +174,6 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(Stream stream)
         {
-            ISupportedImageFormat format = FormatUtilities.GetFormat(stream);
-
-            if (format == null)
-            {
-                throw new ImageFormatException("Input stream is not a supported format.");
-            }
-
             MemoryStream memoryStream = new MemoryStream();
 
             // Copy the stream. Disposal of the input stream is the responsibility  
@@ -193,7 +186,11 @@ namespace ImageProcessor
                 stream.Position = 0;
             }
 
-            memoryStream.Position = 0;
+            ISupportedImageFormat format = FormatUtilities.GetFormat(memoryStream);
+            if (format == null)
+            {
+                throw new ImageFormatException("Input stream is not a supported format.");
+            }
 
             // Set our image as the memory stream value.
             this.Image = format.Load(memoryStream);
