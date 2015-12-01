@@ -371,29 +371,37 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 // Write the blob storage directly to the stream
                 request.Method = "GET";
 
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                TryFiveTimes(() =>
                 {
-                    Stream cachedStream = response.GetResponseStream();
-
-                    if (cachedStream != null)
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                     {
-                        HttpResponse contextResponse = context.Response;
-                        cachedStream.CopyTo(contextResponse.OutputStream);
-                        ImageProcessingModule.SetHeaders(context, this.mimeType, null, this.MaxDays, response.StatusCode);
+                        Stream cachedStream = response.GetResponseStream();
+
+                        if (cachedStream != null)
+                        {
+                            HttpResponse contextResponse = context.Response;
+                            cachedStream.CopyTo(contextResponse.OutputStream);
+                            ImageProcessingModule.SetHeaders(context, this.mimeType, null, this.MaxDays, response.StatusCode);
+                        }
                     }
-                }
+                });
+
             }
             else
             {
                 // Redirect the request to the blob URL
                 request.Method = "HEAD";
 
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                TryFiveTimes(() =>
                 {
-                    HttpStatusCode responseCode = response.StatusCode;
-                    ImageProcessingModule.AddCorsRequestHeaders(context);
-                    context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
-                }
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    {
+                        HttpStatusCode responseCode = response.StatusCode;
+                        ImageProcessingModule.AddCorsRequestHeaders(context);
+                        context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
+                    }
+                });
+
             }
         }
 
@@ -411,5 +419,29 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
             return container;
         }
+
+        /// <summary>
+        /// Trys to execute a delegate action five times
+        /// </summary>
+        /// <param name="delegateAction">The delegate to be executed</param>
+        private static void TryFiveTimes(Action delegateAction)
+        {
+            for (var retry = 0; ; retry++)
+            {
+                try
+                {
+                    delegateAction();
+                    return;
+                }
+                catch (Exception)
+                {
+                    if (retry >= 5)
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
+
     }
 }
