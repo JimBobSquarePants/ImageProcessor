@@ -153,7 +153,7 @@ namespace ImageProcessor.Web.PostProcessor
                     return string.Format(CultureInfo.CurrentCulture, "/c jpegtran -copy all -optimize \"{0}\" \"{0}\"", sourceFile);
 
                 case ".gif":
-                    return string.Format(CultureInfo.CurrentCulture, "/c gifsicle --crop-transparency --no-comments --no-extensions --no-names --optimize=3 --batch \"{0}\" --output=\"{0}\"", sourceFile);
+                    return string.Format(CultureInfo.CurrentCulture, "/c gifsicle --no-comments --no-extensions --no-names --optimize=3 --batch \"{0}\" --output=\"{0}\"", sourceFile);
             }
 
             return null;
