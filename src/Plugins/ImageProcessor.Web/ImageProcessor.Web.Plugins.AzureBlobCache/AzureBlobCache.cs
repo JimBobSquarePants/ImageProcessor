@@ -421,7 +421,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         }
 
         /// <summary>
-        /// Trys to execute a delegate action five times
+        /// Tries to execute a delegate action five times.
         /// </summary>
         /// <param name="delegateAction">The delegate to be executed</param>
         private static void TryFiveTimes(Action delegateAction)
