@@ -91,19 +91,27 @@ namespace ImageProcessor.Web.PostProcessor
                 return tcs.Task;
             }
 
-            Process process = new Process
+            try
             {
-                StartInfo = start,
-                EnableRaisingEvents = true
-            };
+                Process process = new Process
+                {
+                    StartInfo = start,
+                    EnableRaisingEvents = true
+                };
 
-            process.Exited += (sender, args) =>
+                process.Exited += (sender, args) =>
+                {
+                    tcs.SetResult(new PostProcessingResultEventArgs(sourceFile, length));
+                    process.Dispose();
+                };
+
+                process.Start();
+            }
+            catch (System.ComponentModel.Win32Exception)
             {
-                tcs.SetResult(new PostProcessingResultEventArgs(sourceFile, length));
-                process.Dispose();
-            };
-
-            process.Start();
+                // Some security policies don't allow execution of programs in this way
+                tcs.SetResult(null);
+            }
 
             return tcs.Task;
         }
@@ -155,7 +163,6 @@ namespace ImageProcessor.Web.PostProcessor
                 case ".gif":
                     return string.Format(CultureInfo.CurrentCulture, "/c gifsicle --no-comments --no-extensions --no-names --optimize=3 --batch \"{0}\" --output=\"{0}\"", sourceFile);
             }
-
             return null;
         }
     }
