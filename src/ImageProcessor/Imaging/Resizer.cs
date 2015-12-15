@@ -230,14 +230,16 @@ namespace ImageProcessor.Imaging
                 // Change the destination rectangle coordinates if box padding.
                 if (resizeMode == ResizeMode.BoxPad)
                 {
-                    height = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
-                    width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
+                    int boxPadHeight = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
+                    int boxPadWidth = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
 
                     // Only calculate if upscaling. 
-                    if (sourceWidth < width && sourceHeight < height)
+                    if (sourceWidth < boxPadWidth && sourceHeight < boxPadHeight)
                     {
                         destinationWidth = sourceWidth;
                         destinationHeight = sourceHeight;
+                        width = boxPadWidth;
+                        height = boxPadHeight;
 
                         upscale = true;
 
