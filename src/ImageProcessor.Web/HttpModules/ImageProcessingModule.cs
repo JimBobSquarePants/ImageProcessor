@@ -502,7 +502,8 @@ namespace ImageProcessor.Web.HttpModules
                 // Execute the handler which can change the querystring 
                 queryString = this.CheckQuerystringHandler(context, queryString, request.Unvalidated.RawUrl);
 
-                if (string.IsNullOrWhiteSpace(requestPath))
+                // Break out if we don't meet critera.
+                if (string.IsNullOrWhiteSpace(requestPath) || string.IsNullOrWhiteSpace(queryString))
                 {
                     return;
                 }
