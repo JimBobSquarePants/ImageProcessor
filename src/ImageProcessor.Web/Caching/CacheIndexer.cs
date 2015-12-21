@@ -64,8 +64,8 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public static CachedImage Add(CachedImage cachedImage)
         {
-            // Add the CachedImage with a sliding expiration of 10 minutes.
-            CacheItemPolicy policy = new CacheItemPolicy { SlidingExpiration = new TimeSpan(0, 10, 0) };
+            // Add the CachedImage with a sliding expiration of 1 minutes.
+            CacheItemPolicy policy = new CacheItemPolicy { SlidingExpiration = new TimeSpan(0, 1, 0) };
 
             if (new Uri(cachedImage.Path).IsFile)
             {
