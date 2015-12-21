@@ -407,7 +407,6 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
                     }
                 });
-
             }
         }
 
@@ -448,6 +447,5 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 }
             }
         }
-
     }
 }
