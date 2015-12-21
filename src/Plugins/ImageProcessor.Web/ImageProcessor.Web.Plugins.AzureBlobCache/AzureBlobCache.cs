@@ -381,11 +381,17 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         {
                             HttpResponse contextResponse = context.Response;
                             cachedStream.CopyTo(contextResponse.OutputStream);
-                            ImageProcessingModule.SetHeaders(context, this.mimeType, null, this.MaxDays, response.StatusCode);
+
+                            // Mimetype can be null when returning from the cache.
+                            ImageProcessingModule.SetHeaders(
+                                context,
+                                string.IsNullOrWhiteSpace(this.mimeType) ? contextResponse.ContentType : this.mimeType,
+                                null,
+                                this.MaxDays,
+                                response.StatusCode);
                         }
                     }
                 });
-
             }
             else
             {
