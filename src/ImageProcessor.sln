@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1E656CDE-124D-4FAF-837C-0EF1E192D418}"
 	ProjectSection(SolutionItems) = preProject
@@ -33,6 +33,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.AzureBlobCache", "Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AzureBlobCache\ImageProcessor.Web.Plugins.AzureBlobCache.csproj", "{3C805E4C-D679-43F8-8C43-8909CDB4D4D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.AmazonS3Cache", "Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AmazonS3Cache\ImageProcessor.Web.Plugins.AmazonS3Cache.csproj", "{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.Plugins.PostProcessor", "Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.PostProcessor\ImageProcessor.Web.Plugins.PostProcessor.csproj", "{6284F578-6B2A-4DBC-B738-441249C45CB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -197,6 +199,24 @@ Global
 		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B}.Release|x86.ActiveCfg = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.All|Any CPU.ActiveCfg = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.All|Any CPU.Build.0 = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.All|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.All|Mixed Platforms.Build.0 = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.All|x86.ActiveCfg = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.All|x86.Build.0 = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Debug|x86.Build.0 = Debug|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Release|x86.ActiveCfg = Release|Any CPU
+		{6284F578-6B2A-4DBC-B738-441249C45CB2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -210,6 +230,7 @@ Global
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7} = {B5217BED-B0B7-408E-81B7-877DE2BF9036}
 		{3C805E4C-D679-43F8-8C43-8909CDB4D4D7} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
 		{06B29B8B-41B2-40F0-A2BE-99156FF5F68B} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
+		{6284F578-6B2A-4DBC-B738-441249C45CB2} = {5D12E196-FB7A-4D97-B156-56901EF8084D}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = ImageProcessorConsole\ImageProcessorConsole.csproj
