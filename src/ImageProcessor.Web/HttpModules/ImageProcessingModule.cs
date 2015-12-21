@@ -523,8 +523,26 @@ namespace ImageProcessor.Web.HttpModules
                         bool gamma = fixGamma != null && fixGamma.Value;
                         using (ImageFactory imageFactory = new ImageFactory(exif, gamma))
                         {
-                            byte[] imageBuffer = await currentService.GetImage(resourcePath);
+                            byte[] imageBuffer = null;
                             string mimeType;
+
+                            try
+                            {
+                                imageBuffer = await currentService.GetImage(resourcePath);
+                            }
+                            catch (HttpException ex)
+                            {
+                                // We want 404's to be handled by IIS so that other handlers/modules can still run.
+                                if (ex.GetHttpCode() == (int)HttpStatusCode.NotFound)
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (imageBuffer == null)
+                            {
+                                return;
+                            }
 
                             using (MemoryStream inStream = new MemoryStream(imageBuffer))
                             {
