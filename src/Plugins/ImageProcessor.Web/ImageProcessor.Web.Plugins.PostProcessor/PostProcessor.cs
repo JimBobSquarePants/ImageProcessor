@@ -9,13 +9,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace ImageProcessor.Web.PostProcessor
+namespace ImageProcessor.Web.Plugins.PostProcessor
 {
     using System;
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
-    using System.Threading.Tasks;
+    using System.Threading;
 
     /// <summary>
     /// The image postprocessor.
@@ -24,14 +24,14 @@ namespace ImageProcessor.Web.PostProcessor
     internal static class PostProcessor
     {
         /// <summary>
-        /// Post processes the image asynchronously.
+        /// Post processes the image.
         /// </summary>
         /// <param name="stream">The source image stream.</param>
         /// <param name="extension">The image extension.</param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        /// The <see cref="MemoryStream"/>.
         /// </returns>
-        public static async Task<MemoryStream> PostProcessImageAsync(MemoryStream stream, string extension)
+        public static MemoryStream PostProcessImage(MemoryStream stream, string extension)
         {
             // Create a source temporary file with the correct extension.
             long length = stream.Length;
@@ -42,10 +42,10 @@ namespace ImageProcessor.Web.PostProcessor
             // Save the input stream to a temp file for post processing.
             using (FileStream fileStream = File.Create(sourceFile))
             {
-                await stream.CopyToAsync(fileStream);
+                stream.CopyTo(fileStream);
             }
 
-            PostProcessingResultEventArgs result = await RunProcess(sourceFile, length);
+            PostProcessingResultEventArgs result = RunProcess(sourceFile, length);
 
             if (result != null && result.Saving > 0)
             {
@@ -53,7 +53,7 @@ namespace ImageProcessor.Web.PostProcessor
                 {
                     // Replace stream contents.
                     stream.SetLength(0);
-                    await fileStream.CopyToAsync(stream);
+                    fileStream.CopyTo(stream);
                 }
             }
 
@@ -73,9 +73,9 @@ namespace ImageProcessor.Web.PostProcessor
         /// <returns>
         /// The <see cref="Task{PostProcessingResultEventArgs}"/> containing post-processing information.
         /// </returns>
-        private static Task<PostProcessingResultEventArgs> RunProcess(string sourceFile, long length)
+        private static PostProcessingResultEventArgs RunProcess(string sourceFile, long length)
         {
-            TaskCompletionSource<PostProcessingResultEventArgs> tcs = new TaskCompletionSource<PostProcessingResultEventArgs>();
+            PostProcessingResultEventArgs result = null;
             ProcessStartInfo start = new ProcessStartInfo("cmd")
             {
                 WindowStyle = ProcessWindowStyle.Hidden,
@@ -87,9 +87,11 @@ namespace ImageProcessor.Web.PostProcessor
 
             if (string.IsNullOrWhiteSpace(start.Arguments))
             {
-                tcs.SetResult(null);
-                return tcs.Task;
+                return null;
             }
+
+            int elapsedTime = 0;
+            bool eventHandled = false;
 
             try
             {
@@ -101,8 +103,9 @@ namespace ImageProcessor.Web.PostProcessor
 
                 process.Exited += (sender, args) =>
                 {
-                    tcs.SetResult(new PostProcessingResultEventArgs(sourceFile, length));
+                    result = new PostProcessingResultEventArgs(sourceFile, length);
                     process.Dispose();
+                    eventHandled = true;
                 };
 
                 process.Start();
@@ -110,10 +113,23 @@ namespace ImageProcessor.Web.PostProcessor
             catch (System.ComponentModel.Win32Exception)
             {
                 // Some security policies don't allow execution of programs in this way
-                tcs.SetResult(null);
+                return null;
             }
 
-            return tcs.Task;
+            // Wait for Exited event, but not more than 5 seconds.
+            const int SleepAmount = 100;
+            while (!eventHandled)
+            {
+                elapsedTime += SleepAmount;
+                if (elapsedTime > 5000)
+                {
+                    break;
+                }
+
+                Thread.Sleep(SleepAmount);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -163,6 +179,7 @@ namespace ImageProcessor.Web.PostProcessor
                 case ".gif":
                     return string.Format(CultureInfo.CurrentCulture, "/c gifsicle --no-comments --no-extensions --no-names --optimize=3 --batch \"{0}\" --output=\"{0}\"", sourceFile);
             }
+
             return null;
         }
     }
