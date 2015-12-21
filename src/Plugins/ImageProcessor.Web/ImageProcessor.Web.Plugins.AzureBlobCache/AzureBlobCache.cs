@@ -432,7 +432,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <param name="delegateAction">The delegate to be executed</param>
         private static void TryFiveTimes(Action delegateAction)
         {
-            for (var retry = 0; ; retry++)
+            for (int retry = 0;; retry++)
             {
                 try
                 {
