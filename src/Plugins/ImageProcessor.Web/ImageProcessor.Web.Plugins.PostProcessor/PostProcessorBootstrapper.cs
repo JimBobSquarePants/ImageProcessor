@@ -9,7 +9,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace ImageProcessor.Web.PostProcessor
+namespace ImageProcessor.Web.Plugins.PostProcessor
 {
     using System;
     using System.Collections.Generic;
@@ -89,11 +89,11 @@ namespace ImageProcessor.Web.PostProcessor
             // Get the resources and copy them across.
             Dictionary<string, string> resources = new Dictionary<string, string>
             {
-                { "gifsicle.exe", "ImageProcessor.Web.PostProcessor.Resources.Unmanaged." + folder + ".gifsicle.exe" },
-                { "jpegtran.exe", "ImageProcessor.Web.PostProcessor.Resources.Unmanaged.x86.jpegtran.exe" },
-                { "optipng.exe", "ImageProcessor.Web.PostProcessor.Resources.Unmanaged.x86.pngquant.exe" },
-                { "pngout.exe", "ImageProcessor.Web.PostProcessor.Resources.Unmanaged.x86.pngout.exe" },
-                { "png.cmd", "ImageProcessor.Web.PostProcessor.Resources.Unmanaged.x86.png.cmd" }
+                { "gifsicle.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged." + folder + ".gifsicle.exe" },
+                { "jpegtran.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.jpegtran.exe" },
+                { "optipng.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngquant.exe" },
+                { "pngout.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngout.exe" },
+                { "png.cmd", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.png.cmd" }
             };
 
             // Write the files out to the bin folder.
