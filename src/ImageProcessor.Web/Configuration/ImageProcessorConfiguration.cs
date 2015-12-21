@@ -130,18 +130,6 @@ namespace ImageProcessor.Web.Configuration
                 return GetImageProcessingSection().FixGamma;
             }
         }
-
-        /// <summary>
-        /// Gets a value indicating whether to use post processing optimization techniques
-        /// on the resultant images to further reduce file size.
-        /// </summary>
-        public bool PostProcess
-        {
-            get
-            {
-                return GetImageProcessingSection().PostProcess;
-            }
-        }
         #endregion
 
         #region Methods
