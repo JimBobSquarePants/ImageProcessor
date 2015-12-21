@@ -28,6 +28,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -136,6 +137,7 @@
     </Content>
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Web.config">
       <SubType>Designer</SubType>
@@ -171,6 +173,10 @@
     <ProjectReference Include="..\..\ImageProcessor\ImageProcessor.csproj">
       <Project>{3b5dd734-fb7a-487d-8ce6-55e7af9aea7e}</Project>
       <Name>ImageProcessor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.PostProcessor\ImageProcessor.Web.Plugins.PostProcessor.csproj">
+      <Project>{6284f578-6b2a-4dbc-b738-441249c45cb2}</Project>
+      <Name>ImageProcessor.Web.Plugins.PostProcessor</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Plugins\ImageProcessor\ImageProcessor.Plugins.WebP\ImageProcessor.Plugins.WebP.csproj">
       <Project>{2cf69699-959a-44dc-a281-4e2596c25043}</Project>
