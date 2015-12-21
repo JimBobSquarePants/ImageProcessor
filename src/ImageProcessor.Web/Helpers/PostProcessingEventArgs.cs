@@ -11,6 +11,7 @@
 namespace ImageProcessor.Web.Helpers
 {
     using System;
+    using System.IO;
     using System.Web;
 
     /// <summary>
@@ -24,8 +25,13 @@ namespace ImageProcessor.Web.Helpers
         public HttpContext Context { get; set; }
 
         /// <summary>
-        /// Gets or sets the cached image path.
+        /// Gets or sets the image stream.
         /// </summary>
-        public string CachedImagePath { get; set; }
+        public MemoryStream ImageStream { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image extension.
+        /// </summary>
+        public string ImageExtension { get; set; }
     }
 }
