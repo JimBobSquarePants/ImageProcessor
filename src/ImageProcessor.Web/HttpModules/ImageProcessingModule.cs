@@ -21,6 +21,7 @@ namespace ImageProcessor.Web.HttpModules
     using System.Web;
     using System.Web.Hosting;
 
+    using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Configuration;
     using ImageProcessor.Web.Extensions;
@@ -556,8 +557,16 @@ namespace ImageProcessor.Web.HttpModules
                                 // Process the Image
                                 MemoryStream outStream = new MemoryStream();
 
-                                imageFactory.Load(inStream).AutoProcess(queryString).Save(outStream);
-                                mimeType = imageFactory.CurrentImageFormat.MimeType;
+                                if (!string.IsNullOrWhiteSpace(queryString))
+                                {
+                                    imageFactory.Load(inStream).AutoProcess(queryString).Save(outStream);
+                                    mimeType = imageFactory.CurrentImageFormat.MimeType;
+                                }
+                                else
+                                {
+                                    await inStream.CopyToAsync(outStream);
+                                    mimeType = FormatUtilities.GetFormat(outStream).MimeType;
+                                }
 
                                 // Fire the post processing event.
                                 EventHandler<PostProcessingEventArgs> handler = OnPostProcessing;
