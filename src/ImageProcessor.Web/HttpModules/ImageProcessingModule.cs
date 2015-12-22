@@ -75,6 +75,12 @@ namespace ImageProcessor.Web.HttpModules
         private static bool? fixGamma;
 
         /// <summary>
+        /// Whether to to intercept all image requests including ones
+        /// without querystring parameters.
+        /// </summary>
+        private static bool? interceptAllRequests;
+
+        /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
         /// </summary>
         /// <value><see langword="true"/> if this instance has been disposed; otherwise, <see langword="false"/>.</value>
@@ -147,12 +153,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <param name="dependencyPaths">The dependency path for the cache dependency.</param>
         /// <param name="maxDays">The maximum number of days to store the image in the browser cache.</param>
         /// <param name="statusCode">An optional status code to send to the response.</param>
-        public static void SetHeaders(
-            HttpContext context,
-            string responseType,
-            IEnumerable<string> dependencyPaths,
-            int maxDays,
-            HttpStatusCode? statusCode = null)
+        public static void SetHeaders(HttpContext context, string responseType, IEnumerable<string> dependencyPaths, int maxDays, HttpStatusCode? statusCode = null)
         {
             HttpResponse response = context.Response;
 
@@ -266,6 +267,11 @@ namespace ImageProcessor.Web.HttpModules
             if (fixGamma == null)
             {
                 fixGamma = ImageProcessorConfiguration.Instance.FixGamma;
+            }
+
+            if (interceptAllRequests == null)
+            {
+                interceptAllRequests = ImageProcessorConfiguration.Instance.InterceptAllRequests;
             }
 
             EventHandlerTaskAsyncHelper postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
@@ -477,7 +483,8 @@ namespace ImageProcessor.Web.HttpModules
                 queryString = this.CheckQuerystringHandler(context, queryString, request.Unvalidated.RawUrl);
 
                 // Break out if we don't meet critera.
-                if (string.IsNullOrWhiteSpace(requestPath) || string.IsNullOrWhiteSpace(queryString))
+                bool interceptAll = interceptAllRequests != null && interceptAllRequests.Value;
+                if (string.IsNullOrWhiteSpace(requestPath) || (!interceptAll && string.IsNullOrWhiteSpace(queryString)))
                 {
                     return;
                 }

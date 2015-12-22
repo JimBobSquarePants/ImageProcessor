@@ -130,6 +130,18 @@ namespace ImageProcessor.Web.Configuration
                 return GetImageProcessingSection().FixGamma;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether whether to intercept all image requests including ones
+        /// without querystring parameters.
+        /// </summary>
+        public bool InterceptAllRequests
+        {
+            get
+            {
+                return GetImageProcessingSection().InterceptAllRequests;
+            }
+        }
         #endregion
 
         #region Methods
