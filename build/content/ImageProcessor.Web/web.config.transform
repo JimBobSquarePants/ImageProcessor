@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0"?>
 <configuration>
   <system.web>
+    <httpRuntime fcnMode="Single" />
     <httpModules>
       <add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/>
     </httpModules>
