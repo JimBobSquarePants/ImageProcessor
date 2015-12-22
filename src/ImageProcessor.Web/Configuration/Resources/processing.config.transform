@@ -1,4 +1,4 @@
-<processing preserveExifMetaData="false" fixGamma="false">
+<processing preserveExifMetaData="false" fixGamma="false" interceptAllRequests="false">
   <presets>
   </presets>
   <plugins>
