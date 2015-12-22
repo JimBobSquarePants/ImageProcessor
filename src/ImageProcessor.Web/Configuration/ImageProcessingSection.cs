@@ -45,6 +45,17 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to intercept all image requests including ones
+        /// without querystring parameters.
+        /// </summary>
+        [ConfigurationProperty("interceptAllRequests", IsRequired = false, DefaultValue = false)]
+        public bool InterceptAllRequests
+        {
+            get { return (bool)this["interceptAllRequests"]; }
+            set { this["interceptAllRequests"] = value; }
+        }
+
+        /// <summary>
         /// Gets the <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.PresetElementCollection"/>.
         /// </summary>
         /// <value>
