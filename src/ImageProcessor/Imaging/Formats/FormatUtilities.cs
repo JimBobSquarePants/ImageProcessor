@@ -96,42 +96,6 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// Returns the color count from the palette of the given image.
-        /// </summary>
-        /// <param name="image">
-        /// The <see cref="System.Drawing.Image"/> to get the colors from.
-        /// </param>
-        /// <returns>
-        /// The <see cref="int"/> representing the color count.
-        /// </returns>
-        public static int GetColorCount(Image image)
-        {
-            ConcurrentDictionary<Color, Color> colors = new ConcurrentDictionary<Color, Color>();
-            int width = image.Width;
-            int height = image.Height;
-
-            using (FastBitmap fastBitmap = new FastBitmap(image))
-            {
-                Parallel.For(
-                    0,
-                    height,
-                    y =>
-                    {
-                        for (int x = 0; x < width; x++)
-                        {
-                            // ReSharper disable once AccessToDisposedClosure
-                            Color color = fastBitmap.GetPixel(x, y);
-                            colors.GetOrAdd(color, color);
-                        }
-                    });
-            }
-
-            int count = colors.Count;
-            colors.Clear();
-            return count;
-        }
-
-        /// <summary>
         /// Returns a value indicating whether the given image is animated.
         /// </summary>
         /// <param name="image">

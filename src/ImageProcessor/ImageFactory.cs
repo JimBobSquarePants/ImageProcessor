@@ -48,8 +48,7 @@ namespace ImageProcessor
         /// <summary>
         /// The backup collection of property items containing EXIF metadata.
         /// </summary>
-        private ConcurrentDictionary<int, PropertyItem> backupExifPropertyItems
-            = new ConcurrentDictionary<int, PropertyItem>();
+        private ConcurrentDictionary<int, PropertyItem> backupExifPropertyItems;
 
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -202,12 +201,6 @@ namespace ImageProcessor
             format.Quality = DefaultQuality;
             format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
 
-            IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
-            if (imageFormat != null)
-            {
-                imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
-            }
-
             this.backupFormat = format;
             this.CurrentImageFormat = format;
 
@@ -272,12 +265,6 @@ namespace ImageProcessor
                     format.Quality = DefaultQuality;
                     format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
 
-                    IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
-                    if (imageFormat != null)
-                    {
-                        imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
-                    }
-
                     this.backupFormat = format;
                     this.CurrentImageFormat = format;
 
@@ -334,12 +321,6 @@ namespace ImageProcessor
             // Set the other properties.
             format.Quality = DefaultQuality;
             format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
-
-            IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
-            if (imageFormat != null)
-            {
-                imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
-            }
 
             this.backupFormat = format;
             this.CurrentImageFormat = format;
