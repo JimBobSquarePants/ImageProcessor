@@ -20,7 +20,7 @@ namespace ImageProcessor.Imaging.Quantizers
     /// Encapsulates methods to calculate the color palette of an image.
     /// <see href="http://msdn.microsoft.com/en-us/library/aa479306.aspx"/>
     /// </summary>
-    public unsafe abstract class Quantizer : IQuantizer
+    public abstract unsafe class Quantizer : IQuantizer
     {
         /// <summary>
         /// Flag used to indicate whether a single pass or two passes are needed for quantization.
@@ -207,6 +207,7 @@ namespace ImageProcessor.Imaging.Quantizers
                         // rather than calculating it again. This is an inexpensive optimization.
                         if (*previousPixel != *sourcePixel)
                         {
+                            var x = (Color32*)sourcePixel;
                             // Quantize the pixel
                             pixelValue = this.QuantizePixel((Color32*)sourcePixel);
 

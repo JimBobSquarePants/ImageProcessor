@@ -36,6 +36,11 @@ namespace ImageProcessor.Imaging.Quantizers
         private readonly int maxColors;
 
         /// <summary>
+        /// The transparency threshold.
+        /// </summary>
+        private byte threshold = 128;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OctreeQuantizer"/> class.
         /// </summary>
         /// <remarks>
@@ -83,6 +88,21 @@ namespace ImageProcessor.Imaging.Quantizers
         }
 
         /// <summary>
+        /// Gets or sets the transparency threshold (0- 255)
+        /// </summary>
+        public byte Threshold
+        {
+            get
+            {
+                return this.threshold;
+            }
+            set
+            {
+                this.threshold = value;
+            }
+        }
+
+        /// <summary>
         /// Process the pixel in the first pass of the algorithm
         /// </summary>
         /// <param name="pixel">
@@ -113,7 +133,7 @@ namespace ImageProcessor.Imaging.Quantizers
             byte paletteIndex = (byte)this.maxColors;
 
             // Get the palette index if this non-transparent
-            if (pixel->A > 0)
+            if (pixel->A > this.threshold)
             {
                 paletteIndex = (byte)this.octree.GetPaletteIndex(pixel);
             }
