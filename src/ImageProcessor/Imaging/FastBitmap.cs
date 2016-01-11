@@ -279,7 +279,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         private Color32* this[int x, int y]
         {
-            get { return (Color32*)(this.pixelBase + (y * this.bytesInARow) + (x * this.pixelSize)); }
+            get { return (Color32*)(this.pixelBase + (y * this.bytesInARow) + (x * 4)); }
         }
 
         /// <summary>
@@ -531,7 +531,7 @@ namespace ImageProcessor.Imaging
             }
 
             // Lock the bitmap
-            this.bitmapData = this.bitmap.LockBits(bounds, ImageLockMode.ReadWrite, PixelFormat.Format32bppPArgb);
+            this.bitmapData = this.bitmap.LockBits(bounds, ImageLockMode.ReadWrite, this.bitmap.PixelFormat);
 
             // Set the value to the first scan line
             this.pixelBase = (byte*)this.bitmapData.Scan0.ToPointer();
