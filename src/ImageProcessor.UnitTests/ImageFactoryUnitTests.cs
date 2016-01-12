@@ -651,7 +651,7 @@ namespace ImageProcessor.UnitTests
         public void ResolutionIsApplied()
         {
             int i = 0;
-            byte[] bytes = new ExifBitConverter().IsLittleEndian()
+            byte[] bytes = new ExifBitConverter(new ComputerArchitectureInfo()).IsLittleEndian()
                 ? new byte[] { 144, 1, 0, 0, 1, 0, 0, 0 }
                 : new byte[] { 0, 0, 0, 1, 0, 0, 1, 144 };
 
@@ -791,6 +791,20 @@ namespace ImageProcessor.UnitTests
             Size minSize = new Size(300, 300);
             ResizeLayer minLayer = new ResizeLayer(minSize, ResizeMode.Min);
 
+            Size padSingleDimensionWidthSize = new Size(400, 0);
+            // ReSharper disable once RedundantArgumentDefaultValue
+            ResizeLayer paddedSingleDimensionWidthLayer = new ResizeLayer(padSingleDimensionWidthSize, ResizeMode.Pad);
+
+            Size padSingleDimensionHeightSize = new Size(0, 300);
+            // ReSharper disable once RedundantArgumentDefaultValue
+            ResizeLayer paddedSingleDimensionHeightLayer = new ResizeLayer(padSingleDimensionHeightSize, ResizeMode.Pad);
+
+            Size boxPadSingleDimensionWidthSize = new Size(400, 0);
+            ResizeLayer boxPadSingleDimensionWidthLayer = new ResizeLayer(boxPadSingleDimensionWidthSize, ResizeMode.BoxPad);
+
+            Size boxPadSingleDimensionHeightSize = new Size(0, 300);
+            ResizeLayer boxPadSingleDimensionHeightLayer = new ResizeLayer(boxPadSingleDimensionHeightSize, ResizeMode.BoxPad);
+
             int i = 0;
             foreach (ImageFactory imageFactory in this.ListInputImages())
             {
@@ -817,6 +831,26 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Resize(minLayer);
                 Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
                 imageFactory.Save("./output/resize-crop-" + i + ".jpg");
+
+                // Check padding with only a single dimension specified (width)
+                imageFactory.Resize(paddedSingleDimensionWidthLayer);
+                Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
+                imageFactory.Save("./output/resize-padsingledimension-width-" + i + ".jpg");
+
+                // Check padding with only a single dimension specified (height)
+                imageFactory.Resize(paddedSingleDimensionHeightLayer);
+                Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
+                imageFactory.Save("./output/resize-padsingledimension-height-" + i + ".jpg");
+
+                // Check box padding with only a single dimension specified (width)
+                imageFactory.Resize(boxPadSingleDimensionWidthLayer);
+                Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
+                imageFactory.Save("./output/resize-boxpadsingledimension-width-" + i + ".jpg");
+
+                // Check box padding with only a single dimension specified (height)
+                imageFactory.Resize(boxPadSingleDimensionHeightLayer);
+                Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
+                imageFactory.Save("./output/resize-boxpadsingledimension-height-" + i + ".jpg");
 
                 imageFactory.Reset();
                 AssertionHelpers.AssertImagesAreIdentical(original, imageFactory.Image, "because the image should be reset");

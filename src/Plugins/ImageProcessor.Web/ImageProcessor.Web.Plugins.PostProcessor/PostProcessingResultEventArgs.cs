@@ -9,7 +9,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace ImageProcessor.Web.PostProcessor
+namespace ImageProcessor.Web.Plugins.PostProcessor
 {
     using System;
     using System.IO;

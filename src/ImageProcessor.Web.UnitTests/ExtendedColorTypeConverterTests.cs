@@ -35,8 +35,8 @@ namespace ImageProcessor.Web.UnitTests
         [TestCase("blue")]
         public void ExtendedColorTypeConverterParsesColors(string input)
         {
-            ExtendedColorTypeConverter converter = new ExtendedColorTypeConverter();
-            object convertFrom = converter.ConvertFrom(null, null, input);
+            ColorTypeConverter converter = new ColorTypeConverter();
+            object convertFrom = converter.ConvertFrom(null, input, typeof(Color));
             if (convertFrom != null)
             {
                 Color color = (Color)convertFrom;

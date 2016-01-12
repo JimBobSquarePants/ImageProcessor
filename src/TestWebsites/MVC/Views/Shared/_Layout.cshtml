@@ -1,4 +1,49 @@
-﻿<!DOCTYPE html>
+﻿@using System.Collections
+@using System.Reflection;
+@using System.Web;
+@using System.Collections;
+
+@model dynamic
+@{
+    var fileChangesMonitor = typeof(HttpRuntime)
+        .GetProperty("FileChangesMonitor", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)
+        .GetValue(null, null);
+
+    var fcnVal = fileChangesMonitor.GetType()
+        .GetField("_FCNMode", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(fileChangesMonitor);
+
+    var dirs = (Hashtable)fileChangesMonitor.GetType()
+        .GetField("_dirs", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(fileChangesMonitor);
+
+    var dirMonAppPathInternal = fileChangesMonitor.GetType()
+        .GetField("_dirMonAppPathInternal", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(fileChangesMonitor);
+    var dirMonAppPathInternalName = dirMonAppPathInternal == null ? null : dirMonAppPathInternal == null ? null : dirMonAppPathInternal.GetType()
+        .GetField("Directory", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(dirMonAppPathInternal);
+    var dirMonAppPathInternalIsDirMonAppPathInternal = dirMonAppPathInternal == null ? null : dirMonAppPathInternal.GetType()
+        .GetField("_isDirMonAppPathInternal", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(dirMonAppPathInternal);
+    var dirMonAppPathInternalDirMonCompletion = dirMonAppPathInternal == null ? null : dirMonAppPathInternal.GetType()
+        .GetField("_dirMonCompletion", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(dirMonAppPathInternal);
+
+    var dirMonSubdirs = fileChangesMonitor.GetType()
+        .GetField("_dirMonSubdirs", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(fileChangesMonitor);
+    var dirMonSubdirsName = dirMonSubdirs == null ? null : dirMonSubdirs.GetType()
+        .GetField("Directory", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(dirMonSubdirs);
+    var dirMonSubdirsIsDirMonAppPathInternal = dirMonSubdirs == null ? null : dirMonSubdirs.GetType()
+        .GetField("_isDirMonAppPathInternal", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(dirMonSubdirs);
+    var dirMonSubdirsDirMonCompletion = dirMonSubdirs == null ? null : dirMonSubdirs.GetType()
+        .GetField("_dirMonCompletion", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(dirMonSubdirs);
+}
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -33,6 +78,55 @@
                 <li>@Html.ActionLink("External", "External")</li>
             </ul>
         </nav>
+        <div>
+            <h3>FCN Mode</h3>
+            <ul>
+                <li>This is the detected FCN Mode: @fcnVal</li>
+            </ul>
+            <h3>FileChangesMonitor directory monitor hash table</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Directory watched</td>
+                        <td>File monitor count</td>
+                    </tr>
+                </thead>
+                @{
+                    var totalFileWatchers = 0;
+                }
+                @foreach (System.Collections.DictionaryEntry d in dirs)
+                {
+                    var fileMons = (Hashtable)d.Value.GetType()
+                        .GetField("_fileMons", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+                        .GetValue(d.Value);
+                    totalFileWatchers += fileMons.Count;
+                    <tr>
+                        <td>@d.Key</td>
+                        <td>@fileMons.Count</td>
+                    </tr>
+                }
+                <tfoot>
+                    <tr>
+                        <td>@dirs.Count</td>
+                        <td>@totalFileWatchers</td>
+                    </tr>
+                </tfoot>
+            </table>
+            <h3>FCN Mode 'Single' dir monitor properties</h3>
+            <ul>
+                <li>FileChangesMonitor._dirMonAppPathInternal = @dirMonAppPathInternal</li>
+                <li>@dirMonAppPathInternalName</li>
+                <li>_dirMonAppPathInternal._isDirMonAppPathInternal = @dirMonAppPathInternalIsDirMonAppPathInternal</li>
+                <li>_dirMonAppPathInternal._dirMonCompletion = @dirMonAppPathInternalDirMonCompletion</li>
+            </ul>
+            <h3>Normal sub dir monitor properties</h3>
+            <ul>
+                <li>FileChangesMonitor._dirMonSubdirs = @dirMonSubdirs</li>
+                <li>@dirMonSubdirsName</li>
+                <li>_dirMonSubdirs._isDirMonAppPathInternal = @dirMonSubdirsIsDirMonAppPathInternal</li>
+                <li>_dirMonSubdirs._dirMonCompletion = @dirMonSubdirsDirMonCompletion</li>
+            </ul>
+        </div>
         <section>
             @RenderBody()
         </section>
