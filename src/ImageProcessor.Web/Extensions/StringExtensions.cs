@@ -11,6 +11,7 @@
 namespace ImageProcessor.Web.Extensions
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Security.Cryptography;
@@ -65,7 +66,7 @@ namespace ImageProcessor.Web.Extensions
             }
         }
         #endregion
-        
+
         #region Numbers
         /// <summary>
         /// Creates an array of integers scraped from the String.
