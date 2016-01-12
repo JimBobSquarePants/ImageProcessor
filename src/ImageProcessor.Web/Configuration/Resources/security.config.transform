@@ -4,6 +4,7 @@
     <!--Disable the LocalFileImageService and enable this one when using virtual paths. -->
     <!--<service name="CloudImageService" type="ImageProcessor.Web.Services.CloudImageService, ImageProcessor.Web">
       <settings>
+        <setting key="Container" value=""/>
         <setting key="MaxBytes" value="8194304"/>
         <setting key="Timeout" value="30000"/>
         <setting key="Host" value="http://yourhost.com/"/>

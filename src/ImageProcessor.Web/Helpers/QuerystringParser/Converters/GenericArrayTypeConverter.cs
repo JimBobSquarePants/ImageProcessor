@@ -10,8 +10,8 @@
 
 namespace ImageProcessor.Web.Helpers
 {
+    using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Globalization;
     using System.Linq;
 
@@ -30,17 +30,15 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="culture">
         /// The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture. 
         /// </param>
         /// <param name="value">The <see cref="T:System.Object"/> to convert. </param>
+        /// <param name="propertyType">The property type that the converter will convert to.</param>
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed.</exception>
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
-            object result = base.ConvertFrom(context, culture, value);
+            object result = base.ConvertFrom(culture, value, propertyType);
             IList<T> list = result as IList<T>;
             return list != null ? list.ToArray() : result;
         }

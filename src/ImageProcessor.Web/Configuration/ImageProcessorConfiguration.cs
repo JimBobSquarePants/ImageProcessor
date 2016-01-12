@@ -120,14 +120,26 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
-        /// Gets a value indicating whether to use post processing optimization techniques
-        /// on the resultant images to further reduce file size.
+        /// Gets a value indicating whether to convert images to a linear color space before
+        /// processing.
         /// </summary>
-        public bool PostProcess
+        public bool FixGamma
         {
             get
             {
-                return GetImageProcessingSection().PostProcess;
+                return GetImageProcessingSection().FixGamma;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether whether to intercept all image requests including ones
+        /// without querystring parameters.
+        /// </summary>
+        public bool InterceptAllRequests
+        {
+            get
+            {
+                return GetImageProcessingSection().InterceptAllRequests;
             }
         }
         #endregion
