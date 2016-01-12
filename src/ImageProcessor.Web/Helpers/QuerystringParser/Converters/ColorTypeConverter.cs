@@ -293,38 +293,37 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Initializes color table mapping system colors to known colors.
         /// </summary>
+        /// <returns>The <see cref="Hashtable"/></returns>
         private static Hashtable InitializeHtmlSystemColorTable()
         {
-            Hashtable hashTable = new Hashtable(StringComparer.OrdinalIgnoreCase)
-            {
-                ["activeborder"] = Color.FromKnownColor(KnownColor.ActiveBorder),
-                ["activecaption"] = Color.FromKnownColor(KnownColor.ActiveCaption),
-                ["appworkspace"] = Color.FromKnownColor(KnownColor.AppWorkspace),
-                ["background"] = Color.FromKnownColor(KnownColor.Desktop),
-                ["buttonface"] = Color.FromKnownColor(KnownColor.Control),
-                ["buttonhighlight"] = Color.FromKnownColor(KnownColor.ControlLightLight),
-                ["buttonshadow"] = Color.FromKnownColor(KnownColor.ControlDark),
-                ["buttontext"] = Color.FromKnownColor(KnownColor.ControlText),
-                ["captiontext"] = Color.FromKnownColor(KnownColor.ActiveCaptionText),
-                ["graytext"] = Color.FromKnownColor(KnownColor.GrayText),
-                ["highlight"] = Color.FromKnownColor(KnownColor.Highlight),
-                ["highlighttext"] = Color.FromKnownColor(KnownColor.HighlightText),
-                ["inactiveborder"] = Color.FromKnownColor(KnownColor.InactiveBorder),
-                ["inactivecaption"] = Color.FromKnownColor(KnownColor.InactiveCaption),
-                ["inactivecaptiontext"] = Color.FromKnownColor(KnownColor.InactiveCaptionText),
-                ["infobackground"] = Color.FromKnownColor(KnownColor.Info),
-                ["infotext"] = Color.FromKnownColor(KnownColor.InfoText),
-                ["menu"] = Color.FromKnownColor(KnownColor.Menu),
-                ["menutext"] = Color.FromKnownColor(KnownColor.MenuText),
-                ["scrollbar"] = Color.FromKnownColor(KnownColor.ScrollBar),
-                ["threeddarkshadow"] = Color.FromKnownColor(KnownColor.ControlDarkDark),
-                ["threedface"] = Color.FromKnownColor(KnownColor.Control),
-                ["threedhighlight"] = Color.FromKnownColor(KnownColor.ControlLight),
-                ["threedlightshadow"] = Color.FromKnownColor(KnownColor.ControlLightLight),
-                ["window"] = Color.FromKnownColor(KnownColor.Window),
-                ["windowframe"] = Color.FromKnownColor(KnownColor.WindowFrame),
-                ["windowtext"] = Color.FromKnownColor(KnownColor.WindowText)
-            };
+            Hashtable hashTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            hashTable["activeborder"] = Color.FromKnownColor(KnownColor.ActiveBorder);
+            hashTable["activecaption"] = Color.FromKnownColor(KnownColor.ActiveCaption);
+            hashTable["appworkspace"] = Color.FromKnownColor(KnownColor.AppWorkspace);
+            hashTable["background"] = Color.FromKnownColor(KnownColor.Desktop);
+            hashTable["buttonface"] = Color.FromKnownColor(KnownColor.Control);
+            hashTable["buttonhighlight"] = Color.FromKnownColor(KnownColor.ControlLightLight);
+            hashTable["buttonshadow"] = Color.FromKnownColor(KnownColor.ControlDark);
+            hashTable["buttontext"] = Color.FromKnownColor(KnownColor.ControlText);
+            hashTable["captiontext"] = Color.FromKnownColor(KnownColor.ActiveCaptionText);
+            hashTable["graytext"] = Color.FromKnownColor(KnownColor.GrayText);
+            hashTable["highlight"] = Color.FromKnownColor(KnownColor.Highlight);
+            hashTable["highlighttext"] = Color.FromKnownColor(KnownColor.HighlightText);
+            hashTable["inactiveborder"] = Color.FromKnownColor(KnownColor.InactiveBorder);
+            hashTable["inactivecaption"] = Color.FromKnownColor(KnownColor.InactiveCaption);
+            hashTable["inactivecaptiontext"] = Color.FromKnownColor(KnownColor.InactiveCaptionText);
+            hashTable["infobackground"] = Color.FromKnownColor(KnownColor.Info);
+            hashTable["infotext"] = Color.FromKnownColor(KnownColor.InfoText);
+            hashTable["menu"] = Color.FromKnownColor(KnownColor.Menu);
+            hashTable["menutext"] = Color.FromKnownColor(KnownColor.MenuText);
+            hashTable["scrollbar"] = Color.FromKnownColor(KnownColor.ScrollBar);
+            hashTable["threeddarkshadow"] = Color.FromKnownColor(KnownColor.ControlDarkDark);
+            hashTable["threedface"] = Color.FromKnownColor(KnownColor.Control);
+            hashTable["threedhighlight"] = Color.FromKnownColor(KnownColor.ControlLight);
+            hashTable["threedlightshadow"] = Color.FromKnownColor(KnownColor.ControlLightLight);
+            hashTable["window"] = Color.FromKnownColor(KnownColor.Window);
+            hashTable["windowframe"] = Color.FromKnownColor(KnownColor.WindowFrame);
+            hashTable["windowtext"] = Color.FromKnownColor(KnownColor.WindowText);
 
             return hashTable;
         }
@@ -332,6 +331,7 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Initializes color table mapping color constants.
         /// </summary>
+        /// <returns>The <see cref="Hashtable"/></returns>
         private static Hashtable InitializeColorConstantsTable()
         {
             Hashtable hashTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
