@@ -241,21 +241,6 @@ namespace ImageProcessor.Imaging.Colors
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="RgbaColor"/> to a 
-        /// <see cref="HslaColor"/>.
-        /// </summary>
-        /// <param name="rgbaColor">
-        /// The instance of <see cref="RgbaColor"/> to convert.
-        /// </param>
-        /// <returns>
-        /// An instance of <see cref="HslaColor"/>.
-        /// </returns>
-        public static implicit operator HslaColor(RgbaColor rgbaColor)
-        {
-            return HslaColor.FromColor(rgbaColor);
-        }
-
-        /// <summary>
-        /// Allows the implicit conversion of an instance of <see cref="RgbaColor"/> to a 
         /// <see cref="YCbCrColor"/>.
         /// </summary>
         /// <param name="rgbaColor">
@@ -267,21 +252,6 @@ namespace ImageProcessor.Imaging.Colors
         public static implicit operator YCbCrColor(RgbaColor rgbaColor)
         {
             return YCbCrColor.FromColor(rgbaColor);
-        }
-
-        /// <summary>
-        /// Allows the implicit conversion of an instance of <see cref="RgbaColor"/> to a 
-        /// <see cref="CmykColor"/>.
-        /// </summary>
-        /// <param name="rgbaColor">
-        /// The instance of <see cref="RgbaColor"/> to convert.
-        /// </param>
-        /// <returns>
-        /// An instance of <see cref="CmykColor"/>.
-        /// </returns>
-        public static implicit operator CmykColor(RgbaColor rgbaColor)
-        {
-            return CmykColor.FromColor(rgbaColor);
         }
 
         /// <summary>

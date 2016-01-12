@@ -48,8 +48,7 @@ namespace ImageProcessor
         /// <summary>
         /// The backup collection of property items containing EXIF metadata.
         /// </summary>
-        private ConcurrentDictionary<int, PropertyItem> backupExifPropertyItems
-            = new ConcurrentDictionary<int, PropertyItem>();
+        private ConcurrentDictionary<int, PropertyItem> backupExifPropertyItems;
 
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -174,13 +173,6 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(Stream stream)
         {
-            ISupportedImageFormat format = FormatUtilities.GetFormat(stream);
-
-            if (format == null)
-            {
-                throw new ImageFormatException("Input stream is not a supported format.");
-            }
-
             MemoryStream memoryStream = new MemoryStream();
 
             // Copy the stream. Disposal of the input stream is the responsibility  
@@ -193,7 +185,11 @@ namespace ImageProcessor
                 stream.Position = 0;
             }
 
-            memoryStream.Position = 0;
+            ISupportedImageFormat format = FormatUtilities.GetFormat(memoryStream);
+            if (format == null)
+            {
+                throw new ImageFormatException("Input stream is not a supported format.");
+            }
 
             // Set our image as the memory stream value.
             this.Image = format.Load(memoryStream);
@@ -204,12 +200,6 @@ namespace ImageProcessor
             // Set the other properties.
             format.Quality = DefaultQuality;
             format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
-
-            IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
-            if (imageFormat != null)
-            {
-                imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
-            }
 
             this.backupFormat = format;
             this.CurrentImageFormat = format;
@@ -275,12 +265,6 @@ namespace ImageProcessor
                     format.Quality = DefaultQuality;
                     format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
 
-                    IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
-                    if (imageFormat != null)
-                    {
-                        imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
-                    }
-
                     this.backupFormat = format;
                     this.CurrentImageFormat = format;
 
@@ -337,12 +321,6 @@ namespace ImageProcessor
             // Set the other properties.
             format.Quality = DefaultQuality;
             format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
-
-            IQuantizableImageFormat imageFormat = format as IQuantizableImageFormat;
-            if (imageFormat != null)
-            {
-                imageFormat.ColorCount = FormatUtilities.GetColorCount(this.Image);
-            }
 
             this.backupFormat = format;
             this.CurrentImageFormat = format;

@@ -12,16 +12,16 @@ namespace ImageProcessor.Web.Helpers
 {
     using System;
     using System.Collections;
-    using System.ComponentModel;
     using System.Drawing;
     using System.Globalization;
+    using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
 
     /// <summary>
-    /// The extended color type converter allows conversion of system and web colors.
+    /// The color type converter allows conversion of system and web colors.
     /// </summary>
-    public class ExtendedColorTypeConverter : ColorConverter
+    public class ColorTypeConverter : QueryParamConverter
     {
         /// <summary>
         /// The web color regex.
@@ -34,26 +34,71 @@ namespace ImageProcessor.Web.Helpers
         private static readonly Regex NumberRegex = new Regex(@"\d+", RegexOptions.Compiled);
 
         /// <summary>
-        /// The html system color table map.
+        /// The system color table map.
         /// </summary>
-        private static Hashtable htmlSystemColorTable;
+        private static readonly Lazy<Hashtable> SystemColorTable = new Lazy<Hashtable>(InitializeHtmlSystemColorTable);
 
         /// <summary>
-        /// Converts the given object to the type of this converter, using the specified context and culture 
+        /// The color constants table map.
+        /// </summary>
+        private static readonly Lazy<Hashtable> ColorConstantsTable = new Lazy<Hashtable>(InitializeColorConstantsTable);
+
+        /// <summary>
+        /// Gets the html system color table.
+        /// </summary>
+        private static Hashtable SystemColors
+        {
+            get
+            {
+                return SystemColorTable.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the color constants table.
+        /// </summary>
+        private static Hashtable ColorConstants
+        {
+            get
+            {
+                return ColorConstantsTable.Value;
+            }
+        }
+
+        /// <summary>
+        /// Returns whether this converter can convert an object of the given type to the type of this converter, 
+        /// using the specified context.
+        /// </summary>
+        /// <returns>
+        /// true if this converter can perform the conversion; otherwise, false.
+        /// </returns>
+        /// <param name="sourceType">
+        /// A <see cref="T:System.Type"/> that represents the type you want to convert from. 
+        /// </param>
+        public override bool CanConvertFrom(Type sourceType)
+        {
+            if (sourceType == typeof(string))
+            {
+                return true;
+            }
+
+            return base.CanConvertFrom(sourceType);
+        }
+
+        /// <summary>
+        /// Converts the given object to the type of this converter, using the specified culture 
         /// information.
         /// </summary>
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="culture">
         /// The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture. 
         /// </param>
         /// <param name="value">The <see cref="T:System.Object"/> to convert. </param>
+        /// <param name="propertyType">The property type that the converter will convert to.</param>
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed.</exception>
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
             string s = value as string;
             if (s != null)
@@ -126,7 +171,7 @@ namespace ImageProcessor.Web.Helpers
                     switch (colorText.Length)
                     {
                         case 4:
-                            
+
                             // 4 charcters eg: #0f0
                             string r = char.ToString(colorText[1]);
                             string g = char.ToString(colorText[2]);
@@ -138,15 +183,15 @@ namespace ImageProcessor.Web.Helpers
                                 Convert.ToInt32(b + b, 16));
 
                         case 7:
-                            
+
                             // 7 charcters eg: #00ff00
                             return Color.FromArgb(
                                 Convert.ToInt32(colorText.Substring(1, 2), 16),
                                 Convert.ToInt32(colorText.Substring(3, 2), 16),
                                 Convert.ToInt32(colorText.Substring(5, 2), 16));
-                            
+
                         case 9:
-                            
+
                             // 9 characters, starting with alpha eg: #ff00ff00
                             return Color.FromArgb(
                                 Convert.ToInt32(colorText.Substring(1, 2), 16),
@@ -156,24 +201,15 @@ namespace ImageProcessor.Web.Helpers
                     }
                 }
 
-                // System color
-                if (htmlSystemColorTable == null)
+                // System and named color constants.
+                object namedColor = GetNamedColor(colorText);
+                if (namedColor != null)
                 {
-                    InitializeHtmlSystemColorTable();
-                }
-
-                if (htmlSystemColorTable != null)
-                {
-                    object o = htmlSystemColorTable[colorText];
-                    if (o != null)
-                    {
-                        return (Color)o;
-                    }
+                    return (Color)namedColor;
                 }
             }
 
-            // ColorConverter handles all named and KnownColors
-            return base.ConvertFrom(context, culture, value);
+            return base.ConvertFrom(culture, value, propertyType);
         }
 
         /// <summary>
@@ -183,9 +219,6 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="culture">
         /// A <see cref="T:System.Globalization.CultureInfo"/>. If null is passed, the current culture is assumed. 
         /// </param>
@@ -198,7 +231,7 @@ namespace ImageProcessor.Web.Helpers
         /// </exception>
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed. 
         /// </exception>
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object ConvertTo(CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
             {
@@ -216,25 +249,52 @@ namespace ImageProcessor.Web.Helpers
                         return string.Empty;
                     }
 
-                    if (color.IsKnownColor == false)
+                    if (color.IsKnownColor)
                     {
-                        // In the Web scenario, colors should be formatted in #RRGGBB notation 
-                        StringBuilder sb = new StringBuilder("#", 7);
-                        sb.Append(color.R.ToString("X2", CultureInfo.InvariantCulture));
-                        sb.Append(color.G.ToString("X2", CultureInfo.InvariantCulture));
-                        sb.Append(color.B.ToString("X2", CultureInfo.InvariantCulture));
-                        return sb.ToString();
+                        return color.Name;
                     }
+
+                    if (color.IsNamedColor)
+                    {
+                        return "'" + color.Name + "'";
+                    }
+
+                    // In the Web scenario, colors should be formatted in #RRGGBB notation 
+                    StringBuilder sb = new StringBuilder("#", 7);
+                    sb.Append(color.R.ToString("X2", CultureInfo.InvariantCulture));
+                    sb.Append(color.G.ToString("X2", CultureInfo.InvariantCulture));
+                    sb.Append(color.B.ToString("X2", CultureInfo.InvariantCulture));
+                    return sb.ToString();
                 }
             }
 
-            return base.ConvertTo(context, culture, value, destinationType);
+            return base.ConvertTo(culture, value, destinationType);
+        }
+
+        /// <summary>
+        /// Gets the named color from the given name
+        /// </summary>
+        /// <param name="name">The name of the color</param>
+        /// <returns><see cref="object"/></returns>
+        internal static object GetNamedColor(string name)
+        {
+            // First, check to see if this is a standard name.
+            object color = ColorConstants[name];
+            if (color != null)
+            {
+                return color;
+            }
+
+            // Ok, how about a system color?
+            color = SystemColors[name];
+            return color;
         }
 
         /// <summary>
         /// Initializes color table mapping system colors to known colors.
         /// </summary>
-        private static void InitializeHtmlSystemColorTable()
+        /// <returns>The <see cref="Hashtable"/></returns>
+        private static Hashtable InitializeHtmlSystemColorTable()
         {
             Hashtable hashTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
             hashTable["activeborder"] = Color.FromKnownColor(KnownColor.ActiveBorder);
@@ -264,7 +324,34 @@ namespace ImageProcessor.Web.Helpers
             hashTable["window"] = Color.FromKnownColor(KnownColor.Window);
             hashTable["windowframe"] = Color.FromKnownColor(KnownColor.WindowFrame);
             hashTable["windowtext"] = Color.FromKnownColor(KnownColor.WindowText);
-            htmlSystemColorTable = hashTable;
+
+            return hashTable;
+        }
+
+        /// <summary>
+        /// Initializes color table mapping color constants.
+        /// </summary>
+        /// <returns>The <see cref="Hashtable"/></returns>
+        private static Hashtable InitializeColorConstantsTable()
+        {
+            Hashtable hashTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+
+            MethodAttributes attrs = MethodAttributes.Public | MethodAttributes.Static;
+            PropertyInfo[] props = typeof(Color).GetProperties();
+
+            foreach (PropertyInfo prop in props)
+            {
+                if (prop.PropertyType == typeof(Color))
+                {
+                    MethodInfo method = prop.GetGetMethod();
+                    if (method != null && (method.Attributes & attrs) == attrs)
+                    {
+                        hashTable[prop.Name] = prop.GetValue(null, null);
+                    }
+                }
+            }
+
+            return hashTable;
         }
     }
 }

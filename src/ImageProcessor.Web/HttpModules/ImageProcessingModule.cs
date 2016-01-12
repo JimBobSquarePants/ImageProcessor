@@ -41,11 +41,6 @@ namespace ImageProcessor.Web.HttpModules
         private const string CachedResponseTypeKey = "CACHED_IMAGE_RESPONSE_TYPE_054F217C-11CF-49FF-8D2F-698E8E6EB58F";
 
         /// <summary>
-        /// The key for storing the cached path of the current image.
-        /// </summary>
-        private const string CachedPathKey = "CACHED_IMAGE_PATH_TYPE_E0741478-C17B-433D-96A8-6CDA797644E9";
-
-        /// <summary>
         /// The key for storing the file dependency of the current image.
         /// </summary>
         private const string CachedResponseFileDependency = "CACHED_IMAGE_DEPENDENCY_054F217C-11CF-49FF-8D2F-698E8E6EB58F";
@@ -74,6 +69,17 @@ namespace ImageProcessor.Web.HttpModules
         /// Whether to preserve exif meta data.
         /// </summary>
         private static bool? preserveExifMetaData;
+
+        /// <summary>
+        /// Whether to perform gamma correction when performing processing.
+        /// </summary>
+        private static bool? fixGamma;
+
+        /// <summary>
+        /// Whether to to intercept all image requests including ones
+        /// without querystring parameters.
+        /// </summary>
+        private static bool? interceptAllRequests;
 
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -148,12 +154,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <param name="dependencyPaths">The dependency path for the cache dependency.</param>
         /// <param name="maxDays">The maximum number of days to store the image in the browser cache.</param>
         /// <param name="statusCode">An optional status code to send to the response.</param>
-        public static void SetHeaders(
-            HttpContext context,
-            string responseType,
-            IEnumerable<string> dependencyPaths,
-            int maxDays,
-            HttpStatusCode? statusCode = null)
+        public static void SetHeaders(HttpContext context, string responseType, IEnumerable<string> dependencyPaths, int maxDays, HttpStatusCode? statusCode = null)
         {
             HttpResponse response = context.Response;
 
@@ -264,13 +265,23 @@ namespace ImageProcessor.Web.HttpModules
                 preserveExifMetaData = ImageProcessorConfiguration.Instance.PreserveExifMetaData;
             }
 
+            if (fixGamma == null)
+            {
+                fixGamma = ImageProcessorConfiguration.Instance.FixGamma;
+            }
+
+            if (interceptAllRequests == null)
+            {
+                interceptAllRequests = ImageProcessorConfiguration.Instance.InterceptAllRequests;
+            }
+
             EventHandlerTaskAsyncHelper postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
             application.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
             application.PostReleaseRequestState += this.PostReleaseRequestState;
 
-            EventHandlerTaskAsyncHelper postProcessHelper = new EventHandlerTaskAsyncHelper(this.PostProcessImage);
-            application.AddOnEndRequestAsync(postProcessHelper.BeginEventHandler, postProcessHelper.EndEventHandler);
+            EventHandlerTaskAsyncHelper onEndRquestsHelper = new EventHandlerTaskAsyncHelper(this.OnEndRequest);
+            application.AddOnEndRequestAsync(onEndRquestsHelper.BeginEventHandler, onEndRquestsHelper.EndEventHandler);
         }
 
         /// <summary>
@@ -343,36 +354,16 @@ namespace ImageProcessor.Web.HttpModules
         /// <returns>
         /// The <see cref="T:System.Threading.Tasks.Task"/>.
         /// </returns>
-        private async Task PostProcessImage(object sender, EventArgs e)
+        private async Task OnEndRequest(object sender, EventArgs e)
         {
-            HttpContext context = ((HttpApplication)sender).Context;
-            object cachedPathObject = context.Items[CachedPathKey];
-
-            if (cachedPathObject != null)
+            if (this.imageCache != null)
             {
                 // Trim the cache.
                 await this.imageCache.TrimCacheAsync();
 
-                string cachedPath = cachedPathObject.ToString();
-
-                // Fire the post processing event.
-                EventHandler<PostProcessingEventArgs> handler = OnPostProcessing;
-                if (handler != null)
-                {
-                    context.Items[CachedPathKey] = null;
-                    await Task.Run(
-                        () => handler(
-                            this,
-                            new PostProcessingEventArgs
-                                {
-                                    Context = context,
-                                    CachedImagePath = cachedPath
-                                }));
-                }
+                // Reset the cache.
+                this.imageCache = null;
             }
-
-            // Reset the cache.
-            this.imageCache = null;
         }
 
         /// <summary>
@@ -492,7 +483,9 @@ namespace ImageProcessor.Web.HttpModules
                 // Execute the handler which can change the querystring 
                 queryString = this.CheckQuerystringHandler(context, queryString, request.Unvalidated.RawUrl);
 
-                if (string.IsNullOrWhiteSpace(requestPath))
+                // Break out if we don't meet critera.
+                bool interceptAll = interceptAllRequests != null && interceptAllRequests.Value;
+                if (string.IsNullOrWhiteSpace(requestPath) || (!interceptAll && string.IsNullOrWhiteSpace(queryString)))
                 {
                     return;
                 }
@@ -534,10 +527,30 @@ namespace ImageProcessor.Web.HttpModules
                     if (isNewOrUpdated)
                     {
                         // Process the image.
-                        using (ImageFactory imageFactory = new ImageFactory(preserveExifMetaData != null && preserveExifMetaData.Value))
+                        bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
+                        bool gamma = fixGamma != null && fixGamma.Value;
+                        using (ImageFactory imageFactory = new ImageFactory(exif, gamma))
                         {
-                            byte[] imageBuffer = await currentService.GetImage(resourcePath);
+                            byte[] imageBuffer = null;
                             string mimeType;
+
+                            try
+                            {
+                                imageBuffer = await currentService.GetImage(resourcePath);
+                            }
+                            catch (HttpException ex)
+                            {
+                                // We want 404's to be handled by IIS so that other handlers/modules can still run.
+                                if (ex.GetHttpCode() == (int)HttpStatusCode.NotFound)
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (imageBuffer == null)
+                            {
+                                return;
+                            }
 
                             using (MemoryStream inStream = new MemoryStream(imageBuffer))
                             {
@@ -555,11 +568,20 @@ namespace ImageProcessor.Web.HttpModules
                                     mimeType = FormatUtilities.GetFormat(outStream).MimeType;
                                 }
 
-                                // Post process the image.
-                                if (ImageProcessorConfiguration.Instance.PostProcess)
+                                // Fire the post processing event.
+                                EventHandler<PostProcessingEventArgs> handler = OnPostProcessing;
+                                if (handler != null)
                                 {
                                     string extension = Path.GetExtension(cachedPath);
-                                    outStream = await PostProcessor.PostProcessor.PostProcessImageAsync(outStream, extension);
+                                    PostProcessingEventArgs args = new PostProcessingEventArgs
+                                    {
+                                        Context = context,
+                                        ImageStream = outStream,
+                                        ImageExtension = extension
+                                    };
+
+                                    handler(this, args);
+                                    outStream = args.ImageStream;
                                 }
 
                                 // Add to the cache.
@@ -569,8 +591,7 @@ namespace ImageProcessor.Web.HttpModules
                                 outStream.Dispose();
                             }
 
-                            // Store the cached path, response type, and cache dependency in the context for later retrieval.
-                            context.Items[CachedPathKey] = cachedPath;
+                            // Store the response type and cache dependency in the context for later retrieval.
                             context.Items[CachedResponseTypeKey] = mimeType;
                             bool isFileCached = new Uri(cachedPath).IsFile;
 

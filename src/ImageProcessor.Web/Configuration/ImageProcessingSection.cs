@@ -34,14 +34,25 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to use post processing optimization techniques
-        /// on the resultant images to further reduce file size.
+        /// Gets or sets a value indicating whether to convert images to a linear color space before
+        /// processing.
         /// </summary>
-        [ConfigurationProperty("postProcess", IsRequired = false, DefaultValue = true)]
-        public bool PostProcess
+        [ConfigurationProperty("fixGamma", IsRequired = false, DefaultValue = false)]
+        public bool FixGamma
         {
-            get { return (bool)this["postProcess"]; }
-            set { this["postProcess"] = value; }
+            get { return (bool)this["fixGamma"]; }
+            set { this["fixGamma"] = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to intercept all image requests including ones
+        /// without querystring parameters.
+        /// </summary>
+        [ConfigurationProperty("interceptAllRequests", IsRequired = false, DefaultValue = false)]
+        public bool InterceptAllRequests
+        {
+            get { return (bool)this["interceptAllRequests"]; }
+            set { this["interceptAllRequests"] = value; }
         }
 
         /// <summary>

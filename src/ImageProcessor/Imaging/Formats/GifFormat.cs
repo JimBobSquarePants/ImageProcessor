@@ -30,11 +30,6 @@ namespace ImageProcessor.Imaging.Formats
         private IQuantizer quantizer = new OctreeQuantizer(255, 8);
 
         /// <summary>
-        /// The color count.
-        /// </summary>
-        private int colorCount;
-
-        /// <summary>
         /// Gets the file headers.
         /// </summary>
         public override byte[][] FileHeaders
@@ -95,24 +90,6 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// Gets or sets the color count.
-        /// </summary>
-        public int ColorCount
-        {
-            get
-            {
-                return this.colorCount;
-            }
-
-            set
-            {
-                int count = ImageMaths.Clamp(value, 0, 255);
-                this.colorCount = count;
-                this.quantizer = new OctreeQuantizer(count, 8);
-            }
-        }
-
-        /// <summary>
         /// Applies the given processor the current image.
         /// </summary>
         /// <param name="processor">The processor delegate.</param>
@@ -120,7 +97,6 @@ namespace ImageProcessor.Imaging.Formats
         public override void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
         {
             GifDecoder decoder = new GifDecoder(factory.Image);
-
             if (decoder.IsAnimated)
             {
                 GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
