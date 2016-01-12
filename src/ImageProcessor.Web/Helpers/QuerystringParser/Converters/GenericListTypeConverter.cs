@@ -12,7 +12,6 @@ namespace ImageProcessor.Web.Helpers
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Globalization;
     using System.Linq;
 
@@ -22,12 +21,12 @@ namespace ImageProcessor.Web.Helpers
     /// <typeparam name="T">
     /// The type to convert from.
     /// </typeparam>
-    public class GenericListTypeConverter<T> : TypeConverter
+    public class GenericListTypeConverter<T> : QueryParamConverter
     {
         /// <summary>
         /// The type converter.
         /// </summary>
-        private readonly TypeConverter typeConverter;
+        private readonly IQueryParamConverter typeConverter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenericListTypeConverter{T}"/> class.
@@ -38,7 +37,7 @@ namespace ImageProcessor.Web.Helpers
         public GenericListTypeConverter()
         {
             Type type = typeof(T);
-            this.typeConverter = TypeDescriptor.GetConverter(type);
+            this.typeConverter = QueryTypeDescriptor.GetConverter(type);
             if (this.typeConverter == null)
             {
                 throw new InvalidOperationException("No type converter exists for type " + type.FullName);
@@ -52,38 +51,33 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// true if this converter can perform the conversion; otherwise, false.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a 
-        /// format context. </param>
         /// <param name="sourceType">
         /// A <see cref="T:System.Type"/> that represents the type you want to convert from. 
         /// </param>
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        public override bool CanConvertFrom(Type sourceType)
         {
             if (sourceType == typeof(string))
             {
                 return true;
             }
 
-            return base.CanConvertFrom(context, sourceType);
+            return base.CanConvertFrom(sourceType);
         }
 
         /// <summary>
-        /// Converts the given object to the type of this converter, using the specified context and culture 
+        /// Converts the given object to the type of this converter, using the specified culture 
         /// information.
         /// </summary>
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="culture">
         /// The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture. 
         /// </param>
         /// <param name="value">The <see cref="T:System.Object"/> to convert. </param>
+        /// <param name="propertyType">The property type that the converter will convert to.</param>
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed.</exception>
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
             string input = value as string;
             if (input != null)
@@ -96,7 +90,7 @@ namespace ImageProcessor.Web.Helpers
                     items,
                     s =>
                     {
-                        object item = this.typeConverter.ConvertFromInvariantString(s);
+                        object item = this.typeConverter.ConvertFromInvariantString(s, propertyType);
                         if (item != null)
                         {
                             result.Add((T)item);
@@ -106,7 +100,7 @@ namespace ImageProcessor.Web.Helpers
                 return result;
             }
 
-            return base.ConvertFrom(context, culture, value);
+            return base.ConvertFrom(culture, value, propertyType);
         }
 
         /// <summary>
@@ -116,9 +110,6 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="culture">
         /// A <see cref="T:System.Globalization.CultureInfo"/>. If null is passed, the current culture is assumed. 
         /// </param>
@@ -131,7 +122,7 @@ namespace ImageProcessor.Web.Helpers
         /// </exception>
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed. 
         /// </exception>
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object ConvertTo(CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string))
             {
@@ -144,7 +135,7 @@ namespace ImageProcessor.Web.Helpers
                 return string.Join(separator, (IList<T>)value);
             }
 
-            return base.ConvertTo(context, culture, value, destinationType);
+            return base.ConvertTo(culture, value, destinationType);
         }
 
         /// <summary>

@@ -13,7 +13,6 @@ namespace ImageProcessor.Web.Helpers
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Drawing;
     using System.Globalization;
     using System.Linq.Expressions;
@@ -42,6 +41,8 @@ namespace ImageProcessor.Web.Helpers
         {
             this.AddColorConverters();
             this.AddFontFamilyConverters();
+            this.AddPointConverters();
+            this.AddGenericConverters();
             this.AddListConverters();
             this.AddArrayConverters();
         }
@@ -85,7 +86,7 @@ namespace ImageProcessor.Web.Helpers
         /// The <see cref="Type"/> to convert the string to.
         /// </param>
         /// <param name="value">
-        /// The <see cref="String"/> value to parse.
+        /// The <see cref="string"/> value to parse.
         /// </param>
         /// <param name="culture">
         /// The <see cref="CultureInfo"/> to use as the current culture. 
@@ -101,11 +102,11 @@ namespace ImageProcessor.Web.Helpers
                 culture = CultureInfo.InvariantCulture;
             }
 
-            TypeConverter converter = TypeDescriptor.GetConverter(type);
+            IQueryParamConverter converter = QueryTypeDescriptor.GetConverter(type);
             try
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                return converter.ConvertFrom(null, culture, HttpUtility.UrlDecode(value));
+                return converter.ConvertFrom(culture, HttpUtility.UrlDecode(value), type);
             }
             catch
             {
@@ -121,14 +122,11 @@ namespace ImageProcessor.Web.Helpers
         /// The <see cref="Type"/> to add a converter for.
         /// </param>
         /// <param name="converterType">
-        /// The type of <see cref="TypeConverter"/> to add.
+        /// The type of <see cref="IQueryParamConverter"/> to add.
         /// </param>
-        /// <returns>
-        /// The <see cref="TypeDescriptionProvider"/>.
-        /// </returns>
-        public TypeDescriptionProvider AddTypeConverter(Type type, Type converterType)
+        public void AddTypeConverter(Type type, Type converterType)
         {
-            return TypeDescriptor.AddAttributes(type, new TypeConverterAttribute(converterType));
+            QueryTypeDescriptor.AddConverter(type, converterType);
         }
 
         /// <summary>
@@ -136,7 +134,7 @@ namespace ImageProcessor.Web.Helpers
         /// </summary>
         private void AddColorConverters()
         {
-            this.AddTypeConverter(typeof(Color), typeof(ExtendedColorTypeConverter));
+            this.AddTypeConverter(typeof(Color), typeof(ColorTypeConverter));
         }
 
         /// <summary>
@@ -145,6 +143,40 @@ namespace ImageProcessor.Web.Helpers
         private void AddFontFamilyConverters()
         {
             this.AddTypeConverter(typeof(FontFamily), typeof(FontFamilyConverter));
+        }
+
+        /// <summary>
+        /// Adds point converters.
+        /// </summary>
+        private void AddPointConverters()
+        {
+            this.AddTypeConverter(typeof(Point), typeof(PointConverter));
+        }
+
+        /// <summary>
+        /// Add the generic converters
+        /// </summary>
+        private void AddGenericConverters()
+        {
+            this.AddTypeConverter(typeof(sbyte), typeof(GenericConvertableConverter<sbyte>));
+            this.AddTypeConverter(typeof(byte), typeof(GenericConvertableConverter<byte>));
+
+            this.AddTypeConverter(typeof(short), typeof(GenericConvertableConverter<short>));
+            this.AddTypeConverter(typeof(ushort), typeof(GenericConvertableConverter<ushort>));
+
+            this.AddTypeConverter(typeof(int), typeof(GenericConvertableConverter<int>));
+            this.AddTypeConverter(typeof(uint), typeof(GenericConvertableConverter<uint>));
+
+            this.AddTypeConverter(typeof(long), typeof(GenericConvertableConverter<long>));
+            this.AddTypeConverter(typeof(ulong), typeof(GenericConvertableConverter<ulong>));
+
+            this.AddTypeConverter(typeof(decimal), typeof(GenericConvertableConverter<decimal>));
+            this.AddTypeConverter(typeof(float), typeof(GenericConvertableConverter<float>));
+
+            this.AddTypeConverter(typeof(double), typeof(GenericConvertableConverter<double>));
+            this.AddTypeConverter(typeof(string), typeof(GenericConvertableConverter<string>));
+
+            this.AddTypeConverter(typeof(bool), typeof(GenericConvertableConverter<bool>));
         }
 
         /// <summary>
