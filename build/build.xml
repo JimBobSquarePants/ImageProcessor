@@ -1,7 +1,7 @@
 <projects>
   <project>
     <name>ImageProcessor</name>
-    <version>2.3.1.0</version>
+    <version>2.3.2.0</version>
     <folder>..\src\ImageProcessor</folder>
     <projfile>ImageProcessor.csproj</projfile>
     <outputs>
@@ -24,13 +24,13 @@
 
   <project>
     <name>ImageProcessor Web.config sample</name>
-    <version>2.2.4.0</version>
+    <version>2.2.5.0</version>
     <nuspec>ImageProcessor.Web.Config.nuspec</nuspec>
   </project>
   
   <project>
     <name>ImageProcessor Web Azure Blob Cache plugin</name>
-    <version>1.0.5.0</version>
+    <version>1.0.6.0</version>
     <folder>..\src\Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AzureBlobCache</folder>
     <projfile>ImageProcessor.Web.Plugins.AzureBlobCache.csproj</projfile>
     <outputs>
