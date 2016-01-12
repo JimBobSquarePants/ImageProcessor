@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>ImageProcessor.Web.Plugins.AzureBlobCache</id>
-    <version>1.0.5.0</version>
+    <version>1.0.6.0</version>
     <title>ImageProcessor.Web.Plugins.AzureBlobCache</title>
     <authors>James South</authors>
     <owners>James South</owners>
