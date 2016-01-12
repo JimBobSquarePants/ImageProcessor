@@ -22,6 +22,7 @@ file. This allows the library to intercept processing calls to locally stored im
 <!-- ImageProcessor.Web intercept module references -->
 <configuration>
   <system.web>
+    <httpRuntime fcnMode="Single" />
     <httpModules>
       <add name="ImageProcessorModule" type="ImageProcessor.Web.HttpModules.ImageProcessingModule, ImageProcessor.Web"/>
     </httpModules>
@@ -182,8 +183,8 @@ Sources for image processors are plugin based. That means by implementing the `I
 the web implementaion in the configuration file you can add your own image processor.
 
 {% highlight xml %}
-<!--Postprocessing - Added version 4.4.0 optimizes the output images for the web.-->
-<processing preserveExifMetaData="false" postProcess="true">
+<!--interceptAllRequests - Added version 4.5.0 to allow intercepting requests with no querystring.-->
+<processing preserveExifMetaData="false" interceptAllRequests="false">
   <!-- Demo: Presets that allow you to reduce code in your markup. 
        Note the use of &#038; to escape ampersands. -->
   <presets>
