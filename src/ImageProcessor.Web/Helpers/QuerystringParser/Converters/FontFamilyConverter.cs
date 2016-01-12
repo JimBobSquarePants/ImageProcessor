@@ -12,7 +12,6 @@
 namespace ImageProcessor.Web.Helpers
 {
     using System;
-    using System.ComponentModel;
     using System.Drawing;
     using System.Globalization;
 
@@ -20,7 +19,7 @@ namespace ImageProcessor.Web.Helpers
     /// FontFamilyConverter - converter class for converting between the <see cref="FontFamily"/>
     /// and <see cref="String"/> types.
     /// </summary>
-    public class FontFamilyConverter : TypeConverter
+    public class FontFamilyConverter : QueryParamConverter
     {
         /// <summary>
         /// Returns whether this converter can convert an object of the given type to the type of 
@@ -29,20 +28,17 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// true if this converter can perform the conversion; otherwise, false.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="sourceType">
         /// A <see cref="T:System.Type"/> that represents the type you want to convert from. 
         /// </param>
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        public override bool CanConvertFrom(Type sourceType)
         {
             if (sourceType == typeof(string))
             {
                 return true;
             }
 
-            return base.CanConvertFrom(context, sourceType);
+            return base.CanConvertFrom(sourceType);
         }
 
         /// <summary>
@@ -52,20 +48,17 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// true if this converter can perform the conversion; otherwise, false.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="destinationType">
         /// A <see cref="T:System.Type"/> that represents the type you want to convert to. 
         /// </param>
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        public override bool CanConvertTo(Type destinationType)
         {
             if (destinationType == typeof(string) || destinationType == typeof(FontFamily))
             {
                 return true;
             }
 
-            return base.CanConvertTo(context, destinationType);
+            return base.CanConvertTo(destinationType);
         }
 
         /// <summary>
@@ -75,15 +68,13 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="culture">
         /// The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture. 
         /// </param>
         /// <param name="value">The <see cref="T:System.Object"/> to convert. </param>
+        /// <param name="propertyType">The property type that the converter will convert to.</param>
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed. </exception>
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
             string s = value as string;
             if (!string.IsNullOrWhiteSpace(s))
@@ -91,7 +82,7 @@ namespace ImageProcessor.Web.Helpers
                 return new FontFamily(s);
             }
 
-            return base.ConvertFrom(context, culture, value);
+            return base.ConvertFrom(culture, value, propertyType);
         }
 
         /// <summary>
@@ -101,9 +92,6 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>
-        /// <param name="context">
-        /// An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context. 
-        /// </param>
         /// <param name="culture">
         /// A <see cref="T:System.Globalization.CultureInfo"/>. If null is passed, the current culture is assumed. 
         /// </param><param name="value">The <see cref="T:System.Object"/> to convert. </param>
@@ -112,7 +100,7 @@ namespace ImageProcessor.Web.Helpers
         /// </param>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="destinationType"/> parameter is null. </exception>
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed. </exception>
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object ConvertTo(CultureInfo culture, object value, Type destinationType)
         {
             if (null == value)
             {
@@ -135,7 +123,7 @@ namespace ImageProcessor.Web.Helpers
                 return fontFamily.Name;
             }
 
-            return base.ConvertTo(context, culture, value, destinationType);
+            return base.ConvertTo(culture, value, destinationType);
         }
     }
 }

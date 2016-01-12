@@ -92,7 +92,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// The <see cref="Bitmap"/>.
         /// </returns>
-        private static Bitmap ResizeComposite(Image source, int width, int height, Rectangle destination)
+        protected virtual Bitmap ResizeComposite(Image source, int width, int height, Rectangle destination)
         {
             Bitmap resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             resized.SetResolution(source.HorizontalResolution, source.VerticalResolution);
@@ -135,7 +135,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// The <see cref="Bitmap"/>.
         /// </returns>
-        private static Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
+        protected virtual Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
         {
             // Adjust the gamma value so that the image is in the linear color space.
             Bitmap linear = Adjustments.ToLinear(source.Copy());
@@ -230,14 +230,16 @@ namespace ImageProcessor.Imaging
                 // Change the destination rectangle coordinates if box padding.
                 if (resizeMode == ResizeMode.BoxPad)
                 {
-                    height = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
-                    width = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
+                    int boxPadHeight = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
+                    int boxPadWidth = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
 
                     // Only calculate if upscaling. 
-                    if (sourceWidth < width || sourceHeight < height)
+                    if (sourceWidth < boxPadWidth && sourceHeight < boxPadHeight)
                     {
                         destinationWidth = sourceWidth;
                         destinationHeight = sourceHeight;
+                        width = boxPadWidth;
+                        height = boxPadHeight;
 
                         upscale = true;
 
@@ -536,24 +538,7 @@ namespace ImageProcessor.Imaging
                     // Do the resize.
                     Rectangle destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
 
-                    //if (this.ImageFormat is GifFormat || (this.ImageFormat is PngFormat && !((PngFormat)this.ImageFormat).IsIndexed))
-                    //{
-                    //    newImage = FastResizer.ResizeBilinear((Bitmap)source, width, height, destination, linear);
-                    //}
-                    //else
-                    //{
-                    //    if (width <= sourceWidth && height <= sourceHeight)
-                    //    {
-                    //        newImage = FastResizer.ResizeBicubicHighQuality((Bitmap)source, width, height, destination, linear);
-                    //    }
-                    //    else
-                    //    {
-                    //        // Faster
-                    //        newImage = FastResizer.ResizeBilinear((Bitmap)source, width, height, destination, linear);
-                    //    }
-                    //}
-
-                    newImage = linear ? ResizeLinear(source, width, height, destination) : ResizeComposite(source, width, height, destination);
+                    newImage = linear ? this.ResizeLinear(source, width, height, destination) : this.ResizeComposite(source, width, height, destination);
 
                     // Reassign the image.
                     source.Dispose();

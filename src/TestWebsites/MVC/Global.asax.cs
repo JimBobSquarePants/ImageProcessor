@@ -40,10 +40,5 @@ namespace Test_Website_NET45
             //        return args.Querystring;
             //    };
         }
-
-        private async void WritePath(object sender, PostProcessingEventArgs e)
-        {
-            await Task.Run(() => Debug.WriteLine(e.CachedImagePath));
-        }
     }
 }
