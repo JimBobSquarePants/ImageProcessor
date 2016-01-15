@@ -126,7 +126,8 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
             byte[] bytes;
 
             // Encode in webP format.
-            if (EncodeLossly((Bitmap)image, this.Quality, out bytes))
+            // If Quality is 100, encode losslessly instead of lossily
+            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
             {
                 File.WriteAllBytes(path, bytes);
             }
@@ -147,7 +148,8 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
             byte[] bytes;
 
             // Encode in webP format.
-            if (EncodeLossly((Bitmap)image, this.Quality, out bytes))
+            // If Quality is 100, encode losslessly instead of lossily
+            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
             {
                 using (MemoryStream memoryStream = new MemoryStream(bytes))
                 {
@@ -250,6 +252,51 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
             {
                 // Attempt to lossy encode the image.
                 int size = NativeMethods.WebPEncodeBGRA(bmpData.Scan0, bitmap.Width, bitmap.Height, bmpData.Stride, quality, out unmanagedData);
+
+                // Copy image compress data to output array
+                webpData = new byte[size];
+                Marshal.Copy(unmanagedData, webpData, 0, size);
+                encoded = true;
+            }
+            catch
+            {
+                encoded = false;
+            }
+            finally
+            {
+                // Unlock the pixels
+                bitmap.UnlockBits(bmpData);
+
+                // Free memory
+                NativeMethods.WebPFree(unmanagedData);
+            }
+
+            return encoded;
+        }
+
+        /// <summary>
+        /// Losslessly encodes the image in bitmap.
+        /// </summary>
+        /// <param name="bitmap">
+        /// Bitmap with the image
+        /// </param>
+        /// <param name="webpData">
+        /// The byte array containing the encoded image data.
+        /// </param>
+        /// <returns>
+        /// True if success; False otherwise
+        /// </returns>
+        private static bool EncodeLosslessly(Bitmap bitmap, out byte[] webpData)
+        {
+            webpData = null;
+            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            IntPtr unmanagedData = IntPtr.Zero;
+            bool encoded;
+
+            try
+            {
+                // Attempt to losslessly encode the image.
+                int size = NativeMethods.WebPEncodeLosslessBGRA(bmpData.Scan0, bitmap.Width, bitmap.Height, bmpData.Stride, out unmanagedData);
 
                 // Copy image compress data to output array
                 webpData = new byte[size];
