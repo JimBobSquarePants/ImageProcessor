@@ -39,8 +39,10 @@ namespace ImageProcessor.Common.Extensions
                 // TODO: Ensure that we handle other animated types.
                 GifDecoder decoder = new GifDecoder(source);
                 GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
-                foreach (GifFrame frame in decoder.GifFrames)
+
+                for (int i = 0; i < decoder.FrameCount; i++)
                 {
+                    GifFrame frame = decoder.GetFrame(source, i);
                     frame.Image = ((Bitmap)frame.Image).Clone(new Rectangle(0, 0, frame.Image.Width, frame.Image.Height), format);
                     ((Bitmap)frame.Image).SetResolution(source.HorizontalResolution, source.VerticalResolution);
                     encoder.AddFrame(frame);
