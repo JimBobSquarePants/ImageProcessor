@@ -39,40 +39,7 @@ namespace ImageProcessor.Imaging.Formats
 
                 if (this.IsAnimated)
                 {
-                    int frameCount = image.GetFrameCount(FrameDimension.Time);
-                    int last = frameCount - 1;
-                    double length = 0;
-
-                    List<GifFrame> gifFrames = new List<GifFrame>();
-
-                    // Get the times stored in the gif.
-                    byte[] times = image.GetPropertyItem((int)ExifPropertyTag.FrameDelay).Value;
-
-                    for (int i = 0; i < frameCount; i++)
-                    {
-                        // Convert each 4-byte chunk into an integer.
-                        // GDI returns a single array with all delays, while Mono returns a different array for each frame.
-                        TimeSpan delay = TimeSpan.FromMilliseconds(BitConverter.ToInt32(times, (4 * i) % times.Length) * 10);
-
-                        // Find the frame
-                        image.SelectActiveFrame(FrameDimension.Time, i);
-                        Bitmap frame = new Bitmap(image);
-                        frame.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-                        
-                        // TODO: Get positions.
-                        gifFrames.Add(new GifFrame { Delay = delay, Image = frame });
-
-                        // Reset the position.
-                        if (i == last)
-                        {
-                            image.SelectActiveFrame(FrameDimension.Time, 0);
-                        }
-
-                        length += delay.TotalMilliseconds;
-                    }
-
-                    this.GifFrames = gifFrames;
-                    this.AnimationLength = length;
+                    this.FrameCount = image.GetFrameCount(FrameDimension.Time);
 
                     // Loop info is stored at byte 20737.
                     this.LoopCount = BitConverter.ToInt16(image.GetPropertyItem((int)ExifPropertyTag.LoopCount).Value, 0);
@@ -107,6 +74,11 @@ namespace ImageProcessor.Imaging.Formats
         public int LoopCount { get; set; }
 
         /// <summary>
+        /// Gets or sets the frame count.
+        /// </summary>
+        public int FrameCount { get; set; }
+
+        /// <summary>
         /// Gets or sets the gif frames.
         /// </summary>
         public ICollection<GifFrame> GifFrames { get; set; }
@@ -115,5 +87,33 @@ namespace ImageProcessor.Imaging.Formats
         /// Gets or sets the animation length in milliseconds.
         /// </summary>
         public double AnimationLength { get; set; }
+
+        /// <summary>
+        /// Gets the frame at the specified index.
+        /// </summary>
+        /// <param name="image">The image.</param>
+        /// <param name="index">The index.</param>
+        /// <returns>
+        /// The <see cref="GifFrame"/>.
+        /// </returns>
+        public GifFrame GetFrame(Image image, int index)
+        {
+            // Find the frame
+            image.SelectActiveFrame(FrameDimension.Time, index);
+            Bitmap frame = new Bitmap(image);
+            frame.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            // Reset the image
+            image.SelectActiveFrame(FrameDimension.Time, 0);
+
+            // Get the times stored in the gif.
+            byte[] times = image.GetPropertyItem((int)ExifPropertyTag.FrameDelay).Value;
+
+            // Convert each 4-byte chunk into an integer.
+            // GDI returns a single array with all delays, while Mono returns a different array for each frame.
+            TimeSpan delay = TimeSpan.FromMilliseconds(BitConverter.ToInt32(times, (4 * index) % times.Length) * 10);
+
+            return new GifFrame { Delay = delay, Image = frame };
+        }
     }
 }
