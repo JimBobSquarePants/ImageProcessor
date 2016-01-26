@@ -62,12 +62,15 @@ namespace ImageProcessor.PlayGround
                     ResizeLayer layer = new ResizeLayer(size);
 
                     imageFactory.Load(inStream)
-                        .Resize(layer)
+                                .Resize(layer)
                                 //.Resolution(400, 400)
                                 //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
                                 .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
 
                     stopwatch.Stop();
+
+                    // trans.gif says it's (0, 0, 0, 0) but the image saves as black.
+                    // Color first = ((Bitmap)imageFactory.Image).GetPixel(0, 0);
                 }
 
                 // Report back.

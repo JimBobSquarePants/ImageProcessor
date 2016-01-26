@@ -97,16 +97,21 @@ namespace ImageProcessor.Imaging.Formats
         public override void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
         {
             GifDecoder decoder = new GifDecoder(factory.Image);
+
             if (decoder.IsAnimated)
             {
+                Image factoryImage = factory.Image;
                 GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
-                foreach (GifFrame frame in decoder.GifFrames)
+
+                for (int i = 0; i < decoder.FrameCount; i++)
                 {
+                    GifFrame frame = decoder.GetFrame(factoryImage, i);
                     factory.Image = frame.Image;
                     frame.Image = this.Quantizer.Quantize(processor.Invoke(factory));
                     encoder.AddFrame(frame);
                 }
 
+                factoryImage.Dispose();
                 factory.Image = encoder.Save();
             }
             else
