@@ -250,8 +250,6 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 Delimiter = @"/"
             };
 
-            try
-            {
                 List<S3Object> results = new List<S3Object>();
 
                 do
@@ -287,12 +285,6 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         Key = file.Key
                     });
                 }
-            }
-            catch (Exception ex)
-            {
-                // TODO: Remove try/catch.
-                throw ex;
-            }
         }
 
         /// <summary>
