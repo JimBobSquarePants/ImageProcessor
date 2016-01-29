@@ -412,7 +412,11 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <returns>Region Endpoint</returns>
         private RegionEndpoint GetRegionEndpoint()
         {
-            string regionEndpointAsString = this.Settings["RegionEndpoint"].ToLowerInvariant();
+            string regionEndpointAsString = null;
+            if (this.Settings.TryGetValue("RegionEndpoint", out regionEndpointAsString))
+            {
+                regionEndpointAsString = regionEndpointAsString.ToUpperInvariant();
+            }
 
             switch (regionEndpointAsString)
             {
