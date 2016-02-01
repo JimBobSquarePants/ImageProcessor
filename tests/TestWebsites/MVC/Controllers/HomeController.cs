@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNet.Mvc;
 
-namespace DnxRc1SampleApp.Controllers
+namespace MVC.Controllers
 {
     public class HomeController : Controller
     {
@@ -20,11 +20,6 @@ namespace DnxRc1SampleApp.Controllers
         }
 
         public IActionResult Png()
-        {
-            return View();
-        }
-
-        public IActionResult Tiff()
         {
             return View();
         }
