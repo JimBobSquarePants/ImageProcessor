@@ -79,9 +79,9 @@ namespace ImageProcessorCore.Web.Middleware
             //await _next.Invoke(context);
         }
 
-        private List<IImageProcessorCore> GetImageProcessorFilters(IReadableStringCollection queryString)
+        private List<IImageProcessor> GetImageProcessorFilters(IReadableStringCollection queryString)
         {
-            var processors = new List<IImageProcessorCore>();
+            var processors = new List<IImageProcessor>();
 
             foreach (var qs in queryString)
             {
