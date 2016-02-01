@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0-*",
+  "description": "ImageProcessorCore.Web",
+  "authors": [ "" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "ImageProcessorCore": "1.0.0-*",
+    "Microsoft.AspNet.Http.Abstractions": "1.0.0-rc1-final",
+    "Microsoft.CSharp": "4.0.1-beta-23516",
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
+    "System.Collections": "4.0.11-beta-23516",
+    "System.Linq": "4.0.1-beta-23516",
+    "System.Runtime": "4.0.21-beta-23516",
+    "System.Threading": "4.0.11-beta-23516"
+  },
+
+  "frameworks": {
+    "dotnet5.5": { }
+  }
+}

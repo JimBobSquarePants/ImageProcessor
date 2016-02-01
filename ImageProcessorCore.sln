@@ -7,6 +7,10 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ImageProcessorCore", "src\I
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ImageProcessorCore.Tests", "tests\ImageProcessorCore.Tests\ImageProcessorCore.Tests.xproj", "{F836E8E6-B4D9-4208-8346-140C74678B91}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ImageProcessorCore.Web", "src\ImageProcessorCore.Web\ImageProcessorCore.Web.xproj", "{D52682FE-2C89-4014-81A1-2E4CBFE65497}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MVC", "src\TestWebsites\MVC\MVC.xproj", "{6179936E-A716-4900-A027-32B13A42658C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{F836E8E6-B4D9-4208-8346-140C74678B91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F836E8E6-B4D9-4208-8346-140C74678B91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F836E8E6-B4D9-4208-8346-140C74678B91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D52682FE-2C89-4014-81A1-2E4CBFE65497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D52682FE-2C89-4014-81A1-2E4CBFE65497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D52682FE-2C89-4014-81A1-2E4CBFE65497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D52682FE-2C89-4014-81A1-2E4CBFE65497}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6179936E-A716-4900-A027-32B13A42658C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6179936E-A716-4900-A027-32B13A42658C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6179936E-A716-4900-A027-32B13A42658C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6179936E-A716-4900-A027-32B13A42658C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
