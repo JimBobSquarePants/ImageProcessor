@@ -1,10 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.AspNet.Http;
 using System.IO;
+using System.Collections.Generic;
 using ImageProcessorCore.Samplers;
+using ImageProcessorCore.Filters;
+using System;
+using System.Globalization;
 
 namespace ImageProcessorCore.Web.Middleware
 {
@@ -22,95 +25,113 @@ namespace ImageProcessorCore.Web.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            if (!IsImageRequest(context))
+            if (!IsImageProcessorRequest(context))
             {
                 // move to the next request here?
                 await _next.Invoke(context);
                 return;
             }
 
-            try
+            int width = 0;
+            int.TryParse(context.Request.Query["width"], out width);
+            int height = 0;
+            int.TryParse(context.Request.Query["height"], out height);
+
+            var inputPath = _appEnvironment.ApplicationBasePath + "/wwwroot" + context.Request.Path;
+            using (var inputStream = File.OpenRead(inputPath))
             {
-                //var sb = new StringBuilder();
-                //sb.AppendLine("=====================================================================================================");
-                //sb.AppendLine("Date/Time: " + DateTime.UtcNow.ToString("M/d/yyyy hh:mm tt"));
+                var image = new Image(inputStream);
 
-                int width = 0;
-                int.TryParse(context.Request.Query["width"], out width);
-                int height = 0;
-                int.TryParse(context.Request.Query["height"], out height);
-
-                var inputPath = _appEnvironment.ApplicationBasePath + "/wwwroot" + context.Request.Path;
-                using (var inputStream = File.OpenRead(inputPath))
+                // write directly to the body output stream
+                using (var outputStream = new MemoryStream())
                 {
-                    //sb.AppendLine("Input Path: " + inputPath);
-                    //sb.AppendLine("Querystring Dimensions: " + width.ToString() + "x" + height.ToString());
+                    //image.Resize(width, height)
+                    //    .Save(outputStream);
 
-                    //var sw = new Stopwatch();
-                    //sw.Start();
-                    var image = new Image(inputStream);
-                    if (image.Width > image.Height && width != 0)
-                        height = (width * image.Height) / image.Width;
-                    if (image.Height > image.Width && height != 0)
-                        width = (height * image.Width) / image.Height;
-                    //sw.Stop();
-
-                    //sb.AppendLine("Original Dimensions: " + image.Width.ToString() + "x" + image.Height.ToString());
-                    //sb.AppendLine("Output Dimensions: " + width.ToString() + "x" + height.ToString());
-                    //sb.AppendLine("Image Read Time in Seconds: " + sw.Elapsed.TotalSeconds.ToString());
-
-                    // write directly to the body output stream
-                    using (var outputStream = new MemoryStream())
+                    var processors = GetImageProcessorFilters(context.Request.Query);
+                    if (width > 0 || height > 0)
                     {
-                        //sw.Restart();
-                        image.Resize(width, height)
+                        image.Process(width, height, processors.ToArray())
                             .Save(outputStream);
-                        var bytes = outputStream.ToArray();
-                        //sw.Stop();
-                        //sb.AppendLine("Image Processing Time in Seconds: " + sw.Elapsed.TotalSeconds.ToString());
-
-                        //context.Response.Body.Write(bytes, 0, bytes.Length);
-                        await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                    }
+                    else
+                    {
+                        image.Process(processors.ToArray())
+                            .Save(outputStream);
                     }
 
-                    //// the following approach will write to disk then serve the image
-                    ////var inputPath = _appEnvironment.ApplicationBasePath + "/wwwroot" + context.Request.Path;
-                    //var outputPath = _appEnvironment.ApplicationBasePath + "/Uploads/" + Path.GetFileName(context.Request.Path);
-                    //using (var outputStream = File.OpenWrite(outputPath))
-                    //{
-                    //    image.Resize(width, height)
-                    //        .Save(outputStream);
-                    //}
-                    //var bytes = File.ReadAllBytes(outputPath);
-                    //await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                    var bytes = outputStream.ToArray();
+                    await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
                 }
 
-                //var logFilePath = _appEnvironment.ApplicationBasePath + "/Logs/ThumbnailLog-" + DateTime.UtcNow.ToString("yyyy-MM-dd-hh-mm-ss") + ".txt";
-                //var logFilePath = _appEnvironment.ApplicationBasePath + "/Logs/ThumbnailLog.txt";
-                //var logWriter = new LogWriter(logFilePath);
-                //logWriter.Write(sb.ToString());
-            }
-            catch (Exception ex)
-            {
-                //var logFilePath = _appEnvironment.ApplicationBasePath + "/Logs/Exceptions.txt";
-                //var logWriter = new LogWriter(logFilePath);
-                //logWriter.WriteLine("=====================================================================================================");
-                //logWriter.WriteLine(ex.ToString());
-                throw new Exception(ex.ToString());
+                //// the following approach will write to disk then serve the image
+                ////var inputPath = _appEnvironment.ApplicationBasePath + "/wwwroot" + context.Request.Path;
+                //var outputPath = _appEnvironment.ApplicationBasePath + "/Uploads/" + Path.GetFileName(context.Request.Path);
+                //using (var outputStream = File.OpenWrite(outputPath))
+                //{
+                //    image.Resize(width, height)
+                //        .Save(outputStream);
+                //}
+                //var bytes = File.ReadAllBytes(outputPath);
+                //await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
             }
 
             //await _next.Invoke(context);
         }
 
-        public bool IsImageRequest(HttpContext context)
+        private List<IImageProcessorCore> GetImageProcessorFilters(IReadableStringCollection queryString)
+        {
+            var processors = new List<IImageProcessorCore>();
+
+            foreach (var qs in queryString)
+            {
+                switch (qs.Key)
+                {
+                    case "alpha":
+                        if (IsValidAlphaValue(qs.Value))
+                        {
+                            processors.Add(new Alpha(Convert.ToInt32(qs.Value)));
+                        }
+                        break;
+                    case "brightness":
+                        if (IsValidBrightnessValue(qs.Value))
+                        {
+                            processors.Add(new Brightness(Convert.ToInt32(qs.Value)));
+                        }
+                        break;
+                    case "hue":
+                        if (IsValidHueValue(qs.Value))
+                        {
+                            processors.Add(new Hue(Convert.ToInt32(qs.Value)));
+                        }
+                        break;
+                }
+            }
+
+            return processors;
+        }
+
+        public bool IsImageProcessorRequest(HttpContext context)
         {
             if (!IsImageExtension(Path.GetExtension(context.Request.Path.Value).ToLower()))
                 return false;
 
-            if (string.IsNullOrWhiteSpace(context.Request.Query["width"]) && string.IsNullOrWhiteSpace(context.Request.Query["height"]))
-                return false;
+            var isImageProcessorRequest = false;
+            foreach (var qs in context.Request.Query)
+            {
+                switch (qs.Key.ToLower())
+                {
+                    case "width":
+                    case "height":
+                    case "alpha":
+                    case "brightness":
+                    case "hue":
+                        isImageProcessorRequest = true;
+                        break;
+                }
+            }
 
-            return true;
+            return isImageProcessorRequest;
         }
 
         private bool IsImageExtension(string extension)
@@ -123,7 +144,6 @@ namespace ImageProcessorCore.Web.Middleware
                 case ".jpeg":
                 case ".jpg":
                 case ".png":
-                case ".tif":
                     isImage = true;
                     break;
                 default:
@@ -132,5 +152,57 @@ namespace ImageProcessorCore.Web.Middleware
             }
             return isImage;
         }
+
+        #region QueryString value validation
+
+        private bool IsValidAlphaValue(object value)
+        {
+            if (value == null)
+                return false;
+
+            int number;
+            var isInt = int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Any, NumberFormatInfo.InvariantInfo, out number);
+            if (!isInt)
+                return false;
+
+            if (number > 100 || number < 0)
+                return false;
+
+            return true;
+        }
+
+        private bool IsValidBrightnessValue(object value)
+        {
+            if (value == null)
+                return false;
+
+            int number;
+            var isInt = int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Any, NumberFormatInfo.InvariantInfo, out number);
+            if (!isInt)
+                return false;
+
+            if (number > 100 || number < 0)
+                return false;
+
+            return true;
+        }
+
+        private bool IsValidHueValue(object value)
+        {
+            if (value == null)
+                return false;
+
+            int number;
+            var isInt = int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Any, NumberFormatInfo.InvariantInfo, out number);
+            if (!isInt)
+                return false;
+
+            if (number > 360 || number < 0)
+                return false;
+
+            return true;
+        }
+
+        #endregion
     }
 }
