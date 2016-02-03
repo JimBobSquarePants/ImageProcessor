@@ -60,6 +60,11 @@ namespace ImageProcessor.Imaging
         public ISupportedImageFormat ImageFormat { get; set; }
 
         /// <summary>
+        /// Gets or sets process mode for frames in animated images.
+        /// </summary>
+        public AnimationProcessMode AnimationProcessMode { get; set; }
+
+        /// <summary>
         /// Resizes the given image.
         /// </summary>
         /// <param name="source">The source <see cref="Image"/> to resize.</param>
@@ -137,8 +142,24 @@ namespace ImageProcessor.Imaging
         /// </returns>
         protected virtual Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
         {
+            return ResizeLinear(source, width, height, destination, AnimationProcessMode.All);
+        }
+
+        /// <summary>
+        /// Gets an image resized using the linear color space with gamma correction adjustments.
+        /// </summary>
+        /// <param name="source">The source image.</param>
+        /// <param name="width">The width to resize to.</param>
+        /// <param name="height">The height to resize to.</param>
+        /// <param name="destination">The destination rectangle.</param>
+        /// <param name="animationProcessMode">The process mode for frames in animated images.</param>
+        /// <returns>
+        /// The <see cref="Bitmap"/>.
+        /// </returns>
+        protected virtual Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination, AnimationProcessMode animationProcessMode)
+        {
             // Adjust the gamma value so that the image is in the linear color space.
-            Bitmap linear = Adjustments.ToLinear(source.Copy());
+            Bitmap linear = Adjustments.ToLinear(source.Copy(animationProcessMode));
 
             Bitmap resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             resized.SetResolution(source.HorizontalResolution, source.VerticalResolution);
@@ -538,7 +559,7 @@ namespace ImageProcessor.Imaging
                     // Do the resize.
                     Rectangle destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
 
-                    newImage = linear ? this.ResizeLinear(source, width, height, destination) : this.ResizeComposite(source, width, height, destination);
+                    newImage = linear ? this.ResizeLinear(source, width, height, destination, AnimationProcessMode) : this.ResizeComposite(source, width, height, destination);
 
                     // Reassign the image.
                     source.Dispose();
