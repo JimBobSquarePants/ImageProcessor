@@ -90,7 +90,7 @@ namespace ImageProcessor.Processors
 
                 resizeLayer.MaxSize = maxSize;
 
-                Resizer resizer = new Resizer(resizeLayer) { ImageFormat = factory.CurrentImageFormat };
+                Resizer resizer = new Resizer(resizeLayer) { ImageFormat = factory.CurrentImageFormat, AnimationProcessMode = factory.AnimationProcessMode };
                 newImage = resizer.ResizeImage(image, factory.FixGamma);
 
                 // Check that the original image has not been returned.

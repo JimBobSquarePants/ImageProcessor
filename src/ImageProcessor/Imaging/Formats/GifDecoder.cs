@@ -28,7 +28,10 @@ namespace ImageProcessor.Imaging.Formats
         /// <param name="image">
         /// The <see cref="Image"/> to decode.
         /// </param>
-        public GifDecoder(Image image)
+        /// <param name="animationProcessMode">
+        /// The <see cref="AnimationProcessMode" /> to use.
+        /// </param>
+        public GifDecoder(Image image, AnimationProcessMode animationProcessMode)
         {
             this.Height = image.Height;
             this.Width = image.Width;
@@ -48,7 +51,12 @@ namespace ImageProcessor.Imaging.Formats
                     // Get the times stored in the gif.
                     byte[] times = image.GetPropertyItem((int)ExifPropertyTag.FrameDelay).Value;
 
-                    for (int i = 0; i < frameCount; i++)
+                    AnimationProcessMode processMode = animationProcessMode;
+                    int framesToProcess = frameCount;
+                    if (processMode == AnimationProcessMode.First)
+                        framesToProcess = 1;
+
+                    for (int i = 0; i < framesToProcess; i++)
                     {
                         // Convert each 4-byte chunk into an integer.
                         // GDI returns a single array with all delays, while Mono returns a different array for each frame.
@@ -58,7 +66,7 @@ namespace ImageProcessor.Imaging.Formats
                         image.SelectActiveFrame(FrameDimension.Time, i);
                         Bitmap frame = new Bitmap(image);
                         frame.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-                        
+
                         // TODO: Get positions.
                         gifFrames.Add(new GifFrame { Delay = delay, Image = frame });
 
@@ -81,6 +89,18 @@ namespace ImageProcessor.Imaging.Formats
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GifDecoder"/> class.
+        /// </summary>
+        /// <param name="image">
+        /// The <see cref="Image"/> to decode.
+        /// </param>
+        public GifDecoder(Image image)
+            : this(image, AnimationProcessMode.All)
+        {
+            
+        }
+        
         /// <summary>
         /// Gets or sets the image width.
         /// </summary>
@@ -115,5 +135,6 @@ namespace ImageProcessor.Imaging.Formats
         /// Gets or sets the animation length in milliseconds.
         /// </summary>
         public double AnimationLength { get; set; }
+        
     }
 }

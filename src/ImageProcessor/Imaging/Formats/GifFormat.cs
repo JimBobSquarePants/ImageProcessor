@@ -22,12 +22,17 @@ namespace ImageProcessor.Imaging.Formats
     /// <summary>
     /// Provides the necessary information to support gif images.
     /// </summary>
-    public class GifFormat : FormatBase, IQuantizableImageFormat
+    public class GifFormat : FormatBase, IQuantizableImageFormat, IAnimatedImageFormat
     {
         /// <summary>
         /// The quantizer for reducing the image palette.
         /// </summary>
         private IQuantizer quantizer = new OctreeQuantizer(255, 8);
+
+        /// <summary>
+        /// The process mode for frames in animated images.
+        /// </summary>
+        public AnimationProcessMode AnimationProcessMode { get; set; }
 
         /// <summary>
         /// Gets the file headers.
@@ -96,7 +101,7 @@ namespace ImageProcessor.Imaging.Formats
         /// <param name="factory">The <see cref="ImageFactory" />.</param>
         public override void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
         {
-            GifDecoder decoder = new GifDecoder(factory.Image);
+            GifDecoder decoder = new GifDecoder(factory.Image, factory.AnimationProcessMode);
             if (decoder.IsAnimated)
             {
                 GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
