@@ -116,6 +116,30 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         public static extern int WebPEncodeBGRA(IntPtr rgb, int width, int height, int stride, float qualityFactor, out IntPtr output);
 
         /// <summary>
+        /// Lossless encoding of images pointed to by *data in WebP format
+        /// </summary>
+        /// <param name="rgb">
+        /// Pointer to RGB image data
+        /// </param>
+        /// <param name="width">
+        /// The width range is limited currently from 1 to 16383
+        /// </param>
+        /// <param name="height">
+        /// The height range is limited currently from 1 to 16383
+        /// </param>
+        /// <param name="stride">
+        /// The stride.
+        /// </param>
+        /// <param name="output">
+        /// output_buffer with WebP image
+        /// </param>
+        /// <returns>
+        /// Size of WebP Image
+        /// </returns>
+        [DllImport("libwebp", CallingConvention = CallingConvention.Cdecl, EntryPoint = "WebPEncodeLosslessBGRA")]
+        public static extern int WebPEncodeLosslessBGRA(IntPtr rgb, int width, int height, int stride, out IntPtr output);
+
+        /// <summary>
         /// Frees the unmanaged memory.
         /// </summary>
         /// <param name="pointer">

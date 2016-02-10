@@ -1,5 +1,7 @@
 # ImageProcessor
 
+## This version is built against the .NET Framework
+
 ### Build Status
 
 |Branch   |         |
