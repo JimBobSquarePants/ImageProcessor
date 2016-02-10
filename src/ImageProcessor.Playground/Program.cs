@@ -55,19 +55,28 @@ namespace ImageProcessor.PlayGround
                 stopwatch.Start();
 
                 using (MemoryStream inStream = new MemoryStream(photoBytes))
-                using (ImageFactory imageFactory = new ImageFactory(true, true))
+                using (ImageFactory imageFactory = new ImageFactory(true, true) { AnimationProcessMode = AnimationProcessMode.First })
                 {
                     Size size = new Size(50, 0);
 
                     ResizeLayer layer = new ResizeLayer(size);
-
-                    imageFactory.Load(inStream)
-                        .Resize(layer)
-                                //.Resolution(400, 400)
-                                //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
-                                .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
+                    try
+                    {
+                        imageFactory.Load(inStream)
+                                    .Resize(layer)
+                                    //.Resolution(400, 400)
+                                    //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
+                                    .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
 
                     stopwatch.Stop();
+
+                    // trans.gif says it's (0, 0, 0, 0) but the image saves as black.
+                    // Color first = ((Bitmap)imageFactory.Image).GetPixel(0, 0);
                 }
 
                 // Report back.
