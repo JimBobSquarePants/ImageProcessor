@@ -155,6 +155,12 @@ namespace ImageProcessor
         /// </summary>
         public Image Image { get; internal set; }
 
+
+        /// <summary>
+        /// Gets or sets the process mode for frames in animated images.
+        /// </summary>
+        public AnimationProcessMode AnimationProcessMode { get; set; }
+
         /// <summary>
         /// Gets or sets the stream for storing any input stream to prevent disposal.
         /// </summary>
@@ -211,10 +217,16 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
+            IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
+            if (imageFormat != null)
+            {
+                imageFormat.AnimationProcessMode = this.AnimationProcessMode;
+            }
+
             this.backupExifPropertyItems = this.ExifPropertyItems;
 
             // Ensure the image is in the most efficient format.
-            Image formatted = this.Image.Copy();
+            Image formatted = this.Image.Copy(this.AnimationProcessMode);
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -276,8 +288,14 @@ namespace ImageProcessor
 
                     this.backupExifPropertyItems = this.ExifPropertyItems;
 
+                    IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
+                    if (imageFormat != null)
+                    {
+                        imageFormat.AnimationProcessMode = this.AnimationProcessMode;
+                    }
+
                     // Ensure the image is in the most efficient format.
-                    Image formatted = this.Image.Copy();
+                    Image formatted = this.Image.Copy(this.AnimationProcessMode);
                     this.Image.Dispose();
                     this.Image = formatted;
 
@@ -331,8 +349,14 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
+            IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
+            if (imageFormat != null)
+            {
+                imageFormat.AnimationProcessMode = this.AnimationProcessMode;
+            }
+
             // Ensure the image is in the most efficient format.
-            Image formatted = this.Image.Copy();
+            Image formatted = this.Image.Copy(this.AnimationProcessMode);
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -365,7 +389,7 @@ namespace ImageProcessor
 
                 // Dispose and reassign the image.
                 // Ensure the image is in the most efficient format.
-                Image formatted = newImage.Copy();
+                Image formatted = newImage.Copy(this.AnimationProcessMode);
                 newImage.Dispose();
                 this.Image.Dispose();
                 this.Image = formatted;

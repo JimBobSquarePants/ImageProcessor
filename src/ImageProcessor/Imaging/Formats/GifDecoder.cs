@@ -11,7 +11,6 @@
 namespace ImageProcessor.Imaging.Formats
 {
     using System;
-    using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
 
@@ -29,22 +28,35 @@ namespace ImageProcessor.Imaging.Formats
         /// The <see cref="Image"/> to decode.
         /// </param>
         public GifDecoder(Image image)
+            : this(image, AnimationProcessMode.All)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GifDecoder"/> class.
+        /// </summary>
+        /// <param name="image">
+        /// The <see cref="Image"/> to decode.
+        /// </param>
+        /// <param name="animationProcessMode">
+        /// The <see cref="AnimationProcessMode" /> to use.
+        /// </param>
+        public GifDecoder(Image image, AnimationProcessMode animationProcessMode)
         {
             this.Height = image.Height;
             this.Width = image.Width;
 
-            if (FormatUtilities.IsAnimated(image))
+            if (FormatUtilities.IsAnimated(image) && animationProcessMode == AnimationProcessMode.All)
             {
                 this.IsAnimated = true;
+                this.FrameCount = image.GetFrameCount(FrameDimension.Time);
 
-                if (this.IsAnimated)
-                {
-                    this.FrameCount = image.GetFrameCount(FrameDimension.Time);
-
-                    // Loop info is stored at byte 20737.
-                    this.LoopCount = BitConverter.ToInt16(image.GetPropertyItem((int)ExifPropertyTag.LoopCount).Value, 0);
-                    this.IsLooped = this.LoopCount != 1;
-                }
+                // Loop info is stored at byte 20737.
+                this.LoopCount = BitConverter.ToInt16(image.GetPropertyItem((int)ExifPropertyTag.LoopCount).Value, 0);
+            }
+            else
+            {
+                this.FrameCount = 1;
             }
         }
 
@@ -64,11 +76,6 @@ namespace ImageProcessor.Imaging.Formats
         public bool IsAnimated { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the image is looped.
-        /// </summary>
-        public bool IsLooped { get; set; }
-
-        /// <summary>
         /// Gets or sets the loop count.
         /// </summary>
         public int LoopCount { get; set; }
@@ -77,16 +84,6 @@ namespace ImageProcessor.Imaging.Formats
         /// Gets or sets the frame count.
         /// </summary>
         public int FrameCount { get; set; }
-
-        /// <summary>
-        /// Gets or sets the gif frames.
-        /// </summary>
-        public ICollection<GifFrame> GifFrames { get; set; }
-
-        /// <summary>
-        /// Gets or sets the animation length in milliseconds.
-        /// </summary>
-        public double AnimationLength { get; set; }
 
         /// <summary>
         /// Gets the frame at the specified index.
