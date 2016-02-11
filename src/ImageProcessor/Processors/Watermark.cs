@@ -85,7 +85,7 @@ namespace ImageProcessor.Processors
                 {
                     using (Font font = this.GetFont(textLayer.FontFamily, fontSize, fontStyle))
                     {
-                        using (StringFormat drawFormat = new StringFormat())
+                        using (StringFormat drawFormat = StringFormat.GenericTypographic)
                         {
                             StringFormatFlags? formatFlags = this.GetFlags(textLayer);
                             if (formatFlags != null)
@@ -113,7 +113,7 @@ namespace ImageProcessor.Processors
                                 }
 
                                 // Set the hinting and draw the text.
-                                graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                                graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
 
                                 // Create bounds for the text.
                                 RectangleF bounds;
