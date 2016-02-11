@@ -49,7 +49,7 @@ namespace ImageProcessor.Web.Helpers
                     return (value == null) ? default(T) : (T)Convert.ChangeType(value, u);
                 }
 
-                return (T)Convert.ChangeType(value, t);
+                return (T)Convert.ChangeType(value, t, culture);
             }
 
             return base.ConvertFrom(culture, value, propertyType);

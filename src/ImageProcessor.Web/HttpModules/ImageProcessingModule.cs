@@ -12,6 +12,7 @@ namespace ImageProcessor.Web.HttpModules
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Specialized;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -21,6 +22,7 @@ namespace ImageProcessor.Web.HttpModules
     using System.Web;
     using System.Web.Hosting;
 
+    using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Configuration;
@@ -529,7 +531,9 @@ namespace ImageProcessor.Web.HttpModules
                         // Process the image.
                         bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
                         bool gamma = fixGamma != null && fixGamma.Value;
-                        using (ImageFactory imageFactory = new ImageFactory(exif, gamma))
+                        AnimationProcessMode mode = this.ParseAnimationMode(queryString);
+
+                        using (ImageFactory imageFactory = new ImageFactory(exif, gamma) { AnimationProcessMode = mode })
                         {
                             byte[] imageBuffer = null;
                             string mimeType;
@@ -628,6 +632,26 @@ namespace ImageProcessor.Web.HttpModules
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the animation mode passed in through the querystring, defaults to the default behaviour (All) if nothing found.
+        /// </summary>
+        /// <param name="queryString">The query string to search.</param>
+        /// <returns>
+        /// The process mode for frames in animated images.
+        /// </returns>
+        private AnimationProcessMode ParseAnimationMode(string queryString)
+        {
+            AnimationProcessMode mode = AnimationProcessMode.All;
+            NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
+
+            if (queryCollection.AllKeys.Contains("animationprocessmode", StringComparer.InvariantCultureIgnoreCase))
+            {
+                mode = QueryParamParser.Instance.ParseValue<AnimationProcessMode>(queryCollection["animationprocessmode"]);
+            }
+
+            return mode;
         }
 
         /// <summary>
