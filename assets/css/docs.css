@@ -348,6 +348,10 @@ article [rel="subsection"]{
     box-shadow: rgba(0, 0, 0, 0.15) 0 2px 5px 0;
 }
 
+.highlight{
+    margin-left: 0;
+}
+
 /*
  * Force the spans to break words on the pre tag
  */
