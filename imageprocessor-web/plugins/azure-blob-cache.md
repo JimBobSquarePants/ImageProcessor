@@ -55,6 +55,8 @@ configuration files.
         <!-- The Account, Container and CDN details -->
         <setting key="CachedStorageAccount" value="DefaultEndpointsProtocol=https;AccountName=[CacheAccountName];AccountKey=[CacheAccountKey]"/>
         <setting key="CachedBlobContainer" value="cache"/>
+        <!-- Whether to add the container name to the CDN url. Newer Azure formats require false. -->
+        <setting key="UseCachedContainerInUrl" value="true"/>
         <!-- Full CDN root url e.g http://123456.vo.msecnd.net/ -->
         <setting key="CachedCDNRoot" value="[CdnRootUrl]"/>
         <!-- 
