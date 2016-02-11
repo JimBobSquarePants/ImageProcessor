@@ -16,18 +16,22 @@ namespace ImageProcessor.Imaging.Formats
     using System.IO;
     using System.Text;
 
-    using ImageProcessor.Imaging.Helpers;
     using ImageProcessor.Imaging.Quantizers;
 
     /// <summary>
     /// Provides the necessary information to support gif images.
     /// </summary>
-    public class GifFormat : FormatBase, IQuantizableImageFormat
+    public class GifFormat : FormatBase, IQuantizableImageFormat, IAnimatedImageFormat
     {
         /// <summary>
         /// The quantizer for reducing the image palette.
         /// </summary>
         private IQuantizer quantizer = new OctreeQuantizer(255, 8);
+
+        /// <summary>
+        /// Gets or sets the process mode for frames in animated images.
+        /// </summary>
+        public AnimationProcessMode AnimationProcessMode { get; set; }
 
         /// <summary>
         /// Gets the file headers.
@@ -96,17 +100,21 @@ namespace ImageProcessor.Imaging.Formats
         /// <param name="factory">The <see cref="ImageFactory" />.</param>
         public override void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
         {
-            GifDecoder decoder = new GifDecoder(factory.Image);
+            GifDecoder decoder = new GifDecoder(factory.Image, factory.AnimationProcessMode);
             if (decoder.IsAnimated)
             {
+                Image factoryImage = factory.Image;
                 GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
-                foreach (GifFrame frame in decoder.GifFrames)
+
+                for (int i = 0; i < decoder.FrameCount; i++)
                 {
+                    GifFrame frame = decoder.GetFrame(factoryImage, i);
                     factory.Image = frame.Image;
                     frame.Image = this.Quantizer.Quantize(processor.Invoke(factory));
                     encoder.AddFrame(frame);
                 }
 
+                factoryImage.Dispose();
                 factory.Image = encoder.Save();
             }
             else

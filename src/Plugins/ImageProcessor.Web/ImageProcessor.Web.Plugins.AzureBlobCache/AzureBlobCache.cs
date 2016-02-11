@@ -71,11 +71,6 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private string cachedRewritePath;
 
         /// <summary>
-        /// The content MIME type.
-        /// </summary>
-        private string mimeType;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobCache"/> class.
         /// </summary>
         /// <param name="requestPath">
@@ -133,7 +128,22 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // That gives us massive scope to store millions of files.
             string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
             this.CachedPath = Path.Combine(this.cloudCachedBlobContainer.Uri.ToString(), pathFromKey, cachedFileName).Replace(@"\", "/");
-            this.cachedRewritePath = Path.Combine(this.cachedCdnRoot, this.cloudCachedBlobContainer.Name, pathFromKey, cachedFileName).Replace(@"\", "/");
+
+            // Do we insert the cache container? This seems to break some setups.
+            bool useCachedContainerInUrl = this.Settings.ContainsKey("UseCachedContainerInUrl") 
+                && this.Settings["UseCachedContainerInUrl"].ToLower() != "false";
+
+            if (useCachedContainerInUrl)
+            {
+                this.cachedRewritePath =
+                    Path.Combine(this.cachedCdnRoot, this.cloudCachedBlobContainer.Name, pathFromKey, cachedFileName)
+                        .Replace(@"\", "/");
+            }
+            else
+            {
+                this.cachedRewritePath = Path.Combine(this.cachedCdnRoot, pathFromKey, cachedFileName)
+                    .Replace(@"\", "/");
+            }
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
@@ -214,7 +224,6 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </returns>
         public override async Task AddImageToCacheAsync(Stream stream, string contentType)
         {
-            this.mimeType = contentType;
             string blobPath = this.CachedPath.Substring(this.cloudCachedBlobContainer.Uri.ToString().Length + 1);
             CloudBlockBlob blockBlob = this.cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
 
@@ -382,10 +391,9 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                             HttpResponse contextResponse = context.Response;
                             cachedStream.CopyTo(contextResponse.OutputStream);
 
-                            // Mimetype can be null when returning from the cache.
                             ImageProcessingModule.SetHeaders(
                                 context,
-                                string.IsNullOrWhiteSpace(this.mimeType) ? contextResponse.ContentType : this.mimeType,
+                                response.ContentType,
                                 null,
                                 this.MaxDays,
                                 response.StatusCode);
@@ -420,8 +428,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private static CloudBlobContainer CreateContainer(CloudBlobClient cloudBlobClient, string containerName, BlobContainerPublicAccessType accessType)
         {
             CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
+
             container.CreateIfNotExists();
             container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
+
             return container;
         }
 
