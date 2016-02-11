@@ -1,7 +1,7 @@
 ---
 permalink: imageprocessor-web/imageprocessingmodule/animationprocessmode/
 
-title: animationprocessmode
+title: Animation Process Mode
 subheading: Animation Process Mode
 sublinks: ["#usage|Usage"]
 ---
