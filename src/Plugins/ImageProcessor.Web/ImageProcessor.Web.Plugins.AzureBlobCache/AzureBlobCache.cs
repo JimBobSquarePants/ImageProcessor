@@ -128,7 +128,22 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // That gives us massive scope to store millions of files.
             string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
             this.CachedPath = Path.Combine(this.cloudCachedBlobContainer.Uri.ToString(), pathFromKey, cachedFileName).Replace(@"\", "/");
-            this.cachedRewritePath = Path.Combine(this.cachedCdnRoot, this.cloudCachedBlobContainer.Name, pathFromKey, cachedFileName).Replace(@"\", "/");
+
+            // Do we insert the cache container? This seems to break some setups.
+            bool useCachedContainerInUrl = this.Settings.ContainsKey("UseCachedContainerInUrl") 
+                && this.Settings["UseCachedContainerInUrl"].ToLower() != "false";
+
+            if (useCachedContainerInUrl)
+            {
+                this.cachedRewritePath =
+                    Path.Combine(this.cachedCdnRoot, this.cloudCachedBlobContainer.Name, pathFromKey, cachedFileName)
+                        .Replace(@"\", "/");
+            }
+            else
+            {
+                this.cachedRewritePath = Path.Combine(this.cachedCdnRoot, pathFromKey, cachedFileName)
+                    .Replace(@"\", "/");
+            }
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
@@ -413,8 +428,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private static CloudBlobContainer CreateContainer(CloudBlobClient cloudBlobClient, string containerName, BlobContainerPublicAccessType accessType)
         {
             CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
+
             container.CreateIfNotExists();
             container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
+
             return container;
         }
 
