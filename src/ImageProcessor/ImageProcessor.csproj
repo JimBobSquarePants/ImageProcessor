@@ -140,6 +140,7 @@
     <Compile Include="Configuration\NativeMethods.cs" />
     <Compile Include="Imaging\ComputerArchitectureInfo.cs" />
     <Compile Include="Imaging\AnimationProcessMode.cs" />
+    <Compile Include="Imaging\ComputerArchitectureInfo.cs" />
     <Compile Include="Imaging\Formats\IAnimatedImageFormat.cs" />
     <Compile Include="Imaging\Helpers\Converters\BigEndianBitConverter.cs" />
     <Compile Include="Imaging\Helpers\Converters\Endianness.cs" />
