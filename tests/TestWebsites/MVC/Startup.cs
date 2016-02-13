@@ -27,9 +27,6 @@ namespace MVC
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
-            services.AddCaching();
-            services.AddSession();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -41,7 +38,6 @@ namespace MVC
             {
                 app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -53,8 +49,6 @@ namespace MVC
             app.UseImageProcessor();
 
             app.UseStaticFiles();
-
-            app.UseSession();
 
             app.UseMvc(routes =>
             {

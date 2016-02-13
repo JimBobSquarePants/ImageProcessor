@@ -1,14 +1,13 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>@ViewBag.Title Processing Samples</title>
-    <link href="~/css/responsive.min.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>ImageProcessorCore.Web @ViewBag.Title Processing Samples</h1>
+            <h1>@ViewBag.Title Processing Samples</h1>
         </header>
         <nav role="navigation">
             <ul>
@@ -18,9 +17,9 @@
                 <li><a href="/Home/Png">Png</a></li>
             </ul>
         </nav>
-        <section>
+        <div>
             @RenderBody()
-        </section>
+        </div>
     </div>
 </body>
 </html>
