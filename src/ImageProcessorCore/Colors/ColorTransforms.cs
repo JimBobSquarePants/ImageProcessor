@@ -6,6 +6,7 @@
 namespace ImageProcessorCore
 {
     using System;
+    using System.Numerics;
 
     /// <summary>
     /// Represents a four-component color using red, green, blue, and alpha data. 
@@ -18,9 +19,58 @@ namespace ImageProcessorCore
     public partial struct Color
     {
         /// <summary>
+        /// Blends two colors by lightening.
+        /// </summary>
+        /// <remarks>
+        /// Selects the lighter of the backdrop and source colors.
+        /// The backdrop is replaced with the source where the backdrop is lighter; otherwise, it is left unchanged
+        /// Note: This behavior is on a channel by channel basis, i.e., this rule is applied to each of the 3 RGB color channels separately.
+        /// </remarks>
+        /// <param name="backdrop"></param>
+        /// <param name="source"></param>
+        /// <returns>
+        /// The <see cref="Color"/>.
+        /// </returns>
+        public static Color Lighten(Color backdrop, Color source)
+        {
+            var newVector = new Vector4
+                                {
+                                    W = Math.Max(backdrop.backingVector.W, source.backingVector.W),
+                                    X = Math.Max(backdrop.backingVector.X, source.backingVector.X),
+                                    Y = Math.Max(backdrop.backingVector.Y, source.backingVector.Y),
+                                };
+
+            return new Color(newVector);
+        }
+        /// <summary>
+        /// Blends two colors by darkening.
+        /// </summary>
+        /// <remarks>
+        /// Selects the darker of the backdrop and source colors.
+        /// The backdrop is replaced with the source where the backdrop is darker; otherwise, it is left unchanged
+        /// Note: This behavior is on a channel by channel basis, i.e., this rule is applied to each of the 3 RGB color channels separately.
+        /// </remarks>
+        /// <param name="backdrop"></param>
+        /// <param name="source"></param>
+        /// <returns>
+        /// The <see cref="Color"/>.
+        /// </returns>
+        public static Color Darken(Color backdrop, Color source)
+        {
+            var newVector = new Vector4
+                                {
+                                    W = Math.Min(backdrop.backingVector.W, source.backingVector.W),
+                                    X = Math.Min(backdrop.backingVector.X, source.backingVector.X),
+                                    Y = Math.Min(backdrop.backingVector.Y, source.backingVector.Y),
+                                };
+
+            return new Color(newVector);
+        }
+
+        /// <summary>
         /// Blends two colors by multiplication.
         /// <remarks>
-        /// The source color is multiplied by the destination color and replaces the destination.
+        /// The source color is multiplied by the destination color and replaces the source.
         /// The resultant color is always at least as dark as either the source or destination color.
         /// Multiplying any color with black results in black. Multiplying any color with white preserves the 
         /// original color.
