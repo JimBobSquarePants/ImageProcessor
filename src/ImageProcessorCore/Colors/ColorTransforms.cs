@@ -35,9 +35,10 @@ namespace ImageProcessorCore
         {
             var newVector = new Vector4
                                 {
-                                    W = Math.Max(backdrop.backingVector.W, source.backingVector.W),
+//                                    W = Math.Max(backdrop.backingVector.W, source.backingVector.W),
                                     X = Math.Max(backdrop.backingVector.X, source.backingVector.X),
                                     Y = Math.Max(backdrop.backingVector.Y, source.backingVector.Y),
+                                    Z = Math.Max(backdrop.backingVector.Z, source.backingVector.Z),
                                 };
 
             return new Color(newVector);
@@ -59,9 +60,10 @@ namespace ImageProcessorCore
         {
             var newVector = new Vector4
                                 {
-                                    W = Math.Min(backdrop.backingVector.W, source.backingVector.W),
+//                                    W = Math.Min(backdrop.backingVector.W, source.backingVector.W),
                                     X = Math.Min(backdrop.backingVector.X, source.backingVector.X),
                                     Y = Math.Min(backdrop.backingVector.Y, source.backingVector.Y),
+                                    Z = Math.Min(backdrop.backingVector.Z, source.backingVector.Z),
                                 };
 
             return new Color(newVector);
