@@ -266,48 +266,40 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 Delimiter = @"/"
             };
 
-            try
+            List<S3Object> results = new List<S3Object>();
+
+            do
             {
-                List<S3Object> results = new List<S3Object>();
+                ListObjectsResponse response = await this.amazonS3ClientCache.ListObjectsAsync(request);
 
-                do
+                results.AddRange(response.S3Objects);
+
+                // If response is truncated, set the marker to get the next 
+                // set of keys.
+                if (response.IsTruncated)
                 {
-                    ListObjectsResponse response = await this.amazonS3ClientCache.ListObjectsAsync(request);
-
-                    results.AddRange(response.S3Objects);
-
-                    // If response is truncated, set the marker to get the next 
-                    // set of keys.
-                    if (response.IsTruncated)
-                    {
-                        request.Marker = response.NextMarker;
-                    }
-                    else
-                    {
-                        request = null;
-                    }
+                    request.Marker = response.NextMarker;
                 }
-                while (request != null);
-
-                foreach (S3Object file in results.OrderBy(x => x.LastModified.ToUniversalTime()))
+                else
                 {
-                    if (!this.IsExpired(file.LastModified.ToUniversalTime()))
-                    {
-                        break;
-                    }
-
-                    CacheIndexer.Remove(file.Key);
-                    await this.amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
-                    {
-                        BucketName = this.awsBucketName,
-                        Key = file.Key
-                    });
+                    request = null;
                 }
             }
-            catch (Exception ex)
+            while (request != null);
+
+            foreach (S3Object file in results.OrderBy(x => x.LastModified.ToUniversalTime()))
             {
-                // TODO: Remove try/catch.
-                throw ex;
+                if (!this.IsExpired(file.LastModified.ToUniversalTime()))
+                {
+                    break;
+                }
+
+                CacheIndexer.Remove(file.Key);
+                await this.amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
+                {
+                    BucketName = this.awsBucketName,
+                    Key = file.Key
+                });
             }
         }
 
@@ -396,7 +388,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         false);
                 }
 
-                // TODO: We should be using something like below toggling between CDN and Bucket URL
+                // TODO: Above seems wrong. We should be using something like below toggling between CDN and Bucket URL
                 //using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 //{
                 //    HttpStatusCode responseCode = response.StatusCode;
@@ -452,7 +444,11 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <returns>Region Endpoint</returns>
         private RegionEndpoint GetRegionEndpoint()
         {
-            string regionEndpointAsString = this.Settings["RegionEndpoint"].ToLowerInvariant();
+            string regionEndpointAsString = null;
+            if (this.Settings.TryGetValue("RegionEndpoint", out regionEndpointAsString))
+            {
+                regionEndpointAsString = regionEndpointAsString.ToUpperInvariant();
+            }
 
             switch (regionEndpointAsString)
             {
