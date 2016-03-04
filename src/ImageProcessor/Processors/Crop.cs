@@ -84,14 +84,14 @@ namespace ImageProcessor.Processors
                     // Work out the percentages.
                     float left = cropLayer.Left * sourceWidth;
                     float top = cropLayer.Top * sourceHeight;
-                    float width = cropLayer.Right < 1 ? (1 - cropLayer.Left - cropLayer.Right) * sourceWidth : sourceWidth;
-                    float height = cropLayer.Bottom < 1 ? (1 - cropLayer.Top - cropLayer.Bottom) * sourceHeight : sourceHeight;
+                    float width = cropLayer.Right < 1 ? (cropLayer.Right - cropLayer.Left) * sourceWidth : sourceWidth;
+                    float height = cropLayer.Bottom < 1 ? (cropLayer.Bottom - cropLayer.Top) * sourceHeight : sourceHeight;
 
                     rectangleF = new RectangleF(left, top, width, height);
                 }
                 else
                 {
-                    rectangleF = new RectangleF(cropLayer.Left, cropLayer.Top, cropLayer.Right, cropLayer.Bottom);
+                    rectangleF = new RectangleF(cropLayer.Left, cropLayer.Top, cropLayer.Right - cropLayer.Left, cropLayer.Bottom - cropLayer.Top);
                 }
 
                 Rectangle rectangle = Rectangle.Round(rectangleF);
