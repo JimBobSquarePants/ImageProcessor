@@ -138,7 +138,6 @@
     <Compile Include="Common\Helpers\IOHelper.cs" />
     <Compile Include="Configuration\NativeBinaryFactory.cs" />
     <Compile Include="Configuration\NativeMethods.cs" />
-    <Compile Include="Imaging\ComputerArchitectureInfo.cs" />
     <Compile Include="Imaging\AnimationProcessMode.cs" />
     <Compile Include="Imaging\ComputerArchitectureInfo.cs" />
     <Compile Include="Imaging\Formats\IAnimatedImageFormat.cs" />
