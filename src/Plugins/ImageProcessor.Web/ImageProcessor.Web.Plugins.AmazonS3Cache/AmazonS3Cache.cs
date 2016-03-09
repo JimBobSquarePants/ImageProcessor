@@ -28,6 +28,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Extensions;
     using ImageProcessor.Web.Helpers;
+    using ImageProcessor.Web.HttpModules;
 
     /// <summary>
     /// Provides an <see cref="IImageCache"/> implementation that uses Amazon S3 storage.
@@ -35,6 +36,11 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
     /// </summary>
     public class AmazonS3Cache : ImageCacheBase
     {
+        /// <summary>
+        /// The assembly version.
+        /// </summary>
+        private static readonly string AssemblyVersion = typeof(ImageProcessingModule).Assembly.GetName().Version.ToString();
+
         /// <summary>
         /// The Amazon S3 client.
         /// </summary>
@@ -60,6 +66,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </summary>
         private readonly string awsBucketName;
 
+        // TODO: Why is this here? What does it do and why is it a const?
         /// <summary>
         /// Image Processor Cache folder in S3.
         /// </summary>
@@ -123,6 +130,11 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
             this.CachedPath = Path.Combine(this.cachedCdnRoot, this.imageProcessorCachePrefix, pathFromKey, cachedFileName)
                                   .Replace(@"\", "/");
+
+            // TODO: What is the S3 version of the following lines? The Above doesn't match what I expect
+            //this.CachedPath = Path.Combine(this.cloudCachedBlobContainer.Uri.ToString(), pathFromKey, cachedFileName).Replace(@"\", "/");
+            //this.cachedRewritePath = Path.Combine(this.cachedCdnRoot, this.cloudCachedBlobContainer.Name, pathFromKey, cachedFileName).Replace(@"\", "/");
+
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
@@ -228,6 +240,10 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 CannedACL = S3CannedACL.PublicRead
             };
 
+            transferUtilityUploadRequest.Headers.CacheControl = string.Format("public, max-age={0}", this.MaxDays * 86400);
+            transferUtilityUploadRequest.Headers.ContentType = contentType;
+            transferUtilityUploadRequest.Metadata.Add("x-amz-meta-ImageProcessedBy", "ImageProcessor.Web/" + AssemblyVersion);
+
             await transferUtility.UploadAsync(transferUtilityUploadRequest);
         }
 
@@ -242,7 +258,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             string path = this.GetFolderStructureForAmazon(this.CachedPath);
             string directory = path.Substring(0, path.LastIndexOf('/'));
             string parent = directory.Substring(0, directory.LastIndexOf('/') + 1);
-            
+
             ListObjectsRequest request = new ListObjectsRequest
             {
                 BucketName = this.awsBucketName,
@@ -250,48 +266,40 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 Delimiter = @"/"
             };
 
-            try
+            List<S3Object> results = new List<S3Object>();
+
+            do
             {
-                List<S3Object> results = new List<S3Object>();
+                ListObjectsResponse response = await this.amazonS3ClientCache.ListObjectsAsync(request);
 
-                do
+                results.AddRange(response.S3Objects);
+
+                // If response is truncated, set the marker to get the next 
+                // set of keys.
+                if (response.IsTruncated)
                 {
-                    ListObjectsResponse response = await this.amazonS3ClientCache.ListObjectsAsync(request);
-
-                    results.AddRange(response.S3Objects);
-
-                    // If response is truncated, set the marker to get the next 
-                    // set of keys.
-                    if (response.IsTruncated)
-                    {
-                        request.Marker = response.NextMarker;
-                    }
-                    else
-                    {
-                        request = null;
-                    }
+                    request.Marker = response.NextMarker;
                 }
-                while (request != null);
-
-                foreach (S3Object file in results.OrderBy(x => x.LastModified.ToUniversalTime()))
+                else
                 {
-                    if (!this.IsExpired(file.LastModified.ToUniversalTime()))
-                    {
-                        break;
-                    }
-
-                    CacheIndexer.Remove(file.Key);
-                    await this.amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
-                    {
-                        BucketName = this.awsBucketName,
-                        Key = file.Key
-                    });
+                    request = null;
                 }
             }
-            catch (Exception ex)
+            while (request != null);
+
+            foreach (S3Object file in results.OrderBy(x => x.LastModified.ToUniversalTime()))
             {
-                // TODO: Remove try/catch.
-                throw ex;
+                if (!this.IsExpired(file.LastModified.ToUniversalTime()))
+                {
+                    break;
+                }
+
+                CacheIndexer.Remove(file.Key);
+                await this.amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
+                {
+                    BucketName = this.awsBucketName,
+                    Key = file.Key
+                });
             }
         }
 
@@ -321,6 +329,19 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         string creation = imageFileInfo.CreationTimeUtc.ToString(CultureInfo.InvariantCulture);
                         string length = imageFileInfo.Length.ToString(CultureInfo.InvariantCulture);
                         streamHash = string.Format("{0}{1}", creation, length);
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync()))
+                    {
+                        string lastModified = response.LastModified.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
+                        string length = response.ContentLength.ToString(CultureInfo.InvariantCulture);
+                        streamHash = string.Format("{0}{1}", lastModified, length);
                     }
                 }
 
@@ -357,13 +378,24 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.CachedPath);
             request.Method = "HEAD";
 
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            TryFiveTimes(() =>
             {
-                HttpStatusCode responseCode = response.StatusCode;
-                context.Response.Redirect(
-                    responseCode == HttpStatusCode.NotFound ? this.RequestPath : this.CachedPath, 
-                    false);
-            }
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    HttpStatusCode responseCode = response.StatusCode;
+                    context.Response.Redirect(
+                        responseCode == HttpStatusCode.NotFound ? this.RequestPath : this.CachedPath,
+                        false);
+                }
+
+                // TODO: Above seems wrong. We should be using something like below toggling between CDN and Bucket URL
+                //using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                //{
+                //    HttpStatusCode responseCode = response.StatusCode;
+                //    ImageProcessingModule.AddCorsRequestHeaders(context);
+                //    context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
+                //}
+            });
         }
 
         /// <summary>
@@ -412,7 +444,11 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <returns>Region Endpoint</returns>
         private RegionEndpoint GetRegionEndpoint()
         {
-            string regionEndpointAsString = this.Settings["RegionEndpoint"].ToLowerInvariant();
+            string regionEndpointAsString = null;
+            if (this.Settings.TryGetValue("RegionEndpoint", out regionEndpointAsString))
+            {
+                regionEndpointAsString = regionEndpointAsString.ToUpperInvariant();
+            }
 
             switch (regionEndpointAsString)
             {
@@ -440,6 +476,29 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 // Set EUWest1 as default RegionEndoint
                 default:
                     return RegionEndpoint.EUWest1;
+            }
+        }
+
+        /// <summary>
+        /// Tries to execute a delegate action five times.
+        /// </summary>
+        /// <param name="delegateAction">The delegate to be executed</param>
+        private static void TryFiveTimes(Action delegateAction)
+        {
+            for (int retry = 0; ; retry++)
+            {
+                try
+                {
+                    delegateAction();
+                    return;
+                }
+                catch (Exception)
+                {
+                    if (retry >= 5)
+                    {
+                        throw;
+                    }
+                }
             }
         }
     }
