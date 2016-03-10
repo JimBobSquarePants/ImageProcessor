@@ -6,9 +6,9 @@ namespace ImageProcessor.Web.Helpers
     using System.Globalization;
 
     /// <summary>
-    /// The point converter.
+    /// The size converter.
     /// </summary>
-    public class PointConverter : GenericArrayTypeConverter<int>
+    public class SizeConverter : GenericArrayTypeConverter<int>
     {
         /// <summary>
         /// Converts the given object to the type of this converter, using the specified context and culture 
@@ -28,7 +28,7 @@ namespace ImageProcessor.Web.Helpers
             object result = base.ConvertFrom(culture, value, propertyType);
             
             int[] list = result as int[];
-            return list != null ? new Point(list[0], list[1]) : result;
+            return list != null ? new Size(list[0], list[1]) : result;
         }
     }
 }

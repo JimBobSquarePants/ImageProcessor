@@ -42,6 +42,7 @@ namespace ImageProcessor.Web.Helpers
             this.AddColorConverters();
             this.AddFontFamilyConverters();
             this.AddPointConverters();
+            this.AddSizeConverters();
             this.AddGenericConverters();
             this.AddListConverters();
             this.AddArrayConverters();
@@ -151,6 +152,14 @@ namespace ImageProcessor.Web.Helpers
         private void AddPointConverters()
         {
             this.AddTypeConverter(typeof(Point), typeof(PointConverter));
+        }
+
+        /// <summary>
+        /// Adds point converters.
+        /// </summary>
+        private void AddSizeConverters()
+        {
+            this.AddTypeConverter(typeof(Size), typeof(SizeConverter));
         }
 
         /// <summary>

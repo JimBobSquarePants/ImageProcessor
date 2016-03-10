@@ -59,6 +59,7 @@
     <Compile Include="Helpers\QuerystringParser\Converters\GenericConvertableConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\EnumConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\IQueryParamConverter.cs" />
+    <Compile Include="Helpers\QuerystringParser\Converters\PointConverter - Copy.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\PointConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\QueryParamConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\QueryTypeDescriptor.cs" />
