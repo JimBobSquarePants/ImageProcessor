@@ -1,10 +1,10 @@
-namespace ImageProcessorCore.Formats
+﻿namespace ImageProcessorCore.Formats
 {
     using System;
     using System.IO;
     using System.Threading.Tasks;
 
-    internal class Decoder
+    internal class JpegDecoderCore
     {
         private class errMissingFF00 : Exception { }
         private class errShortHuffmanData : Exception { }
@@ -69,7 +69,7 @@ namespace ImageProcessorCore.Formats
             public byte tq; // Quantization table destination selector.
         }
 
-        public Decoder()
+        public JpegDecoderCore()
         {
             huff = new huffman_class[maxTc + 1, maxTh + 1];
             quant = new Block[maxTq + 1];
@@ -162,17 +162,19 @@ namespace ImageProcessorCore.Formats
 
             public img_ycbcr subimage(int x, int y, int w, int h)
             {
-                var ret = new img_ycbcr();
-                ret.w = w;
-                ret.h = h;
-                ret.pix_y = pix_y;
-                ret.pix_cb = pix_cb;
-                ret.pix_cr = pix_cr;
-                ret.ratio = ratio;
-                ret.y_stride = y_stride;
-                ret.c_stride = c_stride;
-                ret.y_offset = y * y_stride + x;
-                ret.c_offset = y * c_stride + x;
+                var ret = new img_ycbcr
+                {
+                    w = w,
+                    h = h,
+                    pix_y = this.pix_y,
+                    pix_cb = this.pix_cb,
+                    pix_cr = this.pix_cr,
+                    ratio = this.ratio,
+                    y_stride = this.y_stride,
+                    c_stride = this.c_stride,
+                    y_offset = y * this.y_stride + x,
+                    c_offset = y * this.c_stride + x
+                };
                 return ret;
             }
 
@@ -201,30 +203,6 @@ namespace ImageProcessorCore.Formats
             }
         }
 
-        public class img_rgb
-        {
-            public float[] pixels;
-            public int stride;
-            public int w, h;
-
-            private img_rgb()
-            {
-            }
-
-            public img_rgb(int w, int h)
-            {
-                this.w = w;
-                this.h = h;
-                this.pixels = new float[w * h * 3];
-                this.stride = w * 3;
-            }
-
-            public int get_row_offset(int y)
-            {
-                return y * stride;
-            }
-        }
-
         public class img_gray
         {
             public byte[] pixels;
@@ -247,12 +225,14 @@ namespace ImageProcessorCore.Formats
 
             public img_gray subimage(int x, int y, int w, int h)
             {
-                var ret = new img_gray();
-                ret.w = w;
-                ret.h = h;
-                ret.pixels = pixels;
-                ret.stride = stride;
-                ret.offset = y * stride + x;
+                var ret = new img_gray
+                {
+                    w = w,
+                    h = h,
+                    pixels = this.pixels,
+                    stride = this.stride,
+                    offset = y * this.stride + x
+                };
                 return ret;
             }
 
@@ -328,10 +308,10 @@ namespace ImageProcessorCore.Formats
         public int width, height;
         public int nComp;
         public img_gray img1; //grayscale
-        public img_rgb imgrgb; //RGB
+        //public img_rgb imgrgb; //RGB
 
         private img_ycbcr img3; //YCrCb
-        private Stream r;
+        private Stream inputStream;
         private bits_class bits;
         private bytes_class bytes;
         private byte[] blackPix;
@@ -391,17 +371,17 @@ namespace ImageProcessorCore.Formats
             while (n > 0)
             {
                 if (n < 17)
-                    throw new Exception("DHT has wrong length");
+                    throw new ImageFormatException("DHT has wrong length");
 
                 readFull(tmp, 0, 17);
 
                 int tc = tmp[0] >> 4;
                 if (tc > maxTc)
-                    throw new Exception("bad Tc value");
+                    throw new ImageFormatException("bad Tc value");
 
                 int th = tmp[0] & 0x0f;
                 if (th > maxTh || !progressive && th > 1)
-                    throw new Exception("bad Th value");
+                    throw new ImageFormatException("bad Th value");
 
                 huffman_class h = huff[tc, th];
 
@@ -418,13 +398,13 @@ namespace ImageProcessorCore.Formats
                 }
 
                 if (h.nCodes == 0)
-                    throw new Exception("Huffman table has zero length");
+                    throw new ImageFormatException("Huffman table has zero length");
                 if (h.nCodes > maxNCodes)
-                    throw new Exception("Huffman table has excessive length");
+                    throw new ImageFormatException("Huffman table has excessive length");
 
                 n -= h.nCodes + 17;
                 if (n < 0)
-                    throw new Exception("DHT has wrong length");
+                    throw new ImageFormatException("DHT has wrong length");
 
                 readFull(h.vals, 0, h.nCodes);
 
@@ -483,7 +463,7 @@ namespace ImageProcessorCore.Formats
         private byte decodeHuffman(huffman_class h)
         {
             if (h.nCodes == 0)
-                throw new Exception("uninitialized Huffman table");
+                throw new ImageFormatException("uninitialized Huffman table");
 
             if (bits.n < 8)
             {
@@ -529,7 +509,7 @@ namespace ImageProcessorCore.Formats
                 code <<= 1;
             }
 
-            throw new Exception("bad Huffman code");
+            throw new ImageFormatException("bad Huffman code");
         }
 
         private bool decodeBit()
@@ -560,7 +540,7 @@ namespace ImageProcessorCore.Formats
         private void fill()
         {
             if (bytes.i != bytes.j)
-                throw new Exception("jpeg: fill called when unread bytes exist");
+                throw new ImageFormatException("jpeg: fill called when unread bytes exist");
 
             // Move the last 2 bytes to the start of the buffer, in case we need
             // to call unreadByteStuffedByte.
@@ -573,7 +553,7 @@ namespace ImageProcessorCore.Formats
             }
 
             // Fill in the rest of the buffer.
-            int n = r.Read(bytes.buf, bytes.j, bytes.buf.Length - bytes.j);
+            int n = inputStream.Read(bytes.buf, bytes.j, bytes.buf.Length - bytes.j);
             if (n == 0)
                 throw new errEOF();
             bytes.j += n;
@@ -701,7 +681,7 @@ namespace ImageProcessorCore.Formats
         private void processSOF(int n)
         {
             if (nComp != 0)
-                throw new Exception("multiple SOF markers");
+                throw new ImageFormatException("multiple SOF markers");
 
             switch (n)
             {
@@ -715,19 +695,19 @@ namespace ImageProcessorCore.Formats
                     nComp = 4;
                     break;
                 default:
-                    throw new Exception("number of components");
+                    throw new ImageFormatException("number of components");
             }
 
             readFull(tmp, 0, n);
 
             // We only support 8-bit precision.
             if (tmp[0] != 8)
-                throw new Exception("precision");
+                throw new ImageFormatException("precision");
 
             height = (tmp[1] << 8) + tmp[2];
             width = (tmp[3] << 8) + tmp[4];
             if (tmp[5] != nComp)
-                throw new Exception("SOF has wrong length");
+                throw new ImageFormatException("SOF has wrong length");
 
             for (int i = 0; i < nComp; i++)
             {
@@ -737,20 +717,20 @@ namespace ImageProcessorCore.Formats
                 for (int j = 0; j < i; j++)
                 {
                     if (comp[i].c == comp[j].c)
-                        throw new Exception("repeated component identifier");
+                        throw new ImageFormatException("Repeated component identifier");
                 }
 
                 comp[i].tq = tmp[8 + 3 * i];
                 if (comp[i].tq > maxTq)
-                    throw new Exception("bad Tq value");
+                    throw new ImageFormatException("Bad Tq value");
 
                 byte hv = tmp[7 + 3 * i];
                 int h = hv >> 4;
                 int v = hv & 0x0f;
                 if (h < 1 || 4 < h || v < 1 || 4 < v)
-                    throw new Exception("luma/chroma subsampling ratio");
+                    throw new ImageFormatException("Unsupported Luma/chroma subsampling ratio");
                 if (h == 3 || v == 3)
-                    throw new Exception("unsupported subsampling ratio");
+                    throw new ImageFormatException("Lnsupported subsampling ratio");
 
                 switch (nComp)
                 {
@@ -786,19 +766,19 @@ namespace ImageProcessorCore.Formats
                                     // either 1, 2 or 4, so invalid (h, v) combinations are those
                                     // with v == 4.
                                     if (v == 4)
-                                        throw new Exception("unsupported subsampling ratio");
+                                        throw new ImageFormatException("unsupported subsampling ratio");
                                     break;
                                 }
                             case 1: // Cb.
                                 {
                                     if (comp[0].h % h != 0 || comp[0].v % v != 0)
-                                        throw new Exception("unsupported subsampling ratio");
+                                        throw new ImageFormatException("unsupported subsampling ratio");
                                     break;
                                 }
                             case 2: // Cr.
                                 {
                                     if (comp[1].h != h || comp[1].v != v)
-                                        throw new Exception("unsupported subsampling ratio");
+                                        throw new ImageFormatException("unsupported subsampling ratio");
                                     break;
                                 }
                         }
@@ -818,16 +798,16 @@ namespace ImageProcessorCore.Formats
                         {
                             case 0:
                                 if (hv != 0x11 && hv != 0x22)
-                                    throw new Exception("unsupported subsampling ratio");
+                                    throw new ImageFormatException("unsupported subsampling ratio");
                                 break;
                             case 1:
                             case 2:
                                 if (hv != 0x11)
-                                    throw new Exception("unsupported subsampling ratio");
+                                    throw new ImageFormatException("unsupported subsampling ratio");
                                 break;
                             case 3:
                                 if (comp[0].h != h || comp[0].v != v)
-                                    throw new Exception("unsupported subsampling ratio");
+                                    throw new ImageFormatException("unsupported subsampling ratio");
                                 break;
                         }
                         break;
@@ -849,7 +829,7 @@ namespace ImageProcessorCore.Formats
                 byte x = readByte();
                 byte tq = (byte)(x & 0x0f);
                 if (tq > maxTq)
-                    throw new Exception("bad Tq value");
+                    throw new ImageFormatException("bad Tq value");
 
                 switch (x >> 4)
                 {
@@ -878,7 +858,7 @@ namespace ImageProcessorCore.Formats
                             quant[tq][i] = ((int)tmp[2 * i] << 8) | (int)tmp[2 * i + 1];
                         break;
                     default:
-                        throw new Exception("bad Pq value");
+                        throw new ImageFormatException("bad Pq value");
                 }
 
                 if (done)
@@ -886,14 +866,14 @@ namespace ImageProcessorCore.Formats
             }
 
             if (n != 0)
-                throw new Exception("DQT has wrong length");
+                throw new ImageFormatException("DQT has wrong length");
         }
 
         // Specified in section B.2.4.4.
         private void processDRI(int n)
         {
             if (n != 2)
-                throw new Exception("DRI has wrong length");
+                throw new ImageFormatException("DRI has wrong length");
 
             readFull(tmp, 0, 2);
             ri = ((int)tmp[0] << 8) + (int)tmp[1];
@@ -937,14 +917,16 @@ namespace ImageProcessorCore.Formats
         }
 
         // decode reads a JPEG image from r and returns it as an image.Image.
-        public void decode(Stream r, bool configOnly)
+        public void Decode(Stream stream, ImageBase image, bool configOnly)
         {
-            this.r = r;
+            this.inputStream = stream;
 
             // Check for the Start Of Image marker.
             readFull(tmp, 0, 2);
             if (tmp[0] != 0xff || tmp[1] != soiMarker)
-                throw new Exception("missing SOI marker");
+            {
+                throw new ImageFormatException("Missing SOI marker.");
+            }
 
             // Process the remaining segments until the End Of Image marker.
             while (true)
@@ -989,8 +971,11 @@ namespace ImageProcessorCore.Formats
                     marker = readByte();
                 }
 
-                if (marker == eoiMarker) // End Of Image.
+                // End Of Image.
+                if (marker == eoiMarker)
+                {
                     break;
+                }
 
                 if (rst0Marker <= marker && marker <= rst7Marker)
                 {
@@ -1008,7 +993,7 @@ namespace ImageProcessorCore.Formats
                 readFull(tmp, 0, 2);
                 int n = ((int)tmp[0] << 8) + (int)tmp[1] - 2;
                 if (n < 0)
-                    throw new Exception("short segment length");
+                    throw new ImageFormatException("short segment length");
 
                 switch (marker)
                 {
@@ -1018,7 +1003,10 @@ namespace ImageProcessorCore.Formats
                         progressive = (marker == sof2Marker);
                         processSOF(n);
                         if (configOnly && jfif)
+                        {
                             return;
+                        }
+
                         break;
                     case dhtMarker:
                         if (configOnly)
@@ -1034,9 +1022,11 @@ namespace ImageProcessorCore.Formats
                         break;
                     case sosMarker:
                         if (configOnly)
+                        {
                             return;
-                        else
-                            processSOS(n);
+                        }
+
+                        processSOS(n);
                         break;
                     case driMarker:
                         if (configOnly)
@@ -1052,11 +1042,13 @@ namespace ImageProcessorCore.Formats
                         break;
                     default:
                         if (app0Marker <= marker && marker <= app15Marker || marker == comMarker)
+                        {
                             ignore(n);
+                        }
                         else if (marker < 0xc0) // See Table B.1 "Marker code assignments".
-                            throw new Exception("unknown marker");
+                            throw new ImageFormatException("Unknown marker");
                         else
-                            throw new Exception("unknown marker");
+                            throw new ImageFormatException("Unknown marker");
                         break;
                 }
             }
@@ -1066,80 +1058,86 @@ namespace ImageProcessorCore.Formats
                 return;
             }
 
-            else if (img3 != null)
+            if (this.img3 != null)
             {
-                if (comp[0].c == 'R' && comp[1].c == 'G' && comp[2].c == 'B')
+                if (this.comp[0].c == 'R' && this.comp[1].c == 'G' && this.comp[2].c == 'B')
                 {
-                    imgrgb = convert_direct_to_rgb(width, height);
+                    this.ConvertDirectToRGB(this.width, this.height, image);
                 }
                 else
                 {
-                    imgrgb = convert_to_rgb(width, height);
+                    this.ConvertToRGB(this.width, this.height, image);
                 }
             }
             else
             {
-                throw new Exception("missing SOS marker");
+                throw new ImageFormatException("Missing SOS marker.");
             }
         }
 
-        private img_rgb convert_to_rgb(int weight, int height)
+        private void ConvertToRGB(int width, int height, ImageBase image)
         {
-            img_rgb ret = new img_rgb(weight, height);
             int cScale = comp[0].h / comp[1].h;
+
+            float[] pixels = new float[width * height * 4];
 
             Parallel.For(
                 0,
                 height,
                 y =>
                 {
-                    int po = ret.get_row_offset(y);
                     int yo = img3.get_row_y_offset(y);
                     int co = img3.get_row_c_offset(y);
 
-                    for (int x = 0; x < weight; x++)
+                    for (int x = 0; x < width; x++)
                     {
                         byte yy = img3.pix_y[yo + x];
-                        byte cb = img3.pix_cb[co + x / cScale];
-                        byte cr = img3.pix_cr[co + x / cScale];
-                        int index = po + (3 * x);
+                        byte cb = img3.pix_cb[co + (x / cScale)];
+                        byte cr = img3.pix_cr[co + (x / cScale)];
+
+                        int index = ((y * width) + x) * 4;
 
                         // Implicit casting FTW
                         Color color = new YCbCr(yy, cb, cr);
-                        ret.pixels[index] = color.R;
-                        ret.pixels[index + 1] = color.G;
-                        ret.pixels[index + 2] = color.B;
+                        pixels[index] = color.R;
+                        pixels[index + 1] = color.G;
+                        pixels[index + 2] = color.B;
+                        pixels[index + 3] = color.A;
                     }
                 });
 
-            return ret;
+            image.SetPixels(width, height, pixels);
         }
 
-        private img_rgb convert_direct_to_rgb(int w, int h)
+        private void ConvertDirectToRGB(int width, int height, ImageBase image)
         {
-            img_rgb ret = new img_rgb(w, h);
-
             int cScale = comp[0].h / comp[1].h;
-            for (var y = 0; y < h; y++)
-            {
-                int po = ret.get_row_offset(y);
-                int yo = img3.get_row_y_offset(y);
-                int co = img3.get_row_c_offset(y);
+            float[] pixels = new float[width * height * 4];
 
-                for (int x = 0; x < w; x++)
-                {
-                    byte red = img3.pix_y[yo + x];
-                    byte green = img3.pix_cb[co + x / cScale];
-                    byte blue = img3.pix_cr[co + x / cScale];
-                    int index = po + (3 * x);
-                    Color color = new Bgra32(red, green, blue);
-                    ret.pixels[index] = color.R;
-                    ret.pixels[index + 1] = color.G;
-                    ret.pixels[index + 2] = color.B;
-                }
-            }
+            Parallel.For(
+               0,
+               height,
+               y =>
+               {
+                   int yo = img3.get_row_y_offset(y);
+                   int co = img3.get_row_c_offset(y);
 
-            return ret;
+                   for (int x = 0; x < width; x++)
+                   {
+                       byte red = img3.pix_y[yo + x];
+                       byte green = img3.pix_cb[co + x / cScale];
+                       byte blue = img3.pix_cr[co + x / cScale];
+
+                       int index = ((y * width) + x) * 4;
+                       Color color = new Bgra32(red, green, blue);
+                       pixels[index] = color.R;
+                       pixels[index + 1] = color.G;
+                       pixels[index + 2] = color.B;
+                       pixels[index + 3] = color.A;
+                   }
+               });
+
+            image.SetPixels(width, height, pixels);
         }
 
         private struct scan_scruct
@@ -1202,7 +1200,7 @@ namespace ImageProcessorCore.Formats
                 {
                     if (scan[i].compIndex == scan[j].compIndex)
                     {
-                        throw new Exception("repeated component selector");
+                        throw new ImageFormatException("Repeated component selector");
                     }
                 }
 
@@ -1256,11 +1254,11 @@ namespace ImageProcessorCore.Formats
                 ah = (int)(tmp[3 + 2 * nComp] >> 4);
                 al = (int)(tmp[3 + 2 * nComp] & 0x0f);
                 if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || Block.blockSize <= zigEnd)
-                    throw new Exception("bad spectral selection bounds"); ;
+                    throw new ImageFormatException("bad spectral selection bounds"); ;
                 if (zigStart != 0 && nComp != 1)
-                    throw new Exception("progressive AC coefficients for more than one component");
+                    throw new ImageFormatException("progressive AC coefficients for more than one component");
                 if (ah != 0 && ah != al + 1)
-                    throw new Exception("bad successive approximation values");
+                    throw new ImageFormatException("bad successive approximation values");
             }
 
             // mxx and myy are the number of MCUs (Minimum Coded Units) in the image.
@@ -1284,7 +1282,9 @@ namespace ImageProcessorCore.Formats
                         progCoeffs[compIndex] = new Block[mxx * myy * comp[compIndex].h * comp[compIndex].v];
 
                         for (int j = 0; j < progCoeffs[compIndex].Length; j++)
+                        {
                             progCoeffs[compIndex][j] = new Block();
+                        }
                     }
                 }
             }
@@ -1371,10 +1371,14 @@ namespace ImageProcessorCore.Formats
                                 if (zig == 0)
                                 {
                                     zig++;
+
                                     // Decode the DC coefficient, as specified in section F.2.2.1.
                                     byte value = decodeHuffman(huff[dcTable, scan[i].td]);
                                     if (value > 16)
-                                        throw new Exception("excessive DC component");
+                                    {
+                                        throw new ImageFormatException("Excessive DC component");
+                                    }
+
                                     int dcDelta = receiveExtend(value);
                                     dc[compIndex] += dcDelta;
                                     b[0] = dc[compIndex] << al;
@@ -1457,33 +1461,31 @@ namespace ImageProcessorCore.Formats
                                 switch (compIndex)
                                 {
                                     case 0:
-                                        {
-                                            dst = img3.pix_y;
-                                            stride = img3.y_stride;
-                                            offset = img3.y_offset + 8 * (by * img3.y_stride + bx);
-                                            break;
-                                        }
+                                        dst = img3.pix_y;
+                                        stride = img3.y_stride;
+                                        offset = img3.y_offset + 8 * (by * img3.y_stride + bx);
+                                        break;
+
                                     case 1:
-                                        {
-                                            dst = img3.pix_cb;
-                                            stride = img3.c_stride;
-                                            offset = img3.c_offset + 8 * (by * img3.c_stride + bx);
-                                            break;
-                                        }
+                                        dst = img3.pix_cb;
+                                        stride = img3.c_stride;
+                                        offset = img3.c_offset + 8 * (by * img3.c_stride + bx);
+                                        break;
+
                                     case 2:
-                                        {
-                                            dst = img3.pix_cr;
-                                            stride = img3.c_stride;
-                                            offset = img3.c_offset + 8 * (by * img3.c_stride + bx);
-                                            break;
-                                        }
+                                        dst = img3.pix_cr;
+                                        stride = img3.c_stride;
+                                        offset = img3.c_offset + 8 * (by * img3.c_stride + bx);
+                                        break;
+
                                     case 3:
-                                        {
-                                            //dst, stride = blackPix[8*(by*blackStride+bx):], blackStride
-                                            break;
-                                        }
+                                        // dst, stride = blackPix[8*(by*blackStride+bx):], blackStride
+                                        // break;
+                                        // TODO: Check this.
+                                        throw new ImageFormatException("Too many components");
+
                                     default:
-                                        throw new Exception("too many components");
+                                        throw new ImageFormatException("Too many components");
                                 }
                             }
 
@@ -1492,16 +1494,25 @@ namespace ImageProcessorCore.Formats
                             {
                                 int y8 = y * 8;
                                 int yStride = y * stride;
+
                                 for (int x = 0; x < 8; x++)
                                 {
                                     int c = b[y8 + x];
                                     if (c < -128)
+                                    {
                                         c = 0;
+                                    }
                                     else if (c > 127)
+                                    {
                                         c = 255;
+                                    }
                                     else
+                                    {
                                         c += 128;
+                                    }
 
+                                    // TODO: I think we can cut out all the double looping by
+                                    // assigning the color here.
                                     dst[yStride + x + offset] = (byte)c;
                                 }
                             }
@@ -1516,16 +1527,22 @@ namespace ImageProcessorCore.Formats
                         // but this one assumes well-formed input, and hence the restart marker follows immediately.
                         readFull(tmp, 0, 2);
                         if (tmp[0] != 0xff || tmp[1] != expectedRST)
-                            throw new Exception("bad RST marker");
+                        {
+                            throw new ImageFormatException("Bad RST marker");
+                        }
 
                         expectedRST++;
                         if (expectedRST == rst7Marker + 1)
+                        {
                             expectedRST = rst0Marker;
+                        }
 
                         // Reset the Huffman decoder.
                         bits = new bits_class();
+
                         // Reset the DC components, as per section F.2.1.3.1.
                         dc = new int[maxComponents];
+
                         // Reset the progressive decoder state, as per section G.1.2.2.
                         eobRun = 0;
                     }
@@ -1541,7 +1558,7 @@ namespace ImageProcessorCore.Formats
             if (zigStart == 0)
             {
                 if (zigEnd != 0)
-                    throw new Exception("Invalid state for zig DC component");
+                    throw new ImageFormatException("Invalid state for zig DC component");
 
                 bool bit = decodeBit();
                 if (bit)
@@ -1581,12 +1598,12 @@ namespace ImageProcessorCore.Formats
                                 z = -z;
                             break;
                         default:
-                            throw new Exception("unexpected Huffman code");
+                            throw new ImageFormatException("unexpected Huffman code");
                     }
 
                     zig = refineNonZeroes(b, zig, zigEnd, val0, delta);
                     if (zig > zigEnd)
-                        throw new Exception("too many coefficients");
+                        throw new ImageFormatException("too many coefficients");
 
                     if (z != 0)
                         b[unzig[zig]] = z;
