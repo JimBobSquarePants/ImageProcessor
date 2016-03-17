@@ -17,6 +17,7 @@ namespace ImageProcessor.Web.HttpModules
     using System.Linq;
     using System.Net;
     using System.Reflection;
+    using System.Security.Policy;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Web;
@@ -204,7 +205,8 @@ namespace ImageProcessor.Web.HttpModules
         {
             if (!string.IsNullOrEmpty(context.Request.Headers["Origin"]))
             {
-                string origin = context.Request.Headers["Origin"];
+                // Ensure origin is sanitized.
+                string origin = context.Server.UrlEncode(context.Request.Headers["Origin"]);
 
                 ImageSecuritySection.CORSOriginElement origins =
                     ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
