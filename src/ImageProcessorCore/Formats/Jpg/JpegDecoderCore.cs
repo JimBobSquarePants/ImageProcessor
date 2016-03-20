@@ -66,7 +66,7 @@ namespace ImageProcessorCore.Formats
             53, 60, 61, 54, 47, 55, 62, 63,
         };
 
-        private class component
+        private class Component
         {
             public int h; // Horizontal sampling factor.
             public int v; // Vertical sampling factor.
@@ -79,7 +79,7 @@ namespace ImageProcessorCore.Formats
             huff = new huffman_class[maxTc + 1, maxTh + 1];
             quant = new Block[maxTq + 1];
             tmp = new byte[2 * Block.blockSize];
-            comp = new component[maxComponents];
+            comp = new Component[maxComponents];
             progCoeffs = new Block[maxComponents][];
             bits = new bits_class();
             bytes = new bytes_class();
@@ -92,7 +92,7 @@ namespace ImageProcessorCore.Formats
                 quant[i] = new Block();
 
             for (int i = 0; i < comp.Length; i++)
-                comp[i] = new component();
+                comp[i] = new Component();
         }
 
         private class img_ycbcr
@@ -328,7 +328,7 @@ namespace ImageProcessorCore.Formats
         private bool adobeTransformValid;
         private byte adobeTransform;
         private ushort eobRun; // End-of-Band run, specified in section G.1.2.2.
-        private component[] comp;
+        private Component[] comp;
         private Block[][] progCoeffs; // Saved state between progressive-mode scans.
         private huffman_class[,] huff;
         private Block[] quant; // Quantization tables, in zig-zag order.
@@ -1031,7 +1031,7 @@ namespace ImageProcessorCore.Formats
                             return;
                         }
 
-                        processSOS(n);
+                        ProcessSOS(n);
                         break;
                     case driMarker:
                         if (configOnly)
@@ -1058,14 +1058,14 @@ namespace ImageProcessorCore.Formats
                 }
             }
 
-            if (img1 != null)
+            if (this.img1 != null)
             {
                 return;
             }
 
             if (this.img3 != null)
             {
-                if (this.comp[0].c == 'R' && this.comp[1].c == 'G' && this.comp[2].c == 'B')
+                if (this.IsRGB())
                 {
                     this.ConvertDirectToRGB(this.width, this.height, image);
                 }
@@ -1145,44 +1145,61 @@ namespace ImageProcessorCore.Formats
             image.SetPixels(width, height, pixels);
         }
 
-        private struct scan_scruct
+        private struct Scan
         {
             public byte compIndex;
             public byte td;
             public byte ta;
         }
 
-        // Specified in section B.2.3.
-        void processSOS(int n)
+        /// <summary>
+        /// Processes the SOS (Start of scan marker).
+        /// </summary>
+        /// <remarks>
+        /// TODO: This is throwing an error when decoding progressive images taken from 
+        /// Facebook. The second segment is returning 1 component (first is 3) this is 
+        /// throwing an error on line 1208.
+        /// </remarks>
+        /// <remarks>
+        /// TODO: This also needs some significant refactoring to follow a more OO format.
+        /// </remarks>
+        /// <param name="n">
+        /// The first byte of the current image marker.
+        /// </param>
+        /// <exception cref="ImageFormatException">
+        /// Missing SOF Marker
+        /// SOS has wrong length
+        /// </exception>
+        private void ProcessSOS(int n)
         {
-            if (nComp == 0)
+            if (this.nComp == 0)
             {
                 throw new ImageFormatException("missing SOF marker");
             }
 
-            if (n < 6 || 4 + 2 * nComp < n || n % 2 != 0)
+            if (n < 6 || 4 + (2 * this.nComp) < n || n % 2 != 0)
             {
                 throw new ImageFormatException("SOS has wrong length");
             }
 
-            readFull(tmp, 0, n);
-            nComp = tmp[0];
+            this.readFull(this.tmp, 0, n);
+            this.nComp = this.tmp[0];
 
-            if (n != 4 + 2 * nComp)
+            if (n != 4 + (2 * this.nComp))
             {
                 throw new ImageFormatException("SOS length inconsistent with number of components");
             }
 
-            var scan = new scan_scruct[maxComponents];
+            Scan[] scan = new Scan[maxComponents];
             int totalHV = 0;
-            for (int i = 0; i < nComp; i++)
+            for (int i = 0; i < this.nComp; i++)
             {
                 // Component selector.
-                int cs = tmp[1 + (2 * i)];
+                int cs = this.tmp[1 + (2 * i)];
                 int compIndex = -1;
-                for (int j = 0; j < nComp; j++)
+                for (int j = 0; j < this.nComp; j++)
                 {
-                    var compv = comp[j];
+                    Component compv = this.comp[j];
                     if (cs == compv.c)
                     {
                         compIndex = j;
@@ -1209,15 +1226,15 @@ namespace ImageProcessorCore.Formats
                     }
                 }
 
-                totalHV += comp[compIndex].h * comp[compIndex].v;
+                totalHV += this.comp[compIndex].h * this.comp[compIndex].v;
 
-                scan[i].td = (byte)(tmp[2 + 2 * i] >> 4);
+                scan[i].td = (byte)(this.tmp[2 + (2 * i)] >> 4);
                 if (scan[i].td > maxTh)
                 {
                     throw new ImageFormatException("bad Td value");
                 }
 
-                scan[i].ta = (byte)(tmp[2 + 2 * i] & 0x0f);
+                scan[i].ta = (byte)(this.tmp[2 + (2 * i)] & 0x0f);
                 if (scan[i].ta > maxTh)
                 {
                     throw new ImageFormatException("bad Ta value");
@@ -1226,7 +1243,7 @@ namespace ImageProcessorCore.Formats
 
             // Section B.2.3 states that if there is more than one component then the
             // total H*V values in a scan must be <= 10.
-            if (nComp > 1 && totalHV > 10)
+            if (this.nComp > 1 && totalHV > 10)
             {
                 throw new ImageFormatException("Total sampling factors too large.");
             }
@@ -1254,47 +1271,55 @@ namespace ImageProcessorCore.Formats
 
             if (progressive)
             {
-                zigStart = (int)(tmp[1 + 2 * nComp]);
-                zigEnd = (int)(tmp[2 + 2 * nComp]);
-                ah = (int)(tmp[3 + 2 * nComp] >> 4);
-                al = (int)(tmp[3 + 2 * nComp] & 0x0f);
+                zigStart = (int)this.tmp[1 + (2 * this.nComp)];
+                zigEnd = (int)this.tmp[2 + (2 * this.nComp)];
+                ah = (int)(this.tmp[3 + (2 * this.nComp)] >> 4);
+                al = (int)(this.tmp[3 + (2 * this.nComp)] & 0x0f);
                 if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || Block.blockSize <= zigEnd)
-                    throw new ImageFormatException("bad spectral selection bounds"); ;
-                if (zigStart != 0 && nComp != 1)
+                {
+                    throw new ImageFormatException("bad spectral selection bounds");
+                }
+
+                if (zigStart != 0 && this.nComp != 1)
+                {
                     throw new ImageFormatException("progressive AC coefficients for more than one component");
+                }
+
                 if (ah != 0 && ah != al + 1)
+                {
                     throw new ImageFormatException("bad successive approximation values");
+                }
             }
 
             // mxx and myy are the number of MCUs (Minimum Coded Units) in the image.
-            int h0 = comp[0].h;
-            int v0 = comp[0].v;
-            int mxx = (width + 8 * h0 - 1) / (8 * h0);
-            int myy = (height + 8 * v0 - 1) / (8 * v0);
+            int h0 = this.comp[0].h;
+            int v0 = this.comp[0].v;
+            int mxx = (this.width + (8 * h0) - 1) / (8 * h0);
+            int myy = (this.height + (8 * v0) - 1) / (8 * v0);
 
-            if (img1 == null && img3 == null)
+            if (this.img1 == null && this.img3 == null)
             {
-                makeImg(mxx, myy);
+                this.makeImg(mxx, myy);
             }
 
-            if (progressive)
+            if (this.progressive)
             {
-                for (int i = 0; i < nComp; i++)
+                for (int i = 0; i < this.nComp; i++)
                 {
                     int compIndex = scan[i].compIndex;
-                    if (progCoeffs[compIndex] == null)
+                    if (this.progCoeffs[compIndex] == null)
                     {
-                        progCoeffs[compIndex] = new Block[mxx * myy * comp[compIndex].h * comp[compIndex].v];
+                        this.progCoeffs[compIndex] = new Block[mxx * myy * this.comp[compIndex].h * this.comp[compIndex].v];
 
-                        for (int j = 0; j < progCoeffs[compIndex].Length; j++)
+                        for (int j = 0; j < this.progCoeffs[compIndex].Length; j++)
                         {
-                            progCoeffs[compIndex][j] = new Block();
+                            this.progCoeffs[compIndex][j] = new Block();
                         }
                     }
                 }
             }
 
-            bits = new bits_class();
+            this.bits = new bits_class();
 
             byte mcu = 0;
             byte expectedRST = rst0Marker;
@@ -1696,6 +1721,23 @@ namespace ImageProcessorCore.Formats
                     d.blackStride = 8 * h3 * mxx
                 }*/
             }
+        }
+
+        private bool IsRGB()
+        {
+            if (this.jfif)
+            {
+                return false;
+            }
+
+            if (this.adobeTransformValid && this.adobeTransform == adobeTransformUnknown)
+            {
+                // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
+                // says that 0 means Unknown (and in practice RGB) and 1 means YCbCr.
+                return true;
+            }
+
+            return this.comp[0].c == 'R' && this.comp[1].c == 'G' && this.comp[2].c == 'B';
         }
     }
 }
