@@ -1161,16 +1161,16 @@
             }
 
             readFull(tmp, 0, n);
-            nComp = tmp[0];
+            var lnComp = tmp[0];
 
-            if (n != 4 + 2 * nComp)
+            if (n != 4 + 2 * lnComp)
             {
                 throw new ImageFormatException("SOS length inconsistent with number of components");
             }
 
             var scan = new scan_scruct[maxComponents];
             int totalHV = 0;
-            for (int i = 0; i < nComp; i++)
+            for (int i = 0; i < lnComp; i++)
             {
                 // Component selector.
                 int cs = tmp[1 + (2 * i)];
@@ -1249,13 +1249,13 @@
 
             if (progressive)
             {
-                zigStart = (int)(tmp[1 + 2 * nComp]);
-                zigEnd = (int)(tmp[2 + 2 * nComp]);
-                ah = (int)(tmp[3 + 2 * nComp] >> 4);
-                al = (int)(tmp[3 + 2 * nComp] & 0x0f);
+                zigStart = (int)(tmp[1 + 2 * lnComp]);
+                zigEnd = (int)(tmp[2 + 2 * lnComp]);
+                ah = (int)(tmp[3 + 2 * lnComp] >> 4);
+                al = (int)(tmp[3 + 2 * lnComp] & 0x0f);
                 if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || Block.blockSize <= zigEnd)
-                    throw new ImageFormatException("bad spectral selection bounds"); ;
-                if (zigStart != 0 && nComp != 1)
+                    throw new ImageFormatException("bad spectral selection bounds");
+                if (zigStart != 0 && lnComp != 1)
                     throw new ImageFormatException("progressive AC coefficients for more than one component");
                 if (ah != 0 && ah != al + 1)
                     throw new ImageFormatException("bad successive approximation values");
@@ -1274,7 +1274,7 @@
 
             if (progressive)
             {
-                for (int i = 0; i < nComp; i++)
+                for (int i = 0; i < lnComp; i++)
                 {
                     int compIndex = scan[i].compIndex;
                     if (progCoeffs[compIndex] == null)
@@ -1306,7 +1306,7 @@
             {
                 for (int mx = 0; mx < mxx; mx++)
                 {
-                    for (int i = 0; i < nComp; i++)
+                    for (int i = 0; i < lnComp; i++)
                     {
                         int compIndex = scan[i].compIndex;
                         int hi = comp[compIndex].h;
@@ -1340,7 +1340,7 @@
                             // The non-interleaved scans will process only 6 Y blocks:
                             //  0 1 2
                             //  3 4 5
-                            if (nComp != 1)
+                            if (lnComp != 1)
                             {
                                 bx = hi * mx + j % hi;
                                 by = vi * my + j / hi;
@@ -1603,7 +1603,7 @@
 
                     zig = refineNonZeroes(b, zig, zigEnd, val0, delta);
                     if (zig > zigEnd)
-                        throw new ImageFormatException("too many coefficients");
+                        throw new ImageFormatException(string.Format("too many coefficients {0} > {1}", zig, zigEnd));
 
                     if (z != 0)
                         b[unzig[zig]] = z;
