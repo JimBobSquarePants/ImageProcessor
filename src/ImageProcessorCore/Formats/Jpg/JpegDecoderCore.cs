@@ -337,7 +337,7 @@
             while (true)
             {
                 var c = readByteStuffedByte();
-                bits.a = bits.a << 8 | (uint)c;
+                bits.a = (bits.a << 8) | (uint)c;
                 bits.n += 8;
                 if (bits.m == 0)
                     bits.m = 1 << 7;
@@ -494,7 +494,7 @@
                 return (byte)(v >> 8);
             }
 
-            slowPath:
+slowPath:
             int code = 0;
             for (int i = 0; i < maxCodeLength; i++)
             {
@@ -1573,6 +1573,7 @@
             {
                 for (; zig <= zigEnd; zig++)
                 {
+                    bool done = false;
                     int z = 0;
                     var val = decodeHuffman(h);
                     int val0 = val >> 4;
@@ -1589,6 +1590,8 @@
                                     uint bits = decodeBits(val0);
                                     eobRun |= (ushort)bits;
                                 }
+
+                                done = true;
                             }
                             break;
                         case 1:
@@ -1600,6 +1603,9 @@
                         default:
                             throw new ImageFormatException("unexpected Huffman code");
                     }
+
+                    if(done)
+                        break;
 
                     zig = refineNonZeroes(b, zig, zigEnd, val0, delta);
                     if (zig > zigEnd)
