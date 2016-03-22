@@ -644,9 +644,9 @@ slowPath:
                 else
                 {
                     Array.Copy(bytes.buf, bytes.i, data, offset, bytes.j - bytes.i);
-                    bytes.i += bytes.j - bytes.i;
                     offset += bytes.j - bytes.i;
                     len -= bytes.j - bytes.i;
+                    bytes.i += bytes.j - bytes.i;
 
                     fill();
                 }
