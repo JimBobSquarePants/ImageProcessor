@@ -342,7 +342,7 @@ namespace ImageProcessorCore.Formats
             while (true)
             {
                 var c = readByteStuffedByte();
-                bits.a = bits.a << 8 | (uint)c;
+                bits.a = (bits.a << 8) | (uint)c;
                 bits.n += 8;
                 if (bits.m == 0)
                     bits.m = 1 << 7;
@@ -649,9 +649,9 @@ namespace ImageProcessorCore.Formats
                 else
                 {
                     Array.Copy(bytes.buf, bytes.i, data, offset, bytes.j - bytes.i);
-                    bytes.i += bytes.j - bytes.i;
                     offset += bytes.j - bytes.i;
                     len -= bytes.j - bytes.i;
+                    bytes.i += bytes.j - bytes.i;
 
                     fill();
                 }
@@ -1182,17 +1182,19 @@ namespace ImageProcessorCore.Formats
                 throw new ImageFormatException("SOS has wrong length");
             }
 
-            this.readFull(this.tmp, 0, n);
-            this.nComp = this.tmp[0];
 
-            if (n != 4 + (2 * this.nComp))
+            this.readFull(this.tmp, 0, n);
+            byte lnComp = this.tmp[0];
+
+            if (n != 4 + 2 * lnComp)
             {
                 throw new ImageFormatException("SOS length inconsistent with number of components");
             }
 
             Scan[] scan = new Scan[maxComponents];
             int totalHV = 0;
-            for (int i = 0; i < this.nComp; i++)
+
+            for (int i = 0; i < lnComp; i++)
             {
                 // Component selector.
                 int cs = this.tmp[1 + (2 * i)];
@@ -1269,18 +1271,19 @@ namespace ImageProcessorCore.Formats
             int ah = 0;
             int al = 0;
 
-            if (progressive)
+            if (this.progressive)
             {
-                zigStart = (int)this.tmp[1 + (2 * this.nComp)];
-                zigEnd = (int)this.tmp[2 + (2 * this.nComp)];
-                ah = (int)(this.tmp[3 + (2 * this.nComp)] >> 4);
-                al = (int)(this.tmp[3 + (2 * this.nComp)] & 0x0f);
+                zigStart = (int)this.tmp[1 + (2 * lnComp)];
+                zigEnd = (int)this.tmp[2 + (2 * lnComp)];
+                ah = (int)(this.tmp[3 + (2 * lnComp)] >> 4);
+                al = (int)(this.tmp[3 + (2 * lnComp)] & 0x0f);
+
                 if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || Block.blockSize <= zigEnd)
                 {
                     throw new ImageFormatException("bad spectral selection bounds");
                 }
 
-                if (zigStart != 0 && this.nComp != 1)
+                if (zigStart != 0 && lnComp != 1)
                 {
                     throw new ImageFormatException("progressive AC coefficients for more than one component");
                 }
@@ -1304,7 +1307,7 @@ namespace ImageProcessorCore.Formats
 
             if (this.progressive)
             {
-                for (int i = 0; i < this.nComp; i++)
+                for (int i = 0; i < lnComp; i++)
                 {
                     int compIndex = scan[i].compIndex;
                     if (this.progCoeffs[compIndex] == null)
@@ -1336,7 +1339,7 @@ namespace ImageProcessorCore.Formats
             {
                 for (int mx = 0; mx < mxx; mx++)
                 {
-                    for (int i = 0; i < nComp; i++)
+                    for (int i = 0; i < lnComp; i++)
                     {
                         int compIndex = scan[i].compIndex;
                         int hi = comp[compIndex].h;
@@ -1370,7 +1373,7 @@ namespace ImageProcessorCore.Formats
                             // The non-interleaved scans will process only 6 Y blocks:
                             //  0 1 2
                             //  3 4 5
-                            if (nComp != 1)
+                            if (lnComp != 1)
                             {
                                 bx = hi * mx + j % hi;
                                 by = vi * my + j / hi;
@@ -1603,6 +1606,7 @@ namespace ImageProcessorCore.Formats
             {
                 for (; zig <= zigEnd; zig++)
                 {
+                    bool done = false;
                     int z = 0;
                     var val = decodeHuffman(h);
                     int val0 = val >> 4;
@@ -1619,6 +1623,8 @@ namespace ImageProcessorCore.Formats
                                     uint bits = decodeBits(val0);
                                     eobRun |= (ushort)bits;
                                 }
+
+                                done = true;
                             }
                             break;
                         case 1:
@@ -1631,9 +1637,12 @@ namespace ImageProcessorCore.Formats
                             throw new ImageFormatException("unexpected Huffman code");
                     }
 
+                    if (done)
+                        break;
+
                     zig = refineNonZeroes(b, zig, zigEnd, val0, delta);
                     if (zig > zigEnd)
-                        throw new ImageFormatException("too many coefficients");
+                        throw new ImageFormatException(string.Format("too many coefficients {0} > {1}", zig, zigEnd));
 
                     if (z != 0)
                         b[unzig[zig]] = z;
