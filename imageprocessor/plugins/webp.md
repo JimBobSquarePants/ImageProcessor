@@ -30,7 +30,9 @@ WebP support is added by adding an implementation of <a href="../extending/#isup
 
 <div class="alert" role="alert">
 
-Requires msvcr110.dll from the [Visual C++ Redistributable Package](http://www.microsoft.com/en-us/download/details.aspx?id=40784) to be installed on the server.
+Requires msvcr120.dll from the [Visual C++ Redistributable Package for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=40784) to be installed on the server.
+
+If you are using version 1.0.2  or lower it instead requires msvcr110.dll from the [Visual C++ Redistributable Package for Visual Studio 2012](http://www.microsoft.com/en-us/download/details.aspx?id=30679) to be installed.
 
 </div>
 
