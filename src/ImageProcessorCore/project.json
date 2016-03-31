@@ -25,7 +25,8 @@
     "System.IO": "4.0.11-beta-23516",
     "StyleCop.Analyzers": "1.0.0",
     "Microsoft.NETCore": "5.0.1-beta-23516",
-    "Microsoft.NETCore.Platforms": "1.0.1-beta-23516"
+    "Microsoft.NETCore.Platforms": "1.0.1-beta-23516",
+    "runtime.any.System.IO": "4.1.0-rc2-23811"
   },
   "frameworks": {
     "dotnet5.5": { }

@@ -23,6 +23,7 @@ namespace ImageProcessorCore.Tests
         {
             //"TestImages/Formats/Jpg/Floorplan.jpeg", // Perf: Enable for local testing only
             "TestImages/Formats/Jpg/Calliphora.jpg",
+            "TestImages/Formats/Jpg/IMG_5084.JPG",
             //"TestImages/Formats/Jpg/fb.jpg", // Perf: Enable for local testing only
             //"TestImages/Formats/Jpg/progress.jpg", // Perf: Enable for local testing only
             //"TestImages/Formats/Jpg/gamma_dalai_lama_gray.jpg", // Perf: Enable for local testing only

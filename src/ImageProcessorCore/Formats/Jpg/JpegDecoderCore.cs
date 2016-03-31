@@ -3,6 +3,8 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
+using ImageProcessorCore.Formats.Tiff;
+
 namespace ImageProcessorCore.Formats
 {
     using System;
@@ -44,6 +46,7 @@ namespace ImageProcessorCore.Formats
         // but in practice, their use is described at
         // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html
         private const int app0Marker = 0xe0;
+        private const int app1Marker = 0xe1;
         private const int app14Marker = 0xee;
         private const int app15Marker = 0xef;
 
@@ -884,6 +887,29 @@ namespace ImageProcessorCore.Formats
             ri = ((int)tmp[0] << 8) + (int)tmp[1];
         }
 
+        private void processApp1Marker(int n)
+        {
+            readFull(tmp, 0, 6);
+            n -= 6;
+
+            var exif = tmp[0] == 'E' && tmp[1] == 'x' && tmp[2] == 'i' && tmp[3] == 'f' && tmp[4] == '\0' && tmp[5] == '\0';
+
+            // n should be the number of bytes used by the tiff image. However, the input stream
+            // has already moved past the start of the tiff image... because it reads 4096 chunks at a time.
+
+            var currPos = inputStream.Seek(0, SeekOrigin.Current); // mark our position in the stream
+
+            var tiffPosition = currPos - (4096 - bytes.i);
+
+            inputStream.Seek(tiffPosition, SeekOrigin.Begin);
+
+            var tiffDecoder = new TiffDecoderCore();
+            tiffDecoder.Decode(inputStream);
+
+            inputStream.Seek(currPos, SeekOrigin.Begin); // put the position back to where it was....
+            ignore(n); // move along please nothing to see here.....
+        }
+
         private void processApp0Marker(int n)
         {
             if (n < 5)
@@ -1038,6 +1064,9 @@ namespace ImageProcessorCore.Formats
                             ignore(n);
                         else
                             processDRI(n);
+                        break;
+                    case app1Marker:
+                        processApp1Marker(n);
                         break;
                     case app0Marker:
                         processApp0Marker(n);

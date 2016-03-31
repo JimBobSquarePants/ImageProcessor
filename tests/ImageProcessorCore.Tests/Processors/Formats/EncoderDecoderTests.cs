@@ -9,10 +9,11 @@
     using System.Linq;
 
     using ImageProcessorCore.Quantizers;
+    using ImageProcessorCore.Formats.Tiff;
 
     public class EncoderDecoderTests : ProcessorTestBase
     {
-        [Fact]
+    
         public void DecodeThenEncodeImageFromStreamShouldSucceed()
         {
             if (!Directory.Exists("TestOutput/Encode"))
@@ -68,6 +69,7 @@
             }
         }
 
+      
         [Fact]
         public void ImageCanConvertFormat()
         {
