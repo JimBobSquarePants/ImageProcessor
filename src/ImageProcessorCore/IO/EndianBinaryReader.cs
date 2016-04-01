@@ -122,7 +122,7 @@ namespace ImageProcessorCore.IO
         /// </summary>
         /// <param name="offset">Offset to seek to.</param>
         /// <param name="origin">Origin of seek operation.</param>
-        public void Seek(int offset, SeekOrigin origin)
+        public virtual void Seek(int offset, SeekOrigin origin)
         {
             this.CheckDisposed();
             this.BaseStream.Seek(offset, origin);
@@ -536,7 +536,7 @@ namespace ImageProcessorCore.IO
             this.ReadInternal(data, bytesToRead);
             return this.Encoding.GetString(data, 0, data.Length);
         }
-
+        
         /// <summary>
         /// Disposes of the underlying stream.
         /// </summary>

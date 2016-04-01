@@ -1,32 +1,19 @@
-﻿using System.IO;
+﻿using System;
+using System.Text;
 
 namespace ImageProcessorCore.Formats
 {
-    public class TiffStringValueDecoder : ITiffValueDecoder
+    internal class TiffStringValueDecoder : ITiffValueDecoder
     {
-        public bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value)
+        public bool DecodeValue(TiffReader reader, TiffTagValue value, int count)
         {
-            if (entry.FieldType != IFDEntryType.AsciiString)
+            if (value.ValueType != IFDEntryType.AsciiString)
             {
                 return false;
             }
 
-            // since the ascii string contains an array of single byte characters
-            // the size of the data is just the number of characters.
-            int size = entry.ValueCount;
-
-            if (size <= 4)
-            {
-                value.Value = reader.GetNullTerminatedStringFromBuffer(entry.OffsetBuffer, size);
-                value.ValueType = entry.FieldType;
-            }
-            else
-            {
-                reader.Seek(entry.ValueOffset);
-                value.Value = reader.GetNullTerminatedString(size);
-                value.ValueType = entry.FieldType;
-            }   
-            
+            byte[] data = reader.ReadBytes(count);
+            value.Value = Encoding.ASCII.GetString(data).TrimEnd((Char)0);
 
             return true;
         }

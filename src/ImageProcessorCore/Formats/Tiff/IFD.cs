@@ -13,7 +13,7 @@ namespace ImageProcessorCore.Formats
     /// if the next record contains 4 bytes of 0's. There are no more <see cref="IFD"/> entries in the file.
     /// </summary>
     /// <exception cref="IOException"></exception>
-    public class IFD
+    internal class IFD
     {
         public int Count { get; private set; }
 
@@ -22,88 +22,29 @@ namespace ImageProcessorCore.Formats
         public IFD(TiffReader reader)
         {
             // first 2 bytes are the number of IDFEntry's in the directory.
-            short entryCount = reader.GetInt16();
+            short entryCount = reader.ReadInt16();
             if (entryCount <= 0)
             {
-                throw new IOException("Invalid tiff format. No IDFEntrys found in the directory.");
+                return;
             }
+
 
             Entries = new List<TiffTagValue>();
 
             // Go through the entries....
             for (int i = 0; i < entryCount; i++)
             {
-                // Each entry is 12 bytes in length. The first 2 bytes are the tag
-                ushort tagId = reader.GetUInt16();
-
-                // The next 2 bytes are the field type
-                short fieldType = reader.GetInt16();
-
-                // The next 4 bytes are the value count.
-                int valueCount = reader.GetInt32();
-
-                byte[] offsetBuffer = reader.GetBytes(4);
-
-                // The last 4 bytes are the value offset, or the actual value if
-                // it fits in the 4 bytes. Spec says the value offset must
-                // be on a word boundry. Which means it must be an even number.
-                // Todo: add a check for this condition...
-                //var valueOffsetOrValue = reader.GetInt32();
-                
-                var entry = new IFDEntry
+                TiffReaderSnapshot entryStart = reader.Snapshot();
+                var tagValue = TiffTagValue.Create(reader);
+                if (null != tagValue)
                 {
-                    TagId = tagId,
-                    FieldType =  (IFDEntryType)fieldType,
-                    ValueCount = valueCount,
-                    OffsetBuffer = offsetBuffer,
-                    ValueOffset = reader.GetInt32FromBuffer(offsetBuffer)
-                };
+                    Entries.Add(tagValue);
+                }
 
-                TiffReaderSnapshot snapshot = reader.Snapshot();
-                Entries.Add( TiffTagValue.Create(reader, entry) );
-                reader.Remember(snapshot);
-            }
-           
-        }
-
-
-        private int GetFieldTypeSizeInBytes(IFDEntryType entryType)
-        {
-            // size in bytes
-            int typeSize = 1;
-            switch (entryType)
-            {
-                case IFDEntryType.Double:
-                    typeSize = 8;
-                    break;
-                case IFDEntryType.Float:
-                    typeSize = 4;
-                    break;
-                case IFDEntryType.SLong:
-                    typeSize = 4;
-                    break;
-                case IFDEntryType.SRational:
-                    typeSize = 8;
-                    break;
-                case IFDEntryType.SShort:
-                    typeSize = 2;
-                    break;
-                case IFDEntryType.Short:
-                    typeSize = 2;
-                    break;
-                case IFDEntryType.Long:
-                    typeSize = 4;
-                    break;
-                case IFDEntryType.Rational:
-                    typeSize = 8;
-                    break;
-                default:
-                    typeSize = 1;
-                    break;
+                reader.Remember(entryStart);
+                reader.Seek( 12, SeekOrigin.Current);
             }
 
-            return typeSize;
-            
         }
 
         public override string ToString()

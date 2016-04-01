@@ -2,6 +2,8 @@
 {
     public class TiffReaderSnapshot
     {
-        public long Position { get; set; }
+        public int Position { get; set; }
+
+        public object Context { get; set; }
     }
 }

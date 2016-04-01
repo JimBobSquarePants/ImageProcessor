@@ -2,6 +2,8 @@
 {
     public class IFDEntry
     {
+        public TiffReaderSnapshot EntrySnapshot { get; set; }
+
         public  byte[] OffsetBuffer { get; set; }
 
         public ushort TagId { get; set; }

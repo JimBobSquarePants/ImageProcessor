@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace ImageProcessorCore.Formats
+namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
 {
-    internal class TiffExifIFDDecoder : ITiffValueDecoder
+    internal class TiffExifGPSDirectoryDecoder : ITiffValueDecoder
     {
         public bool DecodeValue(TiffReader reader, TiffTagValue value, int count)
         {
-            if (value.Tag.TagId != 34665)
+            if (value.Tag.TagId != 34853)
             {
                 return false;
             }
@@ -20,5 +23,4 @@ namespace ImageProcessorCore.Formats
             return true;
         }
     }
-
 }

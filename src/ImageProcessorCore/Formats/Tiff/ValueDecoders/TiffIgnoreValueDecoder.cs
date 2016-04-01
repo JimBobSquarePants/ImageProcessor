@@ -1,8 +1,8 @@
 ﻿namespace ImageProcessorCore.Formats
 {
-    public class TiffIgnoreValueDecoder : ITiffValueDecoder
+    internal class TiffIgnoreValueDecoder : ITiffValueDecoder
     {
-        public bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value)
+        public bool DecodeValue(TiffReader reader, TiffTagValue value, int count)
         {
             value.Value = null;
             return true;

@@ -1,8 +1,8 @@
 ﻿namespace ImageProcessorCore.Formats
 {
-    public interface ITiffValueDecoder
+    internal interface ITiffValueDecoder
     {
-   
-        bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value);
+
+        bool DecodeValue(TiffReader reader, TiffTagValue value, int count);
     }
 }

@@ -1,4 +1,5 @@
-﻿namespace ImageProcessorCore.Formats
+﻿
+namespace ImageProcessorCore.Formats
 {
     /// <summary>
     /// The type of the value in the <see cref="IFDEntry"/>. This is used to help value parsers
@@ -15,9 +16,12 @@
     /// </summary>
     public enum IFDEntryType
     {
+        Invalid = 0,
+
         /// <summary>
         /// 8-bit unsigned integer
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes= 1)]
         Byte = 1,
 
         /// <summary>
@@ -31,61 +35,72 @@
         /// first string will often begin on an odd byte
         /// </remarks>
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 1)]
         AsciiString = 2,
 
         /// <summary>
         /// 16-bit (2-byte) unsigned inter
         /// Translates to a Int16 type in .NET
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 2)]
         Short = 3,
-        
+
         /// <summary>
         /// 32-bit (4-byte) unsigned integer
         /// Translates to an Int32 type in .NET
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 4)]
         Long = 4,
 
         /// <summary>
         /// Two consecutive <see cref="Long"/>: the first represents the numerator of a fraction; the second, the denominator.
         /// Translates to 2 Int32 types in .NET
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 8)]
         Rational = 5,
 
         /// <summary>
         /// An 8-bit signed (twos-complement) integer.
         /// <remarks>https://en.wikipedia.org/wiki/Two%27s_complement</remarks>
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 1)]
         SByte = 6,
 
         /// <summary>
         /// An 8-bit byte that may contain anything, depending on the definition of the field
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 1)]
         Undfined = 7,
 
         /// <summary>
         /// A 16-bit (2-byte) signed (twos-complement) integer
         /// <remarks>https://en.wikipedia.org/wiki/Two%27s_complement</remarks>
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 2)]
         SShort = 8,
 
         /// <summary>
         /// A 32-bit (4-byte) signed (twos-complement) integer.
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 4)]
         SLong = 9,
 
         /// <summary>
         /// Two <see cref="SLong"/>: the first represents the numerator of a fraction, the second the denominator.
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 8)]
         SRational = 10,
 
         /// <summary>
         /// Single precision (4-byte) IEEE format.
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 4)]
         Float = 11,
 
         /// <summary>
         /// Double precision (8-byte) IEEE format
         /// </summary>
+        [IFDEntryTypeInfo(TypeSizeInBytes = 8)]
         Double = 12,
     }
 }
