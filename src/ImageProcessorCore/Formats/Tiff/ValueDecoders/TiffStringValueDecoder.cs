@@ -7,11 +7,13 @@ namespace ImageProcessorCore.Formats
         public bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value)
         {
             if (entry.FieldType != IFDEntryType.AsciiString)
+            {
                 return false;
+            }
 
             // since the ascii string contains an array of single byte characters
             // the size of the data is just the number of characters.
-            var size = entry.ValueCount;
+            int size = entry.ValueCount;
 
             if (size <= 4)
             {

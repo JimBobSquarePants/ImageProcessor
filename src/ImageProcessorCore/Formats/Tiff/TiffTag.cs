@@ -1,6 +1,5 @@
 ﻿namespace ImageProcessorCore.Formats
 {
-
     public class TiffTag
     {
         public ushort TagId { get; set; }

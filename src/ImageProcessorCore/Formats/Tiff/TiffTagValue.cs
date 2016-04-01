@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 
-
 namespace ImageProcessorCore.Formats
 {
     public class TiffTagValue
@@ -13,7 +12,7 @@ namespace ImageProcessorCore.Formats
 
         public static TiffTagValue Create(TiffReader reader, IFDEntry entry)
         {
-            var tag = TiffTagRegistry.Instance.Tags.SingleOrDefault(t => t.TagId == entry.TagId) 
+            TiffTag tag = TiffTagRegistry.Instance.Tags.SingleOrDefault(t => t.TagId == entry.TagId) 
                 ?? new TiffTag
                 {
                     TagId = entry.TagId,
@@ -22,7 +21,7 @@ namespace ImageProcessorCore.Formats
                     Description = "This tag is not in the registry"
                 };
 
-            var value = new TiffTagValue{Tag = tag};
+            TiffTagValue value = new TiffTagValue{Tag = tag};
 
             TiffValueDecoderRegistry.Instance.DecodeValue(reader, entry, value);
            

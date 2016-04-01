@@ -27,12 +27,16 @@ namespace ImageProcessorCore.Formats
 
 
         public TiffReader(Stream stream, BitOrder bitOrder = BitOrder.LittleEndian)
-        {   
+        {
             if (stream == null)
+            {
                 throw new ArgumentNullException(nameof(stream));
+            }
 
             if (!stream.CanSeek)
+            {
                 throw new ArgumentException("Stream must be capable of seeking.", nameof(stream));
+            }
 
             BitOrder = bitOrder;
             _stream = stream;
@@ -62,9 +66,11 @@ namespace ImageProcessorCore.Formats
         /// <exception cref="System.IO.IOException">Could not read the next byte. Probably because we reached to the end of the stream..</exception>
         public byte GetByte()
         {
-            var value = _stream.ReadByte();
+            int value = _stream.ReadByte();
             if (value == -1)
+            {
                 throw new IOException("End of data reached.");
+            }
 
             return unchecked((byte)value);
         }
@@ -72,29 +78,33 @@ namespace ImageProcessorCore.Formats
 
         public void Seek(int offset)
         {
-            var start = _begin.Position;
+            long start = _begin.Position;
 
             _stream.Seek(start + offset, SeekOrigin.Begin);
         }
 
         public sbyte GetSByte(int index)
         {
-            var buffer = new byte[1];
+            byte[] buffer = new byte[1];
             if (1 != _stream.Read(buffer, 0, 1))
+            {
                 throw new IOException("Failed to read from stream.");
+            }
             
             return unchecked((sbyte)buffer[0]);
         }
 
         public byte[] GetBytes(int count)
         {
-            var bytes = new byte[count];
-            var totalBytesRead = 0;
+            byte[] bytes = new byte[count];
+            int totalBytesRead = 0;
             while (totalBytesRead != count)
             {
                 var bytesRead = _stream.Read(bytes, totalBytesRead, count - totalBytesRead);
                 if (bytesRead == 0)
+                {
                     throw new IOException("End of data reached.");
+                }
                 totalBytesRead += bytesRead;
             }
             return bytes;
@@ -173,7 +183,7 @@ namespace ImageProcessorCore.Formats
 
         public string GetString(int bytesRequested, Encoding encoding)
         {
-            var bytes = GetBytes(bytesRequested);
+            byte[] bytes = GetBytes(bytesRequested);
             return encoding.GetString(bytes, 0, bytes.Length);
         }
 
@@ -182,7 +192,9 @@ namespace ImageProcessorCore.Formats
             var bytes = new byte[maxLengthBytes];
             var length = 0;
             while (length < bytes.Length && (bytes[length] = GetByte()) != 0)
+            {
                 length++;
+            }
             return Encoding.ASCII.GetString(bytes, 0, length);
         }
 

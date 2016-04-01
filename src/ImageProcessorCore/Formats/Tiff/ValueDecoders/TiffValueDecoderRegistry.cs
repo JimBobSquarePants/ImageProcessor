@@ -5,7 +5,7 @@ namespace ImageProcessorCore.Formats
 {
     public class TiffValueDecoderRegistry
     {
-        private List<ITiffValueDecoder> _decoders;
+        private readonly List<ITiffValueDecoder> _decoders;
 
         private static readonly Lazy<TiffValueDecoderRegistry> Lazy = new Lazy<TiffValueDecoderRegistry>(() => new TiffValueDecoderRegistry());
 
@@ -30,7 +30,9 @@ namespace ImageProcessorCore.Formats
             foreach (var valueDecoder in _decoders)
             {
                 if (valueDecoder.DecodeValue(reader, entry, value))
+                {
                     break;
+                }
             }
         }
     }

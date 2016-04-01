@@ -7,10 +7,12 @@ namespace ImageProcessorCore.Formats
         public bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value)
         {
             if (entry.FieldType != IFDEntryType.Rational)
+            {
                 return false;
+            }
             
             // URATIONAL = 2 (4-byte) unsinged integers
-            var size = entry.ValueCount * 8;
+            int size = entry.ValueCount * 8;
            
             // first 4 bytes are the numerator
             // second 4 bytes are the denominator
@@ -19,8 +21,8 @@ namespace ImageProcessorCore.Formats
             
             reader.Seek(entry.ValueOffset);
 
-            var numerator = reader.GetInt32();
-            var denominator = reader.GetInt32();
+            int numerator = reader.GetInt32();
+            int denominator = reader.GetInt32();
 
             // TODO: strongly type this... for now just use an anonymouse type
             value.Value = new {Numerator = numerator, Denominator = denominator};

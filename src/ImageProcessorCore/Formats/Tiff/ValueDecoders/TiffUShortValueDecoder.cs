@@ -7,14 +7,18 @@ namespace ImageProcessorCore.Formats
         public bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value)
         {
             if (entry.FieldType != IFDEntryType.Short)
+            {
                 return false;
+            }
 
             // no need... to big
             if (entry.ValueCount > 1600)
+            {
                 return false;
+            }
 
             // ushort takes 2 bytes
-            var size = entry.ValueCount * 2;
+            int size = entry.ValueCount * 2;
 
             // Does the value fit into the offset directly
             if (size <= 4 )
@@ -27,8 +31,8 @@ namespace ImageProcessorCore.Formats
                 // size would be less the 4 ( or fit into the offset )
                 reader.Seek(entry.ValueOffset);
 
-                var array = new ushort[entry.ValueCount];
-                for (var i = 0; i < entry.ValueCount; i++)
+                ushort[] array = new ushort[entry.ValueCount];
+                for (int i = 0; i < entry.ValueCount; i++)
                     array[i] = reader.GetUInt16();
 
                 value.Value = array;

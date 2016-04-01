@@ -22,9 +22,11 @@ namespace ImageProcessorCore.Formats
         public IFD(TiffReader reader)
         {
             // first 2 bytes are the number of IDFEntry's in the directory.
-            var entryCount = reader.GetInt16();
-            if( entryCount <= 0 )
+            short entryCount = reader.GetInt16();
+            if (entryCount <= 0)
+            {
                 throw new IOException("Invalid tiff format. No IDFEntrys found in the directory.");
+            }
 
             Entries = new List<TiffTagValue>();
 
@@ -32,15 +34,15 @@ namespace ImageProcessorCore.Formats
             for (int i = 0; i < entryCount; i++)
             {
                 // Each entry is 12 bytes in length. The first 2 bytes are the tag
-                var tagId = reader.GetUInt16();
+                ushort tagId = reader.GetUInt16();
 
                 // The next 2 bytes are the field type
-                var fieldType = reader.GetInt16();
+                short fieldType = reader.GetInt16();
 
                 // The next 4 bytes are the value count.
-                var valueCount = reader.GetInt32();
+                int valueCount = reader.GetInt32();
 
-                var offsetBuffer = reader.GetBytes(4);
+                byte[] offsetBuffer = reader.GetBytes(4);
 
                 // The last 4 bytes are the value offset, or the actual value if
                 // it fits in the 4 bytes. Spec says the value offset must
@@ -57,7 +59,7 @@ namespace ImageProcessorCore.Formats
                     ValueOffset = reader.GetInt32FromBuffer(offsetBuffer)
                 };
 
-                var snapshot = reader.Snapshot();
+                TiffReaderSnapshot snapshot = reader.Snapshot();
                 Entries.Add( TiffTagValue.Create(reader, entry) );
                 reader.Remember(snapshot);
             }
@@ -68,7 +70,7 @@ namespace ImageProcessorCore.Formats
         private int GetFieldTypeSizeInBytes(IFDEntryType entryType)
         {
             // size in bytes
-            var typeSize = 1;
+            int typeSize = 1;
             switch (entryType)
             {
                 case IFDEntryType.Double:

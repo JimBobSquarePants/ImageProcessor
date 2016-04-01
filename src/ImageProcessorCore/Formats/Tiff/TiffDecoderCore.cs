@@ -15,12 +15,12 @@ namespace ImageProcessorCore.Formats
             _header = new TiffHeader(_tiffReader);
                
             _directories = new List<IFD>();
-            var nextOffset = _header.Offset;
+            int nextOffset = _header.Offset;
             do
             {
                 _tiffReader.Seek(nextOffset);
 
-                var directory = new IFD(_tiffReader);
+                IFD directory = new IFD(_tiffReader);
                 _directories.Add(directory);
 
 
