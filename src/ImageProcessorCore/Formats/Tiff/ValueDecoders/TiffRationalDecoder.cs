@@ -2,7 +2,7 @@
 
 namespace ImageProcessorCore.Formats
 {
-    public class TiffURationalValueDecoder : ITiffValueDecoder
+    public class TiffRationalValueDecoder : ITiffValueDecoder
     {
         public bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value)
         {
@@ -24,9 +24,8 @@ namespace ImageProcessorCore.Formats
             int numerator = reader.GetInt32();
             int denominator = reader.GetInt32();
 
-            // TODO: strongly type this... for now just use an anonymouse type
-            value.Value = new {Numerator = numerator, Denominator = denominator};
-
+            value.Value = new Rational<int>(numerator, denominator);
+           
             return true;
         }
 

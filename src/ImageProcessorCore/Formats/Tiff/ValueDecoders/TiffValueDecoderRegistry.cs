@@ -20,7 +20,7 @@ namespace ImageProcessorCore.Formats
                 new TiffUShortValueDecoder(),
                 new TiffSShortValueDecoder(),
                 new TiffULongValueDecoder(),
-                new TiffURationalValueDecoder(),
+                new TiffRationalValueDecoder(),
                 new TiffIgnoreValueDecoder() // needs to be last...
             };
         }
