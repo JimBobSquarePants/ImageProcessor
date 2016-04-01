@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace ImageProcessorCore.Formats.Tiff
+﻿namespace ImageProcessorCore.Formats
 {
     public class IFDEntry
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
+namespace ImageProcessorCore.Formats
 {
     public class TiffSShortValueDecoder : ITiffValueDecoder
     {

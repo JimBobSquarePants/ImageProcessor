@@ -9,8 +9,7 @@
     using System.Linq;
 
     using ImageProcessorCore.Quantizers;
-    using ImageProcessorCore.Formats.Tiff;
-
+ 
     public class EncoderDecoderTests : ProcessorTestBase
     {
     

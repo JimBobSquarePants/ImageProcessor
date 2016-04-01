@@ -1,4 +1,4 @@
-﻿namespace ImageProcessorCore.Formats.Tiff
+﻿namespace ImageProcessorCore.Formats
 {
     /// <summary>
     /// The type of the value in the <see cref="IFDEntry"/>. This is used to help value parsers

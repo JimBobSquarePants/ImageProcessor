@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using ImageProcessorCore.Formats.Tiff.ValueDecoders;
 
-namespace ImageProcessorCore.Formats.Tiff
+
+namespace ImageProcessorCore.Formats
 {
     public class TiffTagValue
     {

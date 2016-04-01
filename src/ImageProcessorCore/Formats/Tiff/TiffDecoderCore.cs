@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace ImageProcessorCore.Formats.Tiff
+namespace ImageProcessorCore.Formats
 {
     internal class TiffDecoderCore
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ImageProcessorCore.Formats.Tiff
+namespace ImageProcessorCore.Formats
 {
     /// <summary>
     /// The class maintains a list of well know tiff tags. A good resource for Tiff Tag info

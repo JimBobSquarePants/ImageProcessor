@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace ImageProcessorCore.Formats.Tiff
+namespace ImageProcessorCore.Formats
 {
     /// <summary>
     /// Encapsulates a seekable stream of bytes.

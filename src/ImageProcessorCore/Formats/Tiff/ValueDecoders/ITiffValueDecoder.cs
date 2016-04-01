@@ -1,4 +1,4 @@
-﻿namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
+﻿namespace ImageProcessorCore.Formats
 {
     public interface ITiffValueDecoder
     {

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
 
-namespace ImageProcessorCore.Formats.Tiff
+namespace ImageProcessorCore.Formats
 {
     /// <summary>
     /// The IFD is short for 'Image File Directory'. It contains a bunch <see cref="IFDEntry"/> that describe the

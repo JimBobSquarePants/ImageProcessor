@@ -1,4 +1,4 @@
-﻿namespace ImageProcessorCore.Formats.Tiff
+﻿namespace ImageProcessorCore.Formats
 {
     public class TiffReaderSnapshot
     {

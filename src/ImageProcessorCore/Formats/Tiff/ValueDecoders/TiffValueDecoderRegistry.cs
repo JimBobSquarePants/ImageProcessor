@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
+namespace ImageProcessorCore.Formats
 {
     public class TiffValueDecoderRegistry
     {
