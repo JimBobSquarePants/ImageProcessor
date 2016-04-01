@@ -6,7 +6,7 @@ namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
     {
         public bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value)
         {
-            if (entry.FieldType != IFDEntryType.UShort)
+            if (entry.FieldType != IFDEntryType.Short)
                 return false;
 
             // no need... to big

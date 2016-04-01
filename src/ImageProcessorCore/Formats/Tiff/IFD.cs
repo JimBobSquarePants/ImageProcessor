@@ -89,13 +89,13 @@ namespace ImageProcessorCore.Formats.Tiff
                 case IFDEntryType.SShort:
                     typeSize = 2;
                     break;
-                case IFDEntryType.UShort:
+                case IFDEntryType.Short:
                     typeSize = 2;
                     break;
-                case IFDEntryType.ULong:
+                case IFDEntryType.Long:
                     typeSize = 4;
                     break;
-                case IFDEntryType.URational:
+                case IFDEntryType.Rational:
                     typeSize = 8;
                     break;
                 default:

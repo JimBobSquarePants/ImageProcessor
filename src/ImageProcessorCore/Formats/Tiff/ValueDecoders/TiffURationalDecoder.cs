@@ -6,7 +6,7 @@ namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
     {
         public bool DecodeValue(TiffReader reader, IFDEntry entry, TiffTagValue value)
         {
-            if (entry.FieldType != IFDEntryType.URational)
+            if (entry.FieldType != IFDEntryType.Rational)
                 return false;
             
             // URATIONAL = 2 (4-byte) unsinged integers
