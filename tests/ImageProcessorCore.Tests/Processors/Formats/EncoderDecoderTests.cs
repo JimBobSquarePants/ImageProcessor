@@ -58,12 +58,52 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Image image = new Image(stream);
-                    IQuantizer quantizer = new OctreeQuantizer();
+                    
+                    IQuantizer quantizer   = new OctreeQuantizer();
                     QuantizedImage quantizedImage = quantizer.Quantize(image, 256);
 
-                    using (FileStream output = File.OpenWrite($"TestOutput/Quantize/{Path.GetFileName(file)}"))
+                    using (FileStream output = File.OpenWrite($"TestOutput/Quantize/Octree-{Path.GetFileName(file)}"))
                     {
                         quantizedImage.ToImage().Save(output, image.CurrentImageFormat);
+                    }
+
+                    quantizer = new WuQuantizer();
+                    quantizedImage = quantizer.Quantize(image, 256);
+
+                    using (FileStream output = File.OpenWrite($"TestOutput/Quantize/Wu-{Path.GetFileName(file)}"))
+                    {
+                        quantizedImage.ToImage().Save(output, image.CurrentImageFormat);
+                    }
+
+                    quantizer = new PaletteQuantizer();
+                    quantizedImage = quantizer.Quantize(image, 256);
+
+                    using (FileStream output = File.OpenWrite($"TestOutput/Quantize/Palette-{Path.GetFileName(file)}"))
+                    {
+                        quantizedImage.ToImage().Save(output, image.CurrentImageFormat);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageCanSaveIndexedPng()
+        {
+            if (!Directory.Exists("TestOutput/Indexed"))
+            {
+                Directory.CreateDirectory("TestOutput/Indexed");
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    Image image = new Image(stream);
+
+                    using (FileStream output = File.OpenWrite($"TestOutput/Indexed/{Path.GetFileNameWithoutExtension(file)}.png"))
+                    {
+                        image.Quality = 256;
+                        image.Save(output, new PngFormat());
                     }
                 }
             }
