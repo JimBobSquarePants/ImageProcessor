@@ -901,8 +901,11 @@ namespace ImageProcessorCore.Formats
 
             inputStream.Seek(tiffPosition, SeekOrigin.Begin);
 
-            var tiffDecoder = new TiffDecoderCore();
-            tiffDecoder.Decode(inputStream);
+            if (TiffDecoderCore.IsValidTiff(inputStream))
+            {
+                var tiffDecoder = new TiffDecoderCore();
+                tiffDecoder.Decode(inputStream);
+            }
 
             inputStream.Seek(currPos, SeekOrigin.Begin); // put the position back to where it was....
             ignore(n); // move along please nothing to see here.....
