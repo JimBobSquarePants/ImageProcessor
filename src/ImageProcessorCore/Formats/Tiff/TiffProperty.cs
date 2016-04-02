@@ -11,7 +11,21 @@ namespace ImageProcessorCore.Formats
         public object Value { get; set; }
 
         public TiffDataFormat Format { get; set; }
-        
+
+        internal static TiffProperty CreateFromIptcTag(int tag, string name, object value)
+        {
+            return new TiffProperty
+            {
+                Tag = new TiffTag
+                {
+                    Name = name,
+                    TagGroup = "IPTC",
+                    TagId = (ushort) tag
+                },
+                Value = value
+            };
+        }
+
         internal static TiffProperty Create(TiffReader reader)
         {
             ushort tagId = reader.ReadUInt16();
@@ -64,7 +78,7 @@ namespace ImageProcessorCore.Formats
 
         public override string ToString()
         {
-            return Value.ToString();
+            return string.Format( "Tag: {0}, Value: {1}", Tag.Name, Value.ToString()) ;
         }
     }
 }

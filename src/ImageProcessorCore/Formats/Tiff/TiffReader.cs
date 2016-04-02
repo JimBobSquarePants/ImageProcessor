@@ -7,7 +7,7 @@ using ImageProcessorCore.IO;
 
 namespace ImageProcessorCore.Formats
 {
-    public class TiffReader : IDisposable
+    internal class TiffReader : IDisposable
     {
         /// <summary>
         /// Remembers the start of the Tiff image in the Tiff stream.
@@ -26,8 +26,10 @@ namespace ImageProcessorCore.Formats
             _reader = reader;
             _startingPositionInStream = startingPosistion;
             _directoriesVisited = new List<int>();    
-        } 
+        }
 
+        public EndianBitConverter Converter => _reader.BitConverter;
+        public Stream BaseStream => _reader.BaseStream;
 
         public int ReadInt32()
         {

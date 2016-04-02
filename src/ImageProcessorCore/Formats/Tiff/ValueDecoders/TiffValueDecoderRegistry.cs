@@ -20,6 +20,7 @@ namespace ImageProcessorCore.Formats
                 new TiffExifDirectoryDecoder(), // more specific should be first 
                 new TiffGPSDirectoryDecoder(),
                 new TiffSubDirectoryDecoder(),
+                new TiffIptcValueDecoder(),
                 new TiffStringValueDecoder(),
                 new TiffShortValueDecoder(),
                 new TiffLongDecoder(),

@@ -909,6 +909,7 @@ namespace ImageProcessorCore.Formats
                     tiffDecoder.Decode();
                 }
             }
+            tiffDecoder?.Decode();
 
             inputStream.Seek(currPos, SeekOrigin.Begin); // put the position back to where it was....
             ignore(n); // move along please nothing to see here.....

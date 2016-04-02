@@ -12,6 +12,16 @@
  
     public class EncoderDecoderTests : ProcessorTestBase
     {
+
+        [Fact]
+        public void ReadExifInfoFromTiff()
+        {
+            using (FileStream stream = File.OpenRead("TestImages/Formats/Tif/small.tif"))
+            {
+                TiffDecoderCore tiffDecoder = TiffDecoderCore.Create(stream);
+                tiffDecoder.Decode();
+            }
+        }
     
         [Fact]
         public void DecodeThenEncodeImageFromStreamShouldSucceed()

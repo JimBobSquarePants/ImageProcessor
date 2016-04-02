@@ -15,6 +15,9 @@ namespace ImageProcessorCore.Formats
         
         public TiffDirectory(TiffReader reader)
         {
+            if (null == reader)
+                return;
+
             // first 2 bytes are the number of items TiffDirectory.
             short entryCount = reader.ReadInt16();
             if (entryCount <= 0)
