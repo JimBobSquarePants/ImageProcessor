@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ImageProcessorCore.Formats.Tiff.ValueDecoders;
+using ImageProcessorCore.IO;
 
 namespace ImageProcessorCore.Formats
 {
@@ -16,17 +17,18 @@ namespace ImageProcessorCore.Formats
         {
             _decoders = new List<ITiffValueDecoder>
             {
-                new TiffExifIFDDecoder(), // more specific should be first 
-                new TiffExifGPSDirectoryDecoder(),
+                new TiffExifDirectoryDecoder(), // more specific should be first 
+                new TiffGPSDirectoryDecoder(),
+                new TiffSubDirectoryDecoder(),
                 new TiffStringValueDecoder(),
                 new TiffShortValueDecoder(),
-                new TiffLongValueDecoder(),
-                new TiffRationalValueDecoder(),
-                new TiffIgnoreValueDecoder() // needs to be last...
+                new TiffLongDecoder(),
+                new TiffRationalDecoder(),
+                new TiffIgnoreDecoder() // needs to be last...
             };
         }
 
-        public void DecodeValue(TiffReader reader, int valueCount,  TiffTagValue value)
+        public void DecodeValue(TiffReader reader, int valueCount,  TiffProperty value)
         {
             foreach (var valueDecoder in _decoders)
             {

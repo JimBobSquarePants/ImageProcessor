@@ -1,12 +1,13 @@
 ﻿using System;
+using ImageProcessorCore.IO;
 
 namespace ImageProcessorCore.Formats
 {
     internal class TiffShortValueDecoder : ITiffValueDecoder
     {
-        public bool DecodeValue(TiffReader reader, TiffTagValue value, int count)
+        public bool DecodeValue(TiffReader reader, TiffProperty value, int count)
         {
-            if (value.ValueType != IFDEntryType.Short)
+            if (value.Format != TiffDataFormat.Short)
                 return false;
 
             if (count <= 1)

@@ -13,6 +13,7 @@
     public class EncoderDecoderTests : ProcessorTestBase
     {
     
+        [Fact]
         public void DecodeThenEncodeImageFromStreamShouldSucceed()
         {
             if (!Directory.Exists("TestOutput/Encode"))

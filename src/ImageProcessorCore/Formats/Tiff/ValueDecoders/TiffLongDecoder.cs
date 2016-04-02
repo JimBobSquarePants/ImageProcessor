@@ -1,10 +1,12 @@
-﻿namespace ImageProcessorCore.Formats
+﻿using ImageProcessorCore.IO;
+
+namespace ImageProcessorCore.Formats
 {
-    internal class TiffLongValueDecoder : ITiffValueDecoder
+    internal class TiffLongDecoder : ITiffValueDecoder
     {
-        public bool DecodeValue(TiffReader reader, TiffTagValue value, int count)
+        public bool DecodeValue(TiffReader reader, TiffProperty value, int count)
         {
-            if (value.ValueType != IFDEntryType.Long)
+            if (value.Format != TiffDataFormat.Long)
                 return false;
 
             if (count <= 1)

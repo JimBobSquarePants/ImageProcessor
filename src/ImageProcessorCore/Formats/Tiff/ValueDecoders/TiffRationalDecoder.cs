@@ -1,12 +1,13 @@
 ﻿using System;
+using ImageProcessorCore.IO;
 
 namespace ImageProcessorCore.Formats
 {
-    internal class TiffRationalValueDecoder : ITiffValueDecoder
+    internal class TiffRationalDecoder : ITiffValueDecoder
     {
-        public bool DecodeValue(TiffReader reader, TiffTagValue value, int count)
+        public bool DecodeValue(TiffReader reader, TiffProperty value, int count)
         {
-            if (value.ValueType != IFDEntryType.Rational)
+            if (value.Format != TiffDataFormat.Rational)
             {
                 return false;
             }

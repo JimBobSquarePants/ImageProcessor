@@ -3,9 +3,8 @@ using System.IO;
 using ImageProcessorCore.IO;
 
 namespace ImageProcessorCore.Formats
-{
-    
-    internal static class TiffStreamExtensions
+{   
+    internal static class StreamExtensions
     {
         // using const here instead of an enum to avoid casting to an enum to check the values
         private const byte LittleEndian = 0x49; // "I"
@@ -45,22 +44,22 @@ namespace ImageProcessorCore.Formats
         }
 
         /// <summary>
-        /// Builds a <see cref="TiffReader"/> from a stream.
+        /// Builds a <see cref="EndianBinaryReader"/> from a stream.
         /// This method should not throw an exception if the stream is not located at
         /// a valid tiff location.
         /// </summary>
         /// <param name="stream">The stream you want to create the reader from.</param>
         /// <returns>
-        /// <see cref="TiffReader"/> or null if the stream is not positioned at 
+        /// <see cref="EndianBinaryReader"/> or null if the stream is not positioned at 
         /// a valid tiff image. If the stream is not a valid Tiff image, the current
         /// position in the stream will not change.
         /// </returns>
-        public static TiffReader ToTiffReader(this Stream stream)
+        public static TiffReader ToBinaryReaderFromTiffStream(this Stream stream)
         {
             // remember our position. We cannot assume beginning of file because
             // tiff images can be a segment in another file with an offset that does
             // not start at the beginning of the file.
-            var streamPosistion = stream.Position;
+            int streamPosistion = (int) stream.Position;
 
             try
             {
@@ -68,11 +67,11 @@ namespace ImageProcessorCore.Formats
                 if (null == byteConverter)
                     throw new IOException("Failed to identify the byte order.");
 
-                TiffReader reader = new TiffReader(stream, byteConverter);
+                EndianBinaryReader reader = new EndianBinaryReader(byteConverter, stream);
                 if (TiffHeaderId != reader.ReadInt16()) 
                     throw new IOException("Failed to read the tiff header id.");
-                
-                return reader;
+
+                return new TiffReader(reader, streamPosistion);
             }
             catch (Exception)
             {

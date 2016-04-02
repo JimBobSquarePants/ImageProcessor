@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using ImageProcessorCore.IO;
 
 namespace ImageProcessorCore.Formats
 {
@@ -7,15 +9,15 @@ namespace ImageProcessorCore.Formats
     /// Decodes a stream of bytes according to the TIFF 6.0 specification
     /// http://partners.adobe.com/public/developer/en/tiff/TIFF6.pdf
     /// </summary>
-    internal class TiffDecoderCore
+    internal class TiffDecoderCore : IDisposable
     {
-        private readonly TiffReader _tiffReader;
-        private readonly List<IFD> _directories;
+        private readonly TiffReader _reader;
+        private readonly List<TiffDirectory> _directories;
 
         private TiffDecoderCore(TiffReader reader)
         {
-            _tiffReader = reader;
-            _directories = new List<IFD>();
+            _reader = reader;
+            _directories = new List<TiffDirectory>();
         }
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace ImageProcessorCore.Formats
         /// <returns>True if the stream is sitting at a valid Tiff image; False otherwise.</returns>
         public static TiffDecoderCore Create(Stream stream)
         {
-            TiffReader reader = stream.ToTiffReader();
+            TiffReader reader = stream.ToBinaryReaderFromTiffStream();
             if (null == reader)
             {
                 // not a valid tiff stream.
@@ -33,7 +35,6 @@ namespace ImageProcessorCore.Formats
             }
 
             return new TiffDecoderCore(reader);
-
         }
 
         /// <summary>
@@ -46,27 +47,31 @@ namespace ImageProcessorCore.Formats
         public void Decode()
         {
             
-            // The tiff reader should be sitting at the first offset that contains the
+            // The reader should be sitting at the first offset that contains the
             // location of the first directory.
-            int nextOffset = _tiffReader.ReadInt32();
+            int nextOffset = _reader.ReadInt32();
 
             // Keep reading directories until there are no more
             do
             {
                 // move to the directory location in the file.
-                _tiffReader.Seek(nextOffset, SeekOrigin.Begin);
+                _reader.Seek(nextOffset, SeekOrigin.Begin);
 
                 // process the directory
-                IFD directory = new IFD(_tiffReader);
+                TiffDirectory directory = new TiffDirectory(_reader);
                 _directories.Add(directory);
 
-                // get the next directory location in the file if we are at the 
+                // get the next directory location in the file. If we are at the 
                 // last directory in the file, the offset will be 0
-                nextOffset = _tiffReader.ReadInt32();
+                nextOffset = _reader.ReadInt32();
 
             } while (nextOffset != 0);
             
         }
 
+        public void Dispose()
+        {
+            _reader?.Dispose();
+        }
     }
 }
