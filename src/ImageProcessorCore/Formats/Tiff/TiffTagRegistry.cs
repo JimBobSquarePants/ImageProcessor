@@ -95,16 +95,16 @@ namespace ImageProcessorCore.Formats
                 new TiffTag { TagId = 316, TagGroup = "General", Name = "Computer Created On", Description = ""},
                 new TiffTag { TagId = 318, TagGroup = "General", Name = "White Point", Description = "Image white point."},
                 new TiffTag { TagId = 320, TagGroup = "General", Name = "Color Map", Description = "RGB map for pallete image"},
-                new TiffTag { TagId = 330, TagGroup = "General", Name = "Sub Image ID", Description = "Sub Image Descriptor"},
+                new TiffTag { TagId = TiffSubDirectory, TagGroup = "General", Name = "Sub Image ID", Description = "Sub Image Descriptor"},
                 new TiffTag { TagId = 531, TagGroup = "General", Name = "YCbCrPositioning", Description ="Specifies the positioning of subsampled chrominance components relative to luminance samples."},
 
                 new TiffTag { TagId = 33434, TagGroup = "Exif", Name ="Exposure Time", Description = "Exposure time, given in seconds."},
                 new TiffTag { TagId = 33437, TagGroup = "Exif", Name ="F Stop", Description = "The F number"},
-                new TiffTag { TagId = 33723, TagGroup = "IPTC", Name = "IPTC Directory", Description ="IPTC metadata"},
-                new TiffTag { TagId = 34665, TagGroup = "Exif", Name = "Exif TiffDirectory", Description ="A pointer to the Exif TiffDirectory"},
+                new TiffTag { TagId = TiffIptcDirectory, TagGroup = "IPTC", Name = "IPTC Directory", Description ="IPTC metadata"},
+                new TiffTag { TagId = TiffExifDirectory, TagGroup = "Exif", Name = "Exif TiffDirectory", Description ="A pointer to the Exif TiffDirectory"},
                 new TiffTag { TagId = 34850, TagGroup = "Exif", Name ="Exposure Program", Description = "The class of the program used by the camera to set exposure when the picture is taken."},
                 new TiffTag { TagId = 34852, TagGroup = "Exif", Name ="Spectral Sensitivity", Description = "Indicates the spectral sensitivity of each channel of the camera used."},
-                new TiffTag { TagId = 34853, TagGroup = "Exif", Name ="GPS Group", Description = "A pointer to the Exif-related GPS Info TiffDirectory."},
+                new TiffTag { TagId = TiffGpsDirectory, TagGroup = "Exif", Name ="GPS Group", Description = "A pointer to the Exif-related GPS Info TiffDirectory."},
                 new TiffTag { TagId = 34855, TagGroup = "Exif", Name ="ISO Speed Rating", Description = "Indicates the ISO Speed and ISO Latitude of the camera or input device as specified in ISO 12232."},
                 new TiffTag { TagId = 34856, TagGroup = "Exif", Name ="Opto-Electric Conversion Factor", Description = "Indicates the Opto-Electric Conversion Function (OECF) specified in ISO 14524."},
                 new TiffTag { TagId = 36864, TagGroup = "Exif", Name ="Exif Version", Description = "The version of the supported Exif standard."},
@@ -130,6 +130,11 @@ namespace ImageProcessorCore.Formats
             };
 
         }
-     
+
+        public const ushort TiffSubDirectory = 330;
+        public const ushort TiffExifDirectory = 34665;
+        public const ushort TiffGpsDirectory = 34853;
+        public const ushort TiffIptcDirectory = 33723;
+
     }
 }

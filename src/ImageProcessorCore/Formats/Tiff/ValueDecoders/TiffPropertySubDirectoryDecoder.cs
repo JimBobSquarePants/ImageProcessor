@@ -3,11 +3,16 @@ using System.IO;
 
 namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
 {
-    internal class TiffGPSDirectoryDecoder : ITiffValueDecoder
+    /// <summary>
+    /// This decoder handles the <see cref="TiffTagRegistry.TiffSubDirectory"></see> tag. 
+    /// It means this entry is a sub directory.
+    /// </summary>
+    internal class TiffPropertySubDirectoryDecoder : ITiffPropertyDecoder
     {
-        public bool DecodeValue(TiffReader reader, TiffProperty value, int count)
+        public bool Decode(TiffReader reader, TiffProperty property, int count)
         {
-            if (value.Tag.TagId != 34853)
+            // 0x014A(330)
+            if (property.Tag.TagId != TiffTagRegistry.TiffSubDirectory)
             {
                 return false;
             }
@@ -26,7 +31,7 @@ namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
 
             } while (offset != 0);
 
-            value.Value = directories;
+            property.Value = directories;
 
             return true;
         }

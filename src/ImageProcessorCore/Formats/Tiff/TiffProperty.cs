@@ -71,7 +71,7 @@ namespace ImageProcessorCore.Formats
 
             TiffProperty value = new TiffProperty{ Tag = tag, Format = fieldType };
 
-            TiffValueDecoderRegistry.Instance.DecodeValue(reader, componentCount, value);
+            TiffPropertyValueDecoderRegistry.Instance.DecodeValue(reader, componentCount, value);
           
             return value;
         }

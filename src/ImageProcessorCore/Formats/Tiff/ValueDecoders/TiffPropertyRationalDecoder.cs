@@ -1,13 +1,10 @@
-﻿using System;
-using ImageProcessorCore.IO;
-
-namespace ImageProcessorCore.Formats
+﻿namespace ImageProcessorCore.Formats
 {
-    internal class TiffRationalDecoder : ITiffValueDecoder
+    internal class TiffPropertyRationalDecoder : ITiffPropertyDecoder
     {
-        public bool DecodeValue(TiffReader reader, TiffProperty value, int count)
+        public bool Decode(TiffReader reader, TiffProperty property, int count)
         {
-            if (value.Format != TiffDataFormat.Rational)
+            if (property.Format != TiffDataFormat.Rational)
             {
                 return false;
             }
@@ -18,7 +15,7 @@ namespace ImageProcessorCore.Formats
             int numerator = reader.ReadInt32();
             int denominator = reader.ReadInt32();
 
-            value.Value = new Rational<int>(numerator, denominator);
+            property.Value = new Rational<int>(numerator, denominator);
            
             return true;
         }
