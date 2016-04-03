@@ -80,5 +80,19 @@ namespace ImageProcessorCore.Formats
         {
             return string.Format( "Tag: {0}, Value: {1}", Tag.Name, Value.ToString()) ;
         }
+
+
+        public void Accept(ITiffVisitor visitor)
+        {
+         
+            ITiffAcceptor acceptor = Value as ITiffAcceptor;
+            if( null != acceptor )
+                acceptor.Accept(visitor);
+            else
+            {
+                visitor.Visit(this);
+            }
+
+        }
     }
 }

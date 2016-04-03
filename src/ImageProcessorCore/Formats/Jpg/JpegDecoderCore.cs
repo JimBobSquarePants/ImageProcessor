@@ -3,6 +3,8 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
+using System.Collections.Generic;
+
 namespace ImageProcessorCore.Formats
 {
     using System;
@@ -907,6 +909,10 @@ namespace ImageProcessorCore.Formats
                 using (tiffDecoder)
                 {
                     tiffDecoder.Decode();
+
+                    // now what?
+                    List<ImageProperty> props = tiffDecoder.GetExifProperties();
+
                 }
             }
             tiffDecoder?.Decode();

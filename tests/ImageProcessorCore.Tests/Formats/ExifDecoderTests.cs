@@ -49,6 +49,34 @@ namespace ImageProcessor.Tests.Formats
             }
         }
 
-      
+        [Fact]
+        public void CheckIMG_5058App1Jpeg()
+        {
+            using (TiffDecoderCore decoder = OpenJpegApp1File("TestImages/Formats/Jpg/IMG_5085.JPG.app1"))
+            {
+                decoder.Decode();
+
+                // Make sure we got 2 directory's from this file.
+                Assert.Equal(2, decoder.Directories.Count);
+
+                // Make sure we have 13properties in the first directory
+                Assert.Equal(13, decoder.Directories[0].Entries.Count);
+
+                // Make sure we have 6 properties in the first directory
+                Assert.Equal(6, decoder.Directories[1].Entries.Count);
+
+                // Now make sure we have an exif sub directory
+                var exifProperty = decoder.Directories[0].Entries.Single(i => i.Tag.TagId == TiffTagRegistry.TiffExifDirectory);
+
+                // should only be 1 exif directory for this file
+                IEnumerable<TiffDirectory> exifDirectoreis = exifProperty.Value as IEnumerable<TiffDirectory>;
+                Assert.Equal(1, exifDirectoreis.Count());
+
+                // Should be 34 exif properties
+                Assert.Equal(34, exifDirectoreis.First().Entries.Count);
+
+            }
+        }
+
     }
 }

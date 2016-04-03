@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using ImageProcessorCore.Formats.Tiff;
 
 namespace ImageProcessorCore.Formats
 {
-    public class IptcDirectory
+    internal class IptcDirectory : ITiffAcceptor
     {
         public List<string> Errors { get; private set; }
         public List<IptcProperty> Properties { get; private set; }
@@ -11,6 +12,15 @@ namespace ImageProcessorCore.Formats
             Properties = new List<IptcProperty>();
             Errors = new List<string>();
         }
-        
+
+
+        public void Accept(ITiffVisitor visitor)
+        {
+            foreach (IptcProperty property in Properties)
+            {
+                visitor.Visit(property);
+            }
+        }
+
     }
 }

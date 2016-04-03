@@ -45,6 +45,7 @@ namespace ImageProcessorCore.Formats
 
                 // Process the tiff directory
                 TiffDirectory dir = new TiffDirectory(reader);
+                dir.Name = "EXIF Directory";
                 directories.Add(dir);
 
                 // Get the location of the next chained directory. If no other

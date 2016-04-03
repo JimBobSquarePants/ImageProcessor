@@ -95,7 +95,10 @@ namespace ImageProcessorCore.Formats
                 new TiffTag { TagId = 316, TagGroup = "General", Name = "Computer Created On", Description = ""},
                 new TiffTag { TagId = 318, TagGroup = "General", Name = "White Point", Description = "Image white point."},
                 new TiffTag { TagId = 320, TagGroup = "General", Name = "Color Map", Description = "RGB map for pallete image"},
-                new TiffTag { TagId = TiffSubDirectory, TagGroup = "General", Name = "Sub Image ID", Description = "Sub Image Descriptor"},
+                /*330*/new TiffTag { TagId = TiffSubDirectory, TagGroup = "General", Name = "Sub Image ID", Description = "Sub Image Descriptor"},
+                /*513*/new TiffTag { TagId = 513, TagGroup = "General", Name = "JPEG Interchange Format", Description ="Old-style JPEG compression field. TechNote2 invalidates this part of the specification."},
+                /*514*/new TiffTag { TagId = 514, TagGroup = "General", Name = "JPEG Interchange Format Length", Description ="Old-style JPEG compression field. TechNote2 invalidates this part of the specification."},
+
                 new TiffTag { TagId = 531, TagGroup = "General", Name = "YCbCrPositioning", Description ="Specifies the positioning of subsampled chrominance components relative to luminance samples."},
 
                 new TiffTag { TagId = 33434, TagGroup = "Exif", Name ="Exposure Time", Description = "Exposure time, given in seconds."},
@@ -122,6 +125,13 @@ namespace ImageProcessorCore.Formats
                 new TiffTag { TagId = 37384, TagGroup = "Exif", Name = "Light Source", Description = "The kind of light source." },
                 new TiffTag { TagId = 37385, TagGroup = "Exif", Name = "Flash", Description = "Indicates the status of flash when the image was shot." },
                 new TiffTag { TagId = 37386, TagGroup = "Exif", Name = "Focal Length", Description = "The actual focal length of the lens, in mm." },
+
+                /*37500*/new TiffTag { TagId = TiffMakerNote,       TagGroup = "Exif", Name = "Maker Note", Description = "Manufacturere specific information." },
+                /*37521*/new TiffTag { TagId = SubsecTimeOriginal,  TagGroup = "Exif", Name = "Subsee Time Original", Description = "A tag used to record fractions of seconds for the Date Time Original tag." },
+                /*37521*/new TiffTag { TagId = SubsecTimeDigitized, TagGroup = "Exif", Name = "Subsee Time Digitized", Description = "A tag used to record fractions of seconds for the Date Time Digitized tag." },
+                /*40960*/new TiffTag { TagId = FlashPixVersion,     TagGroup = "Exif", Name = "Flash Pix", Description = "The Flashpix format version supported by a FPXR file." },
+                /*40961*/new TiffTag { TagId = ColorSpace,          TagGroup = "Exif", Name = "Color Space", Description = "The color space information tag is always recorded as the color space specifier." },
+
                 new TiffTag { TagId = 40963, TagGroup = "Exif", Name = "Pixel Y Dimension", Description = "Specific to compressed data; the valid height of the meaningful image." },
                 new TiffTag { TagId = 40962, TagGroup = "Exif", Name = "Pixel X Dimension", Description = "Specific to compressed data; the valid width of the meaningful image." },
                 new TiffTag { TagId = 41492, TagGroup = "Exif", Name = "Subject Location", Description = "Indicates the location of the main subject in the scene." },
@@ -131,10 +141,18 @@ namespace ImageProcessorCore.Formats
 
         }
 
+
         public const ushort TiffSubDirectory = 330;
+        public const ushort TiffJpegInterchangeFormat = 513;
+        public const ushort TiffJpegInterchangeFormatLength = 514;
         public const ushort TiffExifDirectory = 34665;
         public const ushort TiffGpsDirectory = 34853;
         public const ushort TiffIptcDirectory = 33723;
+        public const ushort TiffMakerNote = 37500;                   // 0x027C
+        public const ushort SubsecTimeOriginal = 37521;              // 0x9291
+        public const ushort SubsecTimeDigitized = 37522;             // 0x9292
+        public const ushort FlashPixVersion = 40960;                 // 0xA000
+        public const ushort ColorSpace = 40961;                      // 0xA001
 
     }
 }

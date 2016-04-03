@@ -70,6 +70,18 @@ namespace ImageProcessorCore.Formats
             
         }
 
+        public List<ImageProperty> GetExifProperties()
+        {
+            TiffExifExtractor extractor = new TiffExifExtractor();
+
+            foreach (var directory in Directories)
+            {
+                directory.Accept(extractor);
+            }
+
+            return extractor.Properties;
+        } 
+
         public void Dispose()
         {
             _reader?.Dispose();

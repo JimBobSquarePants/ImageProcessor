@@ -12,7 +12,14 @@ namespace ImageProcessorCore.Formats
     internal class TiffDirectory
     {
         public List<TiffProperty> Entries { get; private set; }
-        
+
+        public string Name { get; set; }
+
+        public TiffDirectory()
+        {
+            Name = "Tiff Directory";
+        }
+
         public TiffDirectory(TiffReader reader)
         {
             if (null == reader)
@@ -24,7 +31,7 @@ namespace ImageProcessorCore.Formats
             {
                 throw new IOException("Empty Tiff Directory is invalid.");
             }
-            
+
             Entries = new List<TiffProperty>();
 
             // Go through the entries each entry is 12 bytes in length
@@ -44,9 +51,20 @@ namespace ImageProcessorCore.Formats
 
         }
 
+        public void Accept(ITiffVisitor visitor)
+        {
+            visitor.Visit(this);
+            foreach (TiffProperty property in Entries)
+            {
+                visitor.Visit(property);    
+            }
+        }
+
         public override string ToString()
         {
-            return string.Format("TIFF Directory: contains {0} entries.", Entries.Count);
+            return $"{Name}: contains {Entries.Count} entries.";
         }
     }
+
+
 }
