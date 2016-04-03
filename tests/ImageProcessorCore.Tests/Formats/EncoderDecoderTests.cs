@@ -1,4 +1,9 @@
-﻿namespace ImageProcessorCore.Tests
+﻿// <copyright file="EncoderDecoderTests.cs" company="James Jackson-South">
+// Copyright (c) James Jackson-South and contributors.
+// Licensed under the Apache License, Version 2.0.
+// </copyright>
+
+namespace ImageProcessorCore.Tests
 {
     using System.Diagnostics;
     using System.IO;
@@ -9,8 +14,8 @@
     using System.Linq;
 
     using ImageProcessorCore.Quantizers;
- 
-    public class EncoderDecoderTests : ProcessorTestBase
+
+    public class EncoderDecoderTests : FileTestBase
     {
 
         [Fact]
@@ -30,11 +35,6 @@
             {
                 Directory.CreateDirectory("TestOutput/Encode");
             }
-
-            //foreach (FileInfo file in new DirectoryInfo("TestOutput/Encode").GetFiles())
-            //{
-            //    file.Delete();
-            //}
 
             foreach (string file in Files)
             {
