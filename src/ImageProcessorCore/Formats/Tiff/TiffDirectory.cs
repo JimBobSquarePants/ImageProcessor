@@ -39,7 +39,7 @@ namespace ImageProcessorCore.Formats
 
                 // go to the next entry in the directory
                 entryStart += 12;
-                reader.Seek(entryStart, SeekOrigin.Begin);
+                reader.Seek(entryStart, SeekOrigin.Begin, false);
             }
 
         }

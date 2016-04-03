@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using ImageProcessorCore.IO;
 
 namespace ImageProcessorCore.Formats
 {
@@ -19,6 +18,8 @@ namespace ImageProcessorCore.Formats
             _reader = reader;
             _directories = new List<TiffDirectory>();
         }
+
+        public List<TiffDirectory> Directories => _directories;
 
         /// <summary>
         /// Checks the stream to see if its sitting at a valid TIFF stream.
