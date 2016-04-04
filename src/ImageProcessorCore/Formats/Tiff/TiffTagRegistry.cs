@@ -74,7 +74,9 @@ namespace ImageProcessorCore.Formats
                 new TiffTag { TagId = 270, TagGroup = "General", Name = "Image Description", Description = "A string that describes the subject of the image."},
                 new TiffTag { TagId = 271, TagGroup = "General", Name = "Make", Description = "The scanner manufacturer."},
                 new TiffTag { TagId = 272, TagGroup = "General", Name = "Model", Description = "The scanner model name or number."},
-                new TiffTag { TagId = 274, TagGroup = "General", Name = "Orientation", Description = "The orientation of the image with respect to the rows and columns."},
+                
+                /*274*/new TiffTag { TagId = TiffOrientation, TagGroup = "General", Name = "Orientation", Description = "The orientation of the image with respect to the rows and columns."},
+
                 new TiffTag { TagId = 277, TagGroup = "General", Name = "Samples Per Pixel", Description = ""},
                 new TiffTag { TagId = 278, TagGroup = "General", Name = "Rows Per Strip", Description = "The number of rows in a strip of data."},
                 new TiffTag { TagId = 279, TagGroup = "General", Name = "Strip Byte Count", Description = "The number of bytes for a strip of data"},
@@ -107,8 +109,10 @@ namespace ImageProcessorCore.Formats
                 new TiffTag { TagId = TiffExifDirectory, TagGroup = "Exif", Name = "Exif TiffDirectory", Description ="A pointer to the Exif TiffDirectory"},
                 new TiffTag { TagId = 34850, TagGroup = "Exif", Name ="Exposure Program", Description = "The class of the program used by the camera to set exposure when the picture is taken."},
                 new TiffTag { TagId = 34852, TagGroup = "Exif", Name ="Spectral Sensitivity", Description = "Indicates the spectral sensitivity of each channel of the camera used."},
-                new TiffTag { TagId = TiffGpsDirectory, TagGroup = "Exif", Name ="GPS Group", Description = "A pointer to the Exif-related GPS Info TiffDirectory."},
+                /*34853*/new TiffTag { TagId = TiffGpsDirectory, TagGroup = "Exif", Name ="GPS Group", Description = "A pointer to the Exif-related GPS Info TiffDirectory."},
+                
                 new TiffTag { TagId = 34855, TagGroup = "Exif", Name ="ISO Speed Rating", Description = "Indicates the ISO Speed and ISO Latitude of the camera or input device as specified in ISO 12232."},
+
                 new TiffTag { TagId = 34856, TagGroup = "Exif", Name ="Opto-Electric Conversion Factor", Description = "Indicates the Opto-Electric Conversion Function (OECF) specified in ISO 14524."},
                 new TiffTag { TagId = 36864, TagGroup = "Exif", Name ="Exif Version", Description = "The version of the supported Exif standard."},
                 new TiffTag { TagId = 36867, TagGroup = "Exif", Name ="Original Date And Time", Description = "The date and time when the original image data was generated."},
@@ -135,13 +139,39 @@ namespace ImageProcessorCore.Formats
                 new TiffTag { TagId = 40963, TagGroup = "Exif", Name = "Pixel Y Dimension", Description = "Specific to compressed data; the valid height of the meaningful image." },
                 new TiffTag { TagId = 40962, TagGroup = "Exif", Name = "Pixel X Dimension", Description = "Specific to compressed data; the valid width of the meaningful image." },
                 new TiffTag { TagId = 41492, TagGroup = "Exif", Name = "Subject Location", Description = "Indicates the location of the main subject in the scene." },
-                new TiffTag { TagId = 41987, TagGroup = "Exif", Name = "White Balance", Description = "Indicates the white balance mode set when the image was shot." },
+                /*41495*/new TiffTag { TagId = TiffSensingMethod, TagGroup = "Exif", Name = "Sensing Method", Description = "Indicates the image sensor type on the camera or input device." },
+                /*41729*/new TiffTag { TagId = TiffSceneType, TagGroup = "Exif", Name = "Scene Type", Description = "Indicates the tpe of scene." },
+
+               
+                /*41985*/new TiffTag { TagId = TiffCustomRendered, TagGroup = "Exif", Name = "Custom Rendered", Description = "Inidicates the use of special processing on image data, such as rendering geared to output." },
+                /*41986*/new TiffTag { TagId = TiffExposureMode, TagGroup = "Exif", Name = "Exposure Mode", Description = "Indicates the exposure mode set when the image was shot." },
+                /*41987*/new TiffTag { TagId = TiffWhiteBalance, TagGroup = "Exif", Name = "White Balance", Description = "Indicates the white balance mode set when the image was shot." },
+                /*41989*/new TiffTag { TagId = TiffFocalLengthIn35MmFilm, TagGroup = "Exif", Name = "Focal Length In 35mm Film", Description = "Indicates the equivalent focal length assuming a 35mm filem camera, in mm." },
+                /*41990*/new TiffTag { TagId = TiffSceneCaptureType, TagGroup = "Exif", Name = "Scene Capture Type", Description = "Indicates the type of scene that was shot." },
+                /*42034*/new TiffTag { TagId = TiffLensSpecification, TagGroup = "Exif", Name = "Lens Specification", Description = "Minimum focal length, maximum focal length of lens that was used in photography." },
+                /*42035*/new TiffTag { TagId = TiffLensMake, TagGroup = "Exif", Name = "Lens Make", Description = "The lens manufacturer." },
+                /*42036*/new TiffTag { TagId = TiffLensModel, TagGroup = "Exif", Name = "Lens Model", Description = "The lens model name and model number." },
+
+
+
                 new TiffTag { TagId = 42016, TagGroup = "Exif", Name = "Image Unique ID", Description = "Indicates an identifier assigned uniquely to each image." }
             };
 
         }
 
-
+        /// <summary>
+        /// How to translate value of the TiffOrientation tag.....
+        /// http://www.cipa.jp/std/documents/e/DC-010-2012_E.pdf
+        /// 1 = 0th row at top, Oth column at left
+        /// 2 = 0th row at top, 0th column at right
+        /// 3 = 0th row at bottom, 0th column at right
+        /// 4 = 0th row at bottom, 0th row at left
+        /// 5 = 0th row at left, oth column at top
+        /// 6 = 0th row at right, 0th column at top
+        /// 7 = 0th row at right, 0th column at bottom
+        /// 8 = 0th row at left, 0th column at bottom
+        /// </summary>
+        public const ushort TiffOrientation = 274;                   // 0x112
         public const ushort TiffSubDirectory = 330;
         public const ushort TiffJpegInterchangeFormat = 513;
         public const ushort TiffJpegInterchangeFormatLength = 514;
@@ -153,6 +183,21 @@ namespace ImageProcessorCore.Formats
         public const ushort SubsecTimeDigitized = 37522;             // 0x9292
         public const ushort FlashPixVersion = 40960;                 // 0xA000
         public const ushort ColorSpace = 40961;                      // 0xA001
+        public const ushort TiffSensingMethod = 41495;               // 0xA217
+        public const ushort TiffSceneType = 41729;                   // 0xA301
+        public const ushort TiffCustomRendered = 41985;              // 0xA401
+        public const ushort TiffExposureMode = 41986;                // 0xA402
+        public const ushort TiffWhiteBalance = 41987;                // 0xA403
+        public const ushort TiffFocalLengthIn35MmFilm = 41989;       // 0xA405
+        public const ushort TiffSceneCaptureType = 41990;            // 0xA406
+        public const ushort TiffLensSpecification = 42034;           // 0xA432 - http://clanmills.com/exiv2/tags-xmp-exifEX.html   // An ordered array of rational
+        public const ushort TiffLensMake = 42035;                    // 0xA433 - http://clanmills.com/exiv2/tags-xmp-exifEX.html   
+        public const ushort TiffLensModel = 42036;                   // 0xA434 - http://clanmills.com/exiv2/tags-xmp-exifEX.html
+
+        // unsure what this is yet. the value data for this tag is large
+        // and probably a some other data stucture i think it might be comming from light room????
+        // https://feedback.photoshop.com/photoshop_family/topics/does_lr5_3_have_setting_to_prevent_exporting_tiff_images_with_tag_59932
+        public const ushort TiffNotSureWhatThisIsYetIgnoreIt = 59932; // also 59933....
 
     }
 }

@@ -41,8 +41,7 @@ namespace ImageProcessorCore.Formats.Tiff.ValueDecoders
                 reader.Seek(offset, SeekOrigin.Begin);
 
                 // Process the tiff directory
-                TiffDirectory dir = new TiffDirectory(reader);
-                dir.Name = "GPS Directory";
+                TiffDirectory dir = new TiffDirectory(reader) {Name = "GPS Directory"};
                 directories.Add(dir);
 
                 // Get the location of the next chained directory. If no other

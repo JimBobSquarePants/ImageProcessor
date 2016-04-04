@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using ImageProcessorCore.Formats.Tiff;
 
 namespace ImageProcessorCore.Formats
 {
@@ -9,7 +10,7 @@ namespace ImageProcessorCore.Formats
     /// Section 2. The directory structure is as follows.
     /// </summary>
     /// <exception cref="IOException"></exception>
-    internal class TiffDirectory
+    internal class TiffDirectory : ITiffAcceptor
     {
         public List<TiffProperty> Entries { get; private set; }
 

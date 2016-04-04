@@ -4,7 +4,7 @@ using ImageProcessorCore.Formats.Tiff;
 
 namespace ImageProcessorCore.Formats
 {
-    internal class TiffProperty 
+    internal class TiffProperty : ITiffAcceptor
     {
         public TiffTag Tag { get; set; }
 
@@ -84,10 +84,13 @@ namespace ImageProcessorCore.Formats
 
         public void Accept(ITiffVisitor visitor)
         {
-         
+            // Can this value be visited... aka acceptor
             ITiffAcceptor acceptor = Value as ITiffAcceptor;
-            if( null != acceptor )
+            if (null != acceptor)
+            {
+                // yes it can
                 acceptor.Accept(visitor);
+            }
             else
             {
                 visitor.Visit(this);
