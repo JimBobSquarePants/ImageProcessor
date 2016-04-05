@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using ImageProcessorCore.Formats.Tiff;
 
 namespace ImageProcessorCore.Formats
@@ -93,7 +94,13 @@ namespace ImageProcessorCore.Formats
             }
             else
             {
-                visitor.Visit(this);
+                // check to see if its enumerable
+                IEnumerable<ITiffAcceptor> acceptorList = Value as IEnumerable<ITiffAcceptor>;
+                if (null != acceptorList)
+                {
+                    foreach( ITiffAcceptor acc in acceptorList )
+                        acc.Accept(visitor);
+                }
             }
 
         }

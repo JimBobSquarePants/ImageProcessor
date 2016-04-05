@@ -16,8 +16,18 @@ namespace ImageProcessorCore.Formats
         {
             Properties = new List<ImageProperty>();
             
+            // i don't think this is needed as we can use the Visit(TiffDirectory)
+            // to determin the exif and gps tags...
             _exifTags = TiffTagRegistry.Instance.Tags
-                .Where( i => i.TagGroup == "Exif")
+                .Where( i => i.TagGroup == "Exif" ||
+                       i.TagGroup == "GPS"
+                       // add a few other tags that are not technically exif tags but could be usefull for processing the image
+                       || i.TagId == TiffTagRegistry.TiffImageWidth
+                       || i.TagId == TiffTagRegistry.TiffImageLength
+                       || i.TagId == TiffTagRegistry.TiffXResolution
+                       || i.TagId == TiffTagRegistry.TiffYResolution
+                       || i.TagId == TiffTagRegistry.TiffResolutionUnit
+                       )
                 .ToDictionary(i => i.TagId);
 
         }
@@ -26,9 +36,11 @@ namespace ImageProcessorCore.Formats
         {
             if (_exifTags.ContainsKey(property.Tag.TagId))
             {
-                // until the image property can hold more than just a string value....
-                ImageProperty imageProperty = new ImageProperty(property.Tag.Name, property.Value.ToString());
-                Properties.Add(imageProperty);
+                if (property.Value != null)
+                {
+                    ImageProperty imageProperty = new ImageProperty(property.Tag.Name, property.Value);
+                    Properties.Add(imageProperty);
+                }
             }
         }
 

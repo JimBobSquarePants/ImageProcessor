@@ -57,7 +57,10 @@ namespace ImageProcessorCore.Formats
             visitor.Visit(this);
             foreach (TiffProperty property in Entries)
             {
-                visitor.Visit(property);    
+                visitor.Visit(property);
+
+                var acceptor = (ITiffAcceptor) property;
+                acceptor.Accept(visitor);
             }
         }
 

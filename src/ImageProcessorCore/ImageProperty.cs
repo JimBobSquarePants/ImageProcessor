@@ -30,12 +30,18 @@ namespace ImageProcessorCore
         /// <param name="value">
         /// The value of the property.
         /// </param>
-        public ImageProperty(string name, string value)
+        public ImageProperty(string name, object value)
         {
             this.Name = name;
             this.Value = value;
+            ValueType = value.GetType();
         }
 
+        /// <summary>
+        /// The type of the value stored in <see cref="Value"/>
+        /// </summary>
+        public Type ValueType { get; set; }
+        
         /// <summary>
         /// Gets the name of this <see cref="ImageProperty"/> indicating which kind of
         /// information this property stores.
@@ -47,9 +53,12 @@ namespace ImageProcessorCore
         public string Name { get; }
 
         /// <summary>
-        /// The value of this <see cref="ImageProperty"/>.
+        /// The value of this <see cref="ImageProperty"/>. 
+        /// <remarks>
+        /// The type of the object can be infered by using the <see cref="ValueType"/>
+        /// </remarks>
         /// </summary>
-        public string Value { get; }
+        public object Value { get; set; }
 
         /// <summary>
         /// Compares two <see cref="ImageProperty"/> objects. The result specifies whether the values
