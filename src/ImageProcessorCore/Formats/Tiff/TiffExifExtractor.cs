@@ -8,13 +8,13 @@ namespace ImageProcessorCore.Formats
     /// </summary>
     internal class TiffExifExtractor : ITiffVisitor
     {
-        private readonly Dictionary<ushort, TiffTag> _exifTags; 
+        private readonly Dictionary<ushort, TiffTag> _exifTags;
 
-        public List<ImageProperty> Properties { get; private set; }
+        private IList<ImageProperty> _properties;
 
-        public TiffExifExtractor()
+        public TiffExifExtractor(IList<ImageProperty> properties )
         {
-            Properties = new List<ImageProperty>();
+            _properties = properties;
             
             // i don't think this is needed as we can use the Visit(TiffDirectory)
             // to determin the exif and gps tags...
@@ -22,6 +22,9 @@ namespace ImageProcessorCore.Formats
                 .Where( i => i.TagGroup == "Exif" ||
                        i.TagGroup == "GPS"
                        // add a few other tags that are not technically exif tags but could be usefull for processing the image
+                       || i.TagId == 271 // need constant
+                       || i.TagId == 272 // need constant
+                       || i.TagId == 315 // need constant
                        || i.TagId == TiffTagRegistry.TiffImageWidth
                        || i.TagId == TiffTagRegistry.TiffImageLength
                        || i.TagId == TiffTagRegistry.TiffXResolution
@@ -39,7 +42,7 @@ namespace ImageProcessorCore.Formats
                 if (property.Value != null)
                 {
                     ImageProperty imageProperty = new ImageProperty(property.Tag.Name, property.Value);
-                    Properties.Add(imageProperty);
+                    _properties.Add(imageProperty);
                 }
             }
         }
@@ -47,7 +50,7 @@ namespace ImageProcessorCore.Formats
         public void Visit(IptcProperty property)
         {
             // until the image property can hold more than just a string value....
-            Properties.Add( new ImageProperty(property.Tag.Name, property.Value.ToString()));
+            _properties.Add( new ImageProperty(property.Tag.Name, property.Value.ToString()));
         }
 
         public void Visit(TiffDirectory directory)

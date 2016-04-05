@@ -25,7 +25,7 @@ namespace ImageProcessorCore.Formats
         /// Checks the stream to see if its sitting at a valid TIFF stream.
         /// </summary>
         /// <param name="stream">The stream to check for a valid TIFF image.</param>
-        /// <returns>True if the stream is sitting at a valid Tiff image; False otherwise.</returns>
+        /// <returns>Returns a <see cref="TiffDecoderCore"/> if the stream is at a valid tiff image. Null otherwise.</returns>
         public static TiffDecoderCore Create(Stream stream)
         {
             TiffReader reader = stream.ToBinaryReaderFromTiffStream();
@@ -70,16 +70,20 @@ namespace ImageProcessorCore.Formats
             
         }
 
-        public List<ImageProperty> GetExifProperties()
+        /// <summary>
+        /// Fills a list with exif properties after the decoder has decoded
+        /// the tiff file.
+        /// </summary>
+        /// <param name="properties"></param>
+        public void FillExifProperties( IList<ImageProperty> properties)
         {
-            TiffExifExtractor extractor = new TiffExifExtractor();
+            TiffExifExtractor extractor = new TiffExifExtractor(properties);
 
             foreach (var directory in Directories)
             {
                 directory.Accept(extractor);
             }
 
-            return extractor.Properties;
         } 
 
         public void Dispose()

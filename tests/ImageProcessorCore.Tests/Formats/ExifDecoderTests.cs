@@ -28,7 +28,8 @@ namespace ImageProcessor.Tests.Formats
             {
                 decoder.Decode();
                 
-                List<ImageProperty> exifProperties = decoder.GetExifProperties();
+                List<ImageProperty> exifProperties = new List<ImageProperty>();
+                decoder.FillExifProperties(exifProperties);
                 Assert.Equal(28, exifProperties.Count);
 
                 // check the x resolution
@@ -49,8 +50,9 @@ namespace ImageProcessor.Tests.Formats
             using (TiffDecoderCore decoder = OpenJpegApp1File("TestImages/Formats/Jpg/IMG_5085.JPG.app1"))
             {
                 decoder.Decode();
-                
-                List<ImageProperty> exifProperties = decoder.GetExifProperties();
+
+                List<ImageProperty> exifProperties = new List<ImageProperty>();
+                decoder.FillExifProperties(exifProperties);
                 Assert.Equal(45, exifProperties.Count);
 
 

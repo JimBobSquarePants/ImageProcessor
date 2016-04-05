@@ -887,7 +887,7 @@ namespace ImageProcessorCore.Formats
             ri = ((int)tmp[0] << 8) + (int)tmp[1];
         }
 
-        private void processApp1Marker(int n)
+        private void processApp1Marker(IList<ImageProperty> properties, int n)
         {
             readFull(tmp, 0, 6);
             n -= 6;
@@ -903,20 +903,17 @@ namespace ImageProcessorCore.Formats
 
             inputStream.Seek(tiffPosition, SeekOrigin.Begin);
 
+            // we may not have a tiff stream... so double check that we do
             TiffDecoderCore tiffDecoder = TiffDecoderCore.Create(inputStream);
             if (tiffDecoder != null)
             {
-                using (tiffDecoder)
-                {
-                    tiffDecoder.Decode();
+                tiffDecoder.Decode();
 
-                    // now what?
-                    List<ImageProperty> props = tiffDecoder.GetExifProperties();
+                // got em...
+                tiffDecoder.FillExifProperties( properties );
 
-                }
             }
-            tiffDecoder?.Decode();
-
+        
             inputStream.Seek(currPos, SeekOrigin.Begin); // put the position back to where it was....
             ignore(n); // move along please nothing to see here.....
         }
@@ -959,7 +956,7 @@ namespace ImageProcessorCore.Formats
         }
 
         // decode reads a JPEG image from r and returns it as an image.Image.
-        public void Decode(Stream stream, ImageBase image, bool configOnly)
+        public void Decode(Stream stream, Image image, bool configOnly)
         {
             this.inputStream = stream;
 
@@ -1077,7 +1074,7 @@ namespace ImageProcessorCore.Formats
                             processDRI(n);
                         break;
                     case app1Marker:
-                        processApp1Marker(n);
+                        processApp1Marker(image.Properties, n);
                         break;
                     case app0Marker:
                         processApp0Marker(n);
