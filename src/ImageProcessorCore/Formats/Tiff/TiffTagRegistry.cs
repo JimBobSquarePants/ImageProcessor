@@ -6,7 +6,8 @@ namespace ImageProcessorCore.Formats
     /// <summary>
     /// The class maintains a list of well know tiff tags. A good resource for Tiff Tag info
     /// is http://www.awaresystems.be/imaging/tiff/tifftags.html. This site maintains a huge
-    /// list of tags with names and descriptions of each tag.
+    /// list of tags with names and descriptions of each tag. 
+    /// http://www.cipa.jp/std/documents/e/DC-010-2012_E.pdf gives some context for tags
     /// </summary>
     public class TiffTagRegistry
     {
@@ -61,11 +62,11 @@ namespace ImageProcessorCore.Formats
 
                 new TiffTag { TagId = 254, TagGroup = "General", Name = "New Sub File Type", Description = "A general indication of the kind of data contained in this subfile."},
                 new TiffTag { TagId = 255, TagGroup = "General", Name = "Sub File Type", Description = "A general indication of the kind of data contained in this subfile."},
-                new TiffTag { TagId = 256, TagGroup = "General", Name = "Image Width", Description = "The number of columns in the image, i.e., the number of pixels per row."},
-                new TiffTag { TagId = 257, TagGroup = "General", Name = "Image Length", Description = "The number of rows of pixels in the image."},
-                new TiffTag { TagId = 258, TagGroup = "General", Name = "Bits Per Sample", Description = "Number of bits per component."},
-                new TiffTag { TagId = 259, TagGroup = "General", Name = "Compression Schema", Description = "Compression scheme used on the image data."},
-                new TiffTag { TagId = 262, TagGroup = "General", Name = "Photometric Interpretation", Description = "The color space of the image data."},
+                /*256*/ new TiffTag { TagId = TiffImageWidth, TagGroup = "General", Name = "Image Width In Pixels", Description = "The number of columns in the image, i.e., the number of pixels per row."},
+                /*257*/ new TiffTag { TagId = TiffImageLength, TagGroup = "General", Name = "Image Length In Pixels", Description = "The number of rows of pixels in the image."},
+                /*258*/ new TiffTag { TagId = TiffBitsPerSample, TagGroup = "General", Name = "Bits Per Sample", Description = "Number of bits per component."},
+                /*259*/ new TiffTag { TagId = TiffCompression, TagGroup = "General", Name = "Compression Schema", Description = "Compression scheme used on the image data."},
+                /*262*/ new TiffTag { TagId = TiffPhotometricInterpretation, TagGroup = "General", Name = "Photometric Interpretation", Description = "The color space of the image data."},
                 new TiffTag { TagId = 263, TagGroup = "General", Name = "Thresh Holding", Description = "For black and white TIFF files that represent shades of gray, the technique used to convert from gray to black and white pixels."},
                 new TiffTag { TagId = 264, TagGroup = "General", Name = "Cell Width", Description = "The width of the dithering or halftoning matrix used to create a dithered or halftoned bilevel file."},
                 new TiffTag { TagId = 265, TagGroup = "General", Name = "Cell Length", Description = "The length of the dithering or halftoning matrix used to create a dithered or halftoned bilevel file."},
@@ -75,46 +76,45 @@ namespace ImageProcessorCore.Formats
                 new TiffTag { TagId = 271, TagGroup = "General", Name = "Make", Description = "The scanner manufacturer."},
                 new TiffTag { TagId = 272, TagGroup = "General", Name = "Model", Description = "The scanner model name or number."},
                 
-                /*274*/new TiffTag { TagId = TiffOrientation, TagGroup = "General", Name = "Orientation", Description = "The orientation of the image with respect to the rows and columns."},
+                /*274*/ new TiffTag { TagId = TiffOrientation, TagGroup = "General", Name = "Orientation", Description = "The orientation of the image with respect to the rows and columns."},
+                /*277*/ new TiffTag { TagId = TiffSamplePerPixel, TagGroup = "General", Name = "Samples Per Pixel", Description = "Number of componets per pixel."},
 
-                new TiffTag { TagId = 277, TagGroup = "General", Name = "Samples Per Pixel", Description = ""},
                 new TiffTag { TagId = 278, TagGroup = "General", Name = "Rows Per Strip", Description = "The number of rows in a strip of data."},
                 new TiffTag { TagId = 279, TagGroup = "General", Name = "Strip Byte Count", Description = "The number of bytes for a strip of data"},
                 new TiffTag { TagId = 280, TagGroup = "General", Name = "Minimum Sample Value", Description = "The minimum sample value."},
                 new TiffTag { TagId = 281, TagGroup = "General", Name = "Maximum Sample Value", Description = "The maximum sample value."},
-                new TiffTag { TagId = 282, TagGroup = "General", Name = "X Resolution", Description = ""},
-                new TiffTag { TagId = 283, TagGroup = "General", Name = "Y Resolution", Description = ""},
+                /*282*/new TiffTag { TagId = TiffXResolution, TagGroup = "General", Name = "X Resolution", Description = "The horizontal resolution in pixels per resolution unit."},
+                /*283*/new TiffTag { TagId = TiffYResolution, TagGroup = "General", Name = "Y Resolution", Description = "The vertical resolution in pixels per resolution unit."},
                 new TiffTag { TagId = 284, TagGroup = "General", Name = "Planer Config", Description = ""},
                 new TiffTag { TagId = 285, TagGroup = "General", Name = "Page Name", Description = ""},
                 new TiffTag { TagId = 286, TagGroup = "General", Name = "X Position", Description = ""},
                 new TiffTag { TagId = 287, TagGroup = "General", Name = "Y Position", Description = ""},
                 new TiffTag { TagId = 288, TagGroup = "General", Name = "Free Offsets", Description = ""},
                 new TiffTag { TagId = 289, TagGroup = "General", Name = "Free Byte Count", Description = ""},
-                new TiffTag { TagId = 296, TagGroup = "General", Name = "Resolution Unit", Description = "The unit of measurement for XResolution and YResolution." },
+                /*296*/new TiffTag { TagId = TiffResolutionUnit, TagGroup = "General", Name = "Resolution Unit", Description = "The unit of measurement for XResolution and YResolution." },
                 new TiffTag { TagId = 305, TagGroup = "General", Name = "Software", Description = ""},
-                new TiffTag { TagId = 306, TagGroup = "General", Name = "Creation Date And Time", Description = ""},
+                new TiffTag { TagId = 306, TagGroup = "General", Name = "Creation Date And Time", Description = "Date and time when the file was last modified (no time zone in Exif), stored in ISO 8601 formant, not in the original Exif format."},
                 new TiffTag { TagId = 315, TagGroup = "General", Name = "Artist", Description = ""},
                 new TiffTag { TagId = 316, TagGroup = "General", Name = "Computer Created On", Description = ""},
                 new TiffTag { TagId = 318, TagGroup = "General", Name = "White Point", Description = "Image white point."},
                 new TiffTag { TagId = 320, TagGroup = "General", Name = "Color Map", Description = "RGB map for pallete image"},
-                /*330*/new TiffTag { TagId = TiffSubDirectory, TagGroup = "General", Name = "Sub Image ID", Description = "Sub Image Descriptor"},
-                /*513*/new TiffTag { TagId = 513, TagGroup = "General", Name = "JPEG Interchange Format", Description ="Old-style JPEG compression field. TechNote2 invalidates this part of the specification."},
-                /*514*/new TiffTag { TagId = 514, TagGroup = "General", Name = "JPEG Interchange Format Length", Description ="Old-style JPEG compression field. TechNote2 invalidates this part of the specification."},
-
-                new TiffTag { TagId = 531, TagGroup = "General", Name = "YCbCrPositioning", Description ="Specifies the positioning of subsampled chrominance components relative to luminance samples."},
+                /*330*/ new TiffTag { TagId = TiffSubDirectory, TagGroup = "General", Name = "Sub Image ID", Description = "Sub Image Descriptor"},
+                /*513*/ new TiffTag { TagId = 513, TagGroup = "General", Name = "JPEG Interchange Format", Description ="Old-style JPEG compression field. TechNote2 invalidates this part of the specification."},
+                /*514*/ new TiffTag { TagId = 514, TagGroup = "General", Name = "JPEG Interchange Format Length", Description ="Old-style JPEG compression field. TechNote2 invalidates this part of the specification."},
+                /*530*/ new TiffTag { TagId = TiffYCbCrSubSampling, TagGroup = "General", Name="YCbCr Sub Sampling", Description = "Sample ratio of chrominance components." }, 
+                /*531*/ new TiffTag { TagId = TiffYCbCrPositioning, TagGroup = "General", Name = "YCbCrPositioning", Description ="Specifies the positioning of subsampled chrominance components relative to luminance samples."},
 
                 new TiffTag { TagId = 33434, TagGroup = "Exif", Name ="Exposure Time", Description = "Exposure time, given in seconds."},
                 new TiffTag { TagId = 33437, TagGroup = "Exif", Name ="F Stop", Description = "The F number"},
                 new TiffTag { TagId = TiffIptcDirectory, TagGroup = "IPTC", Name = "IPTC Directory", Description ="IPTC metadata"},
                 new TiffTag { TagId = TiffExifDirectory, TagGroup = "Exif", Name = "Exif TiffDirectory", Description ="A pointer to the Exif TiffDirectory"},
-                new TiffTag { TagId = 34850, TagGroup = "Exif", Name ="Exposure Program", Description = "The class of the program used by the camera to set exposure when the picture is taken."},
+                /*34850*/new TiffTag { TagId = TiffExifExposureProgram, TagGroup = "Exif", Name ="Exposure Program", Description = "The class of the program used by the camera to set exposure when the picture is taken."},
                 new TiffTag { TagId = 34852, TagGroup = "Exif", Name ="Spectral Sensitivity", Description = "Indicates the spectral sensitivity of each channel of the camera used."},
-                /*34853*/new TiffTag { TagId = TiffGpsDirectory, TagGroup = "Exif", Name ="GPS Group", Description = "A pointer to the Exif-related GPS Info TiffDirectory."},
-                
+                /*34853*/ new TiffTag { TagId = TiffGpsDirectory, TagGroup = "Exif", Name ="GPS Group", Description = "A pointer to the Exif-related GPS Info TiffDirectory."},
                 new TiffTag { TagId = 34855, TagGroup = "Exif", Name ="ISO Speed Rating", Description = "Indicates the ISO Speed and ISO Latitude of the camera or input device as specified in ISO 12232."},
-
+                /*34864*/ new TiffTag() { TagId = TiffExifSensitivityType, Name="Sensitivity Type", Description="Indicates which one of the parameters of ISO 12232 is used for Photographic Sensitivity."},
                 new TiffTag { TagId = 34856, TagGroup = "Exif", Name ="Opto-Electric Conversion Factor", Description = "Indicates the Opto-Electric Conversion Function (OECF) specified in ISO 14524."},
-                new TiffTag { TagId = 36864, TagGroup = "Exif", Name ="Exif Version", Description = "The version of the supported Exif standard."},
+                /*36864*/ new TiffTag { TagId = TiffExifVersion, TagGroup = "Exif", Name ="Exif Version", Description = "The version of the supported Exif standard."},
                 new TiffTag { TagId = 36867, TagGroup = "Exif", Name ="Original Date And Time", Description = "The date and time when the original image data was generated."},
                 new TiffTag { TagId = 36868, TagGroup = "Exif", Name ="Date and Time Digitized", Description = "The date and time when the image was stored as digital data."},
                 new TiffTag { TagId = 37121, TagGroup = "Exif", Name ="Components Configuration", Description = "Specific to compressed data; specifies the channels and complements PhotometricInterpretation"},
@@ -136,8 +136,8 @@ namespace ImageProcessorCore.Formats
                 /*40960*/new TiffTag { TagId = FlashPixVersion,     TagGroup = "Exif", Name = "Flash Pix", Description = "The Flashpix format version supported by a FPXR file." },
                 /*40961*/new TiffTag { TagId = ColorSpace,          TagGroup = "Exif", Name = "Color Space", Description = "The color space information tag is always recorded as the color space specifier." },
 
-                new TiffTag { TagId = 40963, TagGroup = "Exif", Name = "Pixel Y Dimension", Description = "Specific to compressed data; the valid height of the meaningful image." },
                 new TiffTag { TagId = 40962, TagGroup = "Exif", Name = "Pixel X Dimension", Description = "Specific to compressed data; the valid width of the meaningful image." },
+                new TiffTag { TagId = 40963, TagGroup = "Exif", Name = "Pixel Y Dimension", Description = "Specific to compressed data; the valid height of the meaningful image." },
                 new TiffTag { TagId = 41492, TagGroup = "Exif", Name = "Subject Location", Description = "Indicates the location of the main subject in the scene." },
                 /*41495*/new TiffTag { TagId = TiffSensingMethod, TagGroup = "Exif", Name = "Sensing Method", Description = "Indicates the image sensor type on the camera or input device." },
                 /*41729*/new TiffTag { TagId = TiffSceneType, TagGroup = "Exif", Name = "Scene Type", Description = "Indicates the tpe of scene." },
@@ -160,6 +160,45 @@ namespace ImageProcessorCore.Formats
         }
 
         /// <summary>
+        /// Image Width in Pixels
+        /// </summary>
+        public const ushort TiffImageWidth = 256;                        // 0x100;
+
+        /// <summary>
+        /// Image Height in Pixels
+        /// </summary>
+        public const ushort TiffImageLength = 257;                       // 0x101;
+        
+        /// <summary>
+        /// Number of bits per component in each channel.
+        /// <remarks>
+        /// The value of this tag will be an ordered array of integers.
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffBitsPerSample = 258;                     // 0x102
+
+        /// <summary>
+        /// The compression scheme for the image in the current Tiff Directory
+        /// <remarks>
+        /// This is a closed choice of integers. Each integer value represents a compression scheme type.
+        /// 1 - Uncompressed
+        /// 5 - LZW
+        /// 6 - JPEG
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffCompression = 259;                       // 0x103
+        
+        /// <summary>
+        /// Pixel Composition
+        /// <remarks>
+        /// The value of this tag is a closed choice of integers. 
+        /// 2 - RGB
+        /// 6 = YCbCr
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffPhotometricInterpretation = 262;          // 0x106
+
+        /// <summary>
         /// How to translate value of the TiffOrientation tag.....
         /// http://www.cipa.jp/std/documents/e/DC-010-2012_E.pdf
         /// 1 = 0th row at top, Oth column at left
@@ -172,6 +211,116 @@ namespace ImageProcessorCore.Formats
         /// 8 = 0th row at left, 0th column at bottom
         /// </summary>
         public const ushort TiffOrientation = 274;                   // 0x112
+
+        /// <summary>
+        /// Number of components per pixel
+        /// <remarks>
+        /// The value of this tag is an iteger that represents the number of componets per pixel.
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffSamplePerPixel = 277;                // 0x115
+
+        /// <summary>
+        /// Horizontal resolution in pixels per <see cref="TiffResolutionUnit"/>.
+        /// <remarks>
+        /// The value of this tag is a rational that crepresents the horizontal resolution in
+        /// pixels per resolution unit.
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffXResolution = 282;                   // 0x11A
+
+        /// <summary>
+        /// Vertical resolution in pixels per <see cref="TiffResolutionUnit"/>.
+        /// <remarks>
+        /// the value of this tag is a rational that represents the vertical resolution in
+        /// pixels per resolution unit.
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffYResolution = 283;                   // 0x11B
+
+        /// <summary>
+        /// The data layout of the current tiff directory
+        /// <remarks>
+        /// The value of this tag is a closed choice of integers.
+        /// 1 = chunky
+        /// 2 = planar
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffPlanarConfiguration = 284;           // 0x11C
+
+        /// <summary>
+        /// Sampling ration of chrominance components.
+        /// <remarks>
+        /// The value of this tag is a closed choice of ratio's. Which are represented
+        /// as an array of integers.
+        /// [2/1] = YCbcr4:2:2
+        /// [2/2] = YCbCr4:2:0
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffYCbCrSubSampling = 530;              // 0x212
+
+        /// <summary>
+        /// Unit used for <see cref="TiffXResolution"/> and <see cref="TiffYResolution"/>.
+        /// <remarks>
+        /// The value of this tag is a closed choice of integers.
+        /// 2 = inches
+        /// 3 = centimeters
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffResolutionUnit = 296;                // 0x296
+
+        /// <summary>
+        /// Position of chrominance vs. Luminance
+        /// <remarks>
+        /// The value of this tag is a closed choice of integers.
+        /// 1 = centered
+        /// 2 = co-sited
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffYCbCrPositioning = 531;              // 0x213
+
+        /// <summary>
+        /// Exif version number.
+        /// <remarks>
+        /// The value of this tag is a string. 
+        /// Version 2.3 is written as "0230"
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffExifVersion = 36864;                 // 0x9000
+
+        /// <summary>
+        /// Class of program used for exposure
+        /// <remarks>
+        /// The value of this tag is a closed choice of integers
+        /// 0 - Not Defined
+        /// 1 - Manual
+        /// 2 - Normal Program
+        /// 3 - Aperture Priority
+        /// 4 - Shutter Priority
+        /// 5 - Creative Program
+        /// 6 - Action Program
+        /// 7 - Portrait Mode
+        /// 8 - Landscape Mode
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffExifExposureProgram = 34850;         // 0x829A
+
+        /// <summary>
+        /// Indicates which one of the parameters of ISO 12232 is used for Photographic Sensitivity
+        /// <remarks>
+        /// The value of this tag is a closed choice of integers
+        /// 0 = Unknown
+        /// 1 = Standard Output Sensitiviety (SOS)
+        /// 2 = Recommended Exposure Index (REI)
+        /// 3 - ISO Speed
+        /// 4 - Standard Output Sensitivity (SOS and Recommended Exposure Index (REI)
+        /// 5 - Standard Output sensitivity (SOS) and ISO Speed
+        /// 6 - Recommended Exposure Index (REI) and ISO Speed
+        /// 7 - Standard Output Sensitivity (SOS) and Recommended Exposure Index (REI) and ISO Speed
+        /// </remarks>
+        /// </summary>
+        public const ushort TiffExifSensitivityType = 34864;         // 0x34864
+
         public const ushort TiffSubDirectory = 330;
         public const ushort TiffJpegInterchangeFormat = 513;
         public const ushort TiffJpegInterchangeFormatLength = 514;
