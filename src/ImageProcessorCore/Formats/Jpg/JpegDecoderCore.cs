@@ -1324,7 +1324,7 @@ namespace ImageProcessorCore.Formats
 
             this.bits = new bits_class();
 
-            byte mcu = 0;
+            int mcu = 0;
             byte expectedRST = rst0Marker;
 
             // b is the decoded coefficients, in natural (not zig-zag) order.
