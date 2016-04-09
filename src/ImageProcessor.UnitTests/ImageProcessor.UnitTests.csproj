@@ -79,6 +79,7 @@
     <Compile Include="Imaging\ImageLayerUnitTests.cs" />
     <Compile Include="Metadata\TestBigEndianBitConverter.cs" />
     <Compile Include="Metadata\TestLittleEndianBitConverter.cs" />
+    <Compile Include="Processors\CropTests.cs" />
     <Compile Include="Processors\FormatTests.cs" />
     <Compile Include="Processors\MetaTests.cs" />
     <Compile Include="Processors\QualityTests.cs" />
