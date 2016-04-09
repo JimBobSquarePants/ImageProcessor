@@ -358,10 +358,7 @@ namespace ImageProcessor.Imaging
             }
 #endif
             Color32* data = this[x, y];
-            data->R = color.R;
-            data->G = color.G;
-            data->B = color.B;
-            data->A = color.A;
+            data->Argb = color.ToArgb();
         }
 
         /// <summary>
