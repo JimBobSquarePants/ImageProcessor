@@ -41,6 +41,7 @@ local.properties
 *.suo
 *.user
 *.sln.docstates
+.vs/**
 
 # Build results
 **/[Dd]ebug/
@@ -171,5 +172,3 @@ build/TestResult.xml
 *.db
 
 _site/
-
-src/.vs/config/applicationhost.config

@@ -37,7 +37,7 @@ Things I would :heart: people to help me out with:
 **Just remember to StyleCop all things! :oncoming_police_car:**
 
 ## RoadMap
-I want the next version of ImageProcessor to run on all devices. Sadly it looks like using `System.Drawing` will not allow me to do that so I need to have a look at using an alternative. This is a lot of work so any help that could be offered would be greatly appreciated.
+Focus for the ImageProcessor libraries has switched to the new library ImageProcessor Core. As such no new features will be added to this library. Bug fixes an enhancements will continue to be developed though. 
 
 ## Documentation
 
