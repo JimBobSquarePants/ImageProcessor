@@ -31,7 +31,7 @@
   <project>
     <name>ImageProcessor Web Azure Blob Cache plugin</name>
     <version>1.0.8.0</version>
-    <folder>..\src\Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.AzureBlobCache</folder>
+    <folder>..\src\ImageProcessor.Web.Plugins.AzureBlobCache</folder>
     <projfile>ImageProcessor.Web.Plugins.AzureBlobCache.csproj</projfile>
     <outputs>
       <output folder="ImageProcessor.Web.Plugins.AzureBlobCache\lib\net45" />
@@ -42,7 +42,7 @@
   <project>
     <name>ImageProcessor Cair plugin</name>
     <version>1.0.1.0</version>
-    <folder>..\src\Plugins\ImageProcessor\ImageProcessor.Plugins.Cair</folder>
+    <folder>..\src\ImageProcessor.Plugins.Cair</folder>
     <projfile>ImageProcessor.Plugins.Cair.csproj</projfile>
     <outputs>
       <output folder="ImageProcessor.Plugins.Cair\lib\net45" />
@@ -53,7 +53,7 @@
   <project>
     <name>ImageProcessor WebP plugin</name>
     <version>1.0.4.0</version>
-    <folder>..\src\Plugins\ImageProcessor\ImageProcessor.Plugins.WebP</folder>
+    <folder>..\src\ImageProcessor.Plugins.WebP</folder>
     <projfile>ImageProcessor.Plugins.WebP.csproj</projfile>
     <outputs>
       <output folder="ImageProcessor.Plugins.WebP\lib\net45" />
@@ -64,7 +64,7 @@
    <project>
     <name>ImageProcessor Web PostProcessor Plugin</name>
     <version>1.1.0.0</version>
-    <folder>..\src\Plugins\ImageProcessor.Web\ImageProcessor.Web.Plugins.PostProcessor</folder>
+    <folder>..\src\ImageProcessor.Web.Plugins.PostProcessor</folder>
     <projfile>ImageProcessor.Web.Plugins.PostProcessor.csproj</projfile>
     <outputs>
       <output folder="ImageProcessor.Web.Plugins.PostProcessor\lib\net45" />

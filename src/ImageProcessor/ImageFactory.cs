@@ -381,11 +381,7 @@ namespace ImageProcessor
                     this.InputStream.Position = 0;
                 }
 
-#if !__MonoCS__
                 Image newImage = Image.FromStream(this.InputStream, true);
-#else
-                Image newImage = Image.FromStream(this.InputStream);
-#endif
 
                 // Dispose and reassign the image.
                 // Ensure the image is in the most efficient format.
