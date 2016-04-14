@@ -15,13 +15,13 @@
             {
                 { "Bicubic", new BicubicResampler() },
                 { "Triangle", new TriangleResampler() },
+                { "NearestNeighbor", new NearestNeighborResampler() },
                 // Perf: Enable for local testing only
                 //{ "Box", new BoxResampler() },
                 //{ "Lanczos3", new Lanczos3Resampler() },
                 //{ "Lanczos5", new Lanczos5Resampler() },
                 //{ "Lanczos8", new Lanczos8Resampler() },
                 //{ "MitchellNetravali", new MitchellNetravaliResampler() },
-                { "NearestNeighbor", new NearestNeighborResampler() },
                 //{ "Hermite", new HermiteResampler() },
                 //{ "Spline", new SplineResampler() },
                 //{ "Robidoux", new RobidouxResampler() },
@@ -61,6 +61,7 @@
                     Stopwatch watch = Stopwatch.StartNew();
                     Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
                     using (FileStream output = File.OpenWrite($"TestOutput/Sample/{ Path.GetFileName(filename) }"))
                     {
                         processor.OnProgress += this.ProgressUpdate;
@@ -69,6 +70,7 @@
                         processor.OnProgress -= this.ProgressUpdate;
                     }
 
+                    image.Dispose();
                     Trace.WriteLine($"{ name }: { watch.ElapsedMilliseconds}ms");
                 }
             }
@@ -88,8 +90,9 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Resize/{filename}"))
                     {
                         image.Resize(image.Width / 2, image.Height / 2, sampler, false, this.ProgressUpdate)
@@ -116,8 +119,9 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Resize/{filename}"))
                     {
                         image.Resize(image.Width / 3, 0, new TriangleResampler(), false, this.ProgressUpdate)
@@ -144,8 +148,9 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Resize/{filename}"))
                     {
                         image.Resize(0, image.Height / 3, new TriangleResampler(), false, this.ProgressUpdate)
@@ -171,8 +176,9 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + rotateType + flipType + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/RotateFlip/{filename}"))
                     {
                         image.RotateFlip(rotateType, flipType, this.ProgressUpdate)
@@ -184,9 +190,8 @@
             }
         }
 
-        [Theory]
-        [MemberData("ReSamplers")]
-        public void ImageShouldRotate(string name, IResampler sampler)
+        [Fact]
+        public void ImageShouldRotate()
         {
             if (!Directory.Exists("TestOutput/Rotate"))
             {
@@ -198,16 +203,45 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
-                    string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Rotate/{filename}"))
                     {
-                        image.Rotate(45, sampler, false, this.ProgressUpdate)
-                             //.BackgroundColor(Color.Aqua)
+                        image.Rotate(45, this.ProgressUpdate)
                              .Save(output);
                     }
 
-                    Trace.WriteLine($"{name}: {watch.ElapsedMilliseconds}ms");
+                    Trace.WriteLine($"{watch.ElapsedMilliseconds}ms");
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageShouldSkew()
+        {
+            if (!Directory.Exists("TestOutput/Skew"))
+            {
+                Directory.CreateDirectory("TestOutput/Skew");
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
+                    using (FileStream output = File.OpenWrite($"TestOutput/Skew/{filename}"))
+                    {
+                        image.Skew(45, 45, this.ProgressUpdate)
+                             .Save(output);
+                    }
+
+                    Trace.WriteLine($"{watch.ElapsedMilliseconds}ms");
                 }
             }
         }
@@ -224,8 +258,9 @@
             {
                 using (FileStream stream = File.OpenRead(file))
                 {
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-EntropyCrop" + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/EntropyCrop/{filename}"))
                     {
                         image.EntropyCrop(.5f, this.ProgressUpdate).Save(output);
@@ -246,8 +281,10 @@
             {
                 using (FileStream stream = File.OpenRead(file))
                 {
-                    Image image = new Image(stream);
+                    
                     string filename = Path.GetFileNameWithoutExtension(file) + "-Crop" + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Crop/{filename}"))
                     {
                         image.Crop(image.Width / 2, image.Height / 2, this.ProgressUpdate).Save(output);

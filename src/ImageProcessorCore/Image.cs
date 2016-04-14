@@ -45,7 +45,7 @@ namespace ImageProcessorCore
                  new BmpFormat(),
                  new JpegFormat(),
                  new PngFormat(),
-                 new GifFormat(),
+                 new GifFormat()
             });
 
         /// <summary>
@@ -224,6 +224,45 @@ namespace ImageProcessorCore
         }
 
         /// <summary>
+        /// Returns a Base64 encoded string from the given image. 
+        /// </summary>
+        /// <example>data:image/gif;base64,R0lGODlhAQABAIABAEdJRgAAACwAAAAAAQABAAACAkQBAA==</example>
+        /// <returns>The <see cref="string"/></returns>
+        public override string ToString()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                this.Save(stream);
+                stream.Flush();
+                return $"data:{this.CurrentImageFormat.Encoder.MimeType};base64,{Convert.ToBase64String(stream.ToArray())}";
+            }
+        }
+
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // Dispose of any managed resources here.
+                if (this.Frames.Any())
+                {
+                    foreach (ImageFrame frame in this.Frames)
+                    {
+                        frame.Dispose();
+                    }
+                    this.Frames.Clear();
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
+        /// <summary>
         /// Loads the image from the given stream.
         /// </summary>
         /// <param name="stream">
@@ -253,7 +292,7 @@ namespace ImageProcessorCore
                 if (maxHeaderSize > 0)
                 {
                     byte[] header = new byte[maxHeaderSize];
-                    
+
                     stream.Position = 0;
                     stream.Read(header, 0, maxHeaderSize);
                     stream.Position = 0;

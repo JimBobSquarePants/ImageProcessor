@@ -100,13 +100,15 @@ namespace ImageProcessorCore.Samplers
                 {
                     for (int x = startX; x < endX; x++)
                     {
+                        float sum = this.HorizontalWeights[x].Sum;
                         Weight[] horizontalValues = this.HorizontalWeights[x].Values;
 
                         // Destination color components
                         Color destination = new Color();
 
-                        foreach (Weight xw in horizontalValues)
+                        for (int i = 0; i < sum; i++)
                         {
+                            Weight xw = horizontalValues[i];
                             int originX = xw.Index;
                             Color sourceColor = compand ? Color.Expand(source[originX, y]) : source[originX, y];
                             destination += sourceColor * xw.Value;
@@ -129,6 +131,7 @@ namespace ImageProcessorCore.Samplers
                 {
                     if (y >= targetY && y < targetBottom)
                     {
+                        float sum = this.VerticalWeights[y].Sum;
                         Weight[] verticalValues = this.VerticalWeights[y].Values;
 
                         for (int x = startX; x < endX; x++)
@@ -136,11 +139,11 @@ namespace ImageProcessorCore.Samplers
                             // Destination color components
                             Color destination = new Color();
 
-                            foreach (Weight yw in verticalValues)
+                            for (int i = 0; i < sum; i++)
                             {
+                                Weight yw = verticalValues[i];
                                 int originY = yw.Index;
-                                int originX = x;
-                                Color sourceColor = compand ? Color.Expand(this.firstPass[originX, originY]) : this.firstPass[originX, originY];
+                                Color sourceColor = compand ? Color.Expand(this.firstPass[x, originY]) : this.firstPass[x, originY];
                                 destination += sourceColor * yw.Value;
                             }
 
@@ -151,6 +154,7 @@ namespace ImageProcessorCore.Samplers
 
                             target[x, y] = destination;
                         }
+
                         this.OnRowProcessed();
                     }
                 });
