@@ -20,6 +20,7 @@ namespace ImageProcessor.PlayGround
 
     using ImageProcessor;
     using ImageProcessor.Imaging;
+    using ImageProcessor.Imaging.Formats;
 
     /// <summary>
     /// The program.
@@ -55,7 +56,7 @@ namespace ImageProcessor.PlayGround
                 stopwatch.Start();
 
                 using (MemoryStream inStream = new MemoryStream(photoBytes))
-                using (ImageFactory imageFactory = new ImageFactory(true, true) { AnimationProcessMode = AnimationProcessMode.First })
+                using (ImageFactory imageFactory = new ImageFactory(true, true) { AnimationProcessMode = AnimationProcessMode.All })
                 {
                     Size size = new Size(50, 0);
 
@@ -63,7 +64,8 @@ namespace ImageProcessor.PlayGround
                     try
                     {
                         imageFactory.Load(inStream)
-                                    .Resize(layer)
+                                    //.Resize(size)
+                                    .Format(new GifFormat())
                                     //.Resolution(400, 400)
                                     //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
                                     .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));

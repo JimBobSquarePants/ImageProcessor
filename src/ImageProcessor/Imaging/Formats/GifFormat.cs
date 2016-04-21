@@ -13,7 +13,6 @@ namespace ImageProcessor.Imaging.Formats
     using System;
     using System.Drawing;
     using System.Drawing.Imaging;
-    using System.IO;
     using System.Text;
 
     using ImageProcessor.Imaging.Quantizers;
@@ -101,65 +100,19 @@ namespace ImageProcessor.Imaging.Formats
         public override void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
         {
             GifDecoder decoder = new GifDecoder(factory.Image, factory.AnimationProcessMode);
-            if (decoder.IsAnimated)
-            {
-                Image factoryImage = factory.Image;
-                GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
+            Image factoryImage = factory.Image;
+            GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
 
-                for (int i = 0; i < decoder.FrameCount; i++)
-                {
-                    GifFrame frame = decoder.GetFrame(factoryImage, i);
-                    factory.Image = frame.Image;
-                    frame.Image = this.Quantizer.Quantize(processor.Invoke(factory));
-                    encoder.AddFrame(frame);
-                }
-
-                factoryImage.Dispose();
-                factory.Image = encoder.Save();
-            }
-            else
+            for (int i = 0; i < decoder.FrameCount; i++)
             {
-                base.ApplyProcessor(processor, factory);
-            }
-        }
-
-        /// <summary>
-        /// Saves the current image to the specified output stream.
-        /// </summary>
-        /// <param name="stream">
-        /// The <see cref="T:System.IO.Stream" /> to save the image information to.
-        /// </param>
-        /// <param name="image">The <see cref="T:System.Drawing.Image" /> to save.</param>
-        /// <returns>
-        /// The <see cref="T:System.Drawing.Image" />.
-        /// </returns>
-        public override Image Save(Stream stream, Image image)
-        {
-            if (!FormatUtilities.IsAnimated(image))
-            {
-                image = this.Quantizer.Quantize(image);
+                GifFrame frame = decoder.GetFrame(factoryImage, i);
+                factory.Image = frame.Image;
+                frame.Image = this.Quantizer.Quantize(processor.Invoke(factory));
+                encoder.AddFrame(frame);
             }
 
-            return base.Save(stream, image);
-        }
-
-        /// <summary>
-        /// Saves the current image to the specified file path.
-        /// </summary>
-        /// <param name="path">The path to save the image to.</param>
-        /// <param name="image">The 
-        /// <see cref="T:System.Drawing.Image" /> to save.</param>
-        /// <returns>
-        /// The <see cref="T:System.Drawing.Image" />.
-        /// </returns>
-        public override Image Save(string path, Image image)
-        {
-            if (!FormatUtilities.IsAnimated(image))
-            {
-                image = this.Quantizer.Quantize(image);
-            }
-
-            return base.Save(path, image);
+            factoryImage.Dispose();
+            factory.Image = encoder.Save();
         }
     }
 }

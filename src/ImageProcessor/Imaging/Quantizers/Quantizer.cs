@@ -207,7 +207,6 @@ namespace ImageProcessor.Imaging.Quantizers
                         // rather than calculating it again. This is an inexpensive optimization.
                         if (*previousPixel != *sourcePixel)
                         {
-                            var x = (Color32*)sourcePixel;
                             // Quantize the pixel
                             pixelValue = this.QuantizePixel((Color32*)sourcePixel);
 

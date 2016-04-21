@@ -731,6 +731,10 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 this.CurrentImageFormat = format;
+
+                // Apply any fomatting quirks.
+                this.CurrentImageFormat.ApplyProcessor(factory => factory.Image, this);
+
             }
 
             return this;
