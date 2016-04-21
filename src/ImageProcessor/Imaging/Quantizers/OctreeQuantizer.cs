@@ -152,6 +152,12 @@ namespace ImageProcessor.Imaging.Quantizers
         /// </returns>
         protected override ColorPalette GetPalette(ColorPalette original)
         {
+            // Clear out the original pallete
+            for (int i = 0; i < original.Entries.Length; i++)
+            {
+                original.Entries[i] = Color.FromArgb(0, 0, 0, 0);
+            }
+
             // First off convert the Octree to maxColors colors
             ArrayList palette = this.octree.Palletize(Math.Max(this.maxColors - 1, 1));
 
