@@ -15,7 +15,7 @@ namespace ImageProcessor.Common.Extensions
 
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Formats;
-
+    using Imaging.Quantizers;
     /// <summary>
     /// Encapsulates a series of time saving extension methods to the <see cref="Image"/> class.
     /// </summary>
@@ -36,19 +36,19 @@ namespace ImageProcessor.Common.Extensions
         /// </returns>
         public static Image Copy(this Image source, AnimationProcessMode animationProcessMode, PixelFormat format = PixelFormat.Format32bppPArgb)
         {
-            if (FormatUtilities.IsAnimated(source))
+            if (source.RawFormat == ImageFormat.Gif)
             {
                 // Read from the correct first frame when performing additional processing
                 source.SelectActiveFrame(FrameDimension.Time, 0);
-
-                // TODO: Ensure that we handle other animated types.
                 GifDecoder decoder = new GifDecoder(source, animationProcessMode);
                 GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
 
+                // Have to use Octree here, there's no way to inject it.
+                OctreeQuantizer quantizer = new OctreeQuantizer();
                 for (int i = 0; i < decoder.FrameCount; i++)
                 {
                     GifFrame frame = decoder.GetFrame(source, i);
-                    frame.Image = ((Bitmap)frame.Image).Clone(new Rectangle(0, 0, frame.Image.Width, frame.Image.Height), format);
+                    frame.Image = quantizer.Quantize(((Bitmap)frame.Image).Clone(new Rectangle(0, 0, frame.Image.Width, frame.Image.Height), format));
                     ((Bitmap)frame.Image).SetResolution(source.HorizontalResolution, source.VerticalResolution);
                     encoder.AddFrame(frame);
                 }
