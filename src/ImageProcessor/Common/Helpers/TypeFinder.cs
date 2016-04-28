@@ -70,8 +70,8 @@ namespace ImageProcessor.Common.Helpers
                 "ICSharpCode.", "CookComputing.",
                 "AzureDirectory,", "itextsharp,",
                 "UrlRewritingNet.", "HtmlAgilityPack,",
-                "MiniProfiler,", "Moq,", "nunit.",
-                "TidyNet,", "WebDriver,"
+                "MiniProfiler,", "Moq,", "nunit.", "TidyNet,",
+                "WebDriver,", "DevExpress.", "Telerik.", "Google."
             };
 
         /// <summary>
