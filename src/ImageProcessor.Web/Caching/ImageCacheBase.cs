@@ -191,7 +191,7 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         protected virtual bool IsExpired(DateTime creationDate)
         {
-            return creationDate.AddDays(this.MaxDays) < DateTime.UtcNow.AddDays(-this.MaxDays);
+            return creationDate < DateTime.UtcNow.AddDays(-this.MaxDays);
         }
     }
 }
