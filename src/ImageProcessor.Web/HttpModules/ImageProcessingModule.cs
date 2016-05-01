@@ -391,7 +391,7 @@ namespace ImageProcessor.Web.HttpModules
             // Set the headers
             if (this.imageCache != null)
             {
-                SetHeaders(context, responseType, dependencyFiles, this.imageCache.MaxDays);
+                SetHeaders(context, responseType, dependencyFiles, this.imageCache.BrowserMaxDays);
             }
         }
 
