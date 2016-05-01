@@ -104,6 +104,11 @@ namespace ImageProcessor.Web.Configuration
         public int ImageCacheMaxDays { get; private set; }
 
         /// <summary>
+        /// Gets the browser cache max days.
+        /// </summary>
+        public int BrowserCacheMaxDays { get; private set; }
+
+        /// <summary>
         /// Gets the image cache settings.
         /// </summary>
         public Dictionary<string, string> ImageCacheSettings { get; private set; }
@@ -492,6 +497,7 @@ namespace ImageProcessor.Web.Configuration
 
                         this.ImageCache = type;
                         this.ImageCacheMaxDays = cache.MaxDays;
+                        this.BrowserCacheMaxDays = cache.BrowserMaxDays;
                         this.ImageCacheSettings = cache.Settings
                                                        .Cast<SettingElement>()
                                                        .ToDictionary(setting => setting.Key, setting => setting.Value);

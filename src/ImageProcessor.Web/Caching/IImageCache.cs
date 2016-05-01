@@ -36,6 +36,11 @@ namespace ImageProcessor.Web.Caching
         int MaxDays { get; set; }
 
         /// <summary>
+        /// Gets or sets the maximum number of days to cache the image in the browser.
+        /// </summary>
+        int BrowserMaxDays { get; set; }
+
+        /// <summary>
         /// Gets a value indicating whether the image is new or updated in an asynchronous manner.
         /// </summary>
         /// <returns>
