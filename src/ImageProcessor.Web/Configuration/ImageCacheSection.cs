@@ -128,13 +128,17 @@ namespace ImageProcessor.Web.Configuration
             /// </summary>
             /// <value>The maximum number of days to store an image in the browser cache.</value>
             /// <remarks>Defaults to 365 days if not set.</remarks>
-            [ConfigurationProperty("browserMaxDays", DefaultValue = "365", IsRequired = true)]
+            [ConfigurationProperty("browserMaxDays", DefaultValue = "0", IsRequired = false)]
             [IntegerValidator(ExcludeRange = false, MinValue = -1)]
             public int BrowserMaxDays
             {
                 get
                 {
-                    return (int)this["browserMaxDays"];
+                    var maxDays = (int)this["browserMaxDays"];
+                    if (maxDays == 0) {
+                        maxDays = (int)this["maxDays"];
+                    }
+                    return maxDays;
                 }
 
                 set
