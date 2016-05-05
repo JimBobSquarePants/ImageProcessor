@@ -36,7 +36,7 @@ namespace ImageProcessor.Common.Extensions
         /// </returns>
         public static Image Copy(this Image source, AnimationProcessMode animationProcessMode, PixelFormat format = PixelFormat.Format32bppPArgb)
         {
-            if (source.RawFormat == ImageFormat.Gif)
+            if (Equals(source.RawFormat, ImageFormat.Gif))
             {
                 // Read from the correct first frame when performing additional processing
                 source.SelectActiveFrame(FrameDimension.Time, 0);

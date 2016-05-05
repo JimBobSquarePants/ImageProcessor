@@ -10,8 +10,6 @@
 
 namespace ImageProcessor.UnitTests.Processors
 {
-    using System.Management.Instrumentation;
-
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Processors;
 
@@ -60,7 +58,6 @@ namespace ImageProcessor.UnitTests.Processors
                 // Act // Assert
                 Assert.Throws<ImageProcessingException>(() => meta.ProcessImage(new ImageFactory()));
             }
-
         }
     }
 }

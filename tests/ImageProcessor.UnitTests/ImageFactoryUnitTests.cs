@@ -30,14 +30,14 @@ namespace ImageProcessor.UnitTests
     public class ImageFactoryUnitTests
     {
         /// <summary>
-        /// The list of images. Designed to speed up the tests a little.
-        /// </summary>
-        private IEnumerable<FileInfo> imagesInfos;
-
-        /// <summary>
         /// The list of ImageFactories. Designed to speed up the test a bit more.
         /// </summary>
         private List<ImageFactory> imagesFactories;
+
+        /// <summary>
+        /// The output path for saving test images. 
+        /// </summary>
+        private static string outputPath = TestContext.CurrentContext.TestDirectory + @"\output\";
 
         /// <summary>
         /// Tests the loading of image from a file
@@ -45,7 +45,7 @@ namespace ImageProcessor.UnitTests
         [Test]
         public void ImageIsLoadedFromFile()
         {
-            foreach (FileInfo file in this.ListInputFiles())
+            foreach (FileInfo file in ImageSources.GetInputImageFiles())
             {
                 using (ImageFactory imageFactory = new ImageFactory())
                 {
@@ -63,7 +63,7 @@ namespace ImageProcessor.UnitTests
         [Test]
         public void ImageIsLoadedFromMemoryStream()
         {
-            foreach (FileInfo file in this.ListInputFiles())
+            foreach (FileInfo file in ImageSources.GetInputImageFiles())
             {
                 byte[] photoBytes = File.ReadAllBytes(file.FullName);
 
@@ -83,7 +83,7 @@ namespace ImageProcessor.UnitTests
         [Test]
         public void ImageIsLoadedFromByteArray()
         {
-            foreach (FileInfo file in this.ListInputFiles())
+            foreach (FileInfo file in ImageSources.GetInputImageFiles())
             {
                 byte[] photoBytes = File.ReadAllBytes(file.FullName);
 
@@ -103,9 +103,9 @@ namespace ImageProcessor.UnitTests
         [Test]
         public void ImageIsSavedToDisk()
         {
-            foreach (FileInfo file in this.ListInputFiles())
+            foreach (FileInfo file in ImageSources.GetInputImageFiles())
             {
-                string outputFileName = string.Format("./output/{0}", file.Name);
+                string outputFileName = string.Format("{0}{1}", outputPath, file.Name);
                 using (ImageFactory imageFactory = new ImageFactory())
                 {
                     imageFactory.Load(file.FullName);
@@ -143,29 +143,18 @@ namespace ImageProcessor.UnitTests
         public void AlphaIsModified()
         {
             int i = 0;
-            foreach (ImageFactory imageFactory in this.ListInputImages())
+            foreach (ImageFactory imageFactory in this.ListInputImages(".png"))
             {
                 Image original = (Image)imageFactory.Image.Clone();
                 imageFactory.Alpha(50);
 
-                if (imageFactory.CurrentImageFormat.GetType() == typeof(BitmapFormat))
-                {
-                    AssertionHelpers.AssertImagesAreIdentical(
-                        original,
-                        imageFactory.Image,
-                        "because the alpha operation should not have been applied on {0}",
-                        imageFactory.ImagePath);
-                }
-                else
-                {
-                    AssertionHelpers.AssertImagesAreDifferent(
-                        original,
-                        imageFactory.Image,
-                        "because the alpha operation should have been applied on {0}",
-                        imageFactory.ImagePath);
-                }
+                AssertionHelpers.AssertImagesAreDifferent(
+                    original,
+                    imageFactory.Image,
+                    "because the alpha operation should have been applied on {0}",
+                    imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/alpha-" + i++ + ".jpg");
+                imageFactory.Format(new PngFormat()).Save(outputPath + "alpha-" + Path.GetFileName(imageFactory.ImagePath));
             }
         }
 
@@ -182,7 +171,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Brightness(50);
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the brightness operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/brightness-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "brightness-" + i++ + ".jpg");
             }
         }
 
@@ -193,7 +182,7 @@ namespace ImageProcessor.UnitTests
         public void BackgroundColorIsChanged()
         {
             ImageFactory imageFactory = new ImageFactory();
-            imageFactory.Load(@"Images\text.png");
+            imageFactory.Load(ImageSources.GetFilePathByName("text.png"));
             Image original = (Image)imageFactory.Image.Clone();
             imageFactory.BackgroundColor(Color.Yellow);
             AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the background color operation should have been applied on {0}", imageFactory.ImagePath);
@@ -212,7 +201,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Contrast(50);
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the contrast operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/contrast-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "contrast-" + i++ + ".jpg");
             }
         }
 
@@ -229,7 +218,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Saturation(50);
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the saturation operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/saturation-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "saturation-" + i++ + ".jpg");
             }
         }
 
@@ -246,7 +235,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Tint(Color.FromKnownColor(KnownColor.AliceBlue));
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the tint operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/tint-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "tint-" + i++ + ".jpg");
             }
         }
 
@@ -263,7 +252,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Vignette(Color.FromKnownColor(KnownColor.AliceBlue));
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the vignette operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/vignette-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "vignette-" + i++ + ".jpg");
             }
         }
 
@@ -286,7 +275,7 @@ namespace ImageProcessor.UnitTests
                 });
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the watermark operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/watermark-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "watermark-" + i++ + ".jpg");
             }
         }
 
@@ -303,7 +292,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.GaussianBlur(5);
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the blur operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/blur-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "blur-" + i++ + ".jpg");
             }
         }
 
@@ -320,7 +309,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.GaussianBlur(new GaussianLayer { Sigma = 10, Size = 5, Threshold = 2 });
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the layered blur operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/blurlayer-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "blurlayer-" + i++ + ".jpg");
             }
         }
 
@@ -337,7 +326,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.GaussianSharpen(5);
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the sharpen operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/sharpen-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "sharpen-" + i++ + ".jpg");
             }
         }
 
@@ -354,7 +343,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.GaussianSharpen(new GaussianLayer { Sigma = 10, Size = 5, Threshold = 2 });
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the layered sharpen operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/sharpenlayer-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "sharpenlayer-" + i++ + ".jpg");
             }
         }
 
@@ -391,7 +380,7 @@ namespace ImageProcessor.UnitTests
                     imageFactory.Reset();
                     AssertionHelpers.AssertImagesAreIdentical(original, imageFactory.Image, "because the image should be reset");
 
-                    imageFactory.Format(new JpegFormat()).Save("./output/filter-" + j++ + "-image-" + i + ".jpg");
+                    imageFactory.Format(new JpegFormat()).Save(outputPath + "filter-" + j++ + "-image-" + i + ".jpg");
                 }
 
                 i++;
@@ -411,7 +400,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.RoundedCorners(new RoundedCornerLayer(5));
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the rounded corners operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/roundedcorners-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "roundedcorners-" + i++ + ".jpg");
             }
         }
 
@@ -429,7 +418,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Image.Width.Should().BeLessOrEqualTo(MaxSize, "because the image size should have been reduced");
                 imageFactory.Image.Height.Should().BeLessOrEqualTo(MaxSize, "because the image size should have been reduced");
 
-                imageFactory.Format(new JpegFormat()).Save("./output/resizedcontraints-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "resizedcontraints-" + i++ + ".jpg");
             }
         }
 
@@ -450,7 +439,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Image.Width.Should().Be(MaxSize, "because the cropped image should be {0}x{0}", MaxSize);
                 imageFactory.Image.Height.Should().Be(MaxSize, "because the cropped image should be {0}x{0}", MaxSize);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/crop-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "crop-" + i++ + ".jpg");
             }
         }
 
@@ -471,7 +460,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Image.Width.Should().Be(MaxSize, "because the cropped image should be {0}x{0}", MaxSize);
                 imageFactory.Image.Height.Should().Be(MaxSize, "because the cropped image should be {0}x{0}", MaxSize);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/croplayer-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "croplayer-" + i++ + ".jpg");
             }
         }
 
@@ -497,7 +486,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Image.Width.Should().Be(original.Width, "because the dimensions should not have changed");
                 imageFactory.Image.Height.Should().Be(original.Height, "because the dimensions should not have changed");
 
-                imageFactory.Format(new JpegFormat()).Save("./output/flip-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "flip-" + i++ + ".jpg");
             }
         }
 
@@ -516,7 +505,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Image.Width.Should().Be(NewSize, "because the new image's size should be {0}x{0}", NewSize);
                 imageFactory.Image.Height.Should().Be(NewSize, "because the new image's size should be {0}x{0}", NewSize);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/resized-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "resized-" + i++ + ".jpg");
             }
         }
 
@@ -535,7 +524,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Image.Width.Should().Be(NewSize, "because the new image's size should be {0}x{0}", NewSize);
                 imageFactory.Image.Height.Should().Be(NewSize, "because the new image's size should be {0}x{0}", NewSize);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/resizedlayer-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "resizedlayer-" + i++ + ".jpg");
             }
         }
 
@@ -554,7 +543,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Image.Width.Should().Be(original.Height, "because the rotated image dimensions should have been switched");
                 imageFactory.Image.Height.Should().Be(original.Width, "because the rotated image dimensions should have been switched");
 
-                imageFactory.Format(new JpegFormat()).Save("./output/rotated-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "rotated-" + i++ + ".jpg");
             }
         }
 
@@ -575,7 +564,7 @@ namespace ImageProcessor.UnitTests
 
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the inside image should have been rotated on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/rotatebounded-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "rotatebounded-" + i++ + ".jpg");
             }
         }
 
@@ -596,7 +585,7 @@ namespace ImageProcessor.UnitTests
 
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the inside image should have been rotated on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/rotateboundedccw-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "rotateboundedccw-" + i++ + ".jpg");
             }
         }
 
@@ -617,7 +606,7 @@ namespace ImageProcessor.UnitTests
 
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the inside image should have been rotated on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/rotateboundedresized-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "rotateboundedresized-" + i++ + ".jpg");
             }
         }
 
@@ -640,7 +629,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Hue(116, true);
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the hue+rotate operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/hue-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "hue-" + i++ + ".jpg");
             }
         }
 
@@ -679,7 +668,7 @@ namespace ImageProcessor.UnitTests
                     }
                 }
 
-                imageFactory.Format(new JpegFormat()).Save("./output/resolution-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "resolution-" + i++ + ".jpg");
             }
         }
 
@@ -696,7 +685,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.Pixelate(8);
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the pixelate operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/pixelate-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "pixelate-" + i++ + ".jpg");
             }
         }
 
@@ -729,7 +718,7 @@ namespace ImageProcessor.UnitTests
                 imageFactory.ReplaceColor(Color.White, Color.Black, 90);
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the color replace operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save("./output/colorreplace-" + i++ + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "colorreplace-" + i++ + ".jpg");
             }
         }
 
@@ -765,7 +754,7 @@ namespace ImageProcessor.UnitTests
                     imageFactory.Reset();
                     AssertionHelpers.AssertImagesAreIdentical(original, imageFactory.Image, "because the image should be reset");
 
-                    imageFactory.Format(new JpegFormat()).Save("./output/edgefilter-" + j++ + "-image-" + i + ".jpg");
+                    imageFactory.Format(new JpegFormat()).Save(outputPath + "edgefilter-" + j++ + "-image-" + i + ".jpg");
                 }
 
                 i++;
@@ -815,104 +804,60 @@ namespace ImageProcessor.UnitTests
                 AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the resize operation should have been applied on {0}", imageFactory.ImagePath);
 
                 Assert.AreEqual(imageFactory.Image.Size, stretchedSize);
-                imageFactory.Save("./output/resize-stretch-" + i + ".jpg");
+                imageFactory.Save(outputPath + "resize-stretch-" + i + ".jpg");
 
                 // Check we padd correctly.
                 imageFactory.Resize(paddedLayer);
                 Assert.AreEqual(imageFactory.Image.Size, paddedSize);
-                imageFactory.Save("./output/resize-padd-" + i + ".jpg");
+                imageFactory.Save(outputPath + "resize-padd-" + i + ".jpg");
 
                 // Check we crop correctly.
                 imageFactory.Resize(cropLayer);
                 Assert.AreEqual(imageFactory.Image.Size, cropSize);
-                imageFactory.Save("./output/resize-crop-" + i + ".jpg");
+                imageFactory.Save(outputPath + "resize-crop-" + i + ".jpg");
 
                 // Check we min correctly using the shortest size.
                 imageFactory.Resize(minLayer);
                 Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
-                imageFactory.Save("./output/resize-crop-" + i + ".jpg");
+                imageFactory.Save(outputPath + "resize-crop-" + i + ".jpg");
 
                 // Check padding with only a single dimension specified (width)
                 imageFactory.Resize(paddedSingleDimensionWidthLayer);
                 Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
-                imageFactory.Save("./output/resize-padsingledimension-width-" + i + ".jpg");
+                imageFactory.Save(outputPath + "resize-padsingledimension-width-" + i + ".jpg");
 
                 // Check padding with only a single dimension specified (height)
                 imageFactory.Resize(paddedSingleDimensionHeightLayer);
                 Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
-                imageFactory.Save("./output/resize-padsingledimension-height-" + i + ".jpg");
+                imageFactory.Save(outputPath + "resize-padsingledimension-height-" + i + ".jpg");
 
                 // Check box padding with only a single dimension specified (width)
                 imageFactory.Resize(boxPadSingleDimensionWidthLayer);
                 Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
-                imageFactory.Save("./output/resize-boxpadsingledimension-width-" + i + ".jpg");
+                imageFactory.Save(outputPath + "resize-boxpadsingledimension-width-" + i + ".jpg");
 
                 // Check box padding with only a single dimension specified (height)
                 imageFactory.Resize(boxPadSingleDimensionHeightLayer);
                 Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
-                imageFactory.Save("./output/resize-boxpadsingledimension-height-" + i + ".jpg");
+                imageFactory.Save(outputPath + "resize-boxpadsingledimension-height-" + i + ".jpg");
 
                 imageFactory.Reset();
                 AssertionHelpers.AssertImagesAreIdentical(original, imageFactory.Image, "because the image should be reset");
 
-                imageFactory.Format(new JpegFormat()).Save("./output/resize-" + i + ".jpg");
+                imageFactory.Format(new JpegFormat()).Save(outputPath + "resize-" + i + ".jpg");
             }
-        }
-
-        /// <summary>
-        /// Gets the files matching the given extensions.
-        /// </summary>
-        /// <param name="dir">
-        /// The <see cref="System.IO.DirectoryInfo"/>.
-        /// </param>
-        /// <param name="extensions">
-        /// The extensions.
-        /// </param>
-        /// <returns>
-        /// A collection of <see cref="System.IO.FileInfo"/>
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// The extensions variable is null.
-        /// </exception>
-        private static IEnumerable<FileInfo> GetFilesByExtensions(DirectoryInfo dir, params string[] extensions)
-        {
-            if (extensions == null)
-            {
-                throw new ArgumentNullException("extensions");
-            }
-
-            IEnumerable<FileInfo> files = dir.EnumerateFiles();
-            return files.Where(f => extensions.Contains(f.Extension, StringComparer.OrdinalIgnoreCase));
-        }
-
-        /// <summary>
-        /// Lists the input files in the Images folder
-        /// </summary>
-        /// <returns>The list of files.</returns>
-        private IEnumerable<FileInfo> ListInputFiles()
-        {
-            if (this.imagesInfos != null)
-            {
-                return this.imagesInfos;
-            }
-
-            DirectoryInfo directoryInfo = new DirectoryInfo(Path.GetFullPath(TestContext.CurrentContext.TestDirectory + "../../../Images"));
-
-            this.imagesInfos = GetFilesByExtensions(directoryInfo, ".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp", ".webp");
-
-            return this.imagesInfos;
         }
 
         /// <summary>
         /// Lists the input images to use from the Images folder
         /// </summary>
         /// <returns>The list of images</returns>
-        private IEnumerable<ImageFactory> ListInputImages()
+        private IEnumerable<ImageFactory> ListInputImages(params string[] extensions)
         {
             if (this.imagesFactories == null || !this.imagesFactories.Any())
             {
                 this.imagesFactories = new List<ImageFactory>();
-                foreach (FileInfo fi in this.ListInputFiles())
+                foreach (FileInfo fi in ImageSources.GetInputImageFiles(extensions))
                 {
                     this.imagesFactories.Add((new ImageFactory()).Load(fi.FullName));
                 }
@@ -931,12 +876,12 @@ namespace ImageProcessor.UnitTests
         /// Lists the input images to use from the Images folder
         /// </summary>
         /// <returns>The list of images</returns>
-        private IEnumerable<ImageFactory> ListInputImagesWithMetadata()
+        private IEnumerable<ImageFactory> ListInputImagesWithMetadata(params string[] extensions)
         {
             if (this.imagesFactories == null || !this.imagesFactories.Any())
             {
                 this.imagesFactories = new List<ImageFactory>();
-                foreach (FileInfo fi in this.ListInputFiles())
+                foreach (FileInfo fi in ImageSources.GetInputImageFiles(extensions))
                 {
                     this.imagesFactories.Add((new ImageFactory(true)).Load(fi.FullName));
                 }

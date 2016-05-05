@@ -7,7 +7,7 @@ namespace ImageProcessor.UnitTests.Imaging.Colors
     public class CmykColorTests
     {
         [TestFixture]
-        public class when_to_string
+        public class WhenToString
         {
             [Test]
             public void then_should_return_empty_given_empty()
@@ -37,7 +37,7 @@ namespace ImageProcessor.UnitTests.Imaging.Colors
         }
 
         [TestFixture]
-        public class when_implicitly_converting_from_color_ranges
+        public class WhenImplicitlyConvertingFromColorRanges
         {
             [Test]
             public void then_should_return_cmyk_version_of_system_drawing_color_given_red()

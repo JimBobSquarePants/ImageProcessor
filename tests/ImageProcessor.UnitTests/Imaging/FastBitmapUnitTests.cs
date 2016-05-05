@@ -4,6 +4,9 @@
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
+
+using System.Collections.Generic;
+
 namespace ImageProcessor.UnitTests.Imaging
 {
     using System.Drawing;
@@ -20,43 +23,55 @@ namespace ImageProcessor.UnitTests.Imaging
         /// <summary>
         /// Tests that the bitmap's data is read by the fast bitmap
         /// </summary>
-        /// <param name="file">The path to the test file</param>
         [Test]
-        [TestCase(@"Images\format-Penguins.jpg")]
-        [TestCase(@"Images\format-Penguins.png")]
-        public void BitmapIsRead(string file)
+        public void BitmapIsRead()
         {
-            Bitmap bmp = new Bitmap(file);
-
-            using (FastBitmap fbmp = new FastBitmap(bmp))
+            List<string> files = new List<string>
             {
-                fbmp.Width.Should().Be(bmp.Width, "because the bitmap should have been read");
-                fbmp.Height.Should().Be(bmp.Height, "because the bitmap should have been read");
+                ImageSources.GetFilePathByName("format-Penguins.jpg"),
+                ImageSources.GetFilePathByName("format-Penguins.png"),
+            };
+
+            foreach (string file in files)
+            {
+                Bitmap bmp = new Bitmap(file);
+
+                using (FastBitmap fbmp = new FastBitmap(bmp))
+                {
+                    fbmp.Width.Should().Be(bmp.Width, "because the bitmap should have been read");
+                    fbmp.Height.Should().Be(bmp.Height, "because the bitmap should have been read");
+                }
             }
         }
 
         /// <summary>
         /// Tests that modifications on the fast bitmap's bitmap are actually done
         /// </summary>
-        /// <param name="file">The path to the test file</param>
         [Test]
-        [TestCase(@"Images\format-Penguins.jpg")]
-        [TestCase(@"Images\format-Penguins.png")]
-        public void FastBitmapModificationsAreApplied(string file)
+        public void FastBitmapModificationsAreApplied()
         {
-            Bitmap bmp = new Bitmap(file);
-            Bitmap original = (Bitmap)bmp.Clone();
-
-            using (FastBitmap fbmp = new FastBitmap(bmp))
+            List<string> files = new List<string>
             {
-                // draw a pink diagonal line
-                for (int i = 0; i < 10; i++)
-                {
-                    fbmp.SetPixel(i, i, Color.Pink);
-                }
-            }
+                ImageSources.GetFilePathByName("format-Penguins.jpg"),
+                ImageSources.GetFilePathByName("format-Penguins.png"),
+            };
 
-            AssertionHelpers.AssertImagesAreDifferent(original, bmp, "because modifying the fast bitmap should have modified the original bitmap");
+            foreach (string file in files)
+            {
+                Bitmap bmp = new Bitmap(file);
+                Bitmap original = (Bitmap)bmp.Clone();
+
+                using (FastBitmap fbmp = new FastBitmap(bmp))
+                {
+                    // draw a pink diagonal line
+                    for (int i = 0; i < 10; i++)
+                    {
+                        fbmp.SetPixel(i, i, Color.Pink);
+                    }
+                }
+
+                AssertionHelpers.AssertImagesAreDifferent(original, bmp, "because modifying the fast bitmap should have modified the original bitmap");
+            }
         }
     }
 }

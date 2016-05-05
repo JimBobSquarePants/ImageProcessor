@@ -123,7 +123,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
         /// <param name="expected">Whether the value is correct</param>
         /// <remarks>
         /// The full RFC3986 does not seem to pass the test with the square brackets
-        /// ':' is failing for some reason in VS but not elsewhere. Could be a build issue.
+        /// ':' is failing for some reason in VS but not elsewhere. Could be a configuration issue.
         /// </remarks>
         [Test]
         [TestCase("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", true)]
