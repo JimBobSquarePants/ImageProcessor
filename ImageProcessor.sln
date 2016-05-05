@@ -44,6 +44,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{1F6893
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuspecs", "Nuspecs", "{E0B81C77-6E29-4500-9E9F-F0B72EBE8241}"
+	ProjectSection(SolutionItems) = preProject
+		build\NuSpecs\ImageProcessor.nuspec = build\NuSpecs\ImageProcessor.nuspec
+		build\NuSpecs\ImageProcessor.Plugins.Cair.nuspec = build\NuSpecs\ImageProcessor.Plugins.Cair.nuspec
+		build\NuSpecs\ImageProcessor.Plugins.WebP.nuspec = build\NuSpecs\ImageProcessor.Plugins.WebP.nuspec
+		build\NuSpecs\ImageProcessor.Web.Config.nuspec = build\NuSpecs\ImageProcessor.Web.Config.nuspec
+		build\NuSpecs\ImageProcessor.Web.nuspec = build\NuSpecs\ImageProcessor.Web.nuspec
+		build\NuSpecs\ImageProcessor.Web.Plugins.AzureBlobCache.nuspec = build\NuSpecs\ImageProcessor.Web.Plugins.AzureBlobCache.nuspec
+		build\NuSpecs\ImageProcessor.Web.PostProcessor.nuspec = build\NuSpecs\ImageProcessor.Web.PostProcessor.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		All|Any CPU = All|Any CPU
@@ -131,5 +142,6 @@ Global
 		{ADAF0E0D-0CE9-45C2-AF95-70443273C468} = {0E113662-D6E2-473E-92BA-6005EB412C00}
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7} = {0E113662-D6E2-473E-92BA-6005EB412C00}
 		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF} = {0E113662-D6E2-473E-92BA-6005EB412C00}
+		{E0B81C77-6E29-4500-9E9F-F0B72EBE8241} = {4E1AB050-8CC4-4099-80AF-7FF2BFC000E9}
 	EndGlobalSection
 EndGlobal
