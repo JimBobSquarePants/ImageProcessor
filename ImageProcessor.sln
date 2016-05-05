@@ -27,8 +27,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Web.UnitTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.Playground", "tests\ImageProcessor.Playground\ImageProcessor.Playground.csproj", "{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_Website_MVC", "tests\TestWebsite\Test_Website_MVC.csproj", "{F6A208E9-C18F-43E9-B051-3C6EED30FDAF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{4E1AB050-8CC4-4099-80AF-7FF2BFC000E9}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
@@ -54,6 +52,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuspecs", "Nuspecs", "{E0B8
 		build\NuSpecs\ImageProcessor.Web.Plugins.AzureBlobCache.nuspec = build\NuSpecs\ImageProcessor.Web.Plugins.AzureBlobCache.nuspec
 		build\NuSpecs\ImageProcessor.Web.PostProcessor.nuspec = build\NuSpecs\ImageProcessor.Web.PostProcessor.nuspec
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.TestWebsite", "tests\ImageProcessor.TestWebsite\ImageProcessor.TestWebsite.csproj", "{A74AE40C-5374-4B15-BEBF-94D74C16AC3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,12 +122,12 @@ Global
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF}.All|Any CPU.ActiveCfg = Release|Any CPU
-		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF}.All|Any CPU.Build.0 = Release|Any CPU
-		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A74AE40C-5374-4B15-BEBF-94D74C16AC3A}.All|Any CPU.ActiveCfg = Release|Any CPU
+		{A74AE40C-5374-4B15-BEBF-94D74C16AC3A}.All|Any CPU.Build.0 = Release|Any CPU
+		{A74AE40C-5374-4B15-BEBF-94D74C16AC3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A74AE40C-5374-4B15-BEBF-94D74C16AC3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A74AE40C-5374-4B15-BEBF-94D74C16AC3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A74AE40C-5374-4B15-BEBF-94D74C16AC3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,7 +141,7 @@ Global
 		{633B1C4C-4823-47BE-9A01-A665F3118C8C} = {0E113662-D6E2-473E-92BA-6005EB412C00}
 		{ADAF0E0D-0CE9-45C2-AF95-70443273C468} = {0E113662-D6E2-473E-92BA-6005EB412C00}
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7} = {0E113662-D6E2-473E-92BA-6005EB412C00}
-		{F6A208E9-C18F-43E9-B051-3C6EED30FDAF} = {0E113662-D6E2-473E-92BA-6005EB412C00}
 		{E0B81C77-6E29-4500-9E9F-F0B72EBE8241} = {4E1AB050-8CC4-4099-80AF-7FF2BFC000E9}
+		{A74AE40C-5374-4B15-BEBF-94D74C16AC3A} = {0E113662-D6E2-473E-92BA-6005EB412C00}
 	EndGlobalSection
 EndGlobal

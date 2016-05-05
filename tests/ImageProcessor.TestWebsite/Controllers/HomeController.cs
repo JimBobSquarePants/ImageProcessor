@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
-namespace Test_Website_NET45.Controllers
+namespace ImageProcessor.TestWebsite.Controllers
 {
     public class HomeController : Controller
     {

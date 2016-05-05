@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace Test_Website_NET45
+namespace ImageProcessor.TestWebsite
 {
     public class RouteConfig
     {
