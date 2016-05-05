@@ -381,7 +381,7 @@ namespace ImageProcessor
                     this.InputStream.Position = 0;
                 }
 
-                Image newImage = Image.FromStream(this.InputStream, true);
+                Image newImage = this.CurrentImageFormat.Load(this.InputStream);
 
                 // Dispose and reassign the image.
                 // Ensure the image is in the most efficient format.

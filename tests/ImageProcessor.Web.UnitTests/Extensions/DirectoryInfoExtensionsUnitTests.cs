@@ -30,7 +30,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             /// <summary>
             /// The test directory root.
             /// </summary>
-            private const string TestDirectoryRoot = "DirectoryInfoExtensionsTests";
+            private static readonly string TestDirectoryRoot = TestContext.CurrentContext.TestDirectory + @"\DirectoryInfoExtensionsTests";
 
             /// <summary>
             /// The directory count.
@@ -40,7 +40,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             /// <summary>
             /// The directory list.
             /// </summary>
-            private IEnumerable<string> _directoryList;
+            private IEnumerable<string> directoryList;
 
             /// <summary>
             /// The setup directories.
@@ -48,8 +48,8 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             [SetUp]
             public void SetupDirectories()
             {
-                _directoryList = Enumerable.Range(1, DirectoryCount).Select(i => string.Format("{0}/TestDirectory{1}",TestDirectoryRoot, i));
-                foreach (var directory in _directoryList)
+                directoryList = Enumerable.Range(1, DirectoryCount).Select(i => string.Format("{0}/TestDirectory{1}", TestDirectoryRoot, i));
+                foreach (var directory in directoryList)
                 {
                     Directory.CreateDirectory(directory);
                 }
@@ -61,7 +61,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             [TearDown]
             public void RemoveDirectories()
             {
-                Directory.Delete("DirectoryInfoExtensionsTests", true);
+                Directory.Delete(TestDirectoryRoot, true);
             }
 
             /// <summary>
@@ -77,7 +77,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
                 var directories = info.SafeEnumerateDirectories();
 
                 // Assert
-                Assert.That(directories, Is.EquivalentTo(_directoryList.Select(s => new DirectoryInfo(s))));
+                Assert.That(directories, Is.EquivalentTo(directoryList.Select(s => new DirectoryInfo(s))));
             }
             /// <summary>
             /// The then should return empty enumerable directories given path with invalid directory
@@ -86,7 +86,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             public void ThenShouldReturnEmptyEnumerableDirectoriesGivenPathWithInvalidDirectory()
             {
                 // Arrange
-                var info = new DirectoryInfo(string.Format("Bad{0}", TestDirectoryRoot));
+                var info = new DirectoryInfo(string.Format("{0}Bad", TestDirectoryRoot));
 
                 // Act
                 var directories = info.SafeEnumerateDirectories();
@@ -105,7 +105,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             /// <summary>
             /// The test directory root.
             /// </summary>
-            private const string TestDirectoryRoot = "DirectoryInfoExtensionsTests";
+            private static readonly string TestDirectoryRoot = TestContext.CurrentContext.TestDirectory + @"\DirectoryInfoExtensionsTests";
 
             /// <summary>
             /// The directory count.
@@ -115,7 +115,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             /// <summary>
             /// The directory list.
             /// </summary>
-            private IEnumerable<string> _directoryList;
+            private IEnumerable<string> directoryList;
 
             /// <summary>
             /// The setup directories.
@@ -123,8 +123,8 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             [SetUp]
             public void SetupDirectories()
             {
-                _directoryList = Enumerable.Range(1, DirectoryCount).Select(i => string.Format("{0}/TestDirectory{1}",TestDirectoryRoot, i));
-                foreach (var directory in _directoryList)
+                directoryList = Enumerable.Range(1, DirectoryCount).Select(i => string.Format("{0}/TestDirectory{1}", TestDirectoryRoot, i));
+                foreach (var directory in directoryList)
                 {
                     Directory.CreateDirectory(directory);
                 }
@@ -136,7 +136,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             [TearDown]
             public void RemoveDirectories()
             {
-                Directory.Delete("DirectoryInfoExtensionsTests", true);
+                Directory.Delete(TestDirectoryRoot, true);
             }
             /// <summary>
             /// Then should return enumerable directories asynchronously given path with subdirectories
@@ -152,7 +152,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
                 var directories = await asyncResult;
 
                 // Assert
-                Assert.That(directories, Is.EquivalentTo(_directoryList.Select(s => new DirectoryInfo(s))));
+                Assert.That(directories, Is.EquivalentTo(directoryList.Select(s => new DirectoryInfo(s))));
             }
 
             /// <summary>
@@ -162,7 +162,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             public async Task ThenReturnEmptyEnumerableGivenInvalidDirectory()
             {
                 // Arrange
-                var info = new DirectoryInfo(string.Format("Bad{0}", TestDirectoryRoot));
+                var info = new DirectoryInfo(string.Format("{0}Bad", TestDirectoryRoot));
                 var asyncResult = info.SafeEnumerateDirectoriesAsync();
 
                 // Act
