@@ -511,7 +511,8 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 // Check whether the path is valid for other requests.
-                if (!currentService.IsValidRequest(resourcePath.ToString()))
+                // We've already checked the LocalImageService in GetImageServiceForRequest().
+                if (!(currentService is LocalFileImageService) && !currentService.IsValidRequest(resourcePath.ToString()))
                 {
                     return;
                 }
