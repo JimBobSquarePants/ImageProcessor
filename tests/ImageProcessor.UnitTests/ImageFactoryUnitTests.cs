@@ -896,7 +896,7 @@ namespace ImageProcessor.UnitTests
                 return this.imagesInfos;
             }
 
-            DirectoryInfo directoryInfo = new DirectoryInfo("./Images");
+            DirectoryInfo directoryInfo = new DirectoryInfo(Path.GetFullPath(TestContext.CurrentContext.TestDirectory + "../../../Images"));
 
             this.imagesInfos = GetFilesByExtensions(directoryInfo, ".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp", ".webp");
 
