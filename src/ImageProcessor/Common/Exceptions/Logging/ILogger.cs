@@ -8,6 +8,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+#if NET45
 namespace ImageProcessor.Common.Exceptions
 {
     using System.Runtime.CompilerServices;
@@ -26,3 +27,4 @@ namespace ImageProcessor.Common.Exceptions
         void Log<T>(string text, [CallerMemberName] string callerName = null);
     }
 }
+#endif

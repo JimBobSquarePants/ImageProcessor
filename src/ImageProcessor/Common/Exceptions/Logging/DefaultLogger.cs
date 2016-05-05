@@ -8,6 +8,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+#if NET45
 namespace ImageProcessor.Common.Exceptions
 {
     using System;
@@ -53,3 +54,4 @@ namespace ImageProcessor.Common.Exceptions
         }
     }
 }
+#endif
