@@ -510,6 +510,13 @@ namespace ImageProcessor.Web.HttpModules
                     resourcePath = requestPath;
                 }
 
+                // Check whether the path is valid for other requests.
+                // We've already checked the unprefixed requests in GetImageServiceForRequest().
+                if (!string.IsNullOrWhiteSpace(currentService.Prefix) && !currentService.IsValidRequest(resourcePath.ToString()))
+                {
+                    return;
+                }
+
                 string combined = requestPath + fullPath + queryString;
                 using (await Locker.LockAsync(combined))
                 {
@@ -717,16 +724,22 @@ namespace ImageProcessor.Web.HttpModules
         /// </returns>
         private IImageService GetImageServiceForRequest(HttpRequest request)
         {
+            IImageService imageService = null;
             IList<IImageService> services = ImageProcessorConfiguration.Instance.ImageServices;
 
             string path = request.Path.TrimStart('/');
             foreach (IImageService service in services)
             {
                 string key = service.Prefix;
-                if (!string.IsNullOrWhiteSpace(key) && path.StartsWith(key, StringComparison.InvariantCultureIgnoreCase) && service.IsValidRequest(path))
+                if (!string.IsNullOrWhiteSpace(key) && path.StartsWith(key, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return service;
+                    imageService = service;
                 }
+            }
+
+            if (imageService != null)
+            {
+                return imageService;
             }
 
             // Return the file based service.
