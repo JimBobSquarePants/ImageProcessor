@@ -22,6 +22,7 @@ namespace ImageProcessor.Web.HttpModules
     using System.Web;
     using System.Web.Hosting;
 
+    using ImageProcessor.Configuration;
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Web.Caching;
@@ -520,6 +521,7 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 string combined = requestPath + fullPath + queryString;
+
                 using (await Locker.LockAsync(combined))
                 {
                     // Create a new cache to help process and cache the request.
@@ -552,6 +554,7 @@ namespace ImageProcessor.Web.HttpModules
                                 // We want 404's to be handled by IIS so that other handlers/modules can still run.
                                 if (ex.GetHttpCode() == (int)HttpStatusCode.NotFound)
                                 {
+                                    ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(ex.Message);
                                     return;
                                 }
                             }

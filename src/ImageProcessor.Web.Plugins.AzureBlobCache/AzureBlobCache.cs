@@ -21,6 +21,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
     using System.Threading.Tasks;
     using System.Web;
 
+    using ImageProcessor.Configuration;
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Extensions;
     using ImageProcessor.Web.Helpers;
@@ -130,7 +131,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             this.CachedPath = Path.Combine(this.cloudCachedBlobContainer.Uri.ToString(), pathFromKey, cachedFileName).Replace(@"\", "/");
 
             // Do we insert the cache container? This seems to break some setups.
-            bool useCachedContainerInUrl = this.Settings.ContainsKey("UseCachedContainerInUrl") 
+            bool useCachedContainerInUrl = this.Settings.ContainsKey("UseCachedContainerInUrl")
                 && this.Settings["UseCachedContainerInUrl"].ToLower() != "false";
 
             if (useCachedContainerInUrl)
@@ -390,15 +391,13 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         {
                             HttpResponse contextResponse = context.Response;
                             cachedStream.CopyTo(contextResponse.OutputStream);
-
-                            ImageProcessingModule.SetHeaders(
-                                context,
-                                response.ContentType,
-                                null,
-                                this.MaxDays,
-                                response.StatusCode);
+                            ImageProcessingModule.SetHeaders(context, response.ContentType, null, this.MaxDays, response.StatusCode);
                         }
                     }
+                },
+                () =>
+                {
+                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
                 });
             }
             else
@@ -414,6 +413,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         ImageProcessingModule.AddCorsRequestHeaders(context);
                         context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
                     }
+                },
+                () =>
+                {
+                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
                 });
             }
         }
@@ -439,9 +442,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// Tries to execute a delegate action five times.
         /// </summary>
         /// <param name="delegateAction">The delegate to be executed</param>
-        private static void TryFiveTimes(Action delegateAction)
+        /// <param name="exceptionAction">The delegate to throw on error.</param>
+        private static void TryFiveTimes(Action delegateAction, Action exceptionAction)
         {
-            for (int retry = 0;; retry++)
+            for (int retry = 0; ; retry++)
             {
                 try
                 {
@@ -452,6 +456,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 {
                     if (retry >= 5)
                     {
+                        exceptionAction();
                         throw;
                     }
                 }

@@ -18,6 +18,9 @@ namespace ImageProcessor.Web.Helpers
     using System.Threading.Tasks;
     using System.Web;
 
+    using ImageProcessor.Configuration;
+    using ImageProcessor.Web.HttpModules;
+
     /// <summary>
     /// Encapsulates methods used to download files from a website address.
     /// </summary>
@@ -210,7 +213,9 @@ namespace ImageProcessor.Web.Helpers
                 if ((this.MaxDownloadSize > 0) && (contentLength > this.MaxDownloadSize))
                 {
                     response.Close();
-                    throw new SecurityException("An attempt to download a remote file has been halted because the file is larger than allowed.");
+                    string message ="An attempt to download a remote file has been halted because the file is larger than allowed.";
+                    ImageProcessorBootstrapper.Instance.Logger.Log<RemoteFile>(message);
+                    throw new SecurityException(message);
                 }
             }
 
