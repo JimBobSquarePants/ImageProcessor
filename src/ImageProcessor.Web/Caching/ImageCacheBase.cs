@@ -63,6 +63,7 @@ namespace ImageProcessor.Web.Caching
             this.Querystring = querystring;
             this.Settings = ImageProcessorConfiguration.Instance.ImageCacheSettings;
             this.MaxDays = ImageProcessorConfiguration.Instance.ImageCacheMaxDays;
+            this.BrowserMaxDays = ImageProcessorConfiguration.Instance.BrowserCacheMaxDays;
         }
 
         /// <summary>
@@ -79,6 +80,11 @@ namespace ImageProcessor.Web.Caching
         /// Gets or sets the maximum number of days to store the image.
         /// </summary>
         public int MaxDays { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of days to cache the image in the browser.
+        /// </summary>
+        public int BrowserMaxDays { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the image is new or updated in an asynchronous manner.
@@ -191,7 +197,7 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         protected virtual bool IsExpired(DateTime creationDate)
         {
-            return creationDate.AddDays(this.MaxDays) < DateTime.UtcNow.AddDays(-this.MaxDays);
+            return creationDate < DateTime.UtcNow.AddDays(-this.MaxDays);
         }
     }
 }
