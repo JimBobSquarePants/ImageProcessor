@@ -217,38 +217,41 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 // Check the url is from a whitelisted location.
-                Uri url = new Uri(origin);
-                string upper = url.Host.ToUpperInvariant();
-
-                // Check for root or sub domain.
-                bool validUrl = false;
-                foreach (Uri uri in origins.WhiteList)
+                if (origin != null)
                 {
-                    if (uri.ToString() == "*")
-                    {
-                        validUrl = true;
-                        break;
-                    }
+                    Uri url = new Uri(origin);
+                    string upper = url.Host.ToUpperInvariant();
 
-                    if (!uri.IsAbsoluteUri)
+                    // Check for root or sub domain.
+                    bool validUrl = false;
+                    foreach (Uri uri in origins.WhiteList)
                     {
-                        Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
-                        validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
-                    }
-                    else
-                    {
-                        validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
+                        if (uri.ToString() == "*")
+                        {
+                            validUrl = true;
+                            break;
+                        }
+
+                        if (!uri.IsAbsoluteUri)
+                        {
+                            Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
+                            validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
+                        }
+                        else
+                        {
+                            validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
+                        }
+
+                        if (validUrl)
+                        {
+                            break;
+                        }
                     }
 
                     if (validUrl)
                     {
-                        break;
+                        context.Response.AddHeader("Access-Control-Allow-Origin", origin);
                     }
-                }
-
-                if (validUrl)
-                {
-                    context.Response.AddHeader("Access-Control-Allow-Origin", origin);
                 }
             }
         }
