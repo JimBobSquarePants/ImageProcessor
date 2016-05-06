@@ -724,7 +724,6 @@ namespace ImageProcessor.Web.HttpModules
         /// </returns>
         private IImageService GetImageServiceForRequest(HttpRequest request)
         {
-            IImageService imageService = null;
             IList<IImageService> services = ImageProcessorConfiguration.Instance.ImageServices;
 
             string path = request.Path.TrimStart('/');
@@ -733,13 +732,8 @@ namespace ImageProcessor.Web.HttpModules
                 string key = service.Prefix;
                 if (!string.IsNullOrWhiteSpace(key) && path.StartsWith(key, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    imageService = service;
+                    return service;
                 }
-            }
-
-            if (imageService != null)
-            {
-                return imageService;
             }
 
             // Return the file based service.
