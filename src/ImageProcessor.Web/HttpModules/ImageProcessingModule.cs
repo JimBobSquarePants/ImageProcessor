@@ -8,6 +8,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.ComponentModel;
+using System.Diagnostics;
+
 namespace ImageProcessor.Web.HttpModules
 {
     using System;
@@ -124,15 +127,15 @@ namespace ImageProcessor.Web.HttpModules
         #endregion
 
         /// <summary>
-        /// The process querystring event handler.
+        /// Event to use to validate the request or manipulate the request parameters
         /// </summary>
-        /// <param name="sender">
-        /// The sender.
-        /// </param>
-        /// <param name="e">
-        /// The <see cref="ProcessQueryStringEventArgs"/>.
-        /// </param>
-        /// <returns>Returns the processed querystring.</returns>
+        /// <remarks>
+        /// This can be used by devlopers to cancel the request based on the parameters specified or used to manipulate the parameters
+        /// </remarks>
+        public static event EventHandler<ValidatingRequestEventArgs> ValidatingRequest;
+
+        [Obsolete("Use ValidatingRequest instead")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public delegate string ProcessQuerystringEventHandler(object sender, ProcessQueryStringEventArgs e);
 
         /// <summary>
@@ -140,9 +143,8 @@ namespace ImageProcessor.Web.HttpModules
         /// </summary>
         public static event EventHandler<PostProcessingEventArgs> OnPostProcessing;
 
-        /// <summary>
-        /// The event that is called when a querystring is processed.
-        /// </summary>
+        [Obsolete("Use ValidatingRequest instead")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static event ProcessQuerystringEventHandler OnProcessQuerystring;
 
         /// <summary>
@@ -484,8 +486,24 @@ namespace ImageProcessor.Web.HttpModules
                 // Replace any presets in the querystring with the actual value.
                 queryString = this.ReplacePresetsInQueryString(queryString);
 
+                var httpContextBase = new HttpContextWrapper(context);
+
                 // Execute the handler which can change the querystring 
+                //  LEGACY:
                 queryString = this.CheckQuerystringHandler(context, queryString, request.Unvalidated.RawUrl);
+                //  NEW WAY:
+                var validatingArgs = new ValidatingRequestEventArgs(httpContextBase, queryString);
+                OnValidatingRequest(validatingArgs);
+
+                //If the validation has failed based on events, return
+                if (validatingArgs.Cancel)
+                {
+                    Trace.Fail("Image processing has been cancelled by an event");
+                    return;
+                }
+
+                //re-assign based on event handlers
+                queryString = validatingArgs.QueryString;
 
                 // Break out if we don't meet critera.
                 bool interceptAll = interceptAllRequests != null && interceptAllRequests.Value;
@@ -686,6 +704,18 @@ namespace ImageProcessor.Web.HttpModules
         }
 
         /// <summary>
+        /// Raises the ValidatingRequest event
+        /// </summary>
+        /// <param name="args"></param>
+        private void OnValidatingRequest(ValidatingRequestEventArgs args)
+        {
+            if (ValidatingRequest != null)
+            {
+                ValidatingRequest(this, args);
+            }
+        }
+
+        /// <summary>
         /// Checks if there is a handler that changes the querystring and executes that handler.
         /// </summary>
         /// <param name="context">The current request context.</param>
@@ -694,6 +724,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <returns>
         /// The <see cref="string"/> containing the updated querystring.
         /// </returns>
+        [Obsolete("This is here for legacy reasons, use the OnValidatingRequest method instead")]
         private string CheckQuerystringHandler(HttpContext context, string queryString, string rawUrl)
         {
             // Fire the process querystring event.
