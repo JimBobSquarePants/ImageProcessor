@@ -17,7 +17,6 @@ namespace ImageProcessor.Web.HttpModules
     using System.Linq;
     using System.Net;
     using System.Reflection;
-    using System.Security.Policy;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Web;
