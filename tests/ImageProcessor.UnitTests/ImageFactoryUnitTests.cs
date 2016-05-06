@@ -4,6 +4,9 @@
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
+
+using ImageProcessor.Common.Extensions;
+
 namespace ImageProcessor.UnitTests
 {
     using System;
@@ -617,19 +620,24 @@ namespace ImageProcessor.UnitTests
         public void HueIsModified()
         {
             int i = 0;
-            foreach (ImageFactory imageFactory in this.ListInputImages())
+            foreach (ImageFactory imageFactory in this.ListInputImages(".bmp"))
             {
-                Image original = (Image)imageFactory.Image.Clone();
-                imageFactory.Hue(90);
-                AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the hue operation should have been applied on {0}", imageFactory.ImagePath);
+                using (Image original = imageFactory.Image.Copy())
+                {
+                    imageFactory.Hue(90);
+                    AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image,
+                        "because the hue operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Reset();
-                AssertionHelpers.AssertImagesAreIdentical(original, imageFactory.Image, "because the image should be reset");
+                    imageFactory.Reset();
+                    AssertionHelpers.AssertImagesAreIdentical(original, imageFactory.Image,
+                        "because the image should be reset");
 
-                imageFactory.Hue(116, true);
-                AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image, "because the hue+rotate operation should have been applied on {0}", imageFactory.ImagePath);
+                    imageFactory.Hue(116, true);
+                    AssertionHelpers.AssertImagesAreDifferent(original, imageFactory.Image,
+                        "because the hue+rotate operation should have been applied on {0}", imageFactory.ImagePath);
 
-                imageFactory.Format(new JpegFormat()).Save(outputPath + "hue-" + i++ + ".jpg");
+                    imageFactory.Format(new BitmapFormat()).Save(outputPath + "hue-" + i++ + ".jpg");
+                }
             }
         }
 
