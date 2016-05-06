@@ -19,7 +19,9 @@ namespace ImageProcessor.Web.Caching
     using System.Web;
     using System.Web.Hosting;
 
+    using ImageProcessor.Configuration;
     using ImageProcessor.Web.Extensions;
+    using ImageProcessor.Web.HttpModules;
 
     /// <summary>
     /// Provides an <see cref="IImageCache"/> implementation that is file system based.
@@ -73,7 +75,9 @@ namespace ImageProcessor.Web.Caching
 
             if (!virtualPath.IsValidVirtualPathName())
             {
-                throw new ConfigurationErrorsException("DiskCache 'VirtualCachePath' is not a valid virtual path.");
+                string message = "'VirtualCachePath' is not a valid virtual path. " + virtualPath;
+                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>(message);
+                throw new ConfigurationErrorsException("DiskCache: " + message);
             }
 
             this.virtualCachePath = virtualPath;
@@ -159,7 +163,7 @@ namespace ImageProcessor.Web.Caching
             {
                 directoryInfo.Create();
             }
-            
+
             using (FileStream fileStream = File.Create(this.CachedPath))
             {
                 await stream.CopyToAsync(fileStream);
@@ -209,7 +213,8 @@ namespace ImageProcessor.Web.Caching
                             // ReSharper disable once EmptyGeneralCatchClause
                             catch
                             {
-                                // Do nothing; skip to the next file.
+                                // Log it but skip to the next file.
+                                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>("Unable to clean cached file: " + fileInfo.FullName);
                             }
                         }
                     }

@@ -24,7 +24,8 @@ namespace ImageProcessor.Common.Exceptions
         /// <typeparam name="T">The type calling the logger.</typeparam>
         /// <param name="text">The message to log.</param>
         /// <param name="callerName">The property or method name calling the log.</param>
-        void Log<T>(string text, [CallerMemberName] string callerName = null);
+        /// <param name="lineNumber">The line number where the method is called.</param>
+        void Log<T>(string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0);
     }
 }
 #endif

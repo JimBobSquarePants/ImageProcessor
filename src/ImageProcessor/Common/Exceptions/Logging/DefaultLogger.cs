@@ -21,7 +21,10 @@ namespace ImageProcessor.Common.Exceptions
     /// </summary>
     public class DefaultLogger : ILogger
     {
-        private Action<string> debugWriteLine;
+        /// <summary>
+        /// The writeline delegate.
+        /// </summary>
+        private readonly Action<string> debugWriteLine;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultLogger"/> class.
@@ -46,9 +49,10 @@ namespace ImageProcessor.Common.Exceptions
         /// <typeparam name="T">The type calling the logger.</typeparam>
         /// <param name="text">The message to log.</param>
         /// <param name="callerName">The property or method name calling the log.</param>
-        public void Log<T>(string text, [CallerMemberName] string callerName = null)
+        /// <param name="lineNumber">The line number where the method is called.</param>
+        public void Log<T>(string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0)
         {
-            string message = string.Format("{0} : {1} {2}", typeof(T).Name, callerName, text);
+            string message = string.Format("{0} - {1}: {2} {3}:{4}", DateTime.UtcNow.ToString("s"), typeof(T).Name, callerName, lineNumber, text);
 
             this.debugWriteLine(message);
         }
