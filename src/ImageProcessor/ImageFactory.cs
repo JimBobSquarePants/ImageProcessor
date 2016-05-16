@@ -227,6 +227,13 @@ namespace ImageProcessor
 
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
+
+            // Clear property items.
+            if (!this.PreserveExifData)
+            {
+                ClearExif(formatted);
+            }
+
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -296,6 +303,13 @@ namespace ImageProcessor
 
                     // Ensure the image is in the most efficient format.
                     Image formatted = this.Image.Copy(this.AnimationProcessMode);
+
+                    // Clear property items.
+                    if (!this.PreserveExifData)
+                    {
+                        ClearExif(formatted);
+                    }
+
                     this.Image.Dispose();
                     this.Image = formatted;
 
@@ -357,6 +371,13 @@ namespace ImageProcessor
 
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
+
+            // Clear property items.
+            if (!this.PreserveExifData)
+            {
+                ClearExif(formatted);
+            }
+
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -386,6 +407,13 @@ namespace ImageProcessor
                 // Dispose and reassign the image.
                 // Ensure the image is in the most efficient format.
                 Image formatted = newImage.Copy(this.AnimationProcessMode);
+
+                // Clear property items.
+                if (!this.PreserveExifData)
+                {
+                    ClearExif(formatted);
+                }
+
                 newImage.Dispose();
                 this.Image.Dispose();
                 this.Image = formatted;
@@ -1384,5 +1412,16 @@ namespace ImageProcessor
         }
         #endregion
         #endregion
+
+        private void ClearExif(Image image)
+        {
+            foreach (KeyValuePair<int, PropertyItem> item in ExifPropertyItems)
+            {
+                image.RemovePropertyItem(item.Key);
+            }
+
+            //.RotateFlip(RotateFlipType.Rotate180FlipNone);
+        }
     }
 }
+
