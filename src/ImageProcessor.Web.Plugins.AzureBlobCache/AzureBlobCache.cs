@@ -268,7 +268,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             foreach (CloudBlockBlob blob in results
                 .Where((blobItem, type) => blobItem is CloudBlockBlob)
                 .Cast<CloudBlockBlob>()
-                .OrderBy(b => b.Properties.LastModified != null ? b.Properties.LastModified.Value.UtcDateTime : new DateTime()))
+                .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
             {
                 if (blob.Properties.LastModified.HasValue
                     && !this.IsExpired(blob.Properties.LastModified.Value.UtcDateTime))

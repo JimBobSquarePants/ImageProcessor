@@ -155,7 +155,6 @@ namespace ImageProcessor
         /// </summary>
         public Image Image { get; internal set; }
 
-
         /// <summary>
         /// Gets or sets the process mode for frames in animated images.
         /// </summary>
@@ -231,7 +230,7 @@ namespace ImageProcessor
             // Clear property items.
             if (!this.PreserveExifData)
             {
-                ClearExif(formatted);
+                this.ClearExif(formatted);
             }
 
             this.Image.Dispose();
@@ -307,7 +306,7 @@ namespace ImageProcessor
                     // Clear property items.
                     if (!this.PreserveExifData)
                     {
-                        ClearExif(formatted);
+                        this.ClearExif(formatted);
                     }
 
                     this.Image.Dispose();
@@ -375,7 +374,7 @@ namespace ImageProcessor
             // Clear property items.
             if (!this.PreserveExifData)
             {
-                ClearExif(formatted);
+                this.ClearExif(formatted);
             }
 
             this.Image.Dispose();
@@ -411,7 +410,7 @@ namespace ImageProcessor
                 // Clear property items.
                 if (!this.PreserveExifData)
                 {
-                    ClearExif(formatted);
+                    this.ClearExif(formatted);
                 }
 
                 newImage.Dispose();
@@ -762,7 +761,6 @@ namespace ImageProcessor
 
                 // Apply any fomatting quirks.
                 this.CurrentImageFormat.ApplyProcessor(factory => factory.Image, this);
-
             }
 
             return this;
@@ -1413,15 +1411,16 @@ namespace ImageProcessor
         #endregion
         #endregion
 
+        /// <summary>
+        /// Clears any EXIF metadata from the image
+        /// </summary>
+        /// <param name="image">The current image.</param>
         private void ClearExif(Image image)
         {
-            foreach (KeyValuePair<int, PropertyItem> item in ExifPropertyItems)
+            foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
             {
                 image.RemovePropertyItem(item.Key);
             }
-
-            //.RotateFlip(RotateFlipType.Rotate180FlipNone);
         }
     }
 }
-

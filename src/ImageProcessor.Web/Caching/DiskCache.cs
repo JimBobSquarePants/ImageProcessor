@@ -21,7 +21,6 @@ namespace ImageProcessor.Web.Caching
 
     using ImageProcessor.Configuration;
     using ImageProcessor.Web.Extensions;
-    using ImageProcessor.Web.HttpModules;
 
     /// <summary>
     /// Provides an <see cref="IImageCache"/> implementation that is file system based.

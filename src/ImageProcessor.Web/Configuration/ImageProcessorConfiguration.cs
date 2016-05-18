@@ -75,13 +75,7 @@ namespace ImageProcessor.Web.Configuration
         /// <summary>
         /// Gets the current instance of the <see cref="ImageProcessorConfiguration"/> class.
         /// </summary>
-        public static ImageProcessorConfiguration Instance
-        {
-            get
-            {
-                return Lazy.Value;
-            }
-        }
+        public static ImageProcessorConfiguration Instance => Lazy.Value;
 
         /// <summary>
         /// Gets the list of available GraphicsProcessors.
@@ -116,37 +110,20 @@ namespace ImageProcessor.Web.Configuration
         /// <summary>
         /// Gets a value indicating whether to preserve exif meta data.
         /// </summary>
-        public bool PreserveExifMetaData
-        {
-            get
-            {
-                return GetImageProcessingSection().PreserveExifMetaData;
-            }
-        }
+        public bool PreserveExifMetaData => GetImageProcessingSection().PreserveExifMetaData;
 
         /// <summary>
         /// Gets a value indicating whether to convert images to a linear color space before
         /// processing.
         /// </summary>
-        public bool FixGamma
-        {
-            get
-            {
-                return GetImageProcessingSection().FixGamma;
-            }
-        }
+        public bool FixGamma => GetImageProcessingSection().FixGamma;
 
         /// <summary>
         /// Gets a value indicating whether whether to intercept all image requests including ones
         /// without querystring parameters.
         /// </summary>
-        public bool InterceptAllRequests
-        {
-            get
-            {
-                return GetImageProcessingSection().InterceptAllRequests;
-            }
-        }
+        public bool InterceptAllRequests => GetImageProcessingSection().InterceptAllRequests;
+
         #endregion
 
         #region Methods
@@ -169,7 +146,7 @@ namespace ImageProcessor.Web.Configuration
                        .Presets
                        .Cast<ImageProcessingSection.PresetElement>()
                        .FirstOrDefault(x => x.Name == n);
-                       return presetElement != null ? presetElement.Value : null;
+                       return presetElement?.Value;
                    });
         }
 

@@ -1,7 +1,7 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="CommonParameterParserUtility.cs" company="James South">
 //   Copyright (c) James South.
-//   //   Licensed under the Apache License, Version 2.0.
+//   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 namespace ImageProcessor.Web.Helpers

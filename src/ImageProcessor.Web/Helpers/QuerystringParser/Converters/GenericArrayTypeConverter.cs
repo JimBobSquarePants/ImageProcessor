@@ -40,7 +40,7 @@ namespace ImageProcessor.Web.Helpers
         {
             object result = base.ConvertFrom(culture, value, propertyType);
             IList<T> list = result as IList<T>;
-            return list != null ? list.ToArray() : result;
+            return list?.ToArray() ?? result;
         }
     }
 }
