@@ -381,20 +381,21 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 // Write the blob storage directly to the stream
                 request.Method = "GET";
 
-                TryFiveTimes(() =>
-                {
-                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                    {
-                        Stream cachedStream = response.GetResponseStream();
-
-                        if (cachedStream != null)
+                TryFiveTimes(
+                    () =>
                         {
-                            HttpResponse contextResponse = context.Response;
-                            cachedStream.CopyTo(contextResponse.OutputStream);
-                            ImageProcessingModule.SetHeaders(context, response.ContentType, null, this.MaxDays, response.StatusCode);
-                        }
-                    }
-                },
+                            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                            {
+                                Stream cachedStream = response.GetResponseStream();
+
+                                if (cachedStream != null)
+                                {
+                                    HttpResponse contextResponse = context.Response;
+                                    cachedStream.CopyTo(contextResponse.OutputStream);
+                                    ImageProcessingModule.SetHeaders(context, response.ContentType, null, this.BrowserMaxDays, response.StatusCode);
+                                }
+                            }
+                        },
                 () =>
                 {
                     ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
@@ -405,15 +406,16 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 // Redirect the request to the blob URL
                 request.Method = "HEAD";
 
-                TryFiveTimes(() =>
-                {
-                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                    {
-                        HttpStatusCode responseCode = response.StatusCode;
-                        ImageProcessingModule.AddCorsRequestHeaders(context);
-                        context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
-                    }
-                },
+                TryFiveTimes(
+                    () =>
+                        {
+                            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                            {
+                                HttpStatusCode responseCode = response.StatusCode;
+                                ImageProcessingModule.AddCorsRequestHeaders(context);
+                                context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
+                            }
+                        },
                 () =>
                 {
                     ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
@@ -445,7 +447,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <param name="exceptionAction">The delegate to throw on error.</param>
         private static void TryFiveTimes(Action delegateAction, Action exceptionAction)
         {
-            for (int retry = 0; ; retry++)
+            for (int retry = 0;; retry++)
             {
                 try
                 {

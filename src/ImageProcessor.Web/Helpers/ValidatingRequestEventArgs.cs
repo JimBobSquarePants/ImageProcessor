@@ -1,8 +1,18 @@
-﻿using System.ComponentModel;
-using System.Web;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ValidatingRequestEventArgs.cs" company="James South">
+//   Copyright (c) James South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   The validating request event args
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace ImageProcessor.Web.Helpers
 {
+    using System.ComponentModel;
+    using System.Web;
+
     /// <summary>
     /// The validating request event args
     /// </summary>
@@ -12,10 +22,15 @@ namespace ImageProcessor.Web.Helpers
     /// </remarks>
     public class ValidatingRequestEventArgs : CancelEventArgs
     {
-        public ValidatingRequestEventArgs(HttpContextBase http, string queryString)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidatingRequestEventArgs"/> class. 
+        /// </summary>
+        /// <param name="context">The current http context.</param>
+        /// <param name="queryString">The query string.</param>
+        public ValidatingRequestEventArgs(HttpContextBase context, string queryString)
         {
-            Context = http;
-            QueryString = queryString;
+            this.Context = context;
+            this.QueryString = queryString;
         }
 
         /// <summary>
@@ -24,7 +39,7 @@ namespace ImageProcessor.Web.Helpers
         public HttpContextBase Context { get; private set; }
 
         /// <summary>
-        /// Gets/sets the query string
+        /// Gets or sets the query string
         /// </summary>
         /// <remarks>
         /// Event subscribers can directly manipulate the querystring before it's used for image processing

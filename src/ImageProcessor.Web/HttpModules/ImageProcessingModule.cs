@@ -8,14 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.ComponentModel;
-using System.Diagnostics;
-
 namespace ImageProcessor.Web.HttpModules
 {
     using System;
     using System.Collections.Generic;
     using System.Collections.Specialized;
+    using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -40,7 +38,6 @@ namespace ImageProcessor.Web.HttpModules
     public sealed class ImageProcessingModule : IHttpModule
     {
         #region Fields
-
         /// <summary>
         /// The key for storing the response type of the current image.
         /// </summary>
@@ -127,25 +124,37 @@ namespace ImageProcessor.Web.HttpModules
         #endregion
 
         /// <summary>
-        /// Event to use to validate the request or manipulate the request parameters
+        /// The process querystring event handler. DO NOT USE!
         /// </summary>
-        /// <remarks>
-        /// This can be used by devlopers to cancel the request based on the parameters specified or used to manipulate the parameters
-        /// </remarks>
-        public static event EventHandler<ValidatingRequestEventArgs> ValidatingRequest;
-
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="ProcessQueryStringEventArgs"/>.
+        /// </param>
+        /// <returns>Returns the processed querystring.</returns>
         [Obsolete("Use ValidatingRequest instead")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public delegate string ProcessQuerystringEventHandler(object sender, ProcessQueryStringEventArgs e);
+
+        /// <summary>
+        /// Event to use to validate the request or manipulate the request parameters
+        /// </summary>
+        /// <remarks>
+        /// This can be used by developers to cancel the request based on the parameters specified or used to manipulate the parameters
+        /// </remarks>
+        public static event EventHandler<ValidatingRequestEventArgs> ValidatingRequest;
 
         /// <summary>
         /// The event that is called when a new image is processed.
         /// </summary>
         public static event EventHandler<PostProcessingEventArgs> OnPostProcessing;
 
+        /// <summary>
+        /// The event that is called when a querystring is processed. DO NOT USE!
+        /// </summary>
         [Obsolete("Use ValidatingRequest instead")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+#pragma warning disable 618
         public static event ProcessQuerystringEventHandler OnProcessQuerystring;
+#pragma warning restore 618
 
         /// <summary>
         /// This will make the browser and server keep the output
@@ -489,23 +498,26 @@ namespace ImageProcessor.Web.HttpModules
                 // Replace any presets in the querystring with the actual value.
                 queryString = this.ReplacePresetsInQueryString(queryString);
 
-                var httpContextBase = new HttpContextWrapper(context);
+                HttpContextWrapper httpContextBase = new HttpContextWrapper(context);
 
                 // Execute the handler which can change the querystring 
                 //  LEGACY:
+#pragma warning disable 618
                 queryString = this.CheckQuerystringHandler(context, queryString, request.Unvalidated.RawUrl);
-                //  NEW WAY:
-                var validatingArgs = new ValidatingRequestEventArgs(httpContextBase, queryString);
-                OnValidatingRequest(validatingArgs);
+#pragma warning restore 618
 
-                //If the validation has failed based on events, return
+                // NEW WAY:
+                ValidatingRequestEventArgs validatingArgs = new ValidatingRequestEventArgs(httpContextBase, queryString);
+                this.OnValidatingRequest(validatingArgs);
+
+                // If the validation has failed based on events, return
                 if (validatingArgs.Cancel)
                 {
-                    Trace.Fail("Image processing has been cancelled by an event");
+                    ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>("Image processing has been cancelled by an event");
                     return;
                 }
 
-                //re-assign based on event handlers
+                // re-assign based on event handlers
                 queryString = validatingArgs.QueryString;
 
                 // Break out if we don't meet critera.
@@ -712,7 +724,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Raises the ValidatingRequest event
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">The <see cref="ValidatingRequestEventArgs"/></param>
         private void OnValidatingRequest(ValidatingRequestEventArgs args)
         {
             if (ValidatingRequest != null)
