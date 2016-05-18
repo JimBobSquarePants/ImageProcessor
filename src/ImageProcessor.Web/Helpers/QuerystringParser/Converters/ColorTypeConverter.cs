@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ExtendedColorTypeConverter.cs" company="James South">
+// <copyright file="ColorTypeConverter.cs" company="James South">
 //   Copyright (c) James South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
@@ -46,24 +46,12 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Gets the html system color table.
         /// </summary>
-        private static Hashtable SystemColors
-        {
-            get
-            {
-                return SystemColorTable.Value;
-            }
-        }
+        private static Hashtable SystemColors => SystemColorTable.Value;
 
         /// <summary>
         /// Gets the color constants table.
         /// </summary>
-        private static Hashtable ColorConstants
-        {
-            get
-            {
-                return ColorConstantsTable.Value;
-            }
-        }
+        private static Hashtable ColorConstants => ColorConstantsTable.Value;
 
         /// <summary>
         /// Returns whether this converter can convert an object of the given type to the type of this converter, 
@@ -235,7 +223,7 @@ namespace ImageProcessor.Web.Helpers
         {
             if (destinationType == null)
             {
-                throw new ArgumentNullException("destinationType");
+                throw new ArgumentNullException(nameof(destinationType));
             }
 
             if (destinationType == typeof(string))
@@ -296,6 +284,7 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>The <see cref="Hashtable"/></returns>
         private static Hashtable InitializeHtmlSystemColorTable()
         {
+            // ReSharper disable once UseObjectOrCollectionInitializer
             Hashtable hashTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
             hashTable["activeborder"] = Color.FromKnownColor(KnownColor.ActiveBorder);
             hashTable["activecaption"] = Color.FromKnownColor(KnownColor.ActiveCaption);

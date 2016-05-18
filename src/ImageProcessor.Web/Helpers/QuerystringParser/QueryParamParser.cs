@@ -51,13 +51,7 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Gets the current <see cref="QueryParamParser"/> instance.
         /// </summary>
-        public static QueryParamParser Instance
-        {
-            get
-            {
-                return Lazy.Value;
-            }
-        }
+        public static QueryParamParser Instance => Lazy.Value;
 
         /// <summary>
         /// Parses the given string value converting it to the given type.
@@ -257,7 +251,7 @@ namespace ImageProcessor.Web.Helpers
             // Validate parameters.
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             // We want an Func<object> which returns the default.

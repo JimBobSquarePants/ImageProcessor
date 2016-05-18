@@ -222,7 +222,7 @@ namespace ImageProcessor.Web.HttpModules
                 ImageSecuritySection.CORSOriginElement origins =
                     ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
 
-                if (origins == null || origins.WhiteList == null)
+                if (origins?.WhiteList == null)
                 {
                     return;
                 }
@@ -727,10 +727,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <param name="args">The <see cref="ValidatingRequestEventArgs"/></param>
         private void OnValidatingRequest(ValidatingRequestEventArgs args)
         {
-            if (ValidatingRequest != null)
-            {
-                ValidatingRequest(this, args);
-            }
+            ValidatingRequest?.Invoke(this, args);
         }
 
         /// <summary>
