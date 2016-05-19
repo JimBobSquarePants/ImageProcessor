@@ -46,13 +46,7 @@ namespace ImageProcessor.Configuration
         /// <summary>
         /// Gets the current instance of the <see cref="ImageProcessorBootstrapper"/> class.
         /// </summary>
-        public static ImageProcessorBootstrapper Instance
-        {
-            get
-            {
-                return Lazy.Value;
-            }
-        }
+        public static ImageProcessorBootstrapper Instance => Lazy.Value;
 
         /// <summary>
         /// Gets the supported image formats.

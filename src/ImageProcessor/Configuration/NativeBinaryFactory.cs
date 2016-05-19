@@ -74,13 +74,7 @@ namespace ImageProcessor.Configuration
         /// <summary>
         /// Gets a value indicating whether the operating environment is 64 bit.
         /// </summary>
-        public bool Is64BitEnvironment
-        {
-            get
-            {
-                return Is64Bit;
-            }
-        }
+        public bool Is64BitEnvironment => Is64Bit;
 
         /// <summary>
         /// Registers any embedded native (unmanaged) binaries required by ImageProcessor.
