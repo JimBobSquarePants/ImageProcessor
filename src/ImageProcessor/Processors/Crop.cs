@@ -82,7 +82,7 @@ namespace ImageProcessor.Processors
                     float percentageBottom = cropLayer.Bottom > 1 ? cropLayer.Bottom / 100 : cropLayer.Bottom;
 
                     // Work out the percentages.
-                    float left =  percentageLeft* sourceWidth;
+                    float left = percentageLeft * sourceWidth;
                     float top = percentageTop * sourceHeight;
                     float width = percentageRight < 1 ? (1 - percentageLeft - percentageRight) * sourceWidth : sourceWidth;
                     float height = percentageBottom < 1 ? (1 - percentageTop - percentageBottom) * sourceHeight : sourceHeight;
@@ -153,10 +153,7 @@ namespace ImageProcessor.Processors
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
+                newImage?.Dispose();
 
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
