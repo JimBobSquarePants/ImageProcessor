@@ -25,11 +25,6 @@ namespace ImageProcessor.Web.Services
     public class RemoteImageService : IImageService
     {
         /// <summary>
-        /// The prefix for the given implementation.
-        /// </summary>
-        private string prefix = "remote.axd";
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="RemoteImageService"/> class.
         /// </summary>
         public RemoteImageService()
@@ -50,30 +45,13 @@ namespace ImageProcessor.Web.Services
         /// This value is used as a prefix for any image requests that should use this service.
         /// </remarks>
         /// </summary>
-        public string Prefix
-        {
-            get
-            {
-                return this.prefix;
-            }
-
-            set
-            {
-                this.prefix = value;
-            }
-        }
+        public string Prefix { get; set; } = "remote.axd";
 
         /// <summary>
         /// Gets a value indicating whether the image service requests files from
         /// the locally based file system.
         /// </summary>
-        public bool IsFileLocalService
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsFileLocalService => false;
 
         /// <summary>
         /// Gets or sets any additional settings required by the service.

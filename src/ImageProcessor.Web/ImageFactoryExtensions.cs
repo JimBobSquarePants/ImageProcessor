@@ -10,12 +10,10 @@
 
 namespace ImageProcessor.Web
 {
-    #region Using
     using System.Collections.Generic;
     using System.Linq;
     using ImageProcessor.Web.Configuration;
     using ImageProcessor.Web.Processors;
-    #endregion
 
     /// <summary>
     /// Extends the ImageFactory class to provide a fluent API.
