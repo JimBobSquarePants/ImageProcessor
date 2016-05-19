@@ -51,13 +51,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Gets the regular expression to search strings for.
         /// </summary>
-        public Regex RegexPattern
-        {
-            get
-            {
-                return QueryRegex;
-            }
-        }
+        public Regex RegexPattern => QueryRegex;
 
         /// <summary>
         /// Gets the order in which this processor is to be used in a chain.
@@ -70,7 +64,7 @@ namespace ImageProcessor.Web.Processors
         /// <value>
         /// The processor.
         /// </value>
-        public IGraphicsProcessor Processor { get; private set; }
+        public IGraphicsProcessor Processor { get; }
 
         /// <summary>
         /// The position in the original string where the first character of the captured substring was found.
