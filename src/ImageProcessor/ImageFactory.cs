@@ -1417,10 +1417,10 @@ namespace ImageProcessor
         /// <param name="image">The current image.</param>
         private void ClearExif(Image image)
         {
-            foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
-            {
-                image.RemovePropertyItem(item.Key);
-            }
+            //foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
+            //{
+            //    image.RemovePropertyItem(item.Key);
+            //}
         }
     }
 }

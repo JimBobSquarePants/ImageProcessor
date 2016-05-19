@@ -23,7 +23,7 @@ namespace ImageProcessor.Common.Extensions
     internal static class ImageExtensions
     {
         /// <summary>
-        /// Creates a copy of an image allowing you to set the pixel format.
+        /// Creates a deep copy of an image allowing you to set the pixel format.
         /// Disposing of the original is the responsibility of the user.
         /// <remarks>
         /// Unlike the native <see cref="Image.Clone"/> method this also copies animation frames.
@@ -57,13 +57,19 @@ namespace ImageProcessor.Common.Extensions
                 return encoder.Save();
             }
 
-            Bitmap copy = ((Bitmap)source).Clone(new Rectangle(0, 0, source.Width, source.Height), format);
+            // Create a new image and copy it's pixels.
+            Bitmap copy = new Bitmap(source.Width, source.Height, format);
             copy.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+            using (Graphics graphics = Graphics.FromImage(copy))
+            {
+                graphics.DrawImageUnscaled(source, 0, 0);
+            }
+
             return copy;
         }
 
         /// <summary>
-        /// Creates a copy of an image allowing you to set the pixel format.
+        /// Creates a deep copy of an image allowing you to set the pixel format.
         /// Disposing of the original is the responsibility of the user.
         /// <remarks>
         /// Unlike the native <see cref="Image.Clone"/> method this also copies animation frames.
