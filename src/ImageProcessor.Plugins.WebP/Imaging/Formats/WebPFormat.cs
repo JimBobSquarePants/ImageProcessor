@@ -35,46 +35,22 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         /// <summary>
         /// Gets the file headers.
         /// </summary>
-        public override byte[][] FileHeaders
-        {
-            get
-            {
-                return new[] { Encoding.ASCII.GetBytes("RIFF") };
-            }
-        }
+        public override byte[][] FileHeaders => new[] { Encoding.ASCII.GetBytes("RIFF") };
 
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions
-        {
-            get
-            {
-                return new[] { "webp" };
-            }
-        }
+        public override string[] FileExtensions => new[] { "webp" };
 
         /// <summary>
         /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains.
         /// </summary>
-        public override string MimeType
-        {
-            get
-            {
-                return "image/webp";
-            }
-        }
+        public override string MimeType => "image/webp";
 
         /// <summary>
         /// Gets the file format of the image. 
         /// </summary>
-        public override ImageFormat ImageFormat
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public override ImageFormat ImageFormat => null;
 
         /// <summary>
         /// Applies the given processor the current image.
@@ -213,10 +189,7 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
             finally
             {
                 // Unlock the pixels
-                if (bitmap != null)
-                {
-                    bitmap.UnlockBits(bitmapData);
-                }
+                bitmap?.UnlockBits(bitmapData);
 
                 // Free memory
                 pinnedWebP.Free();
