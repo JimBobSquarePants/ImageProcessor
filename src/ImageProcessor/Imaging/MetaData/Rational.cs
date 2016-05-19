@@ -145,26 +145,17 @@ namespace ImageProcessor.Imaging.MetaData
         /// <summary>
         /// Gets and sets the numerator of the rational number
         /// </summary>
-        public T Numerator
-        {
-            get { return this.numerator; }
-        }
+        public T Numerator => this.numerator;
 
         /// <summary>
         /// Gets and sets the denominator of the rational number
         /// </summary>
-        public T Denominator
-        {
-            get { return this.denominator; }
-        }
+        public T Denominator => this.denominator;
 
         /// <summary>
         /// Gets a value indicating whether the current instance is empty.
         /// </summary>
-        public bool IsEmpty
-        {
-            get { return this.Equals(Empty); }
-        }
+        public bool IsEmpty => this.Equals(Empty);
 
         /// <summary>
         /// Gets the MaxValue
@@ -850,7 +841,7 @@ namespace ImageProcessor.Imaging.MetaData
         {
             if (conversionType == null)
             {
-                throw new ArgumentNullException("conversionType");
+                throw new ArgumentNullException(nameof(conversionType));
             }
 
             Type thisType = this.GetType();

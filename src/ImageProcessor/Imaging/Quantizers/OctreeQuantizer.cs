@@ -73,12 +73,12 @@ namespace ImageProcessor.Imaging.Quantizers
         {
             if (maxColors > 255)
             {
-                throw new ArgumentOutOfRangeException("maxColors", maxColors, "The number of colors should be less than 256");
+                throw new ArgumentOutOfRangeException(nameof(maxColors), maxColors, "The number of colors should be less than 256");
             }
 
             if ((maxColorBits < 1) | (maxColorBits > 8))
             {
-                throw new ArgumentOutOfRangeException("maxColorBits", maxColorBits, "This should be between 1 and 8");
+                throw new ArgumentOutOfRangeException(nameof(maxColorBits), maxColorBits, "This should be between 1 and 8");
             }
 
             // Construct the Octree
@@ -241,10 +241,7 @@ namespace ImageProcessor.Imaging.Quantizers
             /// <summary>
             /// Gets the array of reducible nodes
             /// </summary>
-            private OctreeNode[] ReducibleNodes
-            {
-                get { return this.reducibleNodes; }
-            }
+            private OctreeNode[] ReducibleNodes => this.reducibleNodes;
 
             /// <summary>
             /// Add a given color value to the Octree
@@ -362,11 +359,6 @@ namespace ImageProcessor.Imaging.Quantizers
                 private readonly OctreeNode[] children;
 
                 /// <summary>
-                /// Pointer to next reducible node
-                /// </summary>
-                private readonly OctreeNode nextReducible;
-
-                /// <summary>
                 /// Flag indicating that this is a leaf node
                 /// </summary>
                 private bool leaf;
@@ -420,13 +412,13 @@ namespace ImageProcessor.Imaging.Quantizers
                     if (this.leaf)
                     {
                         octree.Leaves++;
-                        this.nextReducible = null;
+                        this.NextReducible = null;
                         this.children = null;
                     }
                     else
                     {
                         // Otherwise add this to the reducible nodes
-                        this.nextReducible = octree.ReducibleNodes[level];
+                        this.NextReducible = octree.ReducibleNodes[level];
                         octree.ReducibleNodes[level] = this;
                         this.children = new OctreeNode[8];
                     }
@@ -435,10 +427,7 @@ namespace ImageProcessor.Imaging.Quantizers
                 /// <summary>
                 /// Gets the next reducible node
                 /// </summary>
-                public OctreeNode NextReducible
-                {
-                    get { return this.nextReducible; }
-                }
+                public OctreeNode NextReducible { get; }
 
                 /// <summary>
                 /// Add a color into the tree
