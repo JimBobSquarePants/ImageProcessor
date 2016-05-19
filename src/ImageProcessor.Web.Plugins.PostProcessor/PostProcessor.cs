@@ -16,6 +16,9 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
     using System.Globalization;
     using System.IO;
     using System.Threading;
+    using System.Threading.Tasks;
+
+    using ImageProcessor.Configuration;
 
     /// <summary>
     /// The image postprocessor.
@@ -71,7 +74,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// <param name="sourceFile">The source file.</param>
         /// <param name="length">The source file length in bytes.</param>
         /// <returns>
-        /// The <see cref="Task{PostProcessingResultEventArgs}"/> containing post-processing information.
+        /// The <see cref="Task{TResult}"/> containing post-processing information.
         /// </returns>
         private static PostProcessingResultEventArgs RunProcess(string sourceFile, long length)
         {
@@ -110,9 +113,11 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 
                 process.Start();
             }
-            catch (System.ComponentModel.Win32Exception)
+            catch (System.ComponentModel.Win32Exception ex)
             {
                 // Some security policies don't allow execution of programs in this way
+                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
+
                 return null;
             }
 

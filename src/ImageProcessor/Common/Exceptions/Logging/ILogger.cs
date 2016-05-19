@@ -11,6 +11,7 @@
 #if NET45
 namespace ImageProcessor.Common.Exceptions
 {
+    using System;
     using System.Runtime.CompilerServices;
 
     /// <summary>
@@ -26,6 +27,15 @@ namespace ImageProcessor.Common.Exceptions
         /// <param name="callerName">The property or method name calling the log.</param>
         /// <param name="lineNumber">The line number where the method is called.</param>
         void Log<T>(string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0);
+
+        /// <summary>
+        /// Logs the specified message.
+        /// </summary>
+        /// <param name="type">The type calling the logger.</param>
+        /// <param name="text">The message to log.</param>
+        /// <param name="callerName">The property or method name calling the log.</param>
+        /// <param name="lineNumber">The line number where the method is called.</param>
+        void Log(Type type, string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0);
     }
 }
 #endif

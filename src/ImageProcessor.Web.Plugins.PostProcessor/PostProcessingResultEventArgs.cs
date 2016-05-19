@@ -55,21 +55,12 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// <summary>
         /// Gets the difference in file size in bytes.
         /// </summary>
-        public long Saving
-        {
-            get { return this.OriginalFileSize - this.ResultFileSize; }
-        }
+        public long Saving => this.OriginalFileSize - this.ResultFileSize;
 
         /// <summary>
         /// Gets the difference in file size as a percentage.
         /// </summary>
-        public double Percent
-        {
-            get
-            {
-                return Math.Round(100 - ((this.ResultFileSize / (double)this.OriginalFileSize) * 100), 1);
-            }
-        }
+        public double Percent => Math.Round(100 - ((this.ResultFileSize / (double)this.OriginalFileSize) * 100), 1);
 
         /// <summary>
         /// Returns a string that represents the current object.
