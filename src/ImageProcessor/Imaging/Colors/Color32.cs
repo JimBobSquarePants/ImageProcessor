@@ -10,6 +10,7 @@
 
 namespace ImageProcessor.Imaging.Colors
 {
+    using System;
     using System.Drawing;
     using System.Runtime.InteropServices;
 
@@ -22,7 +23,7 @@ namespace ImageProcessor.Imaging.Colors
     /// the data is laid out in memory
     /// </remarks>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Color32
+    public struct Color32 : IEquatable<Color32>
     {
         /// <summary>
         /// Holds the blue component of the colour
@@ -57,18 +58,10 @@ namespace ImageProcessor.Imaging.Colors
         /// <summary>
         /// Initializes a new instance of the <see cref="Color32"/> struct.
         /// </summary>
-        /// <param name="alpha">
-        /// The alpha component.
-        /// </param>
-        /// <param name="red">
-        /// The red component.
-        /// </param>
-        /// <param name="green">
-        /// The green component.
-        /// </param>
-        /// <param name="blue">
-        /// The blue component.
-        /// </param>
+        /// <param name="alpha">The alpha component.</param>
+        /// <param name="red">The red component.</param>
+        /// <param name="green">The green component.</param>
+        /// <param name="blue">The blue component.</param>
         public Color32(byte alpha, byte red, byte green, byte blue)
             : this()
         {
@@ -109,12 +102,20 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (obj is Color32)
             {
-                Color32 color32 = (Color32)obj;
-
-                return this.Argb == color32.Argb;
+                return this.Equals((Color32)obj);
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.</returns>
+        public bool Equals(Color32 other)
+        {
+            return this.Argb.Equals(other.Argb);
         }
 
         /// <summary>

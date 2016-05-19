@@ -20,7 +20,7 @@ namespace ImageProcessor.Imaging.Colors
     /// Represents an YCbCr (luminance, chroma, chroma) color conforming to the ITU-R BT.601 standard used in digital imaging systems.
     /// <see href="http://en.wikipedia.org/wiki/YCbCr"/>
     /// </summary>
-    public struct YCbCrColor
+    public struct YCbCrColor : IEquatable<YCbCrColor>
     {
         /// <summary>
         /// Represents a <see cref="YCbCrColor"/> that is null.
@@ -59,37 +59,19 @@ namespace ImageProcessor.Imaging.Colors
         /// Gets the Y luminance component.
         /// <remarks>A value ranging between 0 and 255.</remarks>
         /// </summary>
-        public float Y
-        {
-            get
-            {
-                return this.y;
-            }
-        }
+        public float Y => this.y;
 
         /// <summary>
         /// Gets the U chroma component.
         /// <remarks>A value ranging between 0 and 255.</remarks>
         /// </summary>
-        public float Cb
-        {
-            get
-            {
-                return this.cb;
-            }
-        }
+        public float Cb => this.cb;
 
         /// <summary>
         /// Gets the V chroma component.
         /// <remarks>A value ranging between 0 and 255.</remarks>
         /// </summary>
-        public float Cr
-        {
-            get
-            {
-                return this.cr;
-            }
-        }
+        public float Cr => this.cr;
 
         /// <summary>
         /// Creates a <see cref="YCbCrColor"/> structure from the three 32-bit YCbCr 
@@ -189,10 +171,6 @@ namespace ImageProcessor.Imaging.Colors
             float cb = ycbcrColor.Cb - 128;
             float cr = ycbcrColor.Cr - 128;
 
-            //byte r = Convert.ToByte(Math.Max(0.0f, Math.Min(255f, y + (1.402 * cr))));
-            //byte g = Convert.ToByte(Math.Max(0.0f, Math.Min(255f, y - (0.34414 * cb) - (0.71414 * cr))));
-            //byte b = Convert.ToByte(Math.Max(0.0f, Math.Min(255f, y + (1.772 * cb))));
-
             byte r = Convert.ToByte(ImageMaths.Clamp(y + (1.402 * cr), 0, 255));
             byte g = Convert.ToByte(ImageMaths.Clamp(y - (0.34414 * cb) - (0.71414 * cr), 0, 255));
             byte b = Convert.ToByte(ImageMaths.Clamp(y + (1.772 * cb), 0, 255));
@@ -210,7 +188,7 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (this.IsEmpty())
             {
-                return "YCbCrColor [Empty]";
+                return "YCbCrColor [ Empty ]";
             }
 
             return string.Format("YCbCrColor [ Y={0:#0.##}, Cb={1:#0.##}, Cr={2:#0.##}]", this.Y, this.Cb, this.Cr);
@@ -227,13 +205,22 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (obj is YCbCrColor)
             {
-                Color thisColor = this;
-                Color otherColor = (YCbCrColor)obj;
-
-                return thisColor.Equals(otherColor);
+                return this.Equals((YCbCrColor)obj);
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.</returns>
+        public bool Equals(YCbCrColor other)
+        {
+            Color thisColor = this;
+            Color otherColor = other;
+            return thisColor.Equals(otherColor);
         }
 
         /// <summary>

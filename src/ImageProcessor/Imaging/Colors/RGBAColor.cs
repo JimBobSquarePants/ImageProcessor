@@ -7,12 +7,13 @@
 
 namespace ImageProcessor.Imaging.Colors
 {
+    using System;
     using System.Drawing;
 
     /// <summary>
     /// Represents an RGBA (red, green, blue, alpha) color.
     /// </summary>
-    public struct RgbaColor
+    public struct RgbaColor : IEquatable<RgbaColor>
     {
         /// <summary>
         /// Represents a <see cref="RgbaColor"/> that is null.
@@ -79,60 +80,30 @@ namespace ImageProcessor.Imaging.Colors
         /// <summary>
         /// Gets the red component.
         /// </summary>
-        public byte R
-        {
-            get
-            {
-                return this.r;
-            }
-        }
+        public byte R => this.r;
 
         /// <summary>
         /// Gets the green component.
         /// </summary>
-        public byte G
-        {
-            get
-            {
-                return this.g;
-            }
-        }
+        public byte G => this.g;
 
         /// <summary>
         /// Gets the blue component.
         /// </summary>
-        public byte B
-        {
-            get
-            {
-                return this.b;
-            }
-        }
+        public byte B => this.b;
 
         /// <summary>
         /// Gets the alpha component.
         /// </summary>
-        public byte A
-        {
-            get
-            {
-                return this.a;
-            }
-        }
+        public byte A => this.a;
 
         /// <summary>
         /// Creates a <see cref="RgbaColor"/> structure from the three 8-bit RGBA 
         /// components (red, green, and blue) values.
         /// </summary>
-        /// <param name="red">
-        /// The red component.
-        /// </param>
-        /// <param name="green">
-        /// The green component.
-        /// </param>
-        /// <param name="blue">
-        /// The blue component.
-        /// </param>
+        /// <param name="red">The red component.</param>
+        /// <param name="green">The green component.</param>
+        /// <param name="blue">The blue component.</param>
         /// <returns>
         /// The <see cref="RgbaColor"/>.
         /// </returns>
@@ -145,18 +116,10 @@ namespace ImageProcessor.Imaging.Colors
         /// Creates a <see cref="RgbaColor"/> structure from the four 8-bit RGBA 
         /// components (red, green, blue, and alpha) values.
         /// </summary>
-        /// <param name="red">
-        /// The red component.
-        /// </param>
-        /// <param name="green">
-        /// The green component.
-        /// </param>
-        /// <param name="blue">
-        /// The blue component.
-        /// </param>
-        /// <param name="alpha">
-        /// The alpha component.
-        /// </param>
+        /// <param name="red">The red component.</param>
+        /// <param name="green">The green component.</param>
+        /// <param name="blue">The blue component.</param>
+        /// <param name="alpha">The alpha component.</param>
         /// <returns>
         /// The <see cref="RgbaColor"/>.
         /// </returns>
@@ -264,7 +227,7 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (this.R == 0 && this.G == 0 && this.B == 0 && this.A == 0)
             {
-                return "RGBA [Empty]";
+                return "RGBA [ Empty ]";
             }
 
             return string.Format("RGBA [R={0}, G={1}, B={2}, A={3}]", this.R, this.G, this.B, this.A);
@@ -281,13 +244,22 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (obj is RgbaColor)
             {
-                Color thisColor = this;
-                Color otherColor = (RgbaColor)obj;
-
-                return thisColor.Equals(otherColor);
+                return this.Equals((RgbaColor)obj);
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.</returns>
+        public bool Equals(RgbaColor other)
+        {
+            Color thisColor = this;
+            Color otherColor = other;
+            return thisColor.Equals(otherColor);
         }
 
         /// <summary>
