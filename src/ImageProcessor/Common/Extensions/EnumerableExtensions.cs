@@ -39,7 +39,7 @@ namespace ImageProcessor.Common.Extensions
             long num = (fromInclusive + toExclusive) - 1L;
             if ((toExclusive < 0) || (num > 0x7fffffffL))
             {
-                throw new ArgumentOutOfRangeException("toExclusive");
+                throw new ArgumentOutOfRangeException(nameof(toExclusive));
             }
 
             return RangeIterator(fromInclusive, i => i < toExclusive, step);
