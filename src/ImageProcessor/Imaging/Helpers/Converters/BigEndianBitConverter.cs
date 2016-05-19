@@ -29,10 +29,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <summary>
         /// Indicates the byte order ("endianness") in which data is converted using this class.
         /// </summary>
-        public override Endianness Endianness
-        {
-            get { return Endianness.BigEndian; }
-        }
+        public override Endianness Endianness => Endianness.BigEndian;
 
         /// <summary>
         /// Indicates the byte order ("endianness") in which data is converted using this class.

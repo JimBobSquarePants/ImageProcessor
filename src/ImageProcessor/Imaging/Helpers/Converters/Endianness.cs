@@ -1,4 +1,14 @@
-﻿namespace ImageProcessor.Imaging.Helpers
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Endianness.cs" company="James South">
+//   Copyright (c) James South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   Endianness of a converter
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace ImageProcessor.Imaging.Helpers
 {
     /// <summary>
     /// Endianness of a converter
