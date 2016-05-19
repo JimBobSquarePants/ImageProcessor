@@ -16,6 +16,7 @@ namespace ImageProcessor.Common.Extensions
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Formats;
     using Imaging.Quantizers;
+
     /// <summary>
     /// Encapsulates a series of time saving extension methods to the <see cref="Image"/> class.
     /// </summary>
@@ -36,7 +37,7 @@ namespace ImageProcessor.Common.Extensions
         /// </returns>
         public static Image Copy(this Image source, AnimationProcessMode animationProcessMode, PixelFormat format = PixelFormat.Format32bppPArgb)
         {
-            if (Equals(source.RawFormat, ImageFormat.Gif))
+            if (source.RawFormat.Equals(ImageFormat.Gif))
             {
                 // Read from the correct first frame when performing additional processing
                 source.SelectActiveFrame(FrameDimension.Time, 0);

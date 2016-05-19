@@ -36,7 +36,7 @@ namespace ImageProcessor.Common.Extensions
         {
             if (assembly == null)
             {
-                throw new ArgumentNullException("assembly");
+                throw new ArgumentNullException(nameof(assembly));
             }
 
             try
@@ -72,10 +72,7 @@ namespace ImageProcessor.Common.Extensions
             {
                 using (Stream manifestResourceStream = assembly.GetManifestResourceStream(resource))
                 {
-                    if (manifestResourceStream != null)
-                    {
-                        manifestResourceStream.CopyTo(ms);
-                    }
+                    manifestResourceStream?.CopyTo(ms);
                 }
 
                 return encoding.GetString(ms.GetBuffer()).Replace('\0', ' ').Trim();
