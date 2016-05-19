@@ -215,7 +215,7 @@ namespace ImageProcessor.UnitTests
         public void SaturationIsModified()
         {
             int i = 0;
-            foreach (ImageFactory imageFactory in this.ListInputImages())
+            foreach (ImageFactory imageFactory in this.ListInputImages(".bmp"))
             {
                 Image original = (Image)imageFactory.Image.Clone();
                 imageFactory.Saturation(50);
@@ -357,7 +357,7 @@ namespace ImageProcessor.UnitTests
         public void FilterIsApplied()
         {
             int i = 0;
-            foreach (ImageFactory imageFactory in this.ListInputImages())
+            foreach (ImageFactory imageFactory in this.ListInputImages(".bmp"))
             {
                 Image original = (Image)imageFactory.Image.Clone();
 
