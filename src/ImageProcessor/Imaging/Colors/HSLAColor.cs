@@ -16,7 +16,7 @@ namespace ImageProcessor.Imaging.Colors
     /// Represents an HSLA (hue, saturation, luminosity, alpha) color.
     /// Adapted from <see href="http://richnewman.wordpress.com/about/code-listings-and-diagrams/hslcolor-class/"/>
     /// </summary>
-    public struct HslaColor
+    public struct HslaColor : IEquatable<HslaColor>
     {
         /// <summary>
         /// Represents a <see cref="HslaColor"/> that is null.
@@ -49,18 +49,10 @@ namespace ImageProcessor.Imaging.Colors
         /// <summary>
         /// Initializes a new instance of the <see cref="HslaColor"/> struct.
         /// </summary>
-        /// <param name="hue">
-        /// The hue component.
-        /// </param>
-        /// <param name="saturation">
-        /// The saturation component.
-        /// </param>
-        /// <param name="luminosity">
-        /// The luminosity component.
-        /// </param>
-        /// <param name="alpha">
-        /// The alpha component.
-        /// </param>
+        /// <param name="hue">The hue component.</param>
+        /// <param name="saturation">The saturation component.</param>
+        /// <param name="luminosity">The luminosity component.</param>
+        /// <param name="alpha">The alpha component.</param>
         private HslaColor(float hue, float saturation, float luminosity, float alpha)
         {
             this.h = Clamp(hue);
@@ -88,63 +80,33 @@ namespace ImageProcessor.Imaging.Colors
         /// Gets the hue component.
         /// <remarks>A value ranging between 0 and 1.</remarks>
         /// </summary>
-        public float H
-        {
-            get
-            {
-                return this.h;
-            }
-        }
+        public float H => this.h;
 
         /// <summary>
         /// Gets the luminosity component.
         /// <remarks>A value ranging between 0 and 1.</remarks>
         /// </summary>
-        public float L
-        {
-            get
-            {
-                return this.l;
-            }
-        }
+        public float L => this.l;
 
         /// <summary>
         /// Gets the saturation component.
         /// <remarks>A value ranging between 0 and 1.</remarks>
         /// </summary>
-        public float S
-        {
-            get
-            {
-                return this.s;
-            }
-        }
+        public float S => this.s;
 
         /// <summary>
         /// Gets the alpha component.
         /// <remarks>A value ranging between 0 and 1.</remarks>
         /// </summary>
-        public float A
-        {
-            get
-            {
-                return this.a;
-            }
-        }
+        public float A => this.a;
 
         /// <summary>
         /// Creates a <see cref="HslaColor"/> structure from the three 32-bit HSLA 
         /// components (hue, saturation, and luminosity) values.
         /// </summary>
-        /// <param name="hue">
-        /// The hue component.
-        /// </param>
-        /// <param name="saturation">
-        /// The saturation component.
-        /// </param>
-        /// <param name="luminosity">
-        /// The luminosity component.
-        /// </param>
+        /// <param name="hue">The hue component.</param>
+        /// <param name="saturation">The saturation component.</param>
+        /// <param name="luminosity">The luminosity component.</param>
         /// <returns>
         /// The <see cref="HslaColor"/>.
         /// </returns>
@@ -157,18 +119,10 @@ namespace ImageProcessor.Imaging.Colors
         /// Creates a <see cref="HslaColor"/> structure from the four 32-bit HSLA 
         /// components (hue, saturation, luminosity, and alpha) values.
         /// </summary>
-        /// <param name="hue">
-        /// The hue component.
-        /// </param>
-        /// <param name="saturation">
-        /// The saturation component.
-        /// </param>
-        /// <param name="luminosity">
-        /// The luminosity component.
-        /// </param>
-        /// <param name="alpha">
-        /// The alpha component.
-        /// </param>
+        /// <param name="hue">The hue component.</param>
+        /// <param name="saturation">The saturation component.</param>
+        /// <param name="luminosity">The luminosity component.</param>
+        /// <param name="alpha">The alpha component.</param>
         /// <returns>
         /// The <see cref="HslaColor"/>.
         /// </returns>
@@ -326,7 +280,7 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (this.IsEmpty())
             {
-                return "HslaColor [Empty]";
+                return "HslaColor [ Empty ]";
             }
 
             return string.Format("HslaColor [ H={0:#0.##}, S={1:#0.##}, L={2:#0.##}, A={3:#0.##}]", this.H, this.S, this.L, this.A);
@@ -343,13 +297,22 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (obj is HslaColor)
             {
-                Color thisColor = this;
-                Color otherColor = (HslaColor)obj;
-
-                return thisColor.Equals(otherColor);
+                return this.Equals((HslaColor)obj);
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.</returns>
+        public bool Equals(HslaColor other)
+        {
+            Color thisColor = this;
+            Color otherColor = other;
+            return thisColor.Equals(otherColor);
         }
 
         /// <summary>
