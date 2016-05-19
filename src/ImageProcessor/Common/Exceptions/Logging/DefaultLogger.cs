@@ -56,6 +56,20 @@ namespace ImageProcessor.Common.Exceptions
 
             this.debugWriteLine(message);
         }
+
+        /// <summary>
+        /// Logs the specified message.
+        /// </summary>
+        /// <param name="type">The type calling the logger.</param>
+        /// <param name="text">The message to log.</param>
+        /// <param name="callerName">The property or method name calling the log.</param>
+        /// <param name="lineNumber">The line number where the method is called.</param>
+        public void Log(Type type, string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0)
+        {
+            string message = string.Format("{0} - {1}: {2} {3}:{4}", DateTime.UtcNow.ToString("s"), type.Name, callerName, lineNumber, text);
+
+            this.debugWriteLine(message);
+        }
     }
 }
 #endif
