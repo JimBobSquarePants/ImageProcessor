@@ -55,9 +55,9 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         }
 
         /// <summary>
-        /// Gets or sets the palette.
+        /// Gets the palette.
         /// </summary>
-        private LookupNode[] Palette { get; set; }
+        private LookupNode[] Palette { get; }
 
         /// <summary>
         /// Gets palette index for the given pixel.

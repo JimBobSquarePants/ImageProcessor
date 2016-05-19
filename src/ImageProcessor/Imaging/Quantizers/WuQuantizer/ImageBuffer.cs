@@ -40,7 +40,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <summary>
         /// Gets the image.
         /// </summary>
-        public Bitmap Image { get; private set; }
+        public Bitmap Image { get; }
 
         /// <summary>
         /// Gets the enumerable pixel array representing each row of pixels.
