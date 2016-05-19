@@ -19,7 +19,7 @@ namespace ImageProcessor.UnitTests.Imaging.Colors
                 var s = cmyk.ToString();
 
                 // Assert
-                Assert.That(s, Is.EqualTo("CmykColor [Empty]"));
+                Assert.That(s, Is.EqualTo("CmykColor [ Empty ]"));
             }
 
             [Test]
