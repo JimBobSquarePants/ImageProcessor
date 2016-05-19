@@ -222,48 +222,27 @@ namespace ImageProcessor.Imaging
         /// <summary>
         /// Gets the width, in pixels of the <see cref="System.Drawing.Bitmap"/>.
         /// </summary>
-        public int Width
-        {
-            get
-            {
-                return this.width;
-            }
-        }
+        public int Width => this.width;
 
         /// <summary>
         /// Gets the height, in pixels of the <see cref="System.Drawing.Bitmap"/>.
         /// </summary>
-        public int Height
-        {
-            get
-            {
-                return this.height;
-            }
-        }
+        public int Height => this.height;
 
         /// <summary>
         /// Gets the Integral Image for values' sum.
         /// </summary>
-        public long[,] NormalImage
-        {
-            get { return this.normalSumImage; }
-        }
+        public long[,] NormalImage => this.normalSumImage;
 
         /// <summary>
         /// Gets the Integral Image for values' squared sum.
         /// </summary>
-        public long[,] SquaredImage
-        {
-            get { return this.squaredSumImage; }
-        }
+        public long[,] SquaredImage => this.squaredSumImage;
 
         /// <summary>
         /// Gets the Integral Image for tilted values' sum.
         /// </summary>
-        public long[,] TiltedImage
-        {
-            get { return this.tiltedSumImage; }
-        }
+        public long[,] TiltedImage => this.tiltedSumImage;
 
         /// <summary>
         /// Gets the pixel data for the given position.
@@ -277,10 +256,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// The <see cref="Color32"/>.
         /// </returns>
-        private Color32* this[int x, int y]
-        {
-            get { return (Color32*)(this.pixelBase + (y * this.bytesInARow) + (x * 4)); }
-        }
+        private Color32* this[int x, int y] => (Color32*)(this.pixelBase + (y * this.bytesInARow) + (x * 4));
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="FastBitmap"/> to a 

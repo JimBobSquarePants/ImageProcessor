@@ -151,11 +151,11 @@ namespace ImageProcessor.Imaging
             {
                 int hashCode = this.Size.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.MaxSize.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.RestrictedSizes != null ? this.RestrictedSizes.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (this.RestrictedSizes?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ (int)this.ResizeMode;
                 hashCode = (hashCode * 397) ^ (int)this.AnchorPosition;
                 hashCode = (hashCode * 397) ^ this.Upscale.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.CenterCoordinates != null ? this.CenterCoordinates.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (this.CenterCoordinates?.GetHashCode() ?? 0);
                 return hashCode;
             }
         }

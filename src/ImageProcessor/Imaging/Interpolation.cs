@@ -146,7 +146,7 @@ namespace ImageProcessor.Imaging
         /// Ensures that any passed double is correctly rounded to zero
         /// </summary>
         /// <param name="x">The value to clean.</param>
-        /// The <see cref="double"/>.
+        /// <returns>The <see cref="double"/>.</returns>
         private static double Clean(double x)
         {
             const double Epsilon = .0001;

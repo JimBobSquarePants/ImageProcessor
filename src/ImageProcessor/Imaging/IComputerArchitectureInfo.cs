@@ -16,7 +16,7 @@ namespace ImageProcessor.Imaging
     public interface IComputerArchitectureInfo
     {
         /// <summary>
-        /// Returns a value indicating whether the current computer archtecture is little endian. 
+        /// Returns a value indicating whether the current computer architecture is little endian. 
         /// </summary>
         /// <returns>The <see cref="bool"/></returns>
         bool IsLittleEndian();

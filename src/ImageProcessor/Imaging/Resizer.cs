@@ -80,8 +80,8 @@ namespace ImageProcessor.Imaging
             AnchorPosition anchor = this.ResizeLayer.AnchorPosition;
             bool upscale = this.ResizeLayer.Upscale;
             float[] centerCoordinates = this.ResizeLayer.CenterCoordinates;
-            int maxWidth = this.ResizeLayer.MaxSize.HasValue ? this.ResizeLayer.MaxSize.Value.Width : int.MaxValue;
-            int maxHeight = this.ResizeLayer.MaxSize.HasValue ? this.ResizeLayer.MaxSize.Value.Height : int.MaxValue;
+            int maxWidth = this.ResizeLayer.MaxSize?.Width ?? int.MaxValue;
+            int maxHeight = this.ResizeLayer.MaxSize?.Height ?? int.MaxValue;
             List<Size> restrictedSizes = this.ResizeLayer.RestrictedSizes;
 
             return this.ResizeImage(source, width, height, maxWidth, maxHeight, restrictedSizes, mode, anchor, upscale, centerCoordinates, linear);
@@ -142,7 +142,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         protected virtual Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
         {
-            return ResizeLinear(source, width, height, destination, AnimationProcessMode.All);
+            return this.ResizeLinear(source, width, height, destination, AnimationProcessMode.All);
         }
 
         /// <summary>
@@ -559,7 +559,7 @@ namespace ImageProcessor.Imaging
                     // Do the resize.
                     Rectangle destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
 
-                    newImage = linear ? this.ResizeLinear(source, width, height, destination, AnimationProcessMode) : this.ResizeComposite(source, width, height, destination);
+                    newImage = linear ? this.ResizeLinear(source, width, height, destination, this.AnimationProcessMode) : this.ResizeComposite(source, width, height, destination);
 
                     // Reassign the image.
                     source.Dispose();
@@ -568,10 +568,7 @@ namespace ImageProcessor.Imaging
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
+                newImage?.Dispose();
 
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
