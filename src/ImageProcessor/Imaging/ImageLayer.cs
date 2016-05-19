@@ -18,11 +18,6 @@ namespace ImageProcessor.Imaging
     public class ImageLayer
     {
         /// <summary>
-        /// The opacity at which to render the text.
-        /// </summary>
-        private int opacity = 100;
-
-        /// <summary>
         /// Gets or sets the image.
         /// </summary>
         public Image Image { get; set; }
@@ -35,11 +30,7 @@ namespace ImageProcessor.Imaging
         /// <summary>
         /// Gets or sets the Opacity of the text layer.
         /// </summary>
-        public int Opacity
-        {
-            get { return this.opacity; }
-            set { this.opacity = value; }
-        }
+        public int Opacity { get; set; } = 100;
 
         /// <summary>
         /// Gets or sets the Position of the text layer.
