@@ -20,111 +20,51 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the black and white filter.
         /// </summary>
-        public static IMatrixFilter BlackWhite
-        {
-            get
-            {
-                return new BlackWhiteMatrixFilter();
-            }
-        }
+        public static IMatrixFilter BlackWhite => new BlackWhiteMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the comic filter.
         /// </summary>
-        public static IMatrixFilter Comic
-        {
-            get
-            {
-                return new ComicMatrixFilter();
-            }
-        }
+        public static IMatrixFilter Comic => new ComicMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the gotham filter.
         /// </summary>
-        public static IMatrixFilter Gotham
-        {
-            get
-            {
-                return new GothamMatrixFilter();
-            }
-        }
+        public static IMatrixFilter Gotham => new GothamMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the greyscale filter.
         /// </summary>
-        public static IMatrixFilter GreyScale
-        {
-            get
-            {
-                return new GreyScaleMatrixFilter();
-            }
-        }
+        public static IMatrixFilter GreyScale => new GreyScaleMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the high saturation filter.
         /// </summary>
-        public static IMatrixFilter HiSatch
-        {
-            get
-            {
-                return new HiSatchMatrixFilter();
-            }
-        }
+        public static IMatrixFilter HiSatch => new HiSatchMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the invert filter.
         /// </summary>
-        public static IMatrixFilter Invert
-        {
-            get
-            {
-                return new InvertMatrixFilter();
-            }
-        }
+        public static IMatrixFilter Invert => new InvertMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the lomograph filter.
         /// </summary>
-        public static IMatrixFilter Lomograph
-        {
-            get
-            {
-                return new LomographMatrixFilter();
-            }
-        }
+        public static IMatrixFilter Lomograph => new LomographMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the low saturation filter.
         /// </summary>
-        public static IMatrixFilter LoSatch
-        {
-            get
-            {
-                return new LoSatchMatrixFilter();
-            }
-        }
+        public static IMatrixFilter LoSatch => new LoSatchMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the polaroid filter.
         /// </summary>
-        public static IMatrixFilter Polaroid
-        {
-            get
-            {
-                return new PolaroidMatrixFilter();
-            }
-        }
+        public static IMatrixFilter Polaroid => new PolaroidMatrixFilter();
 
         /// <summary>
         /// Gets the <see cref="IMatrixFilter"/> for generating the sepia filter.
         /// </summary>
-        public static IMatrixFilter Sepia
-        {
-            get
-            {
-                return new SepiaMatrixFilter();
-            }
-        }
+        public static IMatrixFilter Sepia => new SepiaMatrixFilter();
     }
 }

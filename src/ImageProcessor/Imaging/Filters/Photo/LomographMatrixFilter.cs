@@ -23,10 +23,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Gets the <see cref="T:System.Drawing.Imaging.ColorMatrix"/> for this filter instance.
         /// </summary>
-        public override ColorMatrix Matrix
-        {
-            get { return ColorMatrixes.Lomograph; }
-        }
+        public override ColorMatrix Matrix => ColorMatrixes.Lomograph;
 
         /// <summary>
         /// Processes the image.
