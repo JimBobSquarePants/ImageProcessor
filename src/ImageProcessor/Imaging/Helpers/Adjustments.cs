@@ -55,7 +55,7 @@ namespace ImageProcessor.Imaging.Helpers
         {
             if (percentage > 100 || percentage < 0)
             {
-                throw new ArgumentOutOfRangeException("percentage", "Percentage should be between 0 and 100.");
+                throw new ArgumentOutOfRangeException(nameof(percentage), "Percentage should be between 0 and 100.");
             }
 
             float factor = (float)percentage / 100;
@@ -105,7 +105,7 @@ namespace ImageProcessor.Imaging.Helpers
         {
             if (threshold > 100 || threshold < -100)
             {
-                throw new ArgumentOutOfRangeException("threshold", "Threshold should be between -100 and 100.");
+                throw new ArgumentOutOfRangeException(nameof(threshold), "Threshold should be between -100 and 100.");
             }
 
             float brightnessFactor = (float)threshold / 100;
@@ -155,7 +155,7 @@ namespace ImageProcessor.Imaging.Helpers
         {
             if (threshold > 100 || threshold < -100)
             {
-                throw new ArgumentOutOfRangeException("threshold", "Threshold should be between -100 and 100.");
+                throw new ArgumentOutOfRangeException(nameof(threshold), "Threshold should be between -100 and 100.");
             }
 
             Rectangle bounds = rectangle ?? new Rectangle(0, 0, source.Width, source.Height);
@@ -208,7 +208,7 @@ namespace ImageProcessor.Imaging.Helpers
         {
             if (value > 5 || value < .1)
             {
-                throw new ArgumentOutOfRangeException("value", "Value should be between .1 and 5.");
+                throw new ArgumentOutOfRangeException(nameof(value), "Value should be between .1 and 5.");
             }
 
             byte[] ramp = new byte[256];
@@ -395,7 +395,7 @@ namespace ImageProcessor.Imaging.Helpers
                 return signal * 12.92f;
             }
 
-            return ((float)((1 + a) * Math.Pow(signal, 1 / 2.4f))) - a;
+            return ((float)((1 + a) * Math.Pow(signal, 0.4166667F))) - a;
         }
     }
 }
