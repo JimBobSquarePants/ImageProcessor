@@ -23,69 +23,29 @@ namespace ImageProcessor.Imaging.Formats
     public class PngFormat : FormatBase, IQuantizableImageFormat
     {
         /// <summary>
-        /// The quantizer for reducing the image palette.
-        /// </summary>
-        private IQuantizer quantizer = new WuQuantizer();
-
-        /// <summary>
         /// Gets the file headers.
         /// </summary>
-        public override byte[][] FileHeaders
-        {
-            get
-            {
-                return new[] { new byte[] { 137, 80, 78, 71 } };
-            }
-        }
+        public override byte[][] FileHeaders => new[] { new byte[] { 137, 80, 78, 71 } };
 
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions
-        {
-            get
-            {
-                return new[] { "png" };
-            }
-        }
+        public override string[] FileExtensions => new[] { "png" };
 
         /// <summary>
         /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
         /// </summary>
-        public override string MimeType
-        {
-            get
-            {
-                return "image/png";
-            }
-        }
+        public override string MimeType => "image/png";
 
         /// <summary>
         /// Gets the <see cref="ImageFormat" />.
         /// </summary>
-        public override ImageFormat ImageFormat
-        {
-            get
-            {
-                return ImageFormat.Png;
-            }
-        }
+        public override ImageFormat ImageFormat => ImageFormat.Png;
 
         /// <summary>
         /// Gets or sets the quantizer for reducing the image palette.
         /// </summary>
-        public IQuantizer Quantizer
-        {
-            get
-            {
-                return this.quantizer;
-            }
-
-            set
-            {
-                this.quantizer = value;
-            }
-        }
+        public IQuantizer Quantizer { get; set; } = new WuQuantizer();
 
         /// <summary>
         /// Saves the current image to the specified output stream.

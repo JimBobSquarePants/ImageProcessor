@@ -16,7 +16,7 @@ namespace ImageProcessor.Imaging.Formats
     public interface IAnimatedImageFormat
     {
         /// <summary>
-        /// Gets the animation process mode.
+        /// Gets or sets the animation process mode.
         /// </summary>
         AnimationProcessMode AnimationProcessMode { get; set; }
     }

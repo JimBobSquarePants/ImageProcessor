@@ -23,50 +23,26 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the file headers.
         /// </summary>
-        public override byte[][] FileHeaders
-        {
-            get
-            {
-                return new[]
-                { 
-                    new byte[] { 73, 73, 42, 0 }, 
-                    new byte[] { 77, 77, 0, 42 }
-                };
-            }
-        }
+        public override byte[][] FileHeaders => new[]
+        { 
+            new byte[] { 73, 73, 42, 0 }, 
+            new byte[] { 77, 77, 0, 42 }
+        };
 
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions
-        {
-            get
-            {
-                return new[] { "tiff", "tif" };
-            }
-        }
+        public override string[] FileExtensions => new[] { "tiff", "tif" };
 
         /// <summary>
         /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
         /// </summary>
-        public override string MimeType
-        {
-            get
-            {
-                return "image/tiff";
-            }
-        }
+        public override string MimeType => "image/tiff";
 
         /// <summary>
         /// Gets the <see cref="ImageFormat" />.
         /// </summary>
-        public override ImageFormat ImageFormat
-        {
-            get
-            {
-                return ImageFormat.Tiff;
-            }
-        }
+        public override ImageFormat ImageFormat => ImageFormat.Tiff;
 
         /// <summary>
         /// Applies the given processor the current image.

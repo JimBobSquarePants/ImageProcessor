@@ -163,6 +163,9 @@ namespace ImageProcessor.Imaging.Formats
         }
         #endregion
 
+        /// <summary>
+        /// Gets or sets the image bytes.
+        /// </summary>
         public byte[] ImageBytes { get; set; }
 
         #region Public Methods and Operators
