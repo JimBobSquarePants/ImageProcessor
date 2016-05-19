@@ -145,25 +145,13 @@ namespace ImageProcessor.Processors
             }
             catch (Exception ex)
             {
-                if (mask != null)
-                {
-                    mask.Dispose();
-                }
+                mask?.Dispose();
 
-                if (maskCropped != null)
-                {
-                    maskCropped.Dispose();
-                }
+                maskCropped?.Dispose();
 
-                if (maskPositioned != null)
-                {
-                    maskPositioned.Dispose();
-                }
+                maskPositioned?.Dispose();
 
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
+                newImage?.Dispose();
 
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }
