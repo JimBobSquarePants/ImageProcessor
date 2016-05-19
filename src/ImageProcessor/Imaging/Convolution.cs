@@ -29,11 +29,6 @@ namespace ImageProcessor.Imaging
         private readonly double standardDeviation = 1.4;
 
         /// <summary>
-        /// Whether to use dynamic divider for edges.
-        /// </summary>
-        private bool useDynamicDividerForEdges = true;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Convolution"/> class.
         /// </summary>
         public Convolution()
@@ -85,18 +80,7 @@ namespace ImageProcessor.Imaging
         /// <para>Default value is set to <see langword="true" />.</para>
         /// </remarks>
         /// </summary>
-        public bool UseDynamicDividerForEdges
-        {
-            get
-            {
-                return this.useDynamicDividerForEdges;
-            }
-
-            set
-            {
-                this.useDynamicDividerForEdges = value;
-            }
-        }
+        public bool UseDynamicDividerForEdges { get; set; } = true;
 
         /// <summary>
         /// Create a 1 dimensional Gaussian kernel using the Gaussian G(x) function
