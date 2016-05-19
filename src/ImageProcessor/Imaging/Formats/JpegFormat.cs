@@ -25,46 +25,22 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the file headers.
         /// </summary>
-        public override byte[][] FileHeaders
-        {
-            get
-            {
-                return new[] { new byte[] { 255, 216, 255 } };
-            }
-        }
+        public override byte[][] FileHeaders => new[] { new byte[] { 255, 216, 255 } };
 
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions
-        {
-            get
-            {
-                return new[] { "jpeg", "jpg" };
-            }
-        }
+        public override string[] FileExtensions => new[] { "jpeg", "jpg" };
 
         /// <summary>
         /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
         /// </summary>
-        public override string MimeType
-        {
-            get
-            {
-                return "image/jpeg";
-            }
-        }
+        public override string MimeType => "image/jpeg";
 
         /// <summary>
         /// Gets the <see cref="ImageFormat" />.
         /// </summary>
-        public override ImageFormat ImageFormat
-        {
-            get
-            {
-                return ImageFormat.Jpeg;
-            }
-        }
+        public override ImageFormat ImageFormat => ImageFormat.Jpeg;
 
         /// <summary>
         /// Applies the given processor the current image.

@@ -46,13 +46,7 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the default file extension.
         /// </summary>
-        public string DefaultExtension
-        {
-            get
-            {
-                return this.MimeType.Replace("image/", string.Empty);
-            }
-        }
+        public string DefaultExtension => this.MimeType.Replace("image/", string.Empty);
 
         /// <summary>
         /// Gets the file format of the image. 

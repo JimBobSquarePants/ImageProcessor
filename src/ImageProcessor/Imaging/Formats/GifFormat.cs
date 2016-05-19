@@ -23,11 +23,6 @@ namespace ImageProcessor.Imaging.Formats
     public class GifFormat : FormatBase, IQuantizableImageFormat, IAnimatedImageFormat
     {
         /// <summary>
-        /// The quantizer for reducing the image palette.
-        /// </summary>
-        private IQuantizer quantizer = new OctreeQuantizer(255, 8);
-
-        /// <summary>
         /// Gets or sets the process mode for frames in animated images.
         /// </summary>
         public AnimationProcessMode AnimationProcessMode { get; set; }
@@ -35,62 +30,27 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the file headers.
         /// </summary>
-        public override byte[][] FileHeaders
-        {
-            get
-            {
-                return new[] { Encoding.ASCII.GetBytes("GIF") };
-            }
-        }
+        public override byte[][] FileHeaders => new[] { Encoding.ASCII.GetBytes("GIF") };
 
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions
-        {
-            get
-            {
-                return new[] { "gif" };
-            }
-        }
+        public override string[] FileExtensions => new[] { "gif" };
 
         /// <summary>
         /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
         /// </summary>
-        public override string MimeType
-        {
-            get
-            {
-                return "image/gif";
-            }
-        }
+        public override string MimeType => "image/gif";
 
         /// <summary>
         /// Gets the <see cref="ImageFormat" />.
         /// </summary>
-        public override ImageFormat ImageFormat
-        {
-            get
-            {
-                return ImageFormat.Gif;
-            }
-        }
+        public override ImageFormat ImageFormat => ImageFormat.Gif;
 
         /// <summary>
         /// Gets or sets the quantizer for reducing the image palette.
         /// </summary>
-        public IQuantizer Quantizer
-        {
-            get
-            {
-                return this.quantizer;
-            }
-
-            set
-            {
-                this.quantizer = value;
-            }
-        }
+        public IQuantizer Quantizer { get; set; } = new OctreeQuantizer(255, 8);
 
         /// <summary>
         /// Applies the given processor the current image.
