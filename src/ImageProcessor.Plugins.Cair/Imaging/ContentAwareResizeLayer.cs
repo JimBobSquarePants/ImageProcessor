@@ -18,29 +18,9 @@ namespace ImageProcessor.Plugins.Cair.Imaging
     public class ContentAwareResizeLayer
     {
         /// <summary>
-        /// The convolution type to apply to the layer.
-        /// </summary>
-        private ConvolutionType convolutionType = ConvolutionType.Prewitt;
-
-        /// <summary>
-        /// The energy function to apply to the layer.
-        /// </summary>
-        private EnergyFunction energyFunction = EnergyFunction.Forward;
-
-        /// <summary>
         /// The expected output type.
         /// </summary>
         private OutputType outputType = OutputType.Cair;
-
-        /// <summary>
-        /// Whether to assign multiple threads to the resizing method.
-        /// </summary>
-        private bool parallelize = true;
-
-        /// <summary>
-        /// The timeout in milliseconds to attempt to resize for.
-        /// </summary>
-        private int timeout = 60000;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ContentAwareResizeLayer"/> class.
@@ -56,34 +36,12 @@ namespace ImageProcessor.Plugins.Cair.Imaging
         /// <summary>
         /// Gets or sets the content aware resize convolution type (Default ContentAwareResizeConvolutionType.Prewitt).
         /// </summary>
-        public ConvolutionType ConvolutionType
-        {
-            get
-            {
-                return this.convolutionType;
-            }
-
-            set
-            {
-                this.convolutionType = value;
-            }
-        }
+        public ConvolutionType ConvolutionType { get; set; } = ConvolutionType.Prewitt;
 
         /// <summary>
         /// Gets or sets the energy function (Default EnergyFunction.Forward).
         /// </summary>
-        public EnergyFunction EnergyFunction
-        {
-            get
-            {
-                return this.energyFunction;
-            }
-
-            set
-            {
-                this.energyFunction = value;
-            }
-        }
+        public EnergyFunction EnergyFunction { get; set; } = EnergyFunction.Forward;
 
         /// <summary>
         /// Gets or sets the expected output type.
@@ -122,34 +80,12 @@ namespace ImageProcessor.Plugins.Cair.Imaging
         /// Gets or sets a value indicating whether to assign multiple threads to the resizing method.
         /// (Default true)
         /// </summary>
-        public bool Parallelize
-        {
-            get
-            {
-                return this.parallelize;
-            }
-
-            set
-            {
-                this.parallelize = value;
-            }
-        }
+        public bool Parallelize { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the timeout in milliseconds to attempt to resize for (Default 60000).
         /// </summary>
-        public int Timeout
-        {
-            get
-            {
-                return this.timeout;
-            }
-
-            set
-            {
-                this.timeout = value;
-            }
-        }
+        public int Timeout { get; set; } = 60000;
 
         /// <summary>
         /// Returns a value that indicates whether the specified object is an 
