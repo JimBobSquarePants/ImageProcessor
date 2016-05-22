@@ -32,10 +32,11 @@ namespace ImageProcessor.Common.Extensions
         /// <param name="source">The source image to copy.</param>
         /// <param name="animationProcessMode">The process mode for frames in animated images.</param>
         /// <param name="format">The <see cref="PixelFormat"/> to set the copied image to.</param>
+        /// <param name="preserveExifData">Whether to preserve exif metadata. Defaults to false.</param>
         /// <returns>
         /// The <see cref="Image"/>.
         /// </returns>
-        public static Image Copy(this Image source, AnimationProcessMode animationProcessMode, PixelFormat format = PixelFormat.Format32bppPArgb)
+        public static Image Copy(this Image source, AnimationProcessMode animationProcessMode, PixelFormat format = PixelFormat.Format32bppPArgb, bool preserveExifData = false)
         {
             if (source.RawFormat.Equals(ImageFormat.Gif))
             {
@@ -63,6 +64,14 @@ namespace ImageProcessor.Common.Extensions
             using (Graphics graphics = Graphics.FromImage(copy))
             {
                 graphics.DrawImageUnscaled(source, 0, 0);
+            }
+
+            if (preserveExifData)
+            {
+                foreach (PropertyItem item in source.PropertyItems)
+                {
+                    copy.SetPropertyItem(item);
+                }
             }
 
             return copy;
