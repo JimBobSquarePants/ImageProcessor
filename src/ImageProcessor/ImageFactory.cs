@@ -16,6 +16,7 @@ namespace ImageProcessor
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
+    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Common.Extensions;
@@ -1417,10 +1418,13 @@ namespace ImageProcessor
         /// <param name="image">The current image.</param>
         private void ClearExif(Image image)
         {
-            //foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
-            //{
-            //    image.RemovePropertyItem(item.Key);
-            //}
+            if (image.PropertyItems.Any())
+            {
+                foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
+                {
+                    image.RemovePropertyItem(item.Key);
+                }
+            }
         }
     }
 }
