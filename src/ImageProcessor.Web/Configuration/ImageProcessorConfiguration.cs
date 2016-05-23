@@ -320,6 +320,12 @@ namespace ImageProcessor.Web.Configuration
                             {
                                 service.Settings = settings;
                             }
+                            else if (service.Settings == null)
+                            {
+                                // I've noticed some developers are not initializing 
+                                // the settings in their implentations.
+                                service.Settings = new Dictionary<string, string>();
+                            }
 
                             Uri[] whitelist = this.GetServiceWhitelist(name);
 

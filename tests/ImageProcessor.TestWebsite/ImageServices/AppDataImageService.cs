@@ -1,14 +1,14 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TestImageService.cs" company="James South">
+// <copyright file="AppDataImageService.cs" company="James South">
 //   Copyright (c) James South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
-//   The test image service.
+//   The image service demonstrating how to pull images from the app_data folder.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Test_Website_NET45
+namespace ImageProcessor.TestWebsite.ImageServices
 {
     using System;
     using System.Collections.Generic;
@@ -21,50 +21,28 @@ namespace Test_Website_NET45
     using ImageProcessor.Web.Services;
 
     /// <summary>
-    /// The test image service.
+    /// The image service demonstrating how to pull images from the app_data folder.
     /// </summary>
-    public class TestImageService : IImageService
+    public class AppDataImageService : IImageService
     {
-        /// <summary>
-        /// The prefix for the given implementation.
-        /// </summary>
-        private string prefix = "testprovider.axd";
-
         /// <summary>
         /// Gets or sets the prefix for the given implementation.
         /// <remarks>
         /// This value is used as a prefix for any image requests that should use this service.
         /// </remarks>
         /// </summary>
-        public string Prefix
-        {
-            get
-            {
-                return this.prefix;
-            }
-
-            set
-            {
-                this.prefix = value;
-            }
-        }
+        public string Prefix { get; set; } = "appdata.axd";
 
         /// <summary>
         /// Gets a value indicating whether the image service requests files from
         /// the locally based file system.
         /// </summary>
-        public bool IsFileLocalService
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public bool IsFileLocalService => true;
 
         /// <summary>
         /// Gets or sets any additional settings required by the service.
         /// </summary>
-        public Dictionary<string, string> Settings { get; set; }
+        public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the white list of <see cref="System.Uri"/>. 
@@ -82,7 +60,7 @@ namespace Test_Website_NET45
         /// </returns>
         public bool IsValidRequest(string path)
         {
-            return ImageHelpers.IsValidImageExtension(path.Split(new[] { '&', '?' })[0]);
+            return ImageHelpers.IsValidImageExtension(path.Split('&', '?')[0]);
         }
 
         /// <summary>
@@ -107,7 +85,7 @@ namespace Test_Website_NET45
             // In this instance we are just processing a set path. 
             // If you are using the querystring params as a means of identifying the correct image
             // then you can do something with it here.
-            string path = Path.Combine(imageRoot, id.ToString().Split(new[] { '&', '?' })[0]);
+            string path = Path.Combine(imageRoot, id.ToString().Split('&', '?')[0]);
             byte[] buffer;
 
             // Check to see if the file exists.
