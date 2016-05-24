@@ -64,11 +64,12 @@ namespace ImageProcessor.PlayGround
                     try
                     {
                         imageFactory.Load(inStream)
-                                    //.Resize(size)
-                                    .Format(new GifFormat())
-                                    //.Resolution(400, 400)
-                                    //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
-                                    .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
+                            .BitDepth(1)
+                            //.Resize(size)
+                            //.Format(new GifFormat())
+                            //.Resolution(400, 400)
+                            //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
+                            .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
                     }
                     catch (Exception ex)
                     {
