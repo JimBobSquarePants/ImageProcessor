@@ -14,6 +14,8 @@ namespace ImageProcessor.Imaging.Formats
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.IO;
+    using System.Linq;
 
     /// <summary>
     /// Provides the necessary information to support tiff images.
@@ -24,8 +26,8 @@ namespace ImageProcessor.Imaging.Formats
         /// Gets the file headers.
         /// </summary>
         public override byte[][] FileHeaders => new[]
-        { 
-            new byte[] { 73, 73, 42, 0 }, 
+        {
+            new byte[] { 73, 73, 42, 0 },
             new byte[] { 77, 77, 0, 42 }
         };
 
@@ -62,6 +64,76 @@ namespace ImageProcessor.Imaging.Formats
                     factory.Image.SetPropertyItem(propertItem.Value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Saves the current image to the specified output stream.
+        /// </summary>
+        /// <param name="stream">
+        /// The <see cref="T:System.IO.Stream"/> to save the image information to.
+        /// </param>
+        /// <param name="image">
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Drawing.Image"/>.
+        /// </returns>
+        public override Image Save(Stream stream, Image image, long bitDepth)
+        {
+            // Tiffs can be saved with different bit depths. 
+            using (EncoderParameters encoderParameters = new EncoderParameters(2))
+            {
+                encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, (long)(bitDepth == 1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW));
+                encoderParameters.Param[1] = new EncoderParameter(Encoder.ColorDepth, Math.Min(32, bitDepth));
+
+                ImageCodecInfo imageCodecInfo =
+                    ImageCodecInfo.GetImageEncoders()
+                        .FirstOrDefault(ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+
+                if (imageCodecInfo != null)
+                {
+                    image.Save(stream, imageCodecInfo, encoderParameters);
+                }
+            }
+
+            return image;
+        }
+
+        /// <summary>
+        /// Saves the current image to the specified file path.
+        /// </summary>
+        /// <param name="path">The path to save the image to.</param>
+        /// <param name="image"> 
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Drawing.Image"/>.
+        /// </returns>
+        public override Image Save(string path, Image image, long bitDepth)
+        {
+            // Tiffs can be saved with different bit depths. 
+            using (EncoderParameters encoderParameters = new EncoderParameters(2))
+            {
+                encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, (long)(bitDepth == 1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW));
+                encoderParameters.Param[1] = new EncoderParameter(Encoder.ColorDepth, Math.Min(32, bitDepth));
+               
+                ImageCodecInfo imageCodecInfo =
+                    ImageCodecInfo.GetImageEncoders()
+                        .FirstOrDefault(ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+
+                if (imageCodecInfo != null)
+                {
+                    image.Save(path, imageCodecInfo, encoderParameters);
+                }
+            }
+
+            return image;
         }
     }
 }

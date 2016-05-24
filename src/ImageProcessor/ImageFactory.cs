@@ -117,6 +117,13 @@ namespace ImageProcessor
 
         #region Properties
         /// <summary>
+        /// Gets the color depth in number of bits per pixel to save the image with.
+        /// This can be used to change the bit depth of images that can be saved with different
+        /// bit depths such as TIFF.
+        /// </summary>
+        public long CurrentBitDepth { get; private set; }
+
+        /// <summary>
         /// Gets the path to the local image for manipulation.
         /// </summary>
         public string ImagePath { get; private set; }
@@ -200,6 +207,9 @@ namespace ImageProcessor
             // Set our image as the memory stream value.
             this.Image = format.Load(memoryStream);
 
+            // Save the bit depth
+            this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
+
             // Store the stream so we can dispose of it later.
             this.InputStream = memoryStream;
 
@@ -277,6 +287,9 @@ namespace ImageProcessor
                     // Set our image as the memory stream value.
                     this.Image = format.Load(memoryStream);
 
+                    // Save the bit depth
+                    this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
+
                     // Store the stream so we can dispose of it later.
                     this.InputStream = memoryStream;
 
@@ -346,6 +359,9 @@ namespace ImageProcessor
 
             // Set our image as the memory stream value.
             this.Image = format.Load(memoryStream);
+
+            // Save the bit depth
+            this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
 
             // Store the stream so we can dispose of it later.
             this.InputStream = memoryStream;
@@ -465,6 +481,27 @@ namespace ImageProcessor
             {
                 AutoRotate autoRotate = new AutoRotate();
                 this.CurrentImageFormat.ApplyProcessor(autoRotate.ProcessImage, this);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Alters the bit depth of the current image.
+        /// <remarks>
+        /// This can only be used to change the bit depth of images that can be saved 
+        /// by <see cref="System.Drawing"/> with different bit depths such as TIFF.
+        /// </remarks>
+        /// </summary>
+        /// <param name="bitDepth">A value over 0.</param>
+        /// <returns>
+        /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
+        /// </returns>
+        public ImageFactory BitDepth(long bitDepth)
+        {
+            if (bitDepth > 0 && this.ShouldProcess)
+            {
+                this.CurrentBitDepth = bitDepth;
             }
 
             return this;
@@ -1325,7 +1362,7 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
-                this.Image = this.CurrentImageFormat.Save(filePath, this.Image);
+                this.Image = this.CurrentImageFormat.Save(filePath, this.Image, this.CurrentBitDepth);
             }
 
             return this;
@@ -1350,7 +1387,7 @@ namespace ImageProcessor
                     stream.SetLength(0);
                 }
 
-                this.Image = this.CurrentImageFormat.Save(stream, this.Image);
+                this.Image = this.CurrentImageFormat.Save(stream, this.Image, this.CurrentBitDepth);
                 if (stream.CanSeek)
                 {
                     stream.Position = 0;

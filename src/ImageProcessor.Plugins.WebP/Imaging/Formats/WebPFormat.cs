@@ -89,37 +89,21 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         }
 
         /// <summary>
-        /// Saves the current image to the specified file path.
-        /// </summary>
-        /// <param name="path">The path to save the image to.</param>
-        /// <param name="image">The 
-        /// <see cref="T:System.Drawing.Image" /> to save.</param>
-        /// <returns>
-        /// The <see cref="T:System.Drawing.Image" />.
-        /// </returns>
-        public override Image Save(string path, Image image)
-        {
-            byte[] bytes;
-
-            // Encode in webP format.
-            // If Quality is 100, encode losslessly instead of lossily
-            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
-            {
-                File.WriteAllBytes(path, bytes);
-            }
-
-            return image;
-        }
-
-        /// <summary>
         /// Saves the current image to the specified output stream.
         /// </summary>
-        /// <param name="stream">The <see cref="T:System.IO.Stream" /> to save the image information to.</param>
-        /// <param name="image">The <see cref="T:System.Drawing.Image" /> to save.</param>
+        /// <param name="stream">
+        /// The <see cref="T:System.IO.Stream"/> to save the image information to.
+        /// </param>
+        /// <param name="image">
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
         /// <returns>
-        /// The <see cref="T:System.Drawing.Image" />.
+        /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        public override Image Save(Stream stream, Image image)
+        public override Image Save(Stream stream, Image image, long bitDepth)
         {
             byte[] bytes;
 
@@ -142,11 +126,36 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         }
 
         /// <summary>
+        /// Saves the current image to the specified file path.
+        /// </summary>
+        /// <param name="path">The path to save the image to.</param>
+        /// <param name="image"> 
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Drawing.Image"/>.
+        /// </returns>
+        public override Image Save(string path, Image image, long bitDepth)
+        {
+            byte[] bytes;
+
+            // Encode in webP format.
+            // If Quality is 100, encode losslessly instead of lossily
+            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
+            {
+                File.WriteAllBytes(path, bytes);
+            }
+
+            return image;
+        }
+
+        /// <summary>
         /// Decodes a WebP image
         /// </summary>
-        /// <param name="webpData">
-        /// The data to uncompress
-        /// </param>
+        /// <param name="webpData">The data to uncompress.</param>
         /// <returns>
         /// The <see cref="T:System.Drawing.Bitmap" />.
         /// </returns>

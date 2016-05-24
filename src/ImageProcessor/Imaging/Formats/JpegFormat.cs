@@ -66,13 +66,18 @@ namespace ImageProcessor.Imaging.Formats
         /// Saves the current image to the specified output stream.
         /// </summary>
         /// <param name="stream">
-        /// The <see cref="T:System.IO.Stream" /> to save the image information to.
+        /// The <see cref="T:System.IO.Stream"/> to save the image information to.
         /// </param>
-        /// <param name="image">The <see cref="T:System.Drawing.Image" /> to save.</param>
+        /// <param name="image">
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
         /// <returns>
-        /// The <see cref="T:System.Drawing.Image" />.
+        /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        public override Image Save(Stream stream, Image image)
+        public override Image Save(Stream stream, Image image, long bitDepth)
         {
             // Jpegs can be saved with different settings to include a quality setting for the JPEG compression.
             // This improves output compression and quality. 
@@ -95,12 +100,16 @@ namespace ImageProcessor.Imaging.Formats
         /// Saves the current image to the specified file path.
         /// </summary>
         /// <param name="path">The path to save the image to.</param>
-        /// <param name="image">The 
-        /// <see cref="T:System.Drawing.Image" /> to save.</param>
+        /// <param name="image"> 
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
         /// <returns>
-        /// The <see cref="T:System.Drawing.Image" />.
+        /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        public override Image Save(string path, Image image)
+        public override Image Save(string path, Image image, long bitDepth)
         {
             // Jpegs can be saved with different settings to include a quality setting for the JPEG compression.
             // This improves output compression and quality. 
