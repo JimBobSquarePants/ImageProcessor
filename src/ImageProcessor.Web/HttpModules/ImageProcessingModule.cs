@@ -59,9 +59,14 @@ namespace ImageProcessor.Web.HttpModules
         private static readonly Regex ProtocolRegex = new Regex("http(s)?://", RegexOptions.Compiled);
 
         /// <summary>
-        /// The assembly version.
+        /// The base assembly version.
         /// </summary>
-        private static readonly string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        private static readonly string AssemblyVersion = typeof(ImageFactory).Assembly.GetName().Version.ToString();
+
+        /// <summary>
+        /// The web assembly version.
+        /// </summary>
+        private static readonly string WebAssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         /// <summary>
         /// Ensures duplicate requests are atomic.
@@ -174,7 +179,8 @@ namespace ImageProcessor.Web.HttpModules
 
             if (response.Headers["ImageProcessedBy"] == null)
             {
-                response.AddHeader("ImageProcessedBy", "ImageProcessor.Web/" + AssemblyVersion);
+                response.AddHeader("ImageProcessedBy",
+                    string.Format("ImageProcessor/{0} - ImageProcessor.Web/{1}",  AssemblyVersion, WebAssemblyVersion));
             }
 
             HttpCachePolicy cache = response.Cache;
