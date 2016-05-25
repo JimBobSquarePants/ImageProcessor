@@ -42,55 +42,62 @@ namespace ImageProcessorCore.Samplers
         /// <inheritdoc/>
         protected override void OnApply(ImageBase source, ImageBase target, Rectangle targetRectangle, Rectangle sourceRectangle)
         {
-            ImageBase temp = new Image(source.Width, source.Height);
+            using (ImageBase temp = new Image(source.Width, source.Height))
+            {
+                // Detect the edges.
+                new Sobel().Apply(temp, source, sourceRectangle);
 
-            // Detect the edges.
-            new Sobel().Apply(temp, source, sourceRectangle);
+                // Apply threshold binarization filter.
+                new Threshold(.5f).Apply(temp, temp, sourceRectangle);
 
-            // Apply threshold binarization filter.
-            new Threshold(.5f).Apply(temp, temp, sourceRectangle);
+                // Search for the first white pixels
+                Rectangle rectangle = ImageMaths.GetFilteredBoundingRectangle(temp, 0);
 
-            // Search for the first white pixels
-            Rectangle rectangle = ImageMaths.GetFilteredBoundingRectangle(temp, 0);
-
-            // Reset the target pixel to the correct size.
-            target.SetPixels(rectangle.Width, rectangle.Height, new float[rectangle.Width * rectangle.Height * 4]);
-            this.cropRectangle = rectangle;
+                // Reset the target pixel to the correct size.
+                target.SetPixels(rectangle.Width, rectangle.Height, new float[rectangle.Width * rectangle.Height * 4]);
+                this.cropRectangle = rectangle;
+            }
         }
 
         /// <inheritdoc/>
         protected override void Apply(ImageBase target, ImageBase source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
         {
+            // Jump out, we'll deal with that later.
             if (source.Bounds == target.Bounds)
             {
-                target.SetPixels(target.Width, target.Height, source.Pixels);
                 return;
             }
 
             int targetY = this.cropRectangle.Y;
-            int startX = targetRectangle.X;
-            int targetX = this.cropRectangle.X;
-            int endX = this.cropRectangle.Width;
-            int maxX = endX - 1;
-            int maxY = this.cropRectangle.Bottom - 1;
+            int targetBottom = this.cropRectangle.Bottom;
+            int startX = this.cropRectangle.X;
+            int endX = this.cropRectangle.Right;
 
             Parallel.For(
             startY,
             endY,
             y =>
             {
-                for (int x = startX; x < endX; x++)
+                if (y >= targetY && y < targetBottom)
                 {
-                    int offsetY = y + targetY;
-                    offsetY = offsetY.Clamp(0, maxY);
-
-                    int offsetX = x + targetX;
-                    offsetX = offsetX.Clamp(0, maxX);
-
-                    target[x, y] = source[offsetX, offsetY];
+                    for (int x = startX; x < endX; x++)
+                    {
+                        target[x - startX, y - targetY] = source[x, y];
+                    }
                 }
+
                 this.OnRowProcessed();
             });
+        }
+
+        /// <inheritdoc/>
+        protected override void AfterApply(ImageBase source, ImageBase target, Rectangle targetRectangle, Rectangle sourceRectangle)
+        {
+            // Copy the pixels over.
+            if (source.Bounds == target.Bounds)
+            {
+                target.ClonePixels(target.Width, target.Height, source.Pixels);
+            }
         }
     }
 }

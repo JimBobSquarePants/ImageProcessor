@@ -8,20 +8,20 @@
     using Xunit;
     using Filters;
 
-    public class SamplerTests : ProcessorTestBase
+    public class SamplerTests : FileTestBase
     {
         public static readonly TheoryData<string, IResampler> ReSamplers =
             new TheoryData<string, IResampler>
             {
                 { "Bicubic", new BicubicResampler() },
                 { "Triangle", new TriangleResampler() },
+                { "NearestNeighbor", new NearestNeighborResampler() },
                 // Perf: Enable for local testing only
                 //{ "Box", new BoxResampler() },
                 //{ "Lanczos3", new Lanczos3Resampler() },
                 //{ "Lanczos5", new Lanczos5Resampler() },
                 //{ "Lanczos8", new Lanczos8Resampler() },
                 //{ "MitchellNetravali", new MitchellNetravaliResampler() },
-                { "NearestNeighbor", new NearestNeighborResampler() },
                 //{ "Hermite", new HermiteResampler() },
                 //{ "Spline", new SplineResampler() },
                 //{ "Robidoux", new RobidouxResampler() },
@@ -61,6 +61,7 @@
                     Stopwatch watch = Stopwatch.StartNew();
                     Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
                     using (FileStream output = File.OpenWrite($"TestOutput/Sample/{ Path.GetFileName(filename) }"))
                     {
                         processor.OnProgress += this.ProgressUpdate;
@@ -69,6 +70,7 @@
                         processor.OnProgress -= this.ProgressUpdate;
                     }
 
+                    image.Dispose();
                     Trace.WriteLine($"{ name }: { watch.ElapsedMilliseconds}ms");
                 }
             }
@@ -88,11 +90,12 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Resize/{filename}"))
                     {
-                        image.Resize(image.Width / 2, image.Height / 2, sampler, this.ProgressUpdate)
+                        image.Resize(image.Width / 2, image.Height / 2, sampler, false, this.ProgressUpdate)
                              .Save(output);
                     }
 
@@ -116,11 +119,12 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Resize/{filename}"))
                     {
-                        image.Resize(image.Width / 3, 0, new TriangleResampler(), this.ProgressUpdate)
+                        image.Resize(image.Width / 3, 0, new TriangleResampler(), false, this.ProgressUpdate)
                              .Save(output);
                     }
 
@@ -137,22 +141,188 @@
                 Directory.CreateDirectory("TestOutput/Resize");
             }
 
-            var name = "FixedHeight";
+            string name = "FixedHeight";
 
             foreach (string file in Files)
             {
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Resize/{filename}"))
                     {
-                        image.Resize(0, image.Height / 3, new TriangleResampler(), this.ProgressUpdate)
+                        image.Resize(0, image.Height / 3, new TriangleResampler(), false, this.ProgressUpdate)
                              .Save(output);
                     }
 
                     Trace.WriteLine($"{name}: {watch.ElapsedMilliseconds}ms");
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageShouldResizeWithCropMode()
+        {
+            if (!Directory.Exists("TestOutput/ResizeCrop"))
+            {
+                Directory.CreateDirectory("TestOutput/ResizeCrop");
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
+                    using (FileStream output = File.OpenWrite($"TestOutput/ResizeCrop/{filename}"))
+                    {
+                        ResizeOptions options = new ResizeOptions()
+                        {
+                            Size = new Size(image.Width , image.Height / 2)
+                        };
+
+                        image.Resize(options, this.ProgressUpdate)
+                             .Save(output);
+                    }
+
+                    Trace.WriteLine($"{filename}: {watch.ElapsedMilliseconds}ms");
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageShouldResizeWithPadMode()
+        {
+            if (!Directory.Exists("TestOutput/ResizePad"))
+            {
+                Directory.CreateDirectory("TestOutput/ResizePad");
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
+                    using (FileStream output = File.OpenWrite($"TestOutput/ResizePad/{filename}"))
+                    {
+                        ResizeOptions options = new ResizeOptions()
+                        {
+                            Size = new Size(image.Width , image.Height + 200),
+                            Mode = ResizeMode.Pad,
+                            Sampler = new NearestNeighborResampler()
+                        };
+
+                        image.Resize(options, this.ProgressUpdate)
+                             .Save(output);
+                    }
+
+                    Trace.WriteLine($"{filename}: {watch.ElapsedMilliseconds}ms");
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageShouldResizeWithBoxPadMode()
+        {
+            if (!Directory.Exists("TestOutput/ResizeBoxPad"))
+            {
+                Directory.CreateDirectory("TestOutput/ResizeBoxPad");
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
+                    using (FileStream output = File.OpenWrite($"TestOutput/ResizeBoxPad/{filename}"))
+                    {
+                        ResizeOptions options = new ResizeOptions()
+                        {
+                            Size = new Size(image.Width + 200, image.Height + 200),
+                            Mode = ResizeMode.BoxPad
+                        };
+
+                        image.Resize(options, this.ProgressUpdate)
+                             .Save(output);
+                    }
+
+                    Trace.WriteLine($"{filename}: {watch.ElapsedMilliseconds}ms");
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageShouldResizeWithMaxMode()
+        {
+            if (!Directory.Exists("TestOutput/ResizeMax"))
+            {
+                Directory.CreateDirectory("TestOutput/ResizeMax");
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
+                    using (FileStream output = File.OpenWrite($"TestOutput/ResizeMax/{filename}"))
+                    {
+                        ResizeOptions options = new ResizeOptions()
+                        {
+                            Size = new Size(image.Width + 200, image.Height),
+                            Mode = ResizeMode.Max
+                        };
+
+                        image.Resize(options, this.ProgressUpdate)
+                             .Save(output);
+                    }
+
+                    Trace.WriteLine($"{filename}: {watch.ElapsedMilliseconds}ms");
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageShouldResizeWithMinMode()
+        {
+            if (!Directory.Exists("TestOutput/ResizeMin"))
+            {
+                Directory.CreateDirectory("TestOutput/ResizeMin");
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
+                    using (FileStream output = File.OpenWrite($"TestOutput/ResizeMin/{filename}"))
+                    {
+                        ResizeOptions options = new ResizeOptions()
+                        {
+                            Size = new Size(image.Width + 200, image.Height),
+                            Mode = ResizeMode.Min
+                        };
+
+                        image.Resize(options, this.ProgressUpdate)
+                             .Save(output);
+                    }
+
+                    Trace.WriteLine($"{filename}: {watch.ElapsedMilliseconds}ms");
                 }
             }
         }
@@ -171,8 +341,9 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-" + rotateType + flipType + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/RotateFlip/{filename}"))
                     {
                         image.RotateFlip(rotateType, flipType, this.ProgressUpdate)
@@ -184,9 +355,8 @@
             }
         }
 
-        [Theory]
-        [MemberData("ReSamplers")]
-        public void ImageShouldRotate(string name, IResampler sampler)
+        [Fact]
+        public void ImageShouldRotate()
         {
             if (!Directory.Exists("TestOutput/Rotate"))
             {
@@ -198,16 +368,45 @@
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
-                    string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Rotate/{filename}"))
                     {
-                        image.Rotate(45, sampler, this.ProgressUpdate)
-                             //.BackgroundColor(Color.Aqua)
+                        image.Rotate(45, this.ProgressUpdate)
                              .Save(output);
                     }
 
-                    Trace.WriteLine($"{name}: {watch.ElapsedMilliseconds}ms");
+                    Trace.WriteLine($"{watch.ElapsedMilliseconds}ms");
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageShouldSkew()
+        {
+            if (!Directory.Exists("TestOutput/Skew"))
+            {
+                Directory.CreateDirectory("TestOutput/Skew");
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+
+                    string filename = Path.GetFileName(file);
+
+                    using (Image image = new Image(stream))
+                    using (FileStream output = File.OpenWrite($"TestOutput/Skew/{filename}"))
+                    {
+                        image.Skew(45, 45, this.ProgressUpdate)
+                             .Save(output);
+                    }
+
+                    Trace.WriteLine($"{watch.ElapsedMilliseconds}ms");
                 }
             }
         }
@@ -224,8 +423,9 @@
             {
                 using (FileStream stream = File.OpenRead(file))
                 {
-                    Image image = new Image(stream);
                     string filename = Path.GetFileNameWithoutExtension(file) + "-EntropyCrop" + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/EntropyCrop/{filename}"))
                     {
                         image.EntropyCrop(.5f, this.ProgressUpdate).Save(output);
@@ -246,8 +446,10 @@
             {
                 using (FileStream stream = File.OpenRead(file))
                 {
-                    Image image = new Image(stream);
+
                     string filename = Path.GetFileNameWithoutExtension(file) + "-Crop" + Path.GetExtension(file);
+
+                    using (Image image = new Image(stream))
                     using (FileStream output = File.OpenWrite($"TestOutput/Crop/{filename}"))
                     {
                         image.Crop(image.Width / 2, image.Height / 2, this.ProgressUpdate).Save(output);

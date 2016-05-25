@@ -8,7 +8,7 @@ namespace ImageProcessorCore.Tests
 
     using Xunit;
 
-    public class FilterTests : ProcessorTestBase
+    public class FilterTests : FileTestBase
     {
         public static readonly TheoryData<string, IImageProcessor> Filters = new TheoryData<string, IImageProcessor>
         {
@@ -44,7 +44,16 @@ namespace ImageProcessorCore.Tests
             { "Hue-180", new Hue(180) },
             { "Hue--180", new Hue(-180) },
             { "BoxBlur", new BoxBlur(10) },
-            { "Vignette", new Vignette()}
+            { "Vignette", new Vignette() },
+            { "Protanopia", new Protanopia() },
+            { "Protanomaly", new Protanomaly() },
+            { "Deuteranopia", new Deuteranopia() },
+            { "Deuteranomaly", new Deuteranomaly() },
+            { "Tritanopia", new Tritanopia() },
+            { "Tritanomaly", new Tritanomaly() },
+            { "Achromatopsia", new Achromatopsia() },
+            { "Achromatomaly", new Achromatomaly() }
+
         };
 
         [Theory]
@@ -61,15 +70,16 @@ namespace ImageProcessorCore.Tests
                 using (FileStream stream = File.OpenRead(file))
                 {
                     Stopwatch watch = Stopwatch.StartNew();
-                    Image image = new Image(stream);
-                    string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
-                    using (FileStream output = File.OpenWrite($"TestOutput/Filter/{ Path.GetFileName(filename) }"))
+                    using (Image image = new Image(stream))
                     {
-                        processor.OnProgress += this.ProgressUpdate;
-                        image.Process(processor).Save(output);
-                        processor.OnProgress -= this.ProgressUpdate;
+                        string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+                        using (FileStream output = File.OpenWrite($"TestOutput/Filter/{Path.GetFileName(filename)}"))
+                        {
+                            processor.OnProgress += this.ProgressUpdate;
+                            image.Process(processor).Save(output);
+                            processor.OnProgress -= this.ProgressUpdate;
+                        }
                     }
-
                     Trace.WriteLine($"{ name }: { watch.ElapsedMilliseconds}ms");
                 }
             }

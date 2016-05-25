@@ -73,7 +73,10 @@ namespace ImageProcessorCore.Filters
         /// Combines the given image together with the current one by blending their pixels.
         /// </summary>
         /// <param name="source">The image this method extends.</param>
-        /// <param name="image">The image to blend with the currently processing image.</param>
+        /// <param name="image">
+        /// The image to blend with the currently processing image. 
+        /// Disposal of this image is the responsibility of the developer.
+        /// </param>
         /// <param name="percent">The opacity of the image image to blend. Must be between 0 and 100.</param>
         /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
         /// <returns>The <see cref="Image"/>.</returns>
@@ -86,7 +89,10 @@ namespace ImageProcessorCore.Filters
         /// Combines the given image together with the current one by blending their pixels.
         /// </summary>
         /// <param name="source">The image this method extends.</param>
-        /// <param name="image">The image to blend with the currently processing image.</param>
+        /// <param name="image">
+        /// The image to blend with the currently processing image. 
+        /// Disposal of this image is the responsibility of the developer.
+        /// </param>
         /// <param name="percent">The opacity of the image image to blend. Must be between 0 and 100.</param>
         /// <param name="rectangle">
         /// The <see cref="Rectangle"/> structure that specifies the portion of the image object to alter.
@@ -205,6 +211,79 @@ namespace ImageProcessorCore.Filters
         public static Image Brightness(this Image source, int amount, Rectangle rectangle, ProgressEventHandler progressHandler = null)
         {
             Brightness processor = new Brightness(amount);
+            processor.OnProgress += progressHandler;
+
+            try
+            {
+                return source.Process(rectangle, processor);
+            }
+            finally
+            {
+                processor.OnProgress -= progressHandler;
+            }
+        }
+
+        /// <summary>
+        /// Applies the given colorblindness simulator to the image.
+        /// </summary>
+        /// <param name="source">The image this method extends.</param>
+        /// <param name="colorBlindness">The type of color blindness simulator to apply.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image"/>.</returns>
+        public static Image ColorBlindness(this Image source, ColorBlindness colorBlindness, ProgressEventHandler progressHandler = null)
+        {
+            return ColorBlindness(source, colorBlindness, source.Bounds, progressHandler);
+        }
+
+        /// <summary>
+        /// Applies the given colorblindness simulator to the image.
+        /// </summary>
+        /// <param name="source">The image this method extends.</param>
+        /// <param name="colorBlindness">The type of color blindness simulator to apply.</param>
+        /// <param name="rectangle">
+        /// The <see cref="Rectangle"/> structure that specifies the portion of the image object to alter.
+        /// </param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image"/>.</returns>
+        public static Image ColorBlindness(this Image source, ColorBlindness colorBlindness, Rectangle rectangle, ProgressEventHandler progressHandler = null)
+        {
+            IImageProcessor processor;
+
+            switch (colorBlindness)
+            {
+                case Filters.ColorBlindness.Achromatomaly:
+                    processor = new Achromatomaly();
+                    break;
+
+                case Filters.ColorBlindness.Achromatopsia:
+                    processor = new Achromatopsia();
+                    break;
+
+                case Filters.ColorBlindness.Deuteranomaly:
+                    processor = new Deuteranomaly();
+                    break;
+
+                case Filters.ColorBlindness.Deuteranopia:
+                    processor = new Deuteranopia();
+                    break;
+
+                case Filters.ColorBlindness.Protanomaly:
+                    processor = new Protanomaly();
+                    break;
+
+                case Filters.ColorBlindness.Protanopia:
+                    processor = new Protanopia();
+                    break;
+
+                case Filters.ColorBlindness.Tritanomaly:
+                    processor = new Tritanomaly();
+                    break;
+
+                default:
+                    processor = new Tritanopia();
+                    break;
+            }
+
             processor.OnProgress += progressHandler;
 
             try

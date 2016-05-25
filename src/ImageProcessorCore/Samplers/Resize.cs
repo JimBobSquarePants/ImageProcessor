@@ -47,40 +47,50 @@ namespace ImageProcessorCore.Samplers
         protected override void Apply(ImageBase target, ImageBase source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
         {
             // Jump out, we'll deal with that later.
-            if (source.Bounds == target.Bounds)
+            // TODO: Add rectangle comparison.
+            if (source.Bounds == target.Bounds && sourceRectangle == targetRectangle)
             {
                 return;
             }
 
-            int sourceBottom = source.Bounds.Bottom;
-            int targetY = targetRectangle.Y;
-            int targetBottom = targetRectangle.Bottom;
+            int width = target.Width;
+            int height = target.Height;
+            int sourceHeight = sourceRectangle.Height;
+            int targetX = target.Bounds.X;
+            int targetY = target.Bounds.Y;
+            int targetRight = target.Bounds.Right;
+            int targetBottom = target.Bounds.Bottom;
             int startX = targetRectangle.X;
             int endX = targetRectangle.Right;
+            bool compand = this.Compand;
 
             if (this.Sampler is NearestNeighborResampler)
             {
                 // Scaling factors
-                float widthFactor = source.Width / (float)target.Width;
-                float heightFactor = source.Height / (float)target.Height;
+                float widthFactor = sourceRectangle.Width / (float)targetRectangle.Width;
+                float heightFactor = sourceRectangle.Height / (float)targetRectangle.Height;
 
                 Parallel.For(
                     startY,
                     endY,
                     y =>
                     {
-                        if (y >= targetY && y < targetBottom)
+                        if (targetY <= y && y < targetBottom)
                         {
                             // Y coordinates of source points
-                            int originY = (int)((y - targetY) * heightFactor);
+                            int originY = (int)((y - startY) * heightFactor);
 
                             for (int x = startX; x < endX; x++)
                             {
-                                // X coordinates of source points
-                                int originX = (int)((x - startX) * widthFactor);
+                                if (targetX <= x && x < targetRight)
+                                {
+                                    // X coordinates of source points
+                                    int originX = (int)((x - startX) * widthFactor);
 
-                                target[x, y] = source[originX, originY];
+                                    target[x, y] = source[originX, originY];
+                                }
                             }
+
                             this.OnRowProcessed();
                         }
                     });
@@ -91,28 +101,43 @@ namespace ImageProcessorCore.Samplers
 
             // Interpolate the image using the calculated weights.
             // A 2-pass 1D algorithm appears to be faster than splitting a 1-pass 2D algorithm 
-            // First process the columns.
+            // First process the columns. Since we are not using multiple threads startY and endY
+            // are the upper and lower bounds of the source rectangle.
             Parallel.For(
-                0,
-                sourceBottom,
+                startY,
+                endY,
                 y =>
                 {
+                    // Ensure offsets are normalised for cropping and padding.
+                    int offsetY = y - startY;
+
                     for (int x = startX; x < endX; x++)
                     {
-                        Weight[] horizontalValues = this.HorizontalWeights[x].Values;
+                        int offsetX = x - startX;
+
+                        float sum = this.HorizontalWeights[offsetX].Sum;
+                        Weight[] horizontalValues = this.HorizontalWeights[offsetX].Values;
 
                         // Destination color components
                         Color destination = new Color();
 
-                        foreach (Weight xw in horizontalValues)
+                        for (int i = 0; i < sum; i++)
                         {
+                            Weight xw = horizontalValues[i];
                             int originX = xw.Index;
-                            Color sourceColor = Color.Expand(source[originX, y]);
+                            Color sourceColor = compand ? Color.Expand(source[originX, offsetY]) : source[originX, offsetY];
                             destination += sourceColor * xw.Value;
                         }
 
-                        destination = Color.Compress(destination);
-                        this.firstPass[x, y] = destination;
+                        if (compand)
+                        {
+                            destination = Color.Compress(destination);
+                        }
+
+                        if (x >= 0 && x < width && offsetY >= 0 && offsetY < sourceHeight)
+                        {
+                            this.firstPass[x, offsetY] = destination;
+                        }
                     }
                 });
 
@@ -122,28 +147,36 @@ namespace ImageProcessorCore.Samplers
                 endY,
                 y =>
                 {
-                    if (y >= targetY && y < targetBottom)
+                    // Ensure offsets are normalised for cropping and padding.
+                    int offsetY = y - startY;
+                    float sum = this.VerticalWeights[offsetY].Sum;
+                    Weight[] verticalValues = this.VerticalWeights[offsetY].Values;
+
+                    for (int x = 0; x < width; x++)
                     {
-                        Weight[] verticalValues = this.VerticalWeights[y].Values;
+                        // Destination color components
+                        Color destination = new Color();
 
-                        for (int x = startX; x < endX; x++)
+                        for (int i = 0; i < sum; i++)
                         {
-                            // Destination color components
-                            Color destination = new Color();
+                            Weight yw = verticalValues[i];
+                            int originY = yw.Index;
+                            Color sourceColor = compand ? Color.Expand(this.firstPass[x, originY]) : this.firstPass[x, originY];
+                            destination += sourceColor * yw.Value;
+                        }
 
-                            foreach (Weight yw in verticalValues)
-                            {
-                                int originY = yw.Index;
-                                int originX = x;
-                                Color sourceColor = Color.Expand(this.firstPass[originX, originY]);
-                                destination += sourceColor * yw.Value;
-                            }
-
+                        if (compand)
+                        {
                             destination = Color.Compress(destination);
+                        }
+
+                        if (y >= 0 && y < height)
+                        {
                             target[x, y] = destination;
                         }
-                        this.OnRowProcessed();
                     }
+
+                    this.OnRowProcessed();
                 });
         }
 
@@ -151,7 +184,7 @@ namespace ImageProcessorCore.Samplers
         protected override void AfterApply(ImageBase source, ImageBase target, Rectangle targetRectangle, Rectangle sourceRectangle)
         {
             // Copy the pixels over.
-            if (source.Bounds == target.Bounds)
+            if (source.Bounds == target.Bounds && sourceRectangle == targetRectangle)
             {
                 target.ClonePixels(target.Width, target.Height, source.Pixels);
             }

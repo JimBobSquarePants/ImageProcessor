@@ -9,8 +9,6 @@ namespace ImageProcessorCore.Formats
     using System.IO;
     using System.Threading.Tasks;
 
-    using BitMiracle.LibJpeg;
-
     /// <summary>
     /// Image decoder for generating an image out of a jpg stream.
     /// </summary>
@@ -95,65 +93,42 @@ namespace ImageProcessorCore.Formats
         {
             Guard.NotNull(image, "image");
             Guard.NotNull(stream, "stream");
-            JpegImage jpg = new JpegImage(stream);
 
-            int pixelWidth = jpg.Width;
-            int pixelHeight = jpg.Height;
+            JpegDecoderCore decoder = new JpegDecoderCore();
+            decoder.Decode(stream, image, false);
 
-            float[] pixels = new float[pixelWidth * pixelHeight * 4];
-
-            if (jpg.Colorspace == Colorspace.RGB && jpg.BitsPerComponent == 8)
+            // TODO: When nComp is 3 we set the ImageBase pixels internally, Eventually we should 
+            // do the same here
+            if (decoder.nComp == 1)
             {
-                Parallel.For(
-                    0,
-                    pixelHeight,
-                    y =>
-                        {
-                            SampleRow row = jpg.GetRow(y);
+                int pixelWidth = decoder.width;
+                int pixelHeight = decoder.height;
 
-                            for (int x = 0; x < pixelWidth; x++)
-                            {
-                                Sample sample = row.GetAt(x);
+                float[] pixels = new float[pixelWidth * pixelHeight * 4];
 
-                                int offset = ((y * pixelWidth) + x) * 4;
-
-                                pixels[offset + 0] = sample[0] / 255f;
-                                pixels[offset + 1] = sample[1] / 255f;
-                                pixels[offset + 2] = sample[2] / 255f;
-                                pixels[offset + 3] = 1;
-                            }
-                        });
-            }
-            else if (jpg.Colorspace == Colorspace.Grayscale && jpg.BitsPerComponent == 8)
-            {
                 Parallel.For(
                     0,
                     pixelHeight,
                     y =>
                     {
-                        SampleRow row = jpg.GetRow(y);
-
+                        var yoff = decoder.img1.get_row_offset(y);
                         for (int x = 0; x < pixelWidth; x++)
                         {
-                            Sample sample = row.GetAt(x);
-
                             int offset = ((y * pixelWidth) + x) * 4;
 
-                            pixels[offset + 0] = sample[0] / 255f;
-                            pixels[offset + 1] = sample[0] / 255f;
-                            pixels[offset + 2] = sample[0] / 255f;
+                            pixels[offset + 0] = decoder.img1.pixels[yoff + x] / 255f;
+                            pixels[offset + 1] = decoder.img1.pixels[yoff + x] / 255f;
+                            pixels[offset + 2] = decoder.img1.pixels[yoff + x] / 255f;
                             pixels[offset + 3] = 1;
                         }
                     });
+
+                image.SetPixels(pixelWidth, pixelHeight, pixels);
             }
-            else
+            else if (decoder.nComp != 3)
             {
                 throw new NotSupportedException("JpegDecoder only supports RGB and Grayscale color spaces.");
             }
-
-            image.SetPixels(pixelWidth, pixelHeight, pixels);
-
-            jpg.Dispose();
         }
 
         /// <summary>
@@ -182,9 +157,9 @@ namespace ImageProcessorCore.Formats
         {
             bool isExif =
                 header[6] == 0x45 && // E
-                header[7] == 0x78 && // x
-                header[8] == 0x69 && // i
-                header[9] == 0x66 && // f
+                header[7] == 0x78 && // X
+                header[8] == 0x69 && // I
+                header[9] == 0x66 && // F
                 header[10] == 0x00;
 
             return isExif;

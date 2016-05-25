@@ -1,5 +1,3 @@
-﻿Encoder/Decoder adapted from:
+﻿Encoder/Decoder adapted and extended from:
 
-https://github.com/BitMiracle/libjpeg.net/
-https://github.com/yufeih/Nine.Imaging/
-https://imagetools.codeplex.com/
+https://golang.org/src/image/jpeg/

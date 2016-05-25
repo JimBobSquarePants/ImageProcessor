@@ -7,9 +7,6 @@ namespace ImageProcessorCore.Formats
 {
     using System;
     using System.IO;
-    using System.Threading.Tasks;
-
-    using BitMiracle.LibJpeg;
 
     /// <summary>
     /// Encoder for writing the data image to a stream in jpeg format.
@@ -17,19 +14,46 @@ namespace ImageProcessorCore.Formats
     public class JpegEncoder : IImageEncoder
     {
         /// <summary>
-        /// The quality.
+        /// The quality used to encode the image.
         /// </summary>
-        private int quality = 100;
+        private int quality = 75;
+
+        /// <summary>
+        /// The subsamples scheme used to encode the image.
+        /// </summary>
+        private JpegSubsample subsample = JpegSubsample.Ratio420;
+
+        /// <summary>
+        /// Whether subsampling has been specifically set.
+        /// </summary>
+        private bool subsampleSet;
 
         /// <summary>
         /// Gets or sets the quality, that will be used to encode the image. Quality
         /// index must be between 0 and 100 (compression from max to min).
         /// </summary>
+        /// <remarks>
+        /// If the quality is less than or equal to 80, the subsampling ratio will switch to <see cref="JpegSubsample.Ratio420"/>
+        /// </remarks>
         /// <value>The quality of the jpg image from 0 to 100.</value>
         public int Quality
         {
             get { return this.quality; }
             set { this.quality = value.Clamp(1, 100); }
+        }
+
+        /// <summary>
+        /// Gets or sets the subsample ration, that will be used to encode the image.
+        /// </summary>
+        /// <value>The subsample ratio of the jpg image.</value>
+        public JpegSubsample Subsample
+        {
+            get { return this.subsample; }
+            set
+            {
+                this.subsample = value;
+                this.subsampleSet = true;
+            }
         }
 
         /// <inheritdoc/>
@@ -59,34 +83,14 @@ namespace ImageProcessorCore.Formats
             Guard.NotNull(image, nameof(image));
             Guard.NotNull(stream, nameof(stream));
 
-            int imageWidth = image.Width;
-            int imageHeight = image.Height;
-
-            SampleRow[] rows = new SampleRow[imageHeight];
-
-            Parallel.For(
-                0,
-                imageHeight,
-                y =>
-                    {
-                        byte[] samples = new byte[imageWidth * 3];
-
-                        for (int x = 0; x < imageWidth; x++)
-                        {
-                            Bgra32 color = Color.ToNonPremultiplied(image[x, y]);
-
-                            int start = x * 3;
-                            samples[start] = color.R;
-                            samples[start + 1] = color.G;
-                            samples[start + 2] = color.B;
-                        }
-
-                        rows[y] = new SampleRow(samples, imageWidth, 8, 3);
-                    });
-
-            using (JpegImage jpg = new JpegImage(rows, Colorspace.RGB))
+            JpegEncoderCore encode = new JpegEncoderCore();
+            if (this.subsampleSet)
             {
-                jpg.WriteJpeg(stream, new CompressionParameters { Quality = this.Quality });
+                encode.Encode(stream, image, this.Quality, this.Subsample);
+            }
+            else
+            {
+                encode.Encode(stream, image, this.Quality, this.Quality >= 80 ? JpegSubsample.Ratio444 : JpegSubsample.Ratio420);              
             }
         }
     }

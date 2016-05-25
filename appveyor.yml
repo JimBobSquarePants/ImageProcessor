@@ -1,6 +1,18 @@
 version: v1.0.0.{build}
 os: Visual Studio 2015
 
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://gist.githubusercontent.com/PureKrome/0f79e25693d574807939/raw/8cf3160c9516ef1f4effc825c0a44acc918a0b5a/appveyor-build-info.ps'))
+  
+install:
+# Use the install script to grab the latest dotnet install
+- ps: iex .\dotnet-latest.ps1
+
+# Prepend newly installed dotnet cli to the PATH of this build (this cannot be
+# done from inside the powershell script as it would require to restart
+# the parent CMD process).
+- "SET PATH=C:\\Program Files\\dotnet\\bin;%PATH%"
+
 assembly_info:
   patch: true
   file: '**\AssemblyInfo.*'
@@ -9,17 +21,7 @@ assembly_info:
 
 before_build:
 - cmd: >-
-    dnvm install 1.0.0-rc1-update1 -r clr
-
-    dnvm install 1.0.0-rc1-update1 -r coreclr -arch x64 -alias x64
-
-    dnvm use 1.0.0-rc1-update1 -r coreclr -a x64
-
-    dnvm list
-
-    dnu restore src\ImageProcessorCore
-
-    dnu restore tests\ImageProcessorCore.Tests
+    dotnet restore src\ImageProcessorCore
 
     cd build
 
@@ -31,19 +33,10 @@ before_build:
 
 build_script:
 - cmd: >-
-    dnu build src\ImageProcessorCore
+    dotnet pack src\ImageProcessorCore --configuration Release --output "artifacts\bin\ImageProcessorCore"
 
-    dnu build tests\ImageProcessorCore.Tests
+test: off
 
-    dnu pack src\ImageProcessorCore --configuration Release --out "artifacts\bin\ImageProcessorCore"
-
-test_script:
-- cmd: >-
-    dnvm use 1.0.0-rc1-update1 -r coreclr -a x64
-
-    cd tests/ImageProcessorCore.Tests
-
-    dnx test
 artifacts:
 - path: artifacts\bin\ImageProcessorCore\**\*.nupkg
 
@@ -51,7 +44,7 @@ deploy:
     # MyGet Deployment for builds & releases
  - provider: NuGet
    server: https://www.myget.org/F/imageprocessor/api/v2/package
-   symbol_server: https://nuget.symbolsource.org/MyGet/imageprocessor
+   symbol_server: https://www.myget.org/F/imageprocessor/api/v2/package # https://nuget.symbolsource.org/MyGet/imageprocessor
    api_key:
      secure: fz0rUrt3B1HczUC1ZehwVsrFSWX9WZGDQoueDztLte9/+yQG+BBU7UrO+coE8lUf
    artifact: /.*\.nupkg/
