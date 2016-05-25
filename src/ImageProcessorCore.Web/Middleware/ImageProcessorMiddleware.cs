@@ -1,22 +1,21 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.AspNet.Http;
+﻿using ImageProcessorCore.Samplers;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using System.IO;
-using ImageProcessorCore.Samplers;
+using System.Threading.Tasks;
 
 namespace ImageProcessorCore.Web.Middleware
 {
     public class ImageProcessorMiddleware
     {
-        private readonly IApplicationEnvironment _appEnvironment;
+        private readonly IHostingEnvironment _hostingEnvironment;
 
         private readonly RequestDelegate _next;
 
-        public ImageProcessorMiddleware(RequestDelegate next, IApplicationEnvironment appEnvironment)
+        public ImageProcessorMiddleware(RequestDelegate next, IHostingEnvironment hostingEnvironment)
         {
             _next = next;
-            _appEnvironment = appEnvironment;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         public async Task Invoke(HttpContext context)
@@ -32,19 +31,17 @@ namespace ImageProcessorCore.Web.Middleware
             int height = 0;
             int.TryParse(context.Request.Query["height"], out height);
 
-            var inputPath = _appEnvironment.ApplicationBasePath + "/wwwroot" + context.Request.Path;
+            var inputPath = _hostingEnvironment.ContentRootPath + "/wwwroot" + context.Request.Path;
+
             using (var inputStream = File.OpenRead(inputPath))
+            using (var outputStream = new MemoryStream())
+            using (var image = new Image(inputStream))
             {
-                var image = new Image(inputStream);
+                image.Resize(width, height)
+                    .Save(outputStream);
 
-                using (var outputStream = new MemoryStream())
-                {
-                    image.Resize(width, height)
-                        .Save(outputStream);
-
-                    var bytes = outputStream.ToArray();
-                    await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-                }
+                var bytes = outputStream.ToArray();
+                await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
             }
         }
 
