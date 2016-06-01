@@ -3,16 +3,16 @@
   </presets>
   <plugins>
     <plugin name="Alpha" type="ImageProcessor.Web.Processors.Alpha, ImageProcessor.Web"/>
-    <plugin name="AutoRotate" type="ImageProcessor.Web.Processors.AutoRotate, ImageProcessor.Web"/>
-    <plugin name="BackgroundColor" type="ImageProcessor.Web.Processors.BackgroundColor, ImageProcessor.Web"/>
+    <plugin name="AutoRotate" type="ImageProcessor.Web.Processors.AutoRotate, ImageProcessor.Web" enabled="true"/>
+    <plugin name="BackgroundColor" type="ImageProcessor.Web.Processors.BackgroundColor, ImageProcessor.Web" enabled="true"/>
     <plugin name="Brightness" type="ImageProcessor.Web.Processors.Brightness, ImageProcessor.Web"/>
     <plugin name="Contrast" type="ImageProcessor.Web.Processors.Contrast, ImageProcessor.Web"/>
-    <plugin name="Crop" type="ImageProcessor.Web.Processors.Crop, ImageProcessor.Web"/>
+    <plugin name="Crop" type="ImageProcessor.Web.Processors.Crop, ImageProcessor.Web" enabled="true"/>
     <plugin name="DetectEdges" type="ImageProcessor.Web.Processors.DetectEdges, ImageProcessor.Web"/>
     <plugin name="EntropyCrop" type="ImageProcessor.Web.Processors.EntropyCrop, ImageProcessor.Web"/>
     <plugin name="Filter" type="ImageProcessor.Web.Processors.Filter, ImageProcessor.Web"/>
     <plugin name="Flip" type="ImageProcessor.Web.Processors.Flip, ImageProcessor.Web"/>
-    <plugin name="Format" type="ImageProcessor.Web.Processors.Format, ImageProcessor.Web"/>
+    <plugin name="Format" type="ImageProcessor.Web.Processors.Format, ImageProcessor.Web" enabled="true"/>
     <plugin name="GaussianBlur" type="ImageProcessor.Web.Processors.GaussianBlur, ImageProcessor.Web">
       <settings>
         <setting key="MaxSize" value="22"/>
@@ -41,9 +41,9 @@
       </settings>
     </plugin>
     <plugin name="Pixelate" type="ImageProcessor.Web.Processors.Pixelate, ImageProcessor.Web"/>
-    <plugin name="Quality" type="ImageProcessor.Web.Processors.Quality, ImageProcessor.Web"/>
+    <plugin name="Quality" type="ImageProcessor.Web.Processors.Quality, ImageProcessor.Web" enabled="true"/>
     <plugin name="ReplaceColor" type="ImageProcessor.Web.Processors.ReplaceColor, ImageProcessor.Web"/>
-    <plugin name="Resize" type="ImageProcessor.Web.Processors.Resize, ImageProcessor.Web">
+    <plugin name="Resize" type="ImageProcessor.Web.Processors.Resize, ImageProcessor.Web" enabled="true">
       <settings>
         <setting key="MaxWidth" value="5000"/>
         <setting key="MaxHeight" value="5000"/>
