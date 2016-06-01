@@ -76,7 +76,7 @@ namespace ImageProcessor.Web.Configuration
         /// <summary>
         /// Gets or sets a value indicating whether to auto load plugins.
         /// </summary>
-        public bool AutoLoadPlugins { get; set; }
+     //   public bool AutoLoadPlugins { get; set; }
 
         /// <summary>
         /// Retrieves the processing configuration section from the current application configuration. 
@@ -89,7 +89,7 @@ namespace ImageProcessor.Web.Configuration
 
             if (imageProcessingSection != null)
             {
-                imageProcessingSection.AutoLoadPlugins = false;
+                //      imageProcessingSection.AutoLoadPlugins = false;
                 return imageProcessingSection;
             }
 
@@ -97,7 +97,7 @@ namespace ImageProcessor.Web.Configuration
             XmlReader reader = new XmlTextReader(new StringReader(section));
             imageProcessingSection = new ImageProcessingSection();
             imageProcessingSection.DeserializeSection(reader);
-            imageProcessingSection.AutoLoadPlugins = true;
+            //  imageProcessingSection.AutoLoadPlugins = true;
             return imageProcessingSection;
         }
 
@@ -216,7 +216,6 @@ namespace ImageProcessor.Web.Configuration
             /// <summary>
             /// Gets or sets the name of the plugin file.
             /// </summary>
-            /// <value>The name of the plugin.</value>
             [ConfigurationProperty("name", DefaultValue = "", IsRequired = true)]
             public string Name
             {
@@ -228,13 +227,23 @@ namespace ImageProcessor.Web.Configuration
             /// <summary>
             /// Gets or sets the type of the plugin file.
             /// </summary>
-            /// <value>The full Type definition of the plugin</value>
             [ConfigurationProperty("type", DefaultValue = "", IsRequired = true)]
             public string Type
             {
                 get { return (string)this["type"]; }
 
                 set { this["type"] = value; }
+            }
+
+            /// <summary>
+            /// Gets or sets a value indiating whether the plugin is enabled.
+            /// </summary>
+            [ConfigurationProperty("enabled", DefaultValue = "false", IsRequired = false)]
+            public bool Enabled
+            {
+                get { return (bool)this["enabled"]; }
+
+                set { this["enabled"] = value; }
             }
 
             /// <summary>

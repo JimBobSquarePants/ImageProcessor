@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>
 //   Encapsulates methods to allow the retrieval of ImageProcessor settings.
-//   <see href="http://csharpindepth.com/Articles/General/Singleton.aspx" />
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 namespace ImageProcessor.Web.Configuration
@@ -14,10 +13,8 @@ namespace ImageProcessor.Web.Configuration
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
-    using System.Web.Compilation;
 
-    using ImageProcessor.Common.Extensions;
+    using ImageProcessor.Configuration;
     using ImageProcessor.Processors;
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Processors;
@@ -25,7 +22,6 @@ namespace ImageProcessor.Web.Configuration
 
     /// <summary>
     /// Encapsulates methods to allow the retrieval of ImageProcessor settings.
-    /// <see href="http://csharpindepth.com/Articles/General/Singleton.aspx"/>
     /// </summary>
     public sealed class ImageProcessorConfiguration
     {
@@ -179,58 +175,18 @@ namespace ImageProcessor.Web.Configuration
 
         #region GraphicesProcessors
         /// <summary>
-        /// Gets the list of available GraphicsProcessors.
-        /// </summary>
-        private void LoadGraphicsProcessors()
-        {
-            if (this.GraphicsProcessors == null)
-            {
-                if (GetImageProcessingSection().AutoLoadPlugins)
-                {
-                    Type type = typeof(IWebGraphicsProcessor);
-                    try
-                    {
-                        // Build a list of native IGraphicsProcessor instances.
-                        List<Type> availableTypes = BuildManager.GetReferencedAssemblies()
-                                                                .Cast<Assembly>()
-                                                                .SelectMany(s => s.GetLoadableTypes())
-                                                                .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                                                                .ToList();
-
-                        // Create them and add.
-                        this.GraphicsProcessors = availableTypes.Select(x => (Activator.CreateInstance(x) as IWebGraphicsProcessor)).ToList();
-
-                        // Add the available settings.
-                        foreach (IWebGraphicsProcessor webProcessor in this.GraphicsProcessors)
-                        {
-                            Dictionary<string, string> settings = this.GetPluginSettings(webProcessor.GetType().Name);
-                            if (settings.Any())
-                            {
-                                webProcessor.Processor.Settings = settings;
-                            }
-                        }
-                    }
-                    catch (ReflectionTypeLoadException)
-                    {
-                        this.LoadGraphicsProcessorsFromConfiguration();
-                    }
-                }
-                else
-                {
-                    this.LoadGraphicsProcessorsFromConfiguration();
-                }
-            }
-        }
-
-        /// <summary>
         /// Loads graphics processors from configuration.
         /// </summary>
         /// <exception cref="TypeLoadException">
         /// Thrown when an <see cref="IWebGraphicsProcessor"/> cannot be loaded.
         /// </exception>
-        private void LoadGraphicsProcessorsFromConfiguration()
+        private void LoadGraphicsProcessors()
         {
-            ImageProcessingSection.PluginElementCollection pluginConfigs = imageProcessingSection.Plugins;
+            IEnumerable<ImageProcessingSection.PluginElement> pluginConfigs
+                = GetImageProcessingSection().Plugins
+                                             .Cast<ImageProcessingSection.PluginElement>()
+                                             .Where(p => p.Enabled);
+
             this.GraphicsProcessors = new List<IWebGraphicsProcessor>();
             foreach (ImageProcessingSection.PluginElement pluginConfig in pluginConfigs)
             {
@@ -238,7 +194,9 @@ namespace ImageProcessor.Web.Configuration
 
                 if (type == null)
                 {
-                    throw new TypeLoadException("Couldn't load IWebGraphicsProcessor: " + pluginConfig.Type);
+                    string message = "Couldn't load IWebGraphicsProcessor: " + pluginConfig.Type;
+                    ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
+                    throw new TypeLoadException(message);
                 }
 
                 this.GraphicsProcessors.Add(Activator.CreateInstance(type) as IWebGraphicsProcessor);
@@ -290,72 +248,14 @@ namespace ImageProcessor.Web.Configuration
 
         #region ImageServices
         /// <summary>
-        /// Gets the list of available ImageServices.
-        /// </summary>
-        private void LoadImageServices()
-        {
-            if (this.ImageServices == null)
-            {
-                if (this.GetImageSecuritySection().AutoLoadServices)
-                {
-                    Type type = typeof(IImageService);
-                    try
-                    {
-                        // Build a list of native IGraphicsProcessor instances.
-                        List<Type> availableTypes = BuildManager.GetReferencedAssemblies()
-                                                                .Cast<Assembly>()
-                                                                .SelectMany(s => s.GetLoadableTypes())
-                                                                .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                                                                .ToList();
-
-                        // Create them and add.
-                        this.ImageServices = availableTypes.Select(x => (Activator.CreateInstance(x) as IImageService)).ToList();
-
-                        // Add the available settings.
-                        foreach (IImageService service in this.ImageServices)
-                        {
-                            string name = service.GetType().Name;
-                            Dictionary<string, string> settings = this.GetServiceSettings(name);
-                            if (settings.Any())
-                            {
-                                service.Settings = settings;
-                            }
-                            else if (service.Settings == null)
-                            {
-                                // I've noticed some developers are not initializing 
-                                // the settings in their implentations.
-                                service.Settings = new Dictionary<string, string>();
-                            }
-
-                            Uri[] whitelist = this.GetServiceWhitelist(name);
-
-                            if (whitelist.Any())
-                            {
-                                service.WhiteList = this.GetServiceWhitelist(name);
-                            }
-                        }
-                    }
-                    catch (ReflectionTypeLoadException)
-                    {
-                        this.LoadImageServicesFromConfiguration();
-                    }
-                }
-                else
-                {
-                    this.LoadImageServicesFromConfiguration();
-                }
-            }
-        }
-
-        /// <summary>
         /// Loads image services from configuration.
         /// </summary>
         /// <exception cref="TypeLoadException">
         /// Thrown when an <see cref="IGraphicsProcessor"/> cannot be loaded.
         /// </exception>
-        private void LoadImageServicesFromConfiguration()
+        private void LoadImageServices()
         {
-            ImageSecuritySection.ServiceElementCollection services = imageSecuritySection.ImageServices;
+            ImageSecuritySection.ServiceElementCollection services = this.GetImageSecuritySection().ImageServices;
             this.ImageServices = new List<IImageService>();
             foreach (ImageSecuritySection.ServiceElement config in services)
             {
@@ -363,7 +263,9 @@ namespace ImageProcessor.Web.Configuration
 
                 if (type == null)
                 {
-                    throw new TypeLoadException("Couldn't load IImageService: " + config.Type);
+                    string message = "Couldn't load IImageService: " + config.Type;
+                    ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
+                    throw new TypeLoadException(message);
                 }
 
                 IImageService imageService = Activator.CreateInstance(type) as IImageService;
@@ -386,6 +288,12 @@ namespace ImageProcessor.Web.Configuration
                 if (settings.Any())
                 {
                     service.Settings = settings;
+                }
+                else if (service.Settings == null)
+                {
+                    // I've noticed some developers are not initializing 
+                    // the settings in their implentations.
+                    service.Settings = new Dictionary<string, string>();
                 }
 
                 Uri[] whitelist = this.GetServiceWhitelist(name);
@@ -475,7 +383,9 @@ namespace ImageProcessor.Web.Configuration
 
                         if (type == null)
                         {
-                            throw new TypeLoadException("Couldn't load IImageCache: " + cache.Type);
+                            string message = "Couldn't load IImageCache: " + cache.Type;
+                            ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
+                            throw new TypeLoadException(message);
                         }
 
                         this.ImageCache = type;
