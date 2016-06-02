@@ -44,7 +44,7 @@ properties {
 	)
 }
 
-Framework "4.0x86"
+Framework "4.6"
 FormatTaskName "-------- {0} --------"
 
 task default -depends Cleanup-Binaries, Set-VersionNumber, Build-Solution, Run-Tests, Run-Coverage, Generate-Nuget
