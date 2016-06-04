@@ -4,8 +4,8 @@
     <id>ImageProcessor.Plugins.Cair</id>
     <version>1.0.2.0</version>
     <title>ImageProcessor.Plugins.Cair</title>
-    <authors>James South</authors>
-    <owners>James South</owners>
+    <authors>James Jackson-South</authors>
+    <owners>James Jackson-South</owners>
     <projectUrl>http://imageprocessor.org</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/Core/build/icons/imageprocessor-logo-128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -16,7 +16,7 @@ If you use ImageProcessor please get in touch via my twitter @james_m_south
 Feedback is always welcome</description>
     <summary>Adds support to ImageProcessor for Content Aware Image Resizing.</summary>
     <releaseNotes />
-    <copyright>James South</copyright>
+    <copyright>James Jackson-South</copyright>
     <language>en-GB</language>
     <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff Cair Seam Carving</tags>
     <dependencies>

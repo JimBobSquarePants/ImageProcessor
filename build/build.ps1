@@ -47,7 +47,7 @@ properties {
 Framework "4.6"
 FormatTaskName "-------- {0} --------"
 
-task default -depends Cleanup-Binaries, Set-VersionNumber, Build-Solution, Run-Tests, Run-Coverage, Generate-Nuget
+task default -depends Cleanup-Binaries, Set-VersionNumber, Build-Solution, Generate-Nuget #Run-Tests, Run-Coverage, Generate-Nuget
 
 # cleans up the binaries output folder
 task Cleanup-Binaries {
