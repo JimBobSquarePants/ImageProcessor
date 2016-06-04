@@ -355,7 +355,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             // Use an sha1 hash of the full path including the querystring to create the image name.
             // That name can also be used as a key for the cached image and we should be able to use
             // The characters of that hash as sub-folders.
-            string parsedExtension = ImageHelpers.GetExtension(this.FullPath, this.Querystring);
+            string parsedExtension = ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
             string encryptedName = (streamHash + this.FullPath).ToSHA1Fingerprint();
 
             string cachedFileName = string.Format(

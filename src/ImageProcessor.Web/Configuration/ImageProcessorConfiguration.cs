@@ -74,9 +74,9 @@ namespace ImageProcessor.Web.Configuration
         public static ImageProcessorConfiguration Instance => Lazy.Value;
 
         /// <summary>
-        /// Gets the list of available GraphicsProcessors.
+        /// Gets the collection of available procesors to run.
         /// </summary>
-        public IList<IWebGraphicsProcessor> GraphicsProcessors { get; private set; }
+        public ConcurrentDictionary<Type, Dictionary<string, string>> AvailableWebGraphicsProcessors { get; } = new ConcurrentDictionary<Type, Dictionary<string, string>>();
 
         /// <summary>
         /// Gets the list of available ImageServices.
@@ -175,6 +175,28 @@ namespace ImageProcessor.Web.Configuration
 
         #region GraphicesProcessors
         /// <summary>
+        /// Creates and returns a new collection of <see cref="IWebGraphicsProcessor"/> 
+        /// <remarks>
+        /// Creating the processors should be fairly cheap and better for performance than
+        /// locking around the procesors on each request. The System.Drawing.Graphics object still does a lock but that 
+        /// isn't used for many procesors.
+        /// </remarks>
+        /// </summary>
+        /// <returns>The <see cref="T:IWebGraphicsProcessor[]"/></returns>
+        public IWebGraphicsProcessor[] CreateWebGraphicsProcessors()
+        {
+            List<IWebGraphicsProcessor> processors = new List<IWebGraphicsProcessor>();
+
+            foreach (KeyValuePair<Type, Dictionary<string, string>> pair in AvailableWebGraphicsProcessors)
+            {
+                IWebGraphicsProcessor processor = (IWebGraphicsProcessor)Activator.CreateInstance(pair.Key);
+                processor.Processor.Settings = pair.Value;
+                processors.Add(processor);
+            }
+            return processors.ToArray();
+        }
+
+        /// <summary>
         /// Loads graphics processors from configuration.
         /// </summary>
         /// <exception cref="TypeLoadException">
@@ -187,7 +209,6 @@ namespace ImageProcessor.Web.Configuration
                                              .Cast<ImageProcessingSection.PluginElement>()
                                              .Where(p => p.Enabled);
 
-            this.GraphicsProcessors = new List<IWebGraphicsProcessor>();
             foreach (ImageProcessingSection.PluginElement pluginConfig in pluginConfigs)
             {
                 Type type = Type.GetType(pluginConfig.Type);
@@ -199,17 +220,10 @@ namespace ImageProcessor.Web.Configuration
                     throw new TypeLoadException(message);
                 }
 
-                this.GraphicsProcessors.Add(Activator.CreateInstance(type) as IWebGraphicsProcessor);
-            }
+                Dictionary<string, string> settings = this.GetPluginSettings(type.Name);
 
-            // Add the available settings.
-            foreach (IWebGraphicsProcessor webProcessor in this.GraphicsProcessors)
-            {
-                Dictionary<string, string> settings = this.GetPluginSettings(webProcessor.GetType().Name);
-                if (settings.Any())
-                {
-                    webProcessor.Processor.Settings = settings;
-                }
+                // No reason for this to fail.
+                this.AvailableWebGraphicsProcessors.TryAdd(type, settings);
             }
         }
 
