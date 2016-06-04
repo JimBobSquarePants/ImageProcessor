@@ -1,16 +1,24 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="AssemblyInfo.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   AssemblyInfo.cs
+// </summary>
+
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ImageProcessor.Web.Plugins.AmazonS3Cache")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Adds a self cleaning cache to ImageProcessor.Web that uses Amazon S3 Buckets to store processed images.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ImageProcessor.Web.Plugins.AmazonS3Cache")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCopyright("Copyright © James Jackson-South")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

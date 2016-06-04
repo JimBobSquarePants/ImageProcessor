@@ -4,19 +4,19 @@
     <id>ImageProcessor.Web.Plugins.AzureBlobCache</id>
     <version>1.0.9.0</version>
     <title>ImageProcessor.Web.Plugins.AzureBlobCache</title>
-    <authors>James South</authors>
-    <owners>James South</owners>
+    <authors>James Jackson-South</authors>
+    <owners>James Jackson-South</owners>
     <projectUrl>http://imageprocessor.org</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/Core/build/icons/imageprocessor-logo-128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Adds a self cleaning cache that uses Azure Blob Containers to store processed images.
+    <description>Adds a self cleaning cache to ImageProcessor.Web that uses Azure Blob Containers to store processed images.
 
 If you use ImageProcessor.Web please get in touch via my twitter @james_m_south
 
 Feedback is always welcome</description>
     <summary>ImageProcessor.Web AzureBlobCache for ASP.NET websites.</summary>
     <releaseNotes />
-    <copyright>James South</copyright>
+    <copyright>James Jackson-South</copyright>
     <language>en-GB</language>
     <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff Azure Cache Asp</tags>
     <dependencies>
