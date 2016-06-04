@@ -30,6 +30,7 @@ namespace ImageProcessor.Web.HttpModules
     using ImageProcessor.Web.Configuration;
     using ImageProcessor.Web.Extensions;
     using ImageProcessor.Web.Helpers;
+    using ImageProcessor.Web.Processors;
     using ImageProcessor.Web.Services;
 
     /// <summary>
@@ -180,7 +181,7 @@ namespace ImageProcessor.Web.HttpModules
             if (response.Headers["ImageProcessedBy"] == null)
             {
                 response.AddHeader("ImageProcessedBy",
-                    string.Format("ImageProcessor/{0} - ImageProcessor.Web/{1}",  AssemblyVersion, WebAssemblyVersion));
+                    string.Format("ImageProcessor/{0} - ImageProcessor.Web/{1}", AssemblyVersion, WebAssemblyVersion));
             }
 
             HttpCachePolicy cache = response.Cache;
@@ -607,11 +608,25 @@ namespace ImageProcessor.Web.HttpModules
 
                                 if (!string.IsNullOrWhiteSpace(queryString))
                                 {
-                                    imageFactory.Load(inStream).AutoProcess(queryString).Save(outStream);
-                                    mimeType = imageFactory.CurrentImageFormat.MimeType;
+                                    // Attempt to match querystring and processors.
+                                    IWebGraphicsProcessor[] processors = ImageFactoryExtensions.GetMatchingProcessors(queryString);
+                                    if (processors.Any())
+                                    {
+                                        imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
+                                        mimeType = imageFactory.CurrentImageFormat.MimeType;
+                                    }
+                                    else
+                                    {
+                                        // No match? Copy the stream to prevent the overhead of decoding/encoding the image.
+                                        // With the current architecture there is no way to prevent caching of the requests at this point.
+                                        // Use ValidatingRequest event handler instead.
+                                        await inStream.CopyToAsync(outStream);
+                                        mimeType = FormatUtilities.GetFormat(outStream).MimeType;
+                                    }
                                 }
                                 else
                                 {
+                                    // We're capturing all requests.
                                     await inStream.CopyToAsync(outStream);
                                     mimeType = FormatUtilities.GetFormat(outStream).MimeType;
                                 }
