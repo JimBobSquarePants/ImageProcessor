@@ -34,6 +34,16 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to allow known cache busters.
+        /// </summary>
+        [ConfigurationProperty("allowCacheBuster", IsRequired = false, DefaultValue = true)]
+        public bool AllowCacheBuster
+        {
+            get { return (bool)this["allowCacheBuster"]; }
+            set { this["allowCacheBuster"] = value; }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to convert images to a linear color space before
         /// processing.
         /// </summary>
@@ -74,11 +84,6 @@ namespace ImageProcessor.Web.Configuration
         public PluginElementCollection Plugins => this["plugins"] as PluginElementCollection;
 
         /// <summary>
-        /// Gets or sets a value indicating whether to auto load plugins.
-        /// </summary>
-     //   public bool AutoLoadPlugins { get; set; }
-
-        /// <summary>
         /// Retrieves the processing configuration section from the current application configuration. 
         /// </summary>
         /// <returns>The processing configuration section from the current application configuration. </returns>
@@ -89,7 +94,6 @@ namespace ImageProcessor.Web.Configuration
 
             if (imageProcessingSection != null)
             {
-                //      imageProcessingSection.AutoLoadPlugins = false;
                 return imageProcessingSection;
             }
 
@@ -97,7 +101,6 @@ namespace ImageProcessor.Web.Configuration
             XmlReader reader = new XmlTextReader(new StringReader(section));
             imageProcessingSection = new ImageProcessingSection();
             imageProcessingSection.DeserializeSection(reader);
-            //  imageProcessingSection.AutoLoadPlugins = true;
             return imageProcessingSection;
         }
 

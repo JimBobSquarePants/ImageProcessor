@@ -109,6 +109,11 @@ namespace ImageProcessor.Web.Configuration
         public bool PreserveExifMetaData => GetImageProcessingSection().PreserveExifMetaData;
 
         /// <summary>
+        /// Gets a value indicating whether to allow known cachebusters.
+        /// </summary>
+        public bool AllowCacheBuster => GetImageProcessingSection().AllowCacheBuster;
+
+        /// <summary>
         /// Gets a value indicating whether to convert images to a linear color space before
         /// processing.
         /// </summary>

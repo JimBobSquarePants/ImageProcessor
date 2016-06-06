@@ -75,6 +75,11 @@ namespace ImageProcessor.Web.HttpModules
         private static readonly AsyncDuplicateLock Locker = new AsyncDuplicateLock();
 
         /// <summary>
+        /// Whether to allow known cachebusters.
+        /// </summary>
+        private static bool? allowCacheBuster;
+
+        /// <summary>
         /// Whether to preserve exif meta data.
         /// </summary>
         private static bool? preserveExifMetaData;
@@ -288,6 +293,11 @@ namespace ImageProcessor.Web.HttpModules
             if (preserveExifMetaData == null)
             {
                 preserveExifMetaData = ImageProcessorConfiguration.Instance.PreserveExifMetaData;
+            }
+
+            if (allowCacheBuster == null)
+            {
+                allowCacheBuster = ImageProcessorConfiguration.Instance.AllowCacheBuster;
             }
 
             if (fixGamma == null)
@@ -615,6 +625,12 @@ namespace ImageProcessor.Web.HttpModules
                                         mimeType = imageFactory.CurrentImageFormat.MimeType;
                                     }
                                 }
+                                else if (this.ParseCacheBuster(queryString))
+                                {
+                                    // We're cachebustng. Allow the value to be cached
+                                    await inStream.CopyToAsync(outStream);
+                                    mimeType = FormatUtilities.GetFormat(outStream).MimeType;
+                                }
                                 else
                                 {
                                     // No match? Someone is either attacking the server or hasn't read the instructions. 
@@ -692,6 +708,26 @@ namespace ImageProcessor.Web.HttpModules
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Return a value indicating whether common cachebuster variables are being passed through.
+        /// </summary>
+        /// <param name="queryString">The query string to search.</param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool ParseCacheBuster(string queryString)
+        {
+            NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
+            if (allowCacheBuster != null && allowCacheBuster.Value
+                && (queryCollection.AllKeys.Contains("v", StringComparer.InvariantCultureIgnoreCase)
+                || queryCollection.AllKeys.Contains("rnd", StringComparer.InvariantCultureIgnoreCase)))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
