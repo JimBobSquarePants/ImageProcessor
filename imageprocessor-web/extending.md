@@ -30,7 +30,6 @@ View the [source code](https://github.com/JimBobSquarePants/ImageProcessor/tree/
 /// </summary>
 public interface IWebGraphicsProcessor
 {
-    #region Properties
     /// <summary>
     /// Gets the regular expression to search strings for.
     /// </summary>
@@ -45,9 +44,7 @@ public interface IWebGraphicsProcessor
     /// Gets the associated graphics processor.
     /// </summary>
     IGraphicsProcessor Processor { get; }
-    #endregion
-
-    #region Methods
+ 
     /// <summary>
     /// The position in the original string where the first character of the captured substring was found.
     /// </summary>
@@ -58,7 +55,6 @@ public interface IWebGraphicsProcessor
     /// The zero-based starting position in the original string where the captured substring was found.
     /// </returns>
     int MatchRegexIndex(string queryString);
-    #endregion
 }
 {% endhighlight %}
 </div>
