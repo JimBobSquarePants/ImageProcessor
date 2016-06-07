@@ -53,7 +53,7 @@ h3 {
 
 blockquote {
     padding: 1rem 1rem 1rem 1.5rem;
-    border-left: 5px solid #009688;
+    border-left: 5px solid #096396;
 }
 
 a {
@@ -83,8 +83,8 @@ hr {
 
 button,
 [role="button"] {
-    background-color: #357ebd;
-    border-color: #357ebd;
+    background-color: #0f344d;
+    border-color: #0f344d;
     border-radius: 2px;
     color: #fff;
 }
@@ -118,7 +118,7 @@ button,
  *=================================================================
  */
 header[role="banner"] {
-    background-color: #009688;
+    background-color: #096396;
     color: #fff;
     /*background-image: url("libs/images/bg.png");*/
     padding-top: 3.5rem;
@@ -154,7 +154,7 @@ header[role="banner"] {
  */
 
 .nav {
-    border-left: 3px solid #009688;
+    border-left: 3px solid #096396;
 }
 
 nav[role="navigation"] {
@@ -185,8 +185,8 @@ nav[role="navigation"] a[rel="home"] {
 }
 
 nav[role="navigation"] [data-dropdown-target] {
-    border-color: #009688;
-    background: #009688 url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QUVCMDMzMTZFM0ZBMTFFMjgwRkY4QzM1MTM0ODI5MTkiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QUVCMDMzMTdFM0ZBMTFFMjgwRkY4QzM1MTM0ODI5MTkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpBRUIwMzMxNEUzRkExMUUyODBGRjhDMzUxMzQ4MjkxOSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpBRUIwMzMxNUUzRkExMUUyODBGRjhDMzUxMzQ4MjkxOSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pgt6AmsAAAApSURBVHjaYvwPBAw0BEwMNAZD3wIWIGYc8j4YTUWjqWg0FQ11CwACDADmUQYkjaDs3gAAAABJRU5ErkJggg==') /*/assets/css/mobile-nav.png*/ no-repeat center center;
+    border-color: #096396;
+    background: #096396 url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QUVCMDMzMTZFM0ZBMTFFMjgwRkY4QzM1MTM0ODI5MTkiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QUVCMDMzMTdFM0ZBMTFFMjgwRkY4QzM1MTM0ODI5MTkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpBRUIwMzMxNEUzRkExMUUyODBGRjhDMzUxMzQ4MjkxOSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpBRUIwMzMxNUUzRkExMUUyODBGRjhDMzUxMzQ4MjkxOSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pgt6AmsAAAApSURBVHjaYvwPBAw0BEwMNAZD3wIWIGYc8j4YTUWjqWg0FQ11CwACDADmUQYkjaDs3gAAAABJRU5ErkJggg==') /*/assets/css/mobile-nav.png*/ no-repeat center center;
     width: 24px;
     height: 27px;
     float: right;
@@ -204,7 +204,7 @@ nav[role="navigation"] [data-dropdown-target] {
 
         #navigation a.active,
         #navigation a:hover {
-            background-color: #009688;
+            background-color: #096396;
             color: #fff;
         }
 
@@ -322,6 +322,10 @@ article [rel="subsection"]{
    margin: 1.245rem 0;
 }
 
+article a{
+   font-weight: bold;
+}
+
 [rel="subsection"] > .fa,
 [rel="chapter"] > .fa{
     margin-left: .5rem;
@@ -350,6 +354,7 @@ article [rel="subsection"]{
 
 .highlight{
     margin-left: 0;
+    margin-right: 0;
 }
 
 /*

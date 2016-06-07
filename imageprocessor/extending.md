@@ -35,6 +35,7 @@ public interface IGraphicsProcessor
     /// Gets or sets the DynamicParameter.
     /// </summary>
     dynamic DynamicParameter { get; set; }
+    
     /// <summary>
     /// Gets or sets any additional settings required by the processor.
     /// </summary>
@@ -75,27 +76,33 @@ public interface ISupportedImageFormat
     /// Gets the file headers.
     /// </summary>
     byte[][] FileHeaders { get; }
+    
     /// <summary>
     /// Gets the list of file extensions.
     /// </summary>
     string[] FileExtensions { get; }
+    
     /// <summary>
     /// Gets the standard identifier used on the Internet to indicate the type 
     /// of data that a file contains. 
     /// </summary>
     string MimeType { get; }
+    
     /// <summary>
     /// Gets the default file extension.
     /// </summary>
     string DefaultExtension { get; }
+    
     /// <summary>
     /// Gets the file format of the image. 
     /// </summary>
     ImageFormat ImageFormat { get; }
+    
     /// <summary>
     /// Gets or sets a value indicating whether the image format is indexed.
     /// </summary>
     bool IsIndexed { get; set; }
+    
     /// <summary>
     /// Gets or sets the quality of output for images.
     /// </summary>
@@ -111,6 +118,7 @@ public interface ISupportedImageFormat
     /// The <see cref="ImageFactory" />.
     /// </param>
     void ApplyProcessor(Func<imagefactory, image> processor, ImageFactory factory);
+    
     /// <summary>
     /// Loads the image to process. 
     /// </summary>
@@ -121,19 +129,24 @@ public interface ISupportedImageFormat
     /// The <see cref="T:System.Drawing.Image" />.
     /// </returns>
     Image Load(Stream stream);
+    
     /// <summary>
     /// Saves the current image to the specified output stream.
     /// </summary>
     /// <param name="stream">
-    /// The <see cref="T:System.IO.Stream" /> to save the image information to.
+    /// The <see cref="T:System.IO.Stream"/> to save the image information to.
     /// </param>
     /// <param name="image">
-    /// The <see cref="T:System.Drawing.Image" /> to save.
+    /// The <see cref="T:System.Drawing.Image"/> to save.
+    /// </param>
+    /// <param name="bitDepth">
+    /// The color depth in number of bits per pixel to save the image with.
     /// </param>
     /// <returns>
-    /// The <see cref="T:System.Drawing.Image" />.
+    /// The <see cref="T:System.Drawing.Image"/>.
     /// </returns>
-    Image Save(Stream stream, Image image);
+    Image Save(Stream stream, Image image, long bitDepth);
+    
     /// <summary>
     /// Saves the current image to the specified file path.
     /// </summary>
@@ -141,10 +154,13 @@ public interface ISupportedImageFormat
     /// <param name="image">
     /// The <see cref="T:System.Drawing.Image" /> to save.
     /// </param>
+    /// <param name="bitDepth">
+    /// The color depth in number of bits per pixel to save the image with.
+    /// </param>
     /// <returns>
     /// The <see cref="T:System.Drawing.Image" />.
     /// </returns>
-    Image Save(string path, Image image);
+    Image Save(string path, Image image, long bitDepth);
 }
 {% endhighlight %}
 </div>

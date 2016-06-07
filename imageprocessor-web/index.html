@@ -20,6 +20,24 @@ sublinks:
         This works by adding a configurable HttpModule to your website which intercepts local and remote image requests,
         processing them on-the-fly to your desired output.
     </p>
+     <div class="alert">
+     <h4>Important</h4>
+        <p>
+            For security reasons, as of <strong>ImageProcessor.Web v4.6.0</strong>, only the following essential processors are enabled by default. 
+            Any other processors will have to to be manually enabled via the <a href="configuration/" rel="chapter">configuration<i class="fa fa-file-text-o"></i></a>.
+        </p>
+        <ul>
+            <li>AutoRotate</li>
+            <li>BackgroundColor</li>
+            <li>Crop</li>
+            <li>Format</li>
+            <li>Quality</li>
+            <li>Resize</li>
+        </ul>    
+        <p>
+            See the following <a href="https://github.com/JimBobSquarePants/ImageProcessor/issues/49">issue</a> on the Github repo for more information.
+        </p>
+    </div>
     <div class="alert">
      <h4>Important</h4>
         <p>

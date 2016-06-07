@@ -13,7 +13,7 @@ sublinks:
 
 <div id="webconfig">
 
-#The Web.Config
+# The Web.Config
 
 By default ImageProcessor.Web will install references to its HttpModule within the applications `web.config`
 file. This allows the library to intercept processing calls to locally stored image files.
@@ -118,7 +118,7 @@ configuration file you can add your own image sources.
 
 <div class ="alert" role="alert">
 
-This configuration setup was added in version [4.1.0](https://www.nuget.org/packages/ImageProcessor.Web/4.1.0). For versions 
+This configuration setup was added in version <strong>v4.1.0</strong>. For versions 
 prior to that the config is as follows.
 
 </div>
@@ -136,7 +136,9 @@ prior to that the config is as follows.
 </security>
 {% endhighlight %}
 </div>
+
 ---
+
 <div id="cacheconfig">
 
 ### Cache.Config
@@ -150,7 +152,11 @@ configuration file you can add your own image cache.
 <!-- Set the currently assigned cache implemtaion here. -->
 <caching currentCache="DiskCache">
   <caches>
-    <cache name="DiskCache" type="ImageProcessor.Web.Caching.DiskCache, ImageProcessor.Web" maxDays="365">
+  <!--
+      browserMaxDays (Added v4.6.0) separates the time to cache the image in the browser from the time to store
+      the image in the cache
+  -->
+    <cache name="DiskCache" type="ImageProcessor.Web.Caching.DiskCache, ImageProcessor.Web" maxDays="365" browserMaxDays="7">
       <!-- The virtual path to the disk cache location. -->      
       <settings>
         <setting key="VirtualCachePath" value="~/app_data/cache"/>
@@ -163,7 +169,7 @@ configuration file you can add your own image cache.
 
 <div class ="alert" role="alert">
 
-This configuration setup was added in version [4.2.0](https://www.nuget.org/packages/ImageProcessor.Web/4.2.0). For versions 
+This configuration setup was added in version <strong>v4.2.0</strong>. For versions 
 prior to that the config is as follows.
 
 </div>
@@ -179,11 +185,28 @@ prior to that the config is as follows.
 
 Contains information and configuration for all processors.
 
+<div class="alert">
+  <h4>Important</h4>
+  <p>
+      For security reasons as of <strong>ImageProcessor.Web v4.6.0</strong> only the following essential processors are enabled by default. 
+      Any others will have to to be manually enabled by adding the attribute `enabled="true"` via the configuration.
+  </p>
+  <ul>
+      <li>AutoRotate</li>
+      <li>BackgroundColor</li>
+      <li>Crop</li>
+      <li>Format</li>
+      <li>Quality</li>
+      <li>Resize</li>
+  </ul>    
+</div>
+
 Sources for image processors are plugin based. That means by implementing the `IGraphicsProcessor` and `IWebGraphicsProcessor` interfaces and referencing 
 the web implementaion in the configuration file you can add your own image processor.
 
 {% highlight xml %}
-<!--interceptAllRequests - Added version 4.5.0 to allow intercepting requests with no querystring.-->
+<!--interceptAllRequests - Added v4.5.0 to allow intercepting requests with no querystring.-->
+<!--allowCacheBuster - Added v4.6.0 to allow common cachebusting querystring parameters "v" and "rnd".-->
 <processing preserveExifMetaData="false" interceptAllRequests="false">
   <!-- Demo: Presets that allow you to reduce code in your markup. 
        Note the use of &#038; to escape ampersands. -->
@@ -193,16 +216,16 @@ the web implementaion in the configuration file you can add your own image proce
   <!-- List of plugins. -->
   <plugins>
     <plugin name="Alpha" type="ImageProcessor.Web.Processors.Alpha, ImageProcessor.Web"/>
-    <plugin name="AutoRotate" type="ImageProcessor.Web.Processors.AutoRotate, ImageProcessor.Web"/>
-    <plugin name="BackgroundColor" type="ImageProcessor.Web.Processors.BackgroundColor, ImageProcessor.Web"/>
+    <plugin name="AutoRotate" type="ImageProcessor.Web.Processors.AutoRotate, ImageProcessor.Web" enabled="true"/>
+    <plugin name="BackgroundColor" type="ImageProcessor.Web.Processors.BackgroundColor, ImageProcessor.Web" enabled="true"/>
     <plugin name="Brightness" type="ImageProcessor.Web.Processors.Brightness, ImageProcessor.Web"/>
     <plugin name="Contrast" type="ImageProcessor.Web.Processors.Contrast, ImageProcessor.Web"/>
-    <plugin name="Crop" type="ImageProcessor.Web.Processors.Crop, ImageProcessor.Web"/>
+    <plugin name="Crop" type="ImageProcessor.Web.Processors.Crop, ImageProcessor.Web" enabled="true" enabled="true"/>
     <plugin name="DetectEdges" type="ImageProcessor.Web.Processors.DetectEdges, ImageProcessor.Web"/>
     <plugin name="EntropyCrop" type="ImageProcessor.Web.Processors.EntropyCrop, ImageProcessor.Web"/>
     <plugin name="Filter" type="ImageProcessor.Web.Processors.Filter, ImageProcessor.Web"/>
     <plugin name="Flip" type="ImageProcessor.Web.Processors.Flip, ImageProcessor.Web"/>
-    <plugin name="Format" type="ImageProcessor.Web.Processors.Format, ImageProcessor.Web"/>
+    <plugin name="Format" type="ImageProcessor.Web.Processors.Format, ImageProcessor.Web" enabled="true"/>
     <plugin name="GaussianBlur" type="ImageProcessor.Web.Processors.GaussianBlur, ImageProcessor.Web">
       <settings>
         <setting key="MaxSize" value="22"/>
@@ -233,7 +256,7 @@ the web implementaion in the configuration file you can add your own image proce
     <plugin name="Pixelate" type="ImageProcessor.Web.Processors.Pixelate, ImageProcessor.Web"/>
     <plugin name="Quality" type="ImageProcessor.Web.Processors.Quality, ImageProcessor.Web"/>
     <plugin name="ReplaceColor" type="ImageProcessor.Web.Processors.ReplaceColor, ImageProcessor.Web"/>
-    <plugin name="Resize" type="ImageProcessor.Web.Processors.Resize, ImageProcessor.Web">
+    <plugin name="Resize" type="ImageProcessor.Web.Processors.Resize, ImageProcessor.Web" enabled="true">
       <settings>
         <setting key="MaxWidth" value="5000"/>
         <setting key="MaxHeight" value="5000"/>

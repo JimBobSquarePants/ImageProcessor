@@ -8,6 +8,7 @@ heading: Getting Started
 subheading: An introduction to ImageProcessor, how to use it, with installation instructions.
 ---
 <section>
+
 # Download ImageProcessor
 
 The simplest and fastest way to get the ImageProcessor libraries is to install them via Nuget.
@@ -19,6 +20,7 @@ Once installed, simply build your solution.
 </section>
 ---
 <section>
+
 # ImageProcessor on Github
 
 If you want to learn more about ImageProcessor, tinker about in the source or even contribute to the project (Yes please!) then you can see the full source
