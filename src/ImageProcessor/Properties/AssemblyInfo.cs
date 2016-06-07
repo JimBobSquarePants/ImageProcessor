@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyInfo.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="AssemblyInfo.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -18,9 +18,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("ImageProcessor")]
 [assembly: AssemblyDescription("A library for on-the-fly processing of image files written in C#")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("James South")]
+[assembly: AssemblyCompany("James Jackson-South")]
 [assembly: AssemblyProduct("ImageProcessor")]
-[assembly: AssemblyCopyright("Copyright © James South")]
+[assembly: AssemblyCopyright("Copyright © James Jackson-South")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -41,8 +41,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.3.3.0")]
-[assembly: AssemblyFileVersion("2.3.3.0")]
+[assembly: AssemblyVersion("2.4.0.0")]
+[assembly: AssemblyFileVersion("2.4.0.0")]
 
 [assembly: InternalsVisibleTo("ImageProcessor.UnitTests")]
 [assembly: InternalsVisibleTo("ImageProcessor.Web")]

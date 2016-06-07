@@ -25,8 +25,8 @@
   <Analyzers>
     <Analyzer AnalyzerId="StyleCop.CSharp.DocumentationRules">
       <AnalyzerSettings>
-        <StringProperty Name="CompanyName">James South</StringProperty>
-        <StringProperty Name="Copyright">Copyright (c) James South.
+        <StringProperty Name="CompanyName">James Jackson-South</StringProperty>
+        <StringProperty Name="Copyright">Copyright (c) James Jackson-South.
 Licensed under the Apache License, Version 2.0.</StringProperty>
       </AnalyzerSettings>
     </Analyzer>

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ExifBitConverter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ExifBitConverter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -39,13 +39,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <summary>
         /// Indicates the byte order ("endianness") in which data is converted using this class.
         /// </summary>
-        public override Endianness Endianness
-        {
-            get
-            {
-                return this.IsLittleEndian() ? Endianness.LittleEndian : Endianness.BigEndian;
-            }
-        }
+        public override Endianness Endianness => this.IsLittleEndian() ? Endianness.LittleEndian : Endianness.BigEndian;
 
         /// <summary>
         /// Indicates the byte order ("endianness") in which data is converted using this class.

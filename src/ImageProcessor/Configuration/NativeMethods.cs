@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="NativeMethods.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="NativeMethods.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -55,7 +55,7 @@ namespace ImageProcessor.Configuration
         /// <returns>
         /// If the function succeeds, the return value is a handle to the module; otherwise null.
         /// </returns>
-        [System.Runtime.InteropServices.DllImport("libdl")]
+        [DllImport("libdl")]
         public static extern IntPtr dlopen(string libname, int flags);
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace ImageProcessor.Configuration
         /// <param name="hModule">A handle to the loaded library module. 
         /// The LoadLibrary, LoadLibraryEx, GetModuleHandle, or GetModuleHandleEx function returns this handle.</param>
         /// <returns>If the function succeeds, the return value is nonzero; otherwise zero.</returns>
-        [System.Runtime.InteropServices.DllImport("libdl")]
+        [DllImport("libdl")]
         public static extern int dlclose(IntPtr hModule);
     }
 }

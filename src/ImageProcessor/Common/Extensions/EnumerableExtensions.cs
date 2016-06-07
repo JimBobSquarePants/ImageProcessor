@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EnumerableExtensions.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="EnumerableExtensions.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -39,7 +39,7 @@ namespace ImageProcessor.Common.Extensions
             long num = (fromInclusive + toExclusive) - 1L;
             if ((toExclusive < 0) || (num > 0x7fffffffL))
             {
-                throw new ArgumentOutOfRangeException("toExclusive");
+                throw new ArgumentOutOfRangeException(nameof(toExclusive));
             }
 
             return RangeIterator(fromInclusive, i => i < toExclusive, step);

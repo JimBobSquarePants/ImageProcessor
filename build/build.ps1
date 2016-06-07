@@ -12,9 +12,11 @@ properties {
 	$AppVeyor = $null
 	
 	# Input and output paths
+	$env:Path += ";${Env:ProgramFiles(x86)}\MSBuild\14.0\Bin\MsBuild.exe"
 	$BUILD_PATH = Resolve-Path "."
+    $SOLUTION_PATH = Join-Path $BUILD_PATH "..\"
 	$SRC_PATH = Join-Path $BUILD_PATH "..\src"
-	$PLUGINS_PATH = Join-Path $SRC_PATH "Plugins\ImageProcessor"
+	$TESTS_PATH = Join-Path $BUILD_PATH "..\tests"
 	$NUSPECS_PATH = Join-Path $BUILD_PATH "NuSpecs"
 	$BIN_PATH = Join-Path $BUILD_PATH "_BuildOutput"
 	$NUGET_OUTPUT = Join-Path $BIN_PATH "NuGets"
@@ -25,12 +27,12 @@ properties {
 	$API_DOC_PATH = Join-Path $BIN_PATH "Help\docu"
 	
 	# External binaries paths
-	$NUGET_EXE = Join-Path $SRC_PATH ".nuget\NuGet.exe"
-	$NUNIT_EXE = Join-Path $SRC_PATH "packages\NUnit.Runners.2.6.3\tools\nunit-console.exe"
-	$COVERALLS_EXE = Join-Path $SRC_PATH "packages\coveralls.io.1.3.2\tools\coveralls.net.exe"
-	$OPENCOVER_EXE = Join-Path $SRC_PATH "packages\OpenCover.4.5.3809-rc94\OpenCover.Console.exe"
-	$REPORTGEN_EXE = Join-Path $SRC_PATH "packages\ReportGenerator.1.9.1.0\ReportGenerator.exe"
-	$NUNITREPORT_EXE = Join-Path $BUILD_PATH "tools\NUnitHTMLReportGenerator.exe"
+	$NUGET_EXE = Join-Path $SOLUTION_PATH "nuget\NuGet.exe"
+	$NUNIT_EXE = Join-Path $SOLUTION_PATH "packages\NUnit.ConsoleRunner.3.2.0\tools\nunit3-console.exe"
+	$COVERALLS_EXE = Join-Path $SOLUTION_PATH "packages\coveralls.io.1.3.4\tools\coveralls.net.exe"
+	$OPENCOVER_EXE = Join-Path $SOLUTION_PATH "packages\OpenCover.4.6.519\tools\OpenCover.Console.exe"
+	$REPORTGEN_EXE = Join-Path $SOLUTION_PATH "packages\ReportGenerator.2.4.4.0\tools\ReportGenerator.exe"
+	$REPORTUNIT_EXE = Join-Path $SOLUTION_PATH "packages\ReportUnit.1.2.1\tools\ReportUnit.exe"
 	
 	# list of projects
 	$PROJECTS_PATH = (Join-Path $BUILD_PATH "build.xml")
@@ -42,10 +44,10 @@ properties {
 	)
 }
 
-Framework "4.0x86"
+Framework "4.6"
 FormatTaskName "-------- {0} --------"
 
-task default -depends Cleanup-Binaries, Set-VersionNumber, Build-Solution, Run-Tests, Run-Coverage, Generate-Nuget
+task default -depends Cleanup-Binaries, Set-VersionNumber, Build-Solution, Generate-Nuget #Run-Tests, Run-Coverage, Generate-Nuget
 
 # cleans up the binaries output folder
 task Cleanup-Binaries {
@@ -99,10 +101,10 @@ task Build-Solution -depends Cleanup-Binaries, Set-VersionNumber {
 		[System.Xml.XmlElement] $output = $null
 		foreach($output in $project.outputs.ChildNodes) {
 			# using invoke-expression solves a few character escape issues
-			$buildCommand = "msbuild $(Join-Path $projectPath $project.projfile) /t:Build /p:Warnings=true /p:Configuration=Release /p:PipelineDependsOnBuild=False /p:OutDir=$(Join-Path $BIN_PATH $output.folder) $($output.additionalParameters) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo"
+			$buildCommand = "msbuild $(Join-Path $projectPath $project.projfile) /tv:14.0 /p:VisualStudioVersion=14.0 /t:Build /p:Warnings=true /p:Configuration=Release /p:PipelineDependsOnBuild=False /p:OutDir=$(Join-Path $BIN_PATH $output.folder) $($output.additionalParameters) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo"
 			Write-Host $buildCommand -ForegroundColor DarkGreen
 			Exec {
-				Invoke-Expression $buildCommand
+			    Invoke-Expression $buildCommand
 			}
 		}
 	}
@@ -117,13 +119,16 @@ task Build-Tests -depends Cleanup-Binaries {
 	}
 	
 	# make sure the runner exes are restored
-	& $NUGET_EXE restore (Join-Path $SRC_PATH "ImageProcessor.sln")
+	& $NUGET_EXE restore (Join-Path $SOLUTION_PATH "ImageProcessor.sln")
 	
 	# build the test projects
 	$TestProjects | % {
+		# using invoke-expression solves a few character escape issues
+		$buildCommand = "msbuild $(Join-Path $TESTS_PATH "$_\$_.csproj") /tv:14.0 /p:VisualStudioVersion=14.0 /t:Build /p:Configuration=Release /p:Platform=""AnyCPU"" /p:Warnings=true /clp:WarningsOnly /clp:ErrorsOnly /v:Normal /nologo"
 		Write-Host "Building project $_"
 		Exec {
-			msbuild (Join-Path $SRC_PATH "$_\$_.csproj") /t:Build /p:Configuration=Release /p:Platform="AnyCPU" /p:Warnings=true /clp:WarningsOnly /clp:ErrorsOnly /v:Normal /nologo
+			Invoke-Expression $buildCommand
+			#(Join-Path $MSBUILD_PATH (Join-Path $TESTS_PATH "$_\$_.csproj")) /t:Build /p:Configuration=Release /p:Platform="AnyCPU" /p:Warnings=true /clp:WarningsOnly /clp:ErrorsOnly /v:Normal /nologo
 		}
 	}
 }
@@ -132,12 +137,12 @@ task Build-Tests -depends Cleanup-Binaries {
 task Run-Tests -depends Build-Tests {
 	Write-Host "Running unit tests"
 	$TestProjects | % {
-		$TestDllFolder = Join-Path $SRC_PATH "$_\bin\Release"
+		$TestDllFolder = Join-Path $TESTS_PATH "$_\bin\Release"
 		$TestDdlPath = Join-Path $TestDllFolder "$_.dll"
 		$TestOutputPath = Join-Path $TEST_RESULTS "$($_)_Unit.xml"
 		
 		Write-Host "Running unit tests on project $_"
-		& $NUNIT_EXE $TestDdlPath /result:$TestOutputPath /noshadow /nologo
+		& $NUNIT_EXE $TestDdlPath --result=$TestOutputPath 
 		
 		$ReportPath = (Join-Path $TEST_RESULTS "Tests")
 		if (-not (Test-Path $ReportPath)) {
@@ -145,7 +150,7 @@ task Run-Tests -depends Build-Tests {
 		}
 		
 		Write-Host "Transforming tests results file to HTML"
-		& $NUNITREPORT_EXE $TestOutputPath (Join-Path $ReportPath "$_.html")
+		& $REPORTUNIT_EXE $TestOutputPath (Join-Path $ReportPath "$_.html")
 	}
 }
 
@@ -153,7 +158,7 @@ task Run-Tests -depends Build-Tests {
 task Run-Coverage -depends Build-Tests {
 	Write-Host "Running code coverage over unit tests"
 	$TestProjects | % {
-		$TestDllFolder = Join-Path $SRC_PATH "$_\bin\Release"
+		$TestDllFolder = Join-Path $TESTS_PATH "$_\bin\Release"
 		$TestDdlPath = Join-Path $TestDllFolder "$_.dll"
 		$CoverageOutputPath = Join-Path $TEST_RESULTS "$($_)_Coverage.xml"
 		
@@ -166,7 +171,7 @@ task Run-Coverage -depends Build-Tests {
 
 		Write-Host "Running code coverage on project $_"
 		$coverageFilter = "-filter:+[*]* -[FluentAssertions*]* -[ImageProcessor]*Common.Exceptions -[ImageProcessor.UnitTests]* -[ImageProcessor.Web.UnitTests]*"
-		& $OPENCOVER_EXE -threshold:1 -oldstyle -register:user -target:$NUNIT_EXE -targetargs:"$TestDdlPath /noshadow /nologo" $appVeyor -targetdir:$TestDllFolder -output:$CoverageOutputPath $coverageFilter
+		& $OPENCOVER_EXE -threshold:1 -oldstyle -register:user -target:$NUNIT_EXE -targetargs:"$TestDdlPath" $appVeyor -targetdir:$TestDllFolder -output:$CoverageOutputPath $coverageFilter
 		
 		Write-Host "Transforming coverage results file to HTML"
 		& $REPORTGEN_EXE -verbosity:Info -reports:$CoverageOutputPath -targetdir:(Join-Path $TEST_RESULTS "Coverage\$_")

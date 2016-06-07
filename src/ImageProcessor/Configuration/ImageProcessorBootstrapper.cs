@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageProcessorBootstrapper.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ImageProcessorBootstrapper.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -14,6 +14,7 @@ namespace ImageProcessor.Configuration
     using System.Collections.Generic;
     using System.Linq;
 
+    using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Common.Extensions;
     using ImageProcessor.Common.Helpers;
     using ImageProcessor.Imaging.Formats;
@@ -37,23 +38,27 @@ namespace ImageProcessor.Configuration
         {
             this.NativeBinaryFactory = new NativeBinaryFactory();
             this.LoadSupportedImageFormats();
+#if NET45
+            this.LoadLogger();
+#endif
         }
 
         /// <summary>
         /// Gets the current instance of the <see cref="ImageProcessorBootstrapper"/> class.
         /// </summary>
-        public static ImageProcessorBootstrapper Instance
-        {
-            get
-            {
-                return Lazy.Value;
-            }
-        }
+        public static ImageProcessorBootstrapper Instance => Lazy.Value;
 
         /// <summary>
         /// Gets the supported image formats.
         /// </summary>
         public IEnumerable<ISupportedImageFormat> SupportedImageFormats { get; private set; }
+
+#if NET45
+        /// <summary>
+        /// Gets the currently installed logger.
+        /// </summary>
+        public ILogger Logger { get; private set; }
+#endif
 
         /// <summary>
         /// Gets the native binary factory for registering embedded (unmanaged) binaries.
@@ -79,5 +84,35 @@ namespace ImageProcessor.Configuration
                     .ToList();
             }
         }
+
+#if NET45
+        /// <summary>
+        /// Loads the logger.
+        /// </summary>
+        private void LoadLogger()
+        {
+            Type type = typeof(ILogger);
+            if (this.Logger == null)
+            {
+                List<Type> availableTypes =
+                    TypeFinder.GetAssembliesWithKnownExclusions()
+                        .SelectMany(a => a.GetLoadableTypes())
+                        .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
+                        .ToList();
+
+                // There's more than one so load the first that is not our default.
+                if (availableTypes.Count > 1)
+                {
+                    this.Logger = availableTypes.Where(l => l != typeof(DefaultLogger))
+                                                .Select(f => (Activator.CreateInstance(f) as ILogger))
+                                                .First();
+                }
+                else
+                {
+                    this.Logger = new DefaultLogger();
+                }
+            }
+        }
+#endif
     }
 }

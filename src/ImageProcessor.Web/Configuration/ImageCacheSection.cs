@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageCacheSection.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ImageCacheSection.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -124,19 +124,39 @@ namespace ImageProcessor.Web.Configuration
             }
 
             /// <summary>
+            /// Gets or sets the maximum number of days to store an image in the browser cache.
+            /// </summary>
+            /// <value>The maximum number of days to store an image in the browser cache.</value>
+            /// <remarks>Defaults to 365 days if not set.</remarks>
+            [ConfigurationProperty("browserMaxDays", DefaultValue = "0", IsRequired = false)]
+            [IntegerValidator(ExcludeRange = false, MinValue = -1)]
+            public int BrowserMaxDays
+            {
+                get
+                {
+                    int maxDays = (int)this["browserMaxDays"];
+                    if (maxDays == 0)
+                    {
+                        maxDays = (int)this["maxDays"];
+                    }
+
+                    return maxDays;
+                }
+
+                set
+                {
+                    this["browserMaxDays"] = value;
+                }
+            }
+
+            /// <summary>
             /// Gets the <see cref="SettingElementCollection"/>.
             /// </summary>
             /// <value>
             /// The <see cref="SettingElementCollection"/>.
             /// </value>
             [ConfigurationProperty("settings", IsRequired = false)]
-            public SettingElementCollection Settings
-            {
-                get
-                {
-                    return this["settings"] as SettingElementCollection;
-                }
-            }
+            public SettingElementCollection Settings => this["settings"] as SettingElementCollection;
         }
 
         /// <summary>
@@ -150,10 +170,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>
             /// The <see cref="ConfigurationElementCollectionType"/> of this collection.
             /// </value>
-            public override ConfigurationElementCollectionType CollectionType
-            {
-                get { return ConfigurationElementCollectionType.BasicMap; }
-            }
+            public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
             /// <summary>
             /// Gets the name used to identify this collection of elements in the configuration file when overridden in a derived class.
@@ -161,10 +178,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>
             /// The name of the collection; otherwise, an empty string. The default is an empty string.
             /// </value>
-            protected override string ElementName
-            {
-                get { return "cache"; }
-            }
+            protected override string ElementName => "cache";
 
             /// <summary>
             /// Gets or sets the <see cref="CacheElement"/>

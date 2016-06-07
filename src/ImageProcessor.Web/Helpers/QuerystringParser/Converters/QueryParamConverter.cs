@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="QueryParamConverter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="QueryParamConverter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -102,7 +102,7 @@ namespace ImageProcessor.Web.Helpers
         {
             if (destinationType == null)
             {
-                throw new ArgumentNullException("destinationType");
+                throw new ArgumentNullException(nameof(destinationType));
             }
 
             if (destinationType == typeof(string))
@@ -135,6 +135,7 @@ namespace ImageProcessor.Web.Helpers
         /// Converts the given string to the converter's native type using the invariant culture.
         /// </summary>
         /// <param name="text">The value to convert from.</param>
+        /// <param name="propertyType">The type to convert from.</param>
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>

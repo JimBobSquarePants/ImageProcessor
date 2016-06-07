@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AsyncDuplicateLock.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="AsyncDuplicateLock.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -100,11 +100,6 @@ namespace ImageProcessor.Web.Helpers
         private sealed class RefCounted<T>
         {
             /// <summary>
-            /// The object to count references against.
-            /// </summary>
-            private readonly T value;
-
-            /// <summary>
             /// Initializes a new instance of the <see cref="RefCounted{T}"/> class.
             /// </summary>
             /// <param name="value">
@@ -113,7 +108,7 @@ namespace ImageProcessor.Web.Helpers
             public RefCounted(T value)
             {
                 this.RefCount = 1;
-                this.value = value;
+                this.Value = value;
             }
 
             /// <summary>
@@ -124,13 +119,7 @@ namespace ImageProcessor.Web.Helpers
             /// <summary>
             /// Gets the object to count references against.
             /// </summary>
-            public T Value
-            {
-                get
-                {
-                    return this.value;
-                }
-            }
+            public T Value { get; }
         }
 
         /// <summary>

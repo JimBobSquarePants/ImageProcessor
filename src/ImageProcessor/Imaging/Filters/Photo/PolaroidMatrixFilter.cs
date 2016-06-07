@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="PolaroidMatrixFilter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="PolaroidMatrixFilter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -23,10 +23,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Gets the <see cref="T:System.Drawing.Imaging.ColorMatrix"/> for this filter instance.
         /// </summary>
-        public override ColorMatrix Matrix
-        {
-            get { return ColorMatrixes.Polaroid; }
-        }
+        public override ColorMatrix Matrix => ColorMatrixes.Polaroid;
 
         /// <summary>
         /// Processes the image.

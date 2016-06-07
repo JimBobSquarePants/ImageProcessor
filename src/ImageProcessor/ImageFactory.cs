@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageFactory.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ImageFactory.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -16,6 +16,7 @@ namespace ImageProcessor
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
+    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Common.Extensions;
@@ -116,6 +117,13 @@ namespace ImageProcessor
 
         #region Properties
         /// <summary>
+        /// Gets the color depth in number of bits per pixel to save the image with.
+        /// This can be used to change the bit depth of images that can be saved with different
+        /// bit depths such as TIFF.
+        /// </summary>
+        public long CurrentBitDepth { get; private set; }
+
+        /// <summary>
         /// Gets the path to the local image for manipulation.
         /// </summary>
         public string ImagePath { get; private set; }
@@ -154,7 +162,6 @@ namespace ImageProcessor
         /// Gets or the local image for manipulation.
         /// </summary>
         public Image Image { get; internal set; }
-
 
         /// <summary>
         /// Gets or sets the process mode for frames in animated images.
@@ -200,6 +207,9 @@ namespace ImageProcessor
             // Set our image as the memory stream value.
             this.Image = format.Load(memoryStream);
 
+            // Save the bit depth
+            this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
+
             // Store the stream so we can dispose of it later.
             this.InputStream = memoryStream;
 
@@ -227,6 +237,13 @@ namespace ImageProcessor
 
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
+
+            // Clear property items.
+            if (!this.PreserveExifData)
+            {
+                this.ClearExif(formatted);
+            }
+
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -270,6 +287,9 @@ namespace ImageProcessor
                     // Set our image as the memory stream value.
                     this.Image = format.Load(memoryStream);
 
+                    // Save the bit depth
+                    this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
+
                     // Store the stream so we can dispose of it later.
                     this.InputStream = memoryStream;
 
@@ -296,6 +316,13 @@ namespace ImageProcessor
 
                     // Ensure the image is in the most efficient format.
                     Image formatted = this.Image.Copy(this.AnimationProcessMode);
+
+                    // Clear property items.
+                    if (!this.PreserveExifData)
+                    {
+                        this.ClearExif(formatted);
+                    }
+
                     this.Image.Dispose();
                     this.Image = formatted;
 
@@ -333,6 +360,9 @@ namespace ImageProcessor
             // Set our image as the memory stream value.
             this.Image = format.Load(memoryStream);
 
+            // Save the bit depth
+            this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
+
             // Store the stream so we can dispose of it later.
             this.InputStream = memoryStream;
 
@@ -357,6 +387,13 @@ namespace ImageProcessor
 
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
+
+            // Clear property items.
+            if (!this.PreserveExifData)
+            {
+                this.ClearExif(formatted);
+            }
+
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -381,15 +418,18 @@ namespace ImageProcessor
                     this.InputStream.Position = 0;
                 }
 
-#if !__MonoCS__
-                Image newImage = Image.FromStream(this.InputStream, true);
-#else
-                Image newImage = Image.FromStream(this.InputStream);
-#endif
+                Image newImage = this.CurrentImageFormat.Load(this.InputStream);
 
                 // Dispose and reassign the image.
                 // Ensure the image is in the most efficient format.
                 Image formatted = newImage.Copy(this.AnimationProcessMode);
+
+                // Clear property items.
+                if (!this.PreserveExifData)
+                {
+                    this.ClearExif(formatted);
+                }
+
                 newImage.Dispose();
                 this.Image.Dispose();
                 this.Image = formatted;
@@ -441,6 +481,27 @@ namespace ImageProcessor
             {
                 AutoRotate autoRotate = new AutoRotate();
                 this.CurrentImageFormat.ApplyProcessor(autoRotate.ProcessImage, this);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Alters the bit depth of the current image.
+        /// <remarks>
+        /// This can only be used to change the bit depth of images that can be saved 
+        /// by <see cref="System.Drawing"/> with different bit depths such as TIFF.
+        /// </remarks>
+        /// </summary>
+        /// <param name="bitDepth">A value over 0.</param>
+        /// <returns>
+        /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
+        /// </returns>
+        public ImageFactory BitDepth(long bitDepth)
+        {
+            if (bitDepth > 0 && this.ShouldProcess)
+            {
+                this.CurrentBitDepth = bitDepth;
             }
 
             return this;
@@ -735,6 +796,9 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 this.CurrentImageFormat = format;
+
+                // Apply any fomatting quirks.
+                this.CurrentImageFormat.ApplyProcessor(factory => factory.Image, this);
             }
 
             return this;
@@ -1298,7 +1362,7 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
-                this.Image = this.CurrentImageFormat.Save(filePath, this.Image);
+                this.Image = this.CurrentImageFormat.Save(filePath, this.Image, this.CurrentBitDepth);
             }
 
             return this;
@@ -1323,7 +1387,7 @@ namespace ImageProcessor
                     stream.SetLength(0);
                 }
 
-                this.Image = this.CurrentImageFormat.Save(stream, this.Image);
+                this.Image = this.CurrentImageFormat.Save(stream, this.Image, this.CurrentBitDepth);
                 if (stream.CanSeek)
                 {
                     stream.Position = 0;
@@ -1384,5 +1448,20 @@ namespace ImageProcessor
         }
         #endregion
         #endregion
+
+        /// <summary>
+        /// Clears any EXIF metadata from the image
+        /// </summary>
+        /// <param name="image">The current image.</param>
+        private void ClearExif(Image image)
+        {
+            if (image.PropertyItems.Any())
+            {
+                foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
+                {
+                    image.RemovePropertyItem(item.Key);
+                }
+            }
+        }
     }
 }

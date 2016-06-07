@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ComicMatrixFilter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ComicMatrixFilter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -24,10 +24,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Gets the <see cref="T:System.Drawing.Imaging.ColorMatrix"/> for this filter instance.
         /// </summary>
-        public override ColorMatrix Matrix
-        {
-            get { return ColorMatrixes.ComicLow; }
-        }
+        public override ColorMatrix Matrix => ColorMatrixes.ComicLow;
 
         /// <summary>
         /// Processes the image.
@@ -138,30 +135,15 @@ namespace ImageProcessor.Imaging.Filters.Photo
             }
             catch
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
+                newImage?.Dispose();
 
-                if (highBitmap != null)
-                {
-                    highBitmap.Dispose();
-                }
+                highBitmap?.Dispose();
 
-                if (lowBitmap != null)
-                {
-                    lowBitmap.Dispose();
-                }
+                lowBitmap?.Dispose();
 
-                if (patternBitmap != null)
-                {
-                    patternBitmap.Dispose();
-                }
+                patternBitmap?.Dispose();
 
-                if (edgeBitmap != null)
-                {
-                    edgeBitmap.Dispose();
-                }
+                edgeBitmap?.Dispose();
             }
 
             return (Bitmap)image;

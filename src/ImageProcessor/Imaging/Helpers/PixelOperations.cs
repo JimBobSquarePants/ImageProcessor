@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="PixelOperations.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="PixelOperations.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -62,7 +62,7 @@ namespace ImageProcessor.Imaging.Helpers
         {
             if (value > 5 || value < .1)
             {
-                throw new ArgumentOutOfRangeException("value", "Value should be between .1 and 5.");
+                throw new ArgumentOutOfRangeException(nameof(value), "Value should be between .1 and 5.");
             }
 
             byte[] ramp = new byte[256];

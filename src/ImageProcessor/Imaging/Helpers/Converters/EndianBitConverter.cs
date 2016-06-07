@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EndianBitConverter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="EndianBitConverter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -53,32 +53,17 @@ namespace ImageProcessor.Imaging.Helpers
         #region Factory properties
 
         /// <summary>
-        /// The little-endian bit converter.
-        /// </summary>
-        private static readonly LittleEndianBitConverter LittleConverter = new LittleEndianBitConverter();
-
-        /// <summary>
         /// Gets a little-endian bit converter instance. The same instance is
         /// always returned.
         /// </summary>
-        public static LittleEndianBitConverter Little
-        {
-            get { return LittleConverter; }
-        }
-
-        /// <summary>
-        /// The big-endian bit converter.
-        /// </summary>
-        private static readonly BigEndianBitConverter BigConverter = new BigEndianBitConverter();
+        public static LittleEndianBitConverter Little { get; } = new LittleEndianBitConverter();
 
         /// <summary>
         /// Gets a big-endian bit converter instance. The same instance is
         /// always returned.
         /// </summary>
-        public static BigEndianBitConverter Big
-        {
-            get { return BigConverter; }
-        }
+        public static BigEndianBitConverter Big { get; } = new BigEndianBitConverter();
+
         #endregion
 
         #region Double/primitive conversions
@@ -271,12 +256,12 @@ namespace ImageProcessor.Imaging.Helpers
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             if (startIndex < 0 || startIndex > value.Length - bytesRequired)
             {
-                throw new ArgumentOutOfRangeException("startIndex");
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
             }
         }
 
@@ -539,12 +524,12 @@ namespace ImageProcessor.Imaging.Helpers
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", "Byte array must not be null");
+                throw new ArgumentNullException(nameof(buffer), "Byte array must not be null");
             }
 
             if (buffer.Length < index + bytes)
             {
-                throw new ArgumentOutOfRangeException("buffer", "Buffer not big enough for value");
+                throw new ArgumentOutOfRangeException(nameof(buffer), "Buffer not big enough for value");
             }
 
             this.CopyBytesImpl(value, bytes, buffer, index);
@@ -729,18 +714,12 @@ namespace ImageProcessor.Imaging.Helpers
             /// <summary>
             /// Gets the value of the instance as an integer.
             /// </summary>
-            internal int AsInt32
-            {
-                get { return this.i; }
-            }
+            internal int AsInt32 => this.i;
 
             /// <summary>
             /// Gets the value of the instance as a floating point number.
             /// </summary>
-            internal float AsSingle
-            {
-                get { return this.f; }
-            }
+            internal float AsSingle => this.f;
         }
         #endregion
     }

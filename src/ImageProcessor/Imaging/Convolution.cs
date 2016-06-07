@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Convolution.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="Convolution.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -27,11 +27,6 @@ namespace ImageProcessor.Imaging
         /// The standard deviation 'sigma' value for calculating Gaussian curves.
         /// </summary>
         private readonly double standardDeviation = 1.4;
-
-        /// <summary>
-        /// Whether to use dynamic divider for edges.
-        /// </summary>
-        private bool useDynamicDividerForEdges = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Convolution"/> class.
@@ -85,18 +80,7 @@ namespace ImageProcessor.Imaging
         /// <para>Default value is set to <see langword="true" />.</para>
         /// </remarks>
         /// </summary>
-        public bool UseDynamicDividerForEdges
-        {
-            get
-            {
-                return this.useDynamicDividerForEdges;
-            }
-
-            set
-            {
-                this.useDynamicDividerForEdges = value;
-            }
-        }
+        public bool UseDynamicDividerForEdges { get; set; } = true;
 
         /// <summary>
         /// Create a 1 dimensional Gaussian kernel using the Gaussian G(x) function

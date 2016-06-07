@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IComputerArchitectureInfo.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="IComputerArchitectureInfo.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -16,7 +16,7 @@ namespace ImageProcessor.Imaging
     public interface IComputerArchitectureInfo
     {
         /// <summary>
-        /// Returns a value indicating whether the current computer archtecture is little endian. 
+        /// Returns a value indicating whether the current computer architecture is little endian. 
         /// </summary>
         /// <returns>The <see cref="bool"/></returns>
         bool IsLittleEndian();

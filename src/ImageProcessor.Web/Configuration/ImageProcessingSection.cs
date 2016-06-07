@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageProcessingSection.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ImageProcessingSection.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -34,6 +34,16 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to allow known cache busters.
+        /// </summary>
+        [ConfigurationProperty("allowCacheBuster", IsRequired = false, DefaultValue = true)]
+        public bool AllowCacheBuster
+        {
+            get { return (bool)this["allowCacheBuster"]; }
+            set { this["allowCacheBuster"] = value; }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to convert images to a linear color space before
         /// processing.
         /// </summary>
@@ -62,13 +72,7 @@ namespace ImageProcessor.Web.Configuration
         /// The <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.PresetElementCollection"/>.
         /// </value>
         [ConfigurationProperty("presets", IsRequired = true)]
-        public PresetElementCollection Presets
-        {
-            get
-            {
-                return this["presets"] as PresetElementCollection;
-            }
-        }
+        public PresetElementCollection Presets => this["presets"] as PresetElementCollection;
 
         /// <summary>
         /// Gets the <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.PluginElementCollection"/>.
@@ -77,18 +81,7 @@ namespace ImageProcessor.Web.Configuration
         /// The <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.PluginElementCollection"/>.
         /// </value>
         [ConfigurationProperty("plugins", IsRequired = true)]
-        public PluginElementCollection Plugins
-        {
-            get
-            {
-                return this["plugins"] as PluginElementCollection;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to auto load plugins.
-        /// </summary>
-        public bool AutoLoadPlugins { get; set; }
+        public PluginElementCollection Plugins => this["plugins"] as PluginElementCollection;
 
         /// <summary>
         /// Retrieves the processing configuration section from the current application configuration. 
@@ -101,7 +94,6 @@ namespace ImageProcessor.Web.Configuration
 
             if (imageProcessingSection != null)
             {
-                imageProcessingSection.AutoLoadPlugins = false;
                 return imageProcessingSection;
             }
 
@@ -109,7 +101,6 @@ namespace ImageProcessor.Web.Configuration
             XmlReader reader = new XmlTextReader(new StringReader(section));
             imageProcessingSection = new ImageProcessingSection();
             imageProcessingSection.DeserializeSection(reader);
-            imageProcessingSection.AutoLoadPlugins = true;
             return imageProcessingSection;
         }
 
@@ -154,10 +145,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>
             /// The <see cref="ConfigurationElementCollectionType"/> of this collection.
             /// </value>
-            public override ConfigurationElementCollectionType CollectionType
-            {
-                get { return ConfigurationElementCollectionType.BasicMap; }
-            }
+            public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
             /// <summary>
             /// Gets the name used to identify this collection of elements in the configuration file when overridden in a derived class.
@@ -165,10 +153,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>
             /// The name of the collection; otherwise, an empty string. The default is an empty string.
             /// </value>
-            protected override string ElementName
-            {
-                get { return "preset"; }
-            }
+            protected override string ElementName => "preset";
 
             /// <summary>
             /// Gets or sets the <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.PresetElement"/>
@@ -234,7 +219,6 @@ namespace ImageProcessor.Web.Configuration
             /// <summary>
             /// Gets or sets the name of the plugin file.
             /// </summary>
-            /// <value>The name of the plugin.</value>
             [ConfigurationProperty("name", DefaultValue = "", IsRequired = true)]
             public string Name
             {
@@ -246,7 +230,6 @@ namespace ImageProcessor.Web.Configuration
             /// <summary>
             /// Gets or sets the type of the plugin file.
             /// </summary>
-            /// <value>The full Type definition of the plugin</value>
             [ConfigurationProperty("type", DefaultValue = "", IsRequired = true)]
             public string Type
             {
@@ -256,19 +239,24 @@ namespace ImageProcessor.Web.Configuration
             }
 
             /// <summary>
+            /// Gets or sets a value indiating whether the plugin is enabled.
+            /// </summary>
+            [ConfigurationProperty("enabled", DefaultValue = "false", IsRequired = false)]
+            public bool Enabled
+            {
+                get { return (bool)this["enabled"]; }
+
+                set { this["enabled"] = value; }
+            }
+
+            /// <summary>
             /// Gets the <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.SettingElementCollection"/>.
             /// </summary>
             /// <value>
             /// The <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.SettingElementCollection"/>.
             /// </value>
             [ConfigurationProperty("settings", IsRequired = false)]
-            public SettingElementCollection Settings
-            {
-                get
-                {
-                    return this["settings"] as SettingElementCollection;
-                }
-            }
+            public SettingElementCollection Settings => this["settings"] as SettingElementCollection;
         }
 
         /// <summary>
@@ -282,10 +270,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>
             /// The <see cref="ConfigurationElementCollectionType"/> of this collection.
             /// </value>
-            public override ConfigurationElementCollectionType CollectionType
-            {
-                get { return ConfigurationElementCollectionType.BasicMap; }
-            }
+            public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
             /// <summary>
             /// Gets the name used to identify this collection of elements in the configuration file when overridden in a derived class.
@@ -293,10 +278,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>
             /// The name of the collection; otherwise, an empty string. The default is an empty string.
             /// </value>
-            protected override string ElementName
-            {
-                get { return "plugin"; }
-            }
+            protected override string ElementName => "plugin";
 
             /// <summary>
             /// Gets or sets the <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.PluginElement"/>

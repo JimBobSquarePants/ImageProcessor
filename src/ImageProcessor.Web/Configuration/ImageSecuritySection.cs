@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageSecuritySection.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ImageSecuritySection.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -125,13 +125,7 @@ namespace ImageProcessor.Web.Configuration
             /// The <see cref="SettingElementCollection"/>.
             /// </value>
             [ConfigurationProperty("settings", IsRequired = false)]
-            public SettingElementCollection Settings
-            {
-                get
-                {
-                    return this["settings"] as SettingElementCollection;
-                }
-            }
+            public SettingElementCollection Settings => this["settings"] as SettingElementCollection;
 
             /// <summary>
             /// Gets the <see cref="T:ImageProcessor.Web.Config.ImageSecuritySection.WhiteListElementCollection"/>.
@@ -140,13 +134,7 @@ namespace ImageProcessor.Web.Configuration
             /// The <see cref="T:ImageProcessor.Web.Config.ImageSecuritySection.WhiteListElementCollection"/>.
             /// </value>
             [ConfigurationProperty("whitelist", IsRequired = false)]
-            public WhiteListElementCollection WhiteList
-            {
-                get
-                {
-                    return this["whitelist"] as WhiteListElementCollection;
-                }
-            }
+            public WhiteListElementCollection WhiteList => this["whitelist"] as WhiteListElementCollection;
         }
 
         /// <summary>
@@ -160,10 +148,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>
             /// The <see cref="ConfigurationElementCollectionType"/> of this collection.
             /// </value>
-            public override ConfigurationElementCollectionType CollectionType
-            {
-                get { return ConfigurationElementCollectionType.BasicMap; }
-            }
+            public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
             /// <summary>
             /// Gets the name used to identify this collection of elements in the configuration file when overridden in a derived class.
@@ -171,10 +156,7 @@ namespace ImageProcessor.Web.Configuration
             /// <value>
             /// The name of the collection; otherwise, an empty string. The default is an empty string.
             /// </value>
-            protected override string ElementName
-            {
-                get { return "service"; }
-            }
+            protected override string ElementName => "service";
 
             /// <summary>
             /// Gets or sets the <see cref="T:ImageProcessor.Web.Config.ImageSecuritySection.ServiceElement"/>
@@ -239,13 +221,7 @@ namespace ImageProcessor.Web.Configuration
             /// The <see cref="T:ImageProcessor.Web.Config.ImageSecuritySection.WhiteListElementCollection"/>.
             /// </value>
             [ConfigurationProperty("whitelist", IsRequired = false)]
-            public WhiteListElementCollection WhiteList
-            {
-                get
-                {
-                    return this["whitelist"] as WhiteListElementCollection;
-                }
-            }
+            public WhiteListElementCollection WhiteList => this["whitelist"] as WhiteListElementCollection;
         }
 
         /// <summary>

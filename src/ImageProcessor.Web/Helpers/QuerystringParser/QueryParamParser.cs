@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="QueryParamParser.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="QueryParamParser.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -42,6 +42,7 @@ namespace ImageProcessor.Web.Helpers
             this.AddColorConverters();
             this.AddFontFamilyConverters();
             this.AddPointConverters();
+            this.AddSizeConverters();
             this.AddGenericConverters();
             this.AddListConverters();
             this.AddArrayConverters();
@@ -50,13 +51,7 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Gets the current <see cref="QueryParamParser"/> instance.
         /// </summary>
-        public static QueryParamParser Instance
-        {
-            get
-            {
-                return Lazy.Value;
-            }
-        }
+        public static QueryParamParser Instance => Lazy.Value;
 
         /// <summary>
         /// Parses the given string value converting it to the given type.
@@ -154,6 +149,14 @@ namespace ImageProcessor.Web.Helpers
         }
 
         /// <summary>
+        /// Adds point converters.
+        /// </summary>
+        private void AddSizeConverters()
+        {
+            this.AddTypeConverter(typeof(Size), typeof(SizeConverter));
+        }
+
+        /// <summary>
         /// Add the generic converters
         /// </summary>
         private void AddGenericConverters()
@@ -248,7 +251,7 @@ namespace ImageProcessor.Web.Helpers
             // Validate parameters.
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             // We want an Func<object> which returns the default.

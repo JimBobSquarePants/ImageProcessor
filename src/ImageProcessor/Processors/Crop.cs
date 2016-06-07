@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Crop.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="Crop.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -76,16 +76,16 @@ namespace ImageProcessor.Processors
                 if (cropLayer.CropMode == CropMode.Percentage)
                 {
                     // Fix for whole numbers. 
-                    cropLayer.Left = cropLayer.Left > 1 ? cropLayer.Left / 100 : cropLayer.Left;
-                    cropLayer.Right = cropLayer.Right > 1 ? cropLayer.Right / 100 : cropLayer.Right;
-                    cropLayer.Top = cropLayer.Top > 1 ? cropLayer.Top / 100 : cropLayer.Top;
-                    cropLayer.Bottom = cropLayer.Bottom > 1 ? cropLayer.Bottom / 100 : cropLayer.Bottom;
+                    float percentageLeft = cropLayer.Left > 1 ? cropLayer.Left / 100 : cropLayer.Left;
+                    float percentageRight = cropLayer.Right > 1 ? cropLayer.Right / 100 : cropLayer.Right;
+                    float percentageTop = cropLayer.Top > 1 ? cropLayer.Top / 100 : cropLayer.Top;
+                    float percentageBottom = cropLayer.Bottom > 1 ? cropLayer.Bottom / 100 : cropLayer.Bottom;
 
                     // Work out the percentages.
-                    float left = cropLayer.Left * sourceWidth;
-                    float top = cropLayer.Top * sourceHeight;
-                    float width = cropLayer.Right < 1 ? (1 - cropLayer.Left - cropLayer.Right) * sourceWidth : sourceWidth;
-                    float height = cropLayer.Bottom < 1 ? (1 - cropLayer.Top - cropLayer.Bottom) * sourceHeight : sourceHeight;
+                    float left = percentageLeft * sourceWidth;
+                    float top = percentageTop * sourceHeight;
+                    float width = percentageRight < 1 ? (1 - percentageLeft - percentageRight) * sourceWidth : sourceWidth;
+                    float height = percentageBottom < 1 ? (1 - percentageTop - percentageBottom) * sourceHeight : sourceHeight;
 
                     rectangleF = new RectangleF(left, top, width, height);
                 }
@@ -153,10 +153,7 @@ namespace ImageProcessor.Processors
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
+                newImage?.Dispose();
 
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }

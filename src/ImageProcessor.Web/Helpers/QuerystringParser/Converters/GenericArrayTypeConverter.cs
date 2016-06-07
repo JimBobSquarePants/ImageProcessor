@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="GenericArrayTypeConverter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="GenericArrayTypeConverter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -40,7 +40,7 @@ namespace ImageProcessor.Web.Helpers
         {
             object result = base.ConvertFrom(culture, value, propertyType);
             IList<T> list = result as IList<T>;
-            return list != null ? list.ToArray() : result;
+            return list?.ToArray() ?? result;
         }
     }
 }
