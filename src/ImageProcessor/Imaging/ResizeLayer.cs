@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ResizeLayer.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ResizeLayer.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -151,11 +151,11 @@ namespace ImageProcessor.Imaging
             {
                 int hashCode = this.Size.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.MaxSize.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.RestrictedSizes != null ? this.RestrictedSizes.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (this.RestrictedSizes?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ (int)this.ResizeMode;
                 hashCode = (hashCode * 397) ^ (int)this.AnchorPosition;
                 hashCode = (hashCode * 397) ^ this.Upscale.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.CenterCoordinates != null ? this.CenterCoordinates.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (this.CenterCoordinates?.GetHashCode() ?? 0);
                 return hashCode;
             }
         }

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageCacheBase.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ImageCacheBase.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -63,6 +63,7 @@ namespace ImageProcessor.Web.Caching
             this.Querystring = querystring;
             this.Settings = ImageProcessorConfiguration.Instance.ImageCacheSettings;
             this.MaxDays = ImageProcessorConfiguration.Instance.ImageCacheMaxDays;
+            this.BrowserMaxDays = ImageProcessorConfiguration.Instance.BrowserCacheMaxDays;
         }
 
         /// <summary>
@@ -79,6 +80,11 @@ namespace ImageProcessor.Web.Caching
         /// Gets or sets the maximum number of days to store the image.
         /// </summary>
         public int MaxDays { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of days to cache the image in the browser.
+        /// </summary>
+        public int BrowserMaxDays { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the image is new or updated in an asynchronous manner.
@@ -160,7 +166,7 @@ namespace ImageProcessor.Web.Caching
             // Use an sha1 hash of the full path including the querystring to create the image name.
             // That name can also be used as a key for the cached image and we should be able to use
             // The characters of that hash as sub-folders.
-            string parsedExtension = ImageHelpers.GetExtension(this.FullPath, this.Querystring);
+            string parsedExtension = ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
             string encryptedName = (streamHash + this.FullPath).ToSHA1Fingerprint();
 
             string cachedFileName = string.Format(
@@ -191,7 +197,7 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         protected virtual bool IsExpired(DateTime creationDate)
         {
-            return creationDate.AddDays(this.MaxDays) < DateTime.UtcNow.AddDays(-this.MaxDays);
+            return creationDate < DateTime.UtcNow.AddDays(-this.MaxDays);
         }
     }
 }

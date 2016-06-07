@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="BitmapFormat.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="BitmapFormat.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -21,45 +21,21 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the file headers.
         /// </summary>
-        public override byte[][] FileHeaders
-        {
-            get
-            {
-                return new[] { Encoding.ASCII.GetBytes("BM") };
-            }
-        }
+        public override byte[][] FileHeaders => new[] { Encoding.ASCII.GetBytes("BM") };
 
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions
-        {
-            get
-            {
-                return new[] { "bmp" };
-            }
-        }
+        public override string[] FileExtensions => new[] { "bmp" };
 
         /// <summary>
         /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
         /// </summary>
-        public override string MimeType
-        {
-            get
-            {
-                return "image/bmp";
-            }
-        }
+        public override string MimeType => "image/bmp";
 
         /// <summary>
         /// Gets the <see cref="ImageFormat" />.
         /// </summary>
-        public override ImageFormat ImageFormat
-        {
-            get
-            {
-                return ImageFormat.Bmp;
-            }
-        }
+        public override ImageFormat ImageFormat => ImageFormat.Bmp;
     }
 }

@@ -1,10 +1,22 @@
-﻿
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="PointConverter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   The point converter.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 namespace ImageProcessor.Web.Helpers
 {
     using System;
     using System.Drawing;
     using System.Globalization;
 
+    /// <summary>
+    /// The point converter.
+    /// </summary>
     public class PointConverter : GenericArrayTypeConverter<int>
     {
         /// <summary>

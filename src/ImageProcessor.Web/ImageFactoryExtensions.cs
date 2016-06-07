@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageFactoryExtensions.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ImageFactoryExtensions.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -10,12 +10,9 @@
 
 namespace ImageProcessor.Web
 {
-    #region Using
-    using System.Collections.Generic;
     using System.Linq;
     using ImageProcessor.Web.Configuration;
     using ImageProcessor.Web.Processors;
-    #endregion
 
     /// <summary>
     /// Extends the ImageFactory class to provide a fluent API.
@@ -23,44 +20,44 @@ namespace ImageProcessor.Web
     public static class ImageFactoryExtensions
     {
         /// <summary>
-        /// The object to lock against.
-        /// </summary>
-        private static readonly object SyncRoot = new object();
-
-        /// <summary>
         /// Auto processes image files based on any query string parameters added to the image path.
         /// </summary>
         /// <param name="factory">
         /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class
         /// that this method extends.
         /// </param>
-        /// <param name="queryString">The collection of querystring parameters to process.</param>
+        /// <param name="graphicsProcessors">The array of graphics processors to apply.</param>
         /// <returns>
         /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
         /// </returns>
-        public static ImageFactory AutoProcess(this ImageFactory factory, string queryString)
+        internal static ImageFactory AutoProcess(this ImageFactory factory, IWebGraphicsProcessor[] graphicsProcessors)
         {
             if (factory.ShouldProcess)
             {
-                // It's faster to lock and run through our activated list than to create new instances.
-                lock (SyncRoot)
+                // Loop through and process the image.
+                foreach (IWebGraphicsProcessor graphicsProcessor in graphicsProcessors)
                 {
-                    // Get a list of all graphics processors that have parsed and matched the query string.
-                    List<IWebGraphicsProcessor> graphicsProcessors =
-                        ImageProcessorConfiguration.Instance.GraphicsProcessors
-                        .Where(x => x.MatchRegexIndex(queryString) != int.MaxValue)
-                        .OrderBy(y => y.SortOrder)
-                        .ToList();
-
-                    // Loop through and process the image.
-                    foreach (IWebGraphicsProcessor graphicsProcessor in graphicsProcessors)
-                    {
-                        factory.CurrentImageFormat.ApplyProcessor(graphicsProcessor.Processor.ProcessImage, factory);
-                    }
+                    factory.CurrentImageFormat.ApplyProcessor(graphicsProcessor.Processor.ProcessImage, factory);
                 }
             }
 
             return factory;
+        }
+
+        /// <summary>
+        /// Returns an array of processors that match the given querystring.
+        /// </summary>
+        /// <param name="querystring">The collection of querystring parameters to process.</param>
+        /// <returns>
+        /// The <see cref="T:IWebGraphicsProcessor[]"/>.
+        /// </returns>
+        internal static IWebGraphicsProcessor[] GetMatchingProcessors(string querystring)
+        {
+            // Get a list of all graphics processors that have parsed and matched the query string.
+            return ImageProcessorConfiguration.Instance.CreateWebGraphicsProcessors()
+                    .Where(x => x.MatchRegexIndex(querystring) != int.MaxValue)
+                    .OrderBy(y => y.SortOrder)
+                    .ToArray();
         }
     }
 }

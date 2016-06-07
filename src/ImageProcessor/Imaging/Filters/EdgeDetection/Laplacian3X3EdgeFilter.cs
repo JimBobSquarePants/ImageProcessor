@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Laplacian3X3EdgeFilter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="Laplacian3X3EdgeFilter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -20,17 +20,11 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
         /// <summary>
         /// Gets the horizontal gradient operator.
         /// </summary>
-        public double[,] HorizontalGradientOperator
-        {
-            get
-            {
-                return new double[,]  
-                { 
-                    { -1, -1, -1 }, 
-                    { -1,  8, -1 }, 
-                    { -1, -1, -1 } 
-                };
-            }
-        }
+        public double[,] HorizontalGradientOperator => new double[,]  
+        { 
+            { -1, -1, -1 }, 
+            { -1,  8, -1 }, 
+            { -1, -1, -1 } 
+        };
     }
 }

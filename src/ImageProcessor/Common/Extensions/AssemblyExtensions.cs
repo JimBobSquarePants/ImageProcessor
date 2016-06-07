@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyExtensions.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="AssemblyExtensions.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -36,7 +36,7 @@ namespace ImageProcessor.Common.Extensions
         {
             if (assembly == null)
             {
-                throw new ArgumentNullException("assembly");
+                throw new ArgumentNullException(nameof(assembly));
             }
 
             try
@@ -72,10 +72,7 @@ namespace ImageProcessor.Common.Extensions
             {
                 using (Stream manifestResourceStream = assembly.GetManifestResourceStream(resource))
                 {
-                    if (manifestResourceStream != null)
-                    {
-                        manifestResourceStream.CopyTo(ms);
-                    }
+                    manifestResourceStream?.CopyTo(ms);
                 }
 
                 return encoding.GetString(ms.GetBuffer()).Replace('\0', ' ').Trim();

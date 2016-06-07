@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SettingElementCollection.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="SettingElementCollection.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -24,10 +24,7 @@ namespace ImageProcessor.Web.Configuration
         /// <value>
         /// The <see cref="ConfigurationElementCollectionType"/> of this collection.
         /// </value>
-        public override ConfigurationElementCollectionType CollectionType
-        {
-            get { return ConfigurationElementCollectionType.BasicMap; }
-        }
+        public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
         /// <summary>
         /// Gets the name used to identify this collection of elements in the configuration file when overridden in a derived class.
@@ -35,10 +32,7 @@ namespace ImageProcessor.Web.Configuration
         /// <value>
         /// The name of the collection; otherwise, an empty string. The default is an empty string.
         /// </value>
-        protected override string ElementName
-        {
-            get { return "setting"; }
-        }
+        protected override string ElementName => "setting";
 
         /// <summary>
         /// Gets or sets the <see cref="T:ImageProcessor.Web.Config.ImageSecuritySection.SettingElement"/>
@@ -72,10 +66,7 @@ namespace ImageProcessor.Web.Configuration
         /// </summary>
         /// <param name="key">the key representing the element</param>
         /// <returns>the setting element</returns>
-        public new SettingElement this[string key]
-        {
-            get { return (SettingElement)BaseGet(key); }
-        }
+        public new SettingElement this[string key] => (SettingElement)this.BaseGet(key);
 
         /// <summary>
         /// Returns a value indicating whether the settings collection contains the

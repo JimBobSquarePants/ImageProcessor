@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="GaussianSharpen.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="GaussianSharpen.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -41,13 +41,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Gets the regular expression to search strings for.
         /// </summary>
-        public Regex RegexPattern
-        {
-            get
-            {
-                return QueryRegex;
-            }
-        }
+        public Regex RegexPattern => QueryRegex;
 
         /// <summary>
         /// Gets the order in which this processor is to be used in a chain.
@@ -57,7 +51,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Gets the associated graphics processor.
         /// </summary>
-        public IGraphicsProcessor Processor { get; private set; }
+        public IGraphicsProcessor Processor { get; }
 
         /// <summary>
         /// The position in the original string where the first character of the captured substring was found.

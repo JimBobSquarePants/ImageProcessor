@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FontFamilyConverter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="FontFamilyConverter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -17,7 +17,7 @@ namespace ImageProcessor.Web.Helpers
 
     /// <summary>
     /// FontFamilyConverter - converter class for converting between the <see cref="FontFamily"/>
-    /// and <see cref="String"/> types.
+    /// and <see cref="string"/> types.
     /// </summary>
     public class FontFamilyConverter : QueryParamConverter
     {
@@ -104,7 +104,7 @@ namespace ImageProcessor.Web.Helpers
         {
             if (null == value)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             FontFamily fontFamily = value as FontFamily;
@@ -115,7 +115,7 @@ namespace ImageProcessor.Web.Helpers
 
             if (null == destinationType)
             {
-                throw new ArgumentNullException("destinationType");
+                throw new ArgumentNullException(nameof(destinationType));
             }
 
             if (destinationType == typeof(string))

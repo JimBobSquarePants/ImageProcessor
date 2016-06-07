@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="CloudFileImageService.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="CloudImageService.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -27,11 +27,6 @@ namespace ImageProcessor.Web.Services
     public class CloudImageService : IImageService
     {
         /// <summary>
-        /// The prefix for the given implementation.
-        /// </summary>
-        private string prefix = string.Empty;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="CloudImageService"/> class.
         /// </summary>
         public CloudImageService()
@@ -50,30 +45,13 @@ namespace ImageProcessor.Web.Services
         /// This value is used as a prefix for any image requests that should use this service.
         /// </remarks>
         /// </summary>
-        public string Prefix
-        {
-            get
-            {
-                return this.prefix;
-            }
-
-            set
-            {
-                this.prefix = value;
-            }
-        }
+        public string Prefix { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets a value indicating whether the image service requests files from
         /// the locally based file system.
         /// </summary>
-        public bool IsFileLocalService
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsFileLocalService => false;
 
         /// <summary>
         /// Gets or sets any additional settings required by the service.

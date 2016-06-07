@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormatUtilities.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="FormatUtilities.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -11,14 +11,12 @@
 namespace ImageProcessor.Imaging.Formats
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
 
     using ImageProcessor.Configuration;
 
@@ -120,17 +118,15 @@ namespace ImageProcessor.Imaging.Formats
             try
             {
                 // Create a series of encoder parameters.
-                encoderParameters = new EncoderParameters(1);
-
-                // Set the quality.
-                encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, quality);
+                encoderParameters = new EncoderParameters(1)
+                {
+                    // Set the quality.
+                    Param = { [0] = new EncoderParameter(Encoder.Quality, quality) }
+                };
             }
             catch
             {
-                if (encoderParameters != null)
-                {
-                    encoderParameters.Dispose();
-                }
+                encoderParameters?.Dispose();
             }
 
             return encoderParameters;

@@ -1,4 +1,14 @@
-﻿namespace ImageProcessor.Web.Helpers
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="EnumConverter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   The enum converter. Allows conversion of enumerations.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace ImageProcessor.Web.Helpers
 {
     using System;
     using System.Collections.Generic;
@@ -7,6 +17,9 @@
 
     using ImageProcessor.Web.Extensions;
 
+    /// <summary>
+    /// The enum converter. Allows conversion of enumerations.
+    /// </summary>
     public class EnumConverter : QueryParamConverter
     {
         /// <summary>
@@ -30,9 +43,10 @@
                 return propertyType.GetInstance();
             }
 
-            if (value is string)
+            string s = value as string;
+            if (s != null)
             {
-                string strValue = (string)value;
+                string strValue = s;
                 if (strValue.IndexOf(',') != -1)
                 {
                     long convertedValue = 0;

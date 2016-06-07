@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="GifEncoder.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="GifEncoder.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -163,6 +163,11 @@ namespace ImageProcessor.Imaging.Formats
         }
         #endregion
 
+        /// <summary>
+        /// Gets or sets the image bytes.
+        /// </summary>
+        public byte[] ImageBytes { get; set; }
+
         #region Public Methods and Operators
         /// <summary>
         /// Adds a frame to the gif.
@@ -200,9 +205,9 @@ namespace ImageProcessor.Imaging.Formats
             // Push the data
             this.imageStream.Flush();
             this.imageStream.Position = 0;
-            byte[] bytes = this.imageStream.ToArray();
+            this.ImageBytes = this.imageStream.ToArray();
             this.imageStream.Dispose();
-            return (Image)Converter.ConvertFrom(bytes);
+            return (Image)Converter.ConvertFrom(this.ImageBytes);
         }
         #endregion
 
@@ -233,7 +238,7 @@ namespace ImageProcessor.Imaging.Formats
             sourceGif.Position = SourceGlobalColorInfoPosition;
             this.WriteByte(sourceGif.ReadByte());
 
-            this.WriteByte(0); // Background Color Index
+            this.WriteByte(255); // Background Color Index
             this.WriteByte(0); // Pixel aspect ratio
             this.WriteColorTable(sourceGif);
 
@@ -256,7 +261,7 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// The write byte.
+        /// Writes the given integer as a byte to the stream.
         /// </summary>
         /// <param name="value">
         /// The value.
@@ -267,7 +272,7 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// The write color table.
+        /// Writes the color table.
         /// </summary>
         /// <param name="sourceGif">
         /// The source gif.
@@ -281,14 +286,10 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// The write graphic control block.
+        /// Writes graphic control block.
         /// </summary>
-        /// <param name="sourceGif">
-        /// The source gif.
-        /// </param>
-        /// <param name="frameDelay">
-        /// The frame delay.
-        /// </param>
+        /// <param name="sourceGif">The source gif.</param>
+        /// <param name="frameDelay">The frame delay.</param>
         private void WriteGraphicControlBlock(Stream sourceGif, int frameDelay)
         {
             sourceGif.Position = SourceGraphicControlExtensionPosition; // Locating the source GCE
@@ -299,28 +300,18 @@ namespace ImageProcessor.Imaging.Formats
             this.WriteByte(GraphicControlExtensionBlockSize); // Block Size
             this.WriteByte(blockhead[3] & 0xf7 | 0x08); // Setting disposal flag
             this.WriteShort(frameDelay); // Setting frame delay
-            this.WriteByte(blockhead[6]); // Transparent color index
+            this.WriteByte(255); // Transparent color index
             this.WriteByte(0); // Terminator
         }
 
         /// <summary>
-        /// The write image block.
+        /// Writes image block data.
         /// </summary>
-        /// <param name="sourceGif">
-        /// The source gif.
-        /// </param>
-        /// <param name="includeColorTable">
-        /// The include color table.
-        /// </param>
-        /// <param name="x">
-        /// The x position to write the image block.
-        /// </param>
-        /// <param name="y">
-        /// The y position to write the image block.
-        /// </param>
-        /// <param name="h">
-        /// The height of the image block.
-        /// </param>
+        /// <param name="sourceGif">The source gif.</param>
+        /// <param name="includeColorTable">The include color table.</param>
+        /// <param name="x">The x position to write the image block.</param>
+        /// <param name="y">The y position to write the image block.</param>
+        /// <param name="h">The height of the image block.</param>
         /// <param name="w">
         /// The width of the image block.
         /// </param>

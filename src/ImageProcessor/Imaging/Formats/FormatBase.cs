@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormatBase.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="FormatBase.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -46,13 +46,7 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the default file extension.
         /// </summary>
-        public string DefaultExtension
-        {
-            get
-            {
-                return this.MimeType.Replace("image/", string.Empty);
-            }
-        }
+        public string DefaultExtension => this.MimeType.Replace("image/", string.Empty);
 
         /// <summary>
         /// Gets the file format of the image. 
@@ -90,22 +84,25 @@ namespace ImageProcessor.Imaging.Formats
         /// </returns>
         public virtual Image Load(Stream stream)
         {
-#if !__MonoCS__
-            return Image.FromStream(stream, true);
-#else
-            return Image.FromStream(stream);
-#endif
+           return Image.FromStream(stream, true);
         }
 
         /// <summary>
         /// Saves the current image to the specified output stream.
         /// </summary>
-        /// <param name="stream">The <see cref="T:System.IO.Stream" /> to save the image information to.</param>
-        /// <param name="image">The <see cref="T:System.Drawing.Image" /> to save.</param>
+        /// <param name="stream">
+        /// The <see cref="T:System.IO.Stream"/> to save the image information to.
+        /// </param>
+        /// <param name="image">
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
         /// <returns>
-        /// The <see cref="T:System.Drawing.Image" />.
+        /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        public virtual Image Save(Stream stream, Image image)
+        public virtual Image Save(Stream stream, Image image, long bitDepth)
         {
             image.Save(stream, this.ImageFormat);
             return image;
@@ -115,12 +112,16 @@ namespace ImageProcessor.Imaging.Formats
         /// Saves the current image to the specified file path.
         /// </summary>
         /// <param name="path">The path to save the image to.</param>
-        /// <param name="image">The 
-        /// <see cref="T:System.Drawing.Image" /> to save.</param>
+        /// <param name="image"> 
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
         /// <returns>
-        /// The <see cref="T:System.Drawing.Image" />.
+        /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        public virtual Image Save(string path, Image image)
+        public virtual Image Save(string path, Image image, long bitDepth)
         {
             image.Save(path, this.ImageFormat);
             return image;

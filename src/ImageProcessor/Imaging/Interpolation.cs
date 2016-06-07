@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Interpolation.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="Interpolation.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -146,7 +146,7 @@ namespace ImageProcessor.Imaging
         /// Ensures that any passed double is correctly rounded to zero
         /// </summary>
         /// <param name="x">The value to clean.</param>
-        /// The <see cref="double"/>.
+        /// <returns>The <see cref="double"/>.</returns>
         private static double Clean(double x)
         {
             const double Epsilon = .0001;

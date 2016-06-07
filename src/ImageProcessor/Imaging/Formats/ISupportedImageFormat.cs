@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ISupportedImageFormat.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ISupportedImageFormat.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -87,10 +87,13 @@ namespace ImageProcessor.Imaging.Formats
         /// <param name="image">
         /// The <see cref="T:System.Drawing.Image"/> to save.
         /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
         /// <returns>
         /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        Image Save(Stream stream, Image image);
+        Image Save(Stream stream, Image image, long bitDepth);
 
         /// <summary>
         /// Saves the current image to the specified file path.
@@ -99,10 +102,13 @@ namespace ImageProcessor.Imaging.Formats
         /// <param name="image"> 
         /// The <see cref="T:System.Drawing.Image"/> to save.
         /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
         /// <returns>
         /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        Image Save(string path, Image image);
+        Image Save(string path, Image image, long bitDepth);
         #endregion
     }
 }

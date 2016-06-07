@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Filter.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="Filter.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -77,10 +77,7 @@ namespace ImageProcessor.Processors
             }
             catch (Exception ex)
             {
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
+                newImage?.Dispose();
 
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
             }

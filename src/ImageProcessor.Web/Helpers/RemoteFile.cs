@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RemoteFile.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="RemoteFile.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -17,6 +17,8 @@ namespace ImageProcessor.Web.Helpers
     using System.Security;
     using System.Threading.Tasks;
     using System.Web;
+
+    using ImageProcessor.Configuration;
 
     /// <summary>
     /// Encapsulates methods used to download files from a website address.
@@ -42,11 +44,6 @@ namespace ImageProcessor.Web.Helpers
     {
         #region Fields
         /// <summary>
-        /// The <see cref="T:System.Uri">Uri</see> of the remote file being downloaded.
-        /// </summary>
-        private readonly Uri url;
-
-        /// <summary>
         /// The maximum allowable download size in bytes.
         /// </summary>
         private int maxDownloadSize;
@@ -71,10 +68,10 @@ namespace ImageProcessor.Web.Helpers
         {
             if (filePath == null)
             {
-                throw new ArgumentNullException("filePath");
+                throw new ArgumentNullException(nameof(filePath));
             }
 
-            this.url = filePath;
+            this.Uri = filePath;
         }
         #endregion
 
@@ -82,13 +79,7 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Gets the Uri of the remote file being downloaded.
         /// </summary>
-        public Uri Uri
-        {
-            get
-            {
-                return this.url;
-            }
-        }
+        public Uri Uri { get; }
 
         /// <summary>
         /// Gets or sets the length of time, in milliseconds, that a remote file download attempt can 
@@ -167,24 +158,21 @@ namespace ImageProcessor.Web.Helpers
         /// </summary>
         /// <returns>The <see cref="T:System.Net.WebResponse">WebResponse</see> used to download this file.</returns>
         /// <returns>
-        /// The <see cref="IEnumerable{Task}"/>.
+        /// The <see cref="IEnumerable{T}"/>.
         /// </returns>
         internal async Task<WebResponse> GetWebResponseAsync()
         {
-            WebResponse response = null;
+            WebResponse response;
             try
             {
                 response = await this.GetWebRequest().GetResponseAsync();
             }
             catch (WebException ex)
             {
-                if (ex.Response != null)
+                HttpWebResponse errorResponse = (HttpWebResponse)ex.Response;
+                if (errorResponse?.StatusCode == HttpStatusCode.NotFound)
                 {
-                    HttpWebResponse errorResponse = (HttpWebResponse)ex.Response;
-                    if (errorResponse.StatusCode == HttpStatusCode.NotFound)
-                    {
-                        throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + this.Uri);
-                    }
+                    throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + this.Uri);
                 }
 
                 throw;
@@ -210,7 +198,9 @@ namespace ImageProcessor.Web.Helpers
                 if ((this.MaxDownloadSize > 0) && (contentLength > this.MaxDownloadSize))
                 {
                     response.Close();
-                    throw new SecurityException("An attempt to download a remote file has been halted because the file is larger than allowed.");
+                    string message ="An attempt to download a remote file has been halted because the file is larger than allowed.";
+                    ImageProcessorBootstrapper.Instance.Logger.Log<RemoteFile>(message);
+                    throw new SecurityException(message);
                 }
             }
 

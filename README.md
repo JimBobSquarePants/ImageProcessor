@@ -1,30 +1,27 @@
 # ImageProcessor
 
-## This version is built against the .NET Framework
+<img src="https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/Core/build/icons/imageprocessor-logo-512.png" width="128" height="128"/>
 
-### Build Status
-
-|Branch   |         |
-|:--------|:--------|
-|**Debug**|[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor)|
-|**Release**|[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr/branch/Master?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor/branch/Master)|
-|**Coverage Report**|[![Coverage Status](https://coveralls.io/repos/JimBobSquarePants/ImageProcessor/badge.svg?branch=V2&service=github)](https://coveralls.io/r/JimBobSquarePants/ImageProcessor?branch=V2)|
-
-### Latest Releases
-|Library           |Version           |Downloads         |
-|:-----------------|:-----------------|:-----------------|
-|**ImageProcessor**|[![Nuget count](http://img.shields.io/nuget/v/ImageProcessor.svg)](https://www.nuget.org/packages/ImageProcessor/)|[![Nuget downloads](http://img.shields.io/nuget/dt/ImageProcessor.svg)](https://www.nuget.org/packages/ImageProcessor/)|
-|**ImageProcessor.Web**|[![Nuget count](http://img.shields.io/nuget/v/ImageProcessor.Web.svg)](https://www.nuget.org/packages/ImageProcessor.Web/)|[![Nuget downloads](http://img.shields.io/nuget/dt/ImageProcessor.Web.svg)](https://www.nuget.org/packages/ImageProcessor.Web/)|
-
-[![Issues open](http://img.shields.io/github/issues-raw/JimBobSquarePants/imageprocessor.svg)](https://huboard.com/JimBobSquarePants/ImageProcessor/)
-[![Source Browser](https://img.shields.io/badge/Browse-Source-green.svg)](http://sourcebrowser.io/Browse/JimBobSquarePants/ImageProcessor/)
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/JimBobSquarePants/ImageProcessor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-Imageprocessor is a lightweight, extensible library written in C# that allows you to manipulate images on-the-fly using .NET 4.5+
+**Imageprocessor** is a lightweight, extensible library written in C# that allows you to manipulate images on-the-fly using .NET 4.5+
 
 It's fast, extensible, easy to use, comes bundled with some great features and is fully open source.
 
 For full documentation please see [http://imageprocessor.org/](http://imageprocessor.org/)
+
+### Build Status
+
+[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr/branch/Framework?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor/branch/Framework)
+[![Coverage Status](https://coveralls.io/repos/JimBobSquarePants/ImageProcessor/badge.svg?branch=V2&service=github)](https://coveralls.io/r/JimBobSquarePants/ImageProcessor?branch=Framework)
+
+### Latest Releases
+|Library           |Version           |
+|:-----------------|:-----------------|
+|**ImageProcessor**|[![NuGet](https://buildstats.info/nuget/ImageProcessor)](https://www.nuget.org/packages/ImageProcessor)|
+|**ImageProcessor.Web**|[![NuGet](https://buildstats.info/nuget/ImageProcessor.Web)](https://www.nuget.org/packages/ImageProcessor.Web)|
+
+[![Issues open](http://img.shields.io/github/issues-raw/JimBobSquarePants/imageprocessor.svg)](https://huboard.com/JimBobSquarePants/ImageProcessor/)
+[![Source Browser](https://img.shields.io/badge/Browse-Source-green.svg)](http://sourcebrowser.io/Browse/JimBobSquarePants/ImageProcessor/)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/JimBobSquarePants/ImageProcessor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Contributing to ImageProcessor
 Contribution is most welcome! I mean, that's what this is all about isn't it?
@@ -37,7 +34,7 @@ Things I would :heart: people to help me out with:
 **Just remember to StyleCop all things! :oncoming_police_car:**
 
 ## RoadMap
-I want the next version of ImageProcessor to run on all devices. Sadly it looks like using `System.Drawing` will not allow me to do that so I need to have a look at using an alternative. This is a lot of work so any help that could be offered would be greatly appreciated.
+Focus for the ImageProcessor libraries has switched to the new library **ImageProcessorCore**. As such no new features will be added to this library. Bug fixes an enhancements will continue to be developed though. 
 
 ## Documentation
 

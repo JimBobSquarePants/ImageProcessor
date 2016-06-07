@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="CmykColor.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="CmykColor.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -19,7 +19,7 @@ namespace ImageProcessor.Imaging.Colors
     /// <summary>
     /// Represents an CMYK (cyan, magenta, yellow, keyline) color.
     /// </summary>
-    public struct CmykColor
+    public struct CmykColor : IEquatable<CmykColor>
     {
         /// <summary>
         /// Represents a <see cref="CmykColor"/> that is null.
@@ -88,49 +88,25 @@ namespace ImageProcessor.Imaging.Colors
         /// Gets the cyan component.
         /// <remarks>A value ranging between 0 and 100.</remarks>
         /// </summary>
-        public float C
-        {
-            get
-            {
-                return this.c;
-            }
-        }
+        public float C => this.c;
 
         /// <summary>
         /// Gets the magenta component.
         /// <remarks>A value ranging between 0 and 100.</remarks>
         /// </summary>
-        public float M
-        {
-            get
-            {
-                return this.m;
-            }
-        }
+        public float M => this.m;
 
         /// <summary>
         /// Gets the yellow component.
         /// <remarks>A value ranging between 0 and 100.</remarks>
         /// </summary>
-        public float Y
-        {
-            get
-            {
-                return this.y;
-            }
-        }
+        public float Y => this.y;
 
         /// <summary>
         /// Gets the keyline black component.
         /// <remarks>A value ranging between 0 and 100.</remarks>
         /// </summary>
-        public float K
-        {
-            get
-            {
-                return this.k;
-            }
-        }
+        public float K => this.k;
 
         /// <summary>
         /// Creates a <see cref="CmykColor"/> structure from the four 32-bit CMYK 
@@ -307,7 +283,7 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (this.IsEmpty())
             {
-                return "CmykColor [Empty]";
+                return "CmykColor [ Empty ]";
             }
 
             return string.Format("CmykColor [ C={0:#0.##}, M={1:#0.##}, Y={2:#0.##}, K={3:#0.##}]", this.C, this.M, this.Y, this.K);
@@ -324,13 +300,22 @@ namespace ImageProcessor.Imaging.Colors
         {
             if (obj is CmykColor)
             {
-                Color thisColor = this;
-                Color otherColor = (CmykColor)obj;
-
-                return thisColor.Equals(otherColor);
+                return this.Equals((CmykColor)obj);
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.</returns>
+        public bool Equals(CmykColor other)
+        {
+            Color thisColor = this;
+            Color otherColor = other;
+            return thisColor.Equals(otherColor);
         }
 
         /// <summary>

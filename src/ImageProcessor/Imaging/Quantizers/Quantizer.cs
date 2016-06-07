@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Quantizer.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="Quantizer.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -207,7 +207,6 @@ namespace ImageProcessor.Imaging.Quantizers
                         // rather than calculating it again. This is an inexpensive optimization.
                         if (*previousPixel != *sourcePixel)
                         {
-                            var x = (Color32*)sourcePixel;
                             // Quantize the pixel
                             pixelValue = this.QuantizePixel((Color32*)sourcePixel);
 

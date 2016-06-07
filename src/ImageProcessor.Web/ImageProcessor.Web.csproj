@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -59,6 +59,7 @@
     <Compile Include="Helpers\QuerystringParser\Converters\GenericConvertableConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\EnumConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\IQueryParamConverter.cs" />
+    <Compile Include="Helpers\QuerystringParser\Converters\SizeConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\PointConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\QueryParamConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\QueryTypeDescriptor.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Helpers\QuerystringParser\QueryParamParser.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\GenericArrayTypeConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\GenericListTypeConverter.cs" />
+    <Compile Include="Helpers\ValidatingRequestEventArgs.cs" />
     <Compile Include="Processors\DetectEdges.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />
     <Compile Include="Processors\Halftone.cs" />
@@ -135,7 +137,6 @@
     <EmbeddedResource Include="Configuration\Resources\security.config.transform" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

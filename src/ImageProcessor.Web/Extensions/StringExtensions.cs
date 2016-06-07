@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StringExtensions.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="StringExtensions.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -11,7 +11,6 @@
 namespace ImageProcessor.Web.Extensions
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Security.Cryptography;
@@ -77,7 +76,7 @@ namespace ImageProcessor.Web.Extensions
         {
             if (string.IsNullOrWhiteSpace(expression))
             {
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             }
 
             Regex regex = new Regex(@"[\d+]+(?=[,-])|[\d+]+(?![,-])", RegexOptions.Compiled);
@@ -106,7 +105,7 @@ namespace ImageProcessor.Web.Extensions
         {
             if (string.IsNullOrWhiteSpace(expression))
             {
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             }
 
             Regex regex = new Regex(@"[\d+\.]+(?=[,-])|[\d+\.]+(?![,-])", RegexOptions.Compiled);

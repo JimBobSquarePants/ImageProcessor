@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageHelpers.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="ImageHelpers.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -10,6 +10,7 @@
 
 namespace ImageProcessor.Web.Helpers
 {
+    using System;
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -19,10 +20,44 @@ namespace ImageProcessor.Web.Helpers
     using ImageProcessor.Web.Processors;
 
     /// <summary>
-    /// The image helpers.
+    /// Contains helper method for parsing image formats.
     /// </summary>
-    public static class ImageHelpers
+    public class ImageHelpers
     {
+        /// <summary>
+        /// A new instance of the <see cref="T:ImageProcessor.Web.Config.ImageProcessorConfig"/> class.
+        /// with lazy initialization.
+        /// </summary>
+        private static readonly Lazy<ImageHelpers> Lazy =
+                        new Lazy<ImageHelpers>(() => new ImageHelpers());
+
+        /// <summary>
+        /// The format processor for checking extensions.
+        /// </summary>
+        private readonly Format formatProcessor;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageHelpers"/> class. 
+        /// </summary>
+        public ImageHelpers()
+        {
+            // First check to see if the format processor is being used and test against that.
+            Type processor =
+                ImageProcessorConfiguration.Instance.AvailableWebGraphicsProcessors
+                .Keys.FirstOrDefault(
+                    p => typeof(Format) == p);
+
+            if (processor != null)
+            {
+                this.formatProcessor = (Format)Activator.CreateInstance(typeof(Format));
+            }
+        }
+
+        /// <summary>
+        /// Gets the current instance of the <see cref="ImageHelpers"/> class.
+        /// </summary>
+        public static ImageHelpers Instance => Lazy.Value;
+
         /// <summary>
         /// The regex pattern.
         /// </summary>
@@ -60,17 +95,13 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// The correct file extension for the given string input if it can find one; otherwise an empty string.
         /// </returns>
-        public static string GetExtension(string fullPath, string queryString)
+        public string GetExtension(string fullPath, string queryString)
         {
             Match match = null;
 
-            // First check to see if the format processor is being used and test against that.
-            IWebGraphicsProcessor format = ImageProcessorConfiguration.Instance.GraphicsProcessors
-                                           .FirstOrDefault(p => typeof(Format) == p.GetType());
-
-            if (format != null)
+            if (this.formatProcessor != null)
             {
-                match = format.RegexPattern.Match(queryString);
+                match = this.formatProcessor.RegexPattern.Match(queryString);
             }
 
             if (match == null || !match.Success)

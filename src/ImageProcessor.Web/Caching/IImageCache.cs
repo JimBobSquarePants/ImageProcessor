@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IImageCache.cs" company="James South">
-//   Copyright (c) James South.
+// <copyright file="IImageCache.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
 // <summary>
@@ -34,6 +34,11 @@ namespace ImageProcessor.Web.Caching
         /// Gets or sets the maximum number of days to store the image.
         /// </summary>
         int MaxDays { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of days to cache the image in the browser.
+        /// </summary>
+        int BrowserMaxDays { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the image is new or updated in an asynchronous manner.
