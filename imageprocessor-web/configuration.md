@@ -11,6 +11,16 @@ sublinks:
  - "#processingconfig|Processing.Config"
 ---
 
+<div class="alert">
+  <p>
+      As of <strong>ImageProcessor.Web v3.2.0</strong> configuration outwith the <code>Web.Config</code> file is not installed automatically.
+      Instead default configuration matching the values below is built into the system. To overwrite these settings install the nuget package:
+  </p>
+  {% highlight c# %}
+Install-Package ImageProcessor.Web.Config
+ {% endhighlight %}
+</div>
+
 <div id="webconfig">
 
 # The Web.Config
