@@ -611,14 +611,18 @@ namespace ImageProcessor.Web.HttpModules
 
                             if (!string.IsNullOrWhiteSpace(queryString))
                             {
+                                // Animation is not a processor but can be a specific request so we should allow it.
+                                bool processAnimation;
+                                AnimationProcessMode mode = this.ParseAnimationMode(queryString, out processAnimation);
+
                                 // Attempt to match querystring and processors.
                                 IWebGraphicsProcessor[] processors = ImageFactoryExtensions.GetMatchingProcessors(queryString);
-                                if (processors.Any())
+                                if (processors.Any() || processAnimation)
                                 {
                                     // Process the image.
                                     bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
                                     bool gamma = fixGamma != null && fixGamma.Value;
-                                    AnimationProcessMode mode = this.ParseAnimationMode(queryString);
+                                  
                                     using (ImageFactory imageFactory = new ImageFactory(exif, gamma) { AnimationProcessMode = mode })
                                     {
                                         imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
@@ -734,17 +738,28 @@ namespace ImageProcessor.Web.HttpModules
         /// Gets the animation mode passed in through the querystring, defaults to the default behaviour (All) if nothing found.
         /// </summary>
         /// <param name="queryString">The query string to search.</param>
+        /// <param name="process">
+        /// Whether to process the request. True if <see cref="AnimationProcessMode.First"/> 
+        /// has been explicitly requested.
+        /// </param>
         /// <returns>
         /// The process mode for frames in animated images.
         /// </returns>
-        private AnimationProcessMode ParseAnimationMode(string queryString)
+        private AnimationProcessMode ParseAnimationMode(string queryString, out bool process)
         {
             AnimationProcessMode mode = AnimationProcessMode.All;
             NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
+            process = false;
 
             if (queryCollection.AllKeys.Contains("animationprocessmode", StringComparer.InvariantCultureIgnoreCase))
             {
                 mode = QueryParamParser.Instance.ParseValue<AnimationProcessMode>(queryCollection["animationprocessmode"]);
+
+                // Common sense would dictate that requesting AnimationProcessMode.All is a pointless request
+                // since that is the default behaviour and shouldn't be requested on its own.
+                // But hey! this is the internet and it's impossible to stop people twisting your intent into
+                // whatever bizarre thing they choose. Those cats are crazy!
+                process = true;
             }
 
             return mode;
@@ -753,9 +768,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Replaces preset values stored in the configuration in the querystring.
         /// </summary>
-        /// <param name="queryString">
-        /// The query string.
-        /// </param>
+        /// <param name="queryString">The query string.</param>
         /// <returns>
         /// The <see cref="string"/> containing the updated querystring.
         /// </returns>
