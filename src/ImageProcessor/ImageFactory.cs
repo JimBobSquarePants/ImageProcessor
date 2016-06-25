@@ -238,12 +238,6 @@ namespace ImageProcessor
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
-            // Clear property items.
-            if (!this.PreserveExifData)
-            {
-                this.ClearExif(formatted);
-            }
-
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -317,12 +311,6 @@ namespace ImageProcessor
                     // Ensure the image is in the most efficient format.
                     Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
-                    // Clear property items.
-                    if (!this.PreserveExifData)
-                    {
-                        this.ClearExif(formatted);
-                    }
-
                     this.Image.Dispose();
                     this.Image = formatted;
 
@@ -388,12 +376,6 @@ namespace ImageProcessor
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
-            // Clear property items.
-            if (!this.PreserveExifData)
-            {
-                this.ClearExif(formatted);
-            }
-
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -418,26 +400,20 @@ namespace ImageProcessor
                     this.InputStream.Position = 0;
                 }
 
+                // Reset properties.
+                this.CurrentImageFormat = this.backupFormat;
+                this.ExifPropertyItems = this.backupExifPropertyItems;
+                this.CurrentImageFormat.Quality = DefaultQuality;
+
                 Image newImage = this.CurrentImageFormat.Load(this.InputStream);
 
                 // Dispose and reassign the image.
                 // Ensure the image is in the most efficient format.
                 Image formatted = newImage.Copy(this.AnimationProcessMode);
 
-                // Clear property items.
-                if (!this.PreserveExifData)
-                {
-                    this.ClearExif(formatted);
-                }
-
                 newImage.Dispose();
                 this.Image.Dispose();
                 this.Image = formatted;
-
-                // Set the other properties.
-                this.CurrentImageFormat = this.backupFormat;
-                this.ExifPropertyItems = this.backupExifPropertyItems;
-                this.CurrentImageFormat.Quality = DefaultQuality;
             }
 
             return this;
@@ -459,7 +435,11 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Sanitize the input.
-                percentage = ImageMaths.Clamp(percentage, 0, 100);
+                // You can't make an image less transparent.
+                if (percentage < 0 || percentage > 99)
+                {
+                    return this;
+                }
 
                 Alpha alpha = new Alpha { DynamicParameter = percentage };
                 this.CurrentImageFormat.ApplyProcessor(alpha.ProcessImage, this);
@@ -524,7 +504,7 @@ namespace ImageProcessor
                 // Sanitize the input.
                 if (percentage > 100 || percentage < -100)
                 {
-                    percentage = 0;
+                    return this;
                 }
 
                 Brightness brightness = new Brightness { DynamicParameter = percentage };
@@ -592,7 +572,7 @@ namespace ImageProcessor
                 // Sanitize the input.
                 if (percentage > 100 || percentage < -100)
                 {
-                    percentage = 0;
+                    return this;
                 }
 
                 Contrast contrast = new Contrast { DynamicParameter = percentage };
@@ -685,8 +665,10 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Sanitize the input.
-                horizontal = ImageMaths.Clamp(horizontal, 0, int.MaxValue);
-                vertical = ImageMaths.Clamp(vertical, 0, int.MaxValue);
+                if (horizontal < 0 || vertical < 0)
+                {
+                    return this;
+                }
 
                 Tuple<int, int, PropertyTagResolutionUnit> resolution =
                     new Tuple<int, int, PropertyTagResolutionUnit>(horizontal, vertical, unit);
@@ -820,7 +802,7 @@ namespace ImageProcessor
                 // Sanitize the input.
                 if (value > 5 || value < .1)
                 {
-                    value = 2.2F;
+                    return this;
                 }
 
                 this.CurrentGamma = value;
@@ -943,10 +925,10 @@ namespace ImageProcessor
             // Sanitize the input.
             if (degrees > 360 || degrees < 0)
             {
-                degrees = 0;
+                return this;
             }
 
-            if (this.ShouldProcess && degrees > 0)
+            if (this.ShouldProcess)
             {
                 Hue hue = new Hue { DynamicParameter = new Tuple<int, bool>(degrees, rotate) };
                 this.CurrentImageFormat.ApplyProcessor(hue.ProcessImage, this);
@@ -1082,7 +1064,7 @@ namespace ImageProcessor
             // Sanitize the input.
             if (fuzziness < 0 || fuzziness > 128)
             {
-                fuzziness = 0;
+                return this;
             }
 
             if (this.ShouldProcess && target != Color.Empty && replacement != Color.Empty)
@@ -1264,7 +1246,7 @@ namespace ImageProcessor
                 // Sanitize the input.
                 if (percentage > 100 || percentage < -100)
                 {
-                    percentage = 0;
+                    return this;
                 }
 
                 Saturation saturate = new Saturation { DynamicParameter = percentage };
@@ -1362,6 +1344,12 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
+                // Clear property items.
+                if (!this.PreserveExifData)
+                {
+                    this.ClearExif(this.Image);
+                }
+
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image, this.CurrentBitDepth);
             }
 
@@ -1385,6 +1373,12 @@ namespace ImageProcessor
                 if (stream.CanSeek)
                 {
                     stream.SetLength(0);
+                }
+
+                // Clear property items.
+                if (!this.PreserveExifData)
+                {
+                    this.ClearExif(this.Image);
                 }
 
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image, this.CurrentBitDepth);

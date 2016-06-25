@@ -20,6 +20,7 @@ namespace ImageProcessor.PlayGround
 
     using ImageProcessor;
     using ImageProcessor.Imaging;
+    using ImageProcessor.Imaging.Filters.EdgeDetection;
     using ImageProcessor.Imaging.Formats;
 
     /// <summary>
@@ -64,12 +65,13 @@ namespace ImageProcessor.PlayGround
                     try
                     {
                         imageFactory.Load(inStream)
-                            .BitDepth(1)
-                            //.Resize(size)
+                            //.BitDepth(1)
+                            .DetectEdges(new SobelEdgeFilter())
+                            .Format(new JpegFormat())
                             //.Format(new GifFormat())
                             //.Resolution(400, 400)
                             //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
-                            .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
+                            .Save(Path.GetFullPath(Path.Combine(outPath, Guid.NewGuid() + ".jpg")));
                     }
                     catch (Exception ex)
                     {
