@@ -68,7 +68,7 @@ namespace ImageProcessor.UnitTests
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                imageIn.Save(ms, ImageFormat.Jpeg);
+                imageIn.Save(ms, ImageFormat.Png);
                 return ms.ToArray();
             }
         }
