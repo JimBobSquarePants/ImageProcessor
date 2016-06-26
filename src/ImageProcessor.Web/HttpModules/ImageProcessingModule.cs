@@ -842,8 +842,9 @@ namespace ImageProcessor.Web.HttpModules
         {
             IList<IImageService> services = ImageProcessorConfiguration.Instance.ImageServices;
 
-            // remove the Application Path from the Rquest.Path. This allows applications running on localhost as sub application to work.
-            string path = StringHelper.TrimStart(request.Path, request.ApplicationPath).TrimStart('/');
+            // Remove the Application Path from the Request.Path. 
+            // This allows applications running on localhost as sub application to work.
+            string path = request.Path.TrimStart(request.ApplicationPath).TrimStart('/');
             foreach (IImageService service in services)
             {
                 string key = service.Prefix;

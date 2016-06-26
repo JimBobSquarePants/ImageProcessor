@@ -139,5 +139,22 @@ namespace ImageProcessor.Web.Extensions
             return Uri.TryCreate(expression, UriKind.Relative, out uri) && uri.IsWellFormedOriginalString();
         }
         #endregion
+
+        /// <summary>
+        /// Trims a specified string from the start of another string.
+        /// </summary>
+        /// <param name="target">The target string</param>
+        /// <param name="trimString">The string to trim from the start</param>
+        /// <returns>Returns the trimmed string</returns>
+        public static string TrimStart(this string target, string trimString)
+        {
+            string result = target;
+            while (result.StartsWith(trimString))
+            {
+                result = result.Substring(trimString.Length);
+            }
+
+            return result;
+        }
     }
 }
