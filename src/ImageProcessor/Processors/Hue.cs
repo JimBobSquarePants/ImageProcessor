@@ -58,10 +58,15 @@ namespace ImageProcessor.Processors
             {
                 Tuple<int, bool> parameters = this.DynamicParameter;
                 int degrees = parameters.Item1;
+
+                if (degrees == 0)
+                {
+                    return image;
+                }
+
                 bool rotate = parameters.Item2;
                 int width = image.Width;
                 int height = image.Height;
-
                 using (FastBitmap fastBitmap = new FastBitmap(image))
                 {
                     if (!rotate)
