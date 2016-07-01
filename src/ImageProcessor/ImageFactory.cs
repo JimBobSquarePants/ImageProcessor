@@ -502,7 +502,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Sanitize the input.
-                if (percentage > 100 || percentage < -100)
+                if (percentage > 100 || percentage < -100 || percentage == 0)
                 {
                     return this;
                 }
@@ -923,7 +923,7 @@ namespace ImageProcessor
         public ImageFactory Hue(int degrees, bool rotate = false)
         {
             // Sanitize the input.
-            if (degrees > 360 || degrees < 0)
+            if (degrees > 360 || degrees < 0 || degrees == 0)
             {
                 return this;
             }
