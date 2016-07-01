@@ -104,22 +104,7 @@ namespace ImageProcessor.Imaging
 
             using (Graphics graphics = Graphics.FromImage(resized))
             {
-                // We want to use two different blending algorithms for enlargement/shrinking.
-                if (source.Width < width && source.Height < height)
-                {
-                    // We are making it larger.
-                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                }
-                else
-                {
-                    // We are making it smaller.
-                    graphics.SmoothingMode = SmoothingMode.None;
-                }
-
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-
+                GraphicsHelper.SetGraphicsOptions(graphics);
                 using (ImageAttributes attributes = new ImageAttributes())
                 {
                     attributes.SetWrapMode(WrapMode.TileFlipXY);
@@ -166,22 +151,7 @@ namespace ImageProcessor.Imaging
 
             using (Graphics graphics = Graphics.FromImage(resized))
             {
-                // We want to use two different blending algorithms for enlargement/shrinking.
-                if (source.Width < width || source.Height < height)
-                {
-                    // We are making it larger.
-                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                }
-                else
-                {
-                    // We are making it smaller.
-                    graphics.SmoothingMode = SmoothingMode.None;
-                }
-
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-
+                GraphicsHelper.SetGraphicsOptions(graphics);
                 using (ImageAttributes attributes = new ImageAttributes())
                 {
                     attributes.SetWrapMode(WrapMode.TileFlipXY);

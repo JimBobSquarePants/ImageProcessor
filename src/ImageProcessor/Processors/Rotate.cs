@@ -13,11 +13,11 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
     using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Imaging.Helpers;
     using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
@@ -106,7 +106,7 @@ namespace ImageProcessor.Processors
         /// </remarks>
         private Bitmap RotateImage(Image image, float rotateAtX, float rotateAtY, float angle)
         {
-            Rectangle newSize = Imaging.Helpers.ImageMaths.GetBoundingRotatedRectangle(image.Width, image.Height, angle);
+            Rectangle newSize = ImageMaths.GetBoundingRotatedRectangle(image.Width, image.Height, angle);
 
             int x = (newSize.Width - image.Width) / 2;
             int y = (newSize.Height - image.Height) / 2;
@@ -119,10 +119,7 @@ namespace ImageProcessor.Processors
             using (Graphics graphics = Graphics.FromImage(newImage))
             {
                 // Reduce the jagged edge.
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                GraphicsHelper.SetGraphicsOptions(graphics);
 
                 // Put the rotation point in the "center" of the image
                 graphics.TranslateTransform(rotateAtX + x, rotateAtY + y);

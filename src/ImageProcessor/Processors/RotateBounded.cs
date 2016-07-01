@@ -13,7 +13,6 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
     using System.Linq;
 
@@ -123,11 +122,7 @@ namespace ImageProcessor.Processors
             // Make a graphics object from the empty bitmap
             using (Graphics graphics = Graphics.FromImage(newImage))
             {
-                // Reduce the jagged edge.
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                GraphicsHelper.SetGraphicsOptions(graphics);
 
                 if (keepSize)
                 {

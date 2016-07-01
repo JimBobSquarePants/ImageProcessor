@@ -94,6 +94,20 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
+        /// Returns a value indicating whether the given image has an alpha channel.
+        /// </summary>
+        /// <param name="image">
+        /// The <see cref="System.Drawing.Image"/> to test.
+        /// </param>
+        /// <returns>
+        /// The true if the image has an alpha channel; otherwise, false.
+        /// </returns>
+        public static bool HasAlpha(Image image)
+        {
+            return ((ImageFlags)image.Flags & ImageFlags.HasAlpha) == ImageFlags.HasAlpha;
+        }
+
+        /// <summary>
         /// Returns a value indicating whether the given image is animated.
         /// </summary>
         /// <param name="image">

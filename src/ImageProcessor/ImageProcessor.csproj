@@ -147,6 +147,7 @@
     <Compile Include="Imaging\Helpers\Converters\Endianness.cs" />
     <Compile Include="Imaging\Helpers\Converters\LittleEndianBitConverter.cs" />
     <Compile Include="Imaging\Helpers\Converters\EndianBitConverter.cs" />
+    <Compile Include="Imaging\Helpers\GraphicsHelper.cs" />
     <Compile Include="Imaging\IComputerArchitectureInfo.cs" />
     <Compile Include="Imaging\Interpolation.cs" />
     <Compile Include="Imaging\Colors\CmykColor.cs" />
