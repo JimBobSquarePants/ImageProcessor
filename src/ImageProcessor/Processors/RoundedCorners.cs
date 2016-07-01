@@ -18,6 +18,7 @@ namespace ImageProcessor.Processors
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
+    using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
     /// Encapsulates methods to add rounded corners to an image.
@@ -107,11 +108,7 @@ namespace ImageProcessor.Processors
             // Make a graphics object from the empty bitmap
             using (Graphics graphics = Graphics.FromImage(newImage))
             {
-                // Reduce the jagged edge.
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                GraphicsHelper.SetGraphicsOptions(graphics);
 
                 // Add rounded corners
                 using (GraphicsPath path = new GraphicsPath())

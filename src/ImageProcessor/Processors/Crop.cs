@@ -19,6 +19,7 @@ namespace ImageProcessor.Processors
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
+    using ImageProcessor.Imaging.Helpers;
     using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
@@ -113,10 +114,7 @@ namespace ImageProcessor.Processors
 
                     using (Graphics graphics = Graphics.FromImage(newImage))
                     {
-                        graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                        graphics.CompositingQuality = CompositingQuality.HighQuality;
+                        GraphicsHelper.SetGraphicsOptions(graphics);
 
                         // An unwanted border appears when using InterpolationMode.HighQualityBicubic to resize the image
                         // as the algorithm appears to be pulling averaging detail from surrounding pixels beyond the edge 
