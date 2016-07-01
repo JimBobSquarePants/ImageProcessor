@@ -65,13 +65,17 @@ namespace ImageProcessor.PlayGround
                     try
                     {
                         imageFactory.Load(inStream)
+                            .Resize(size)
+                            .Save(Path.GetFullPath(Path.Combine(outPath, "1" + fileInfo.Name)))
+                            .Reset()
+                            .Resize(size)
                             //.BitDepth(1)
-                            .DetectEdges(new SobelEdgeFilter())
-                            .Format(new JpegFormat())
+                            //.DetectEdges(new SobelEdgeFilter())
+                            //.Format(new JpegFormat())
                             //.Format(new GifFormat())
                             //.Resolution(400, 400)
                             //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
-                            .Save(Path.GetFullPath(Path.Combine(outPath, Guid.NewGuid() + ".jpg")));
+                            .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
                     }
                     catch (Exception ex)
                     {
