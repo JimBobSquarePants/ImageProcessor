@@ -8,7 +8,7 @@ sublinks:
  - "#about|WebP"
 ---
 <section id="about">
-#WebP Image Support
+# WebP Image Support
 
 <a href="https://nuget.org/packages/ImageProcessor.Plugins.WebP/" role="button" class="download" data-ga-category="Plugin Actions" data-ga-action="Plugin Links" data-ga-label="WebP Plugin Nuget Link"><i class="fa fa-download"></i>Plugins.WebP</a>
 
