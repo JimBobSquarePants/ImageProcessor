@@ -9,7 +9,7 @@ sublinks:
  - "#webp|WebP"
 ---
 <section id="about">
-#Additional Plugins
+# Additional Plugins
 
 **ImageProcessor** has a plugin based architecture which allows for additional functionality to
 be [added to the library](../extending). The following plugins are available for download.
@@ -17,7 +17,7 @@ be [added to the library](../extending). The following plugins are available for
 </section>
 <hr />
 <section id="webp">
-#WebP
+# WebP
 
 The WebP plugin is an extension to ImageProcessor that allows processing of images with Google's [WebP](https://developers.google.com/speed/webp/) format.
 
