@@ -1345,9 +1345,9 @@ namespace ImageProcessor
 
                 // Gif formats somehow get corrupted when accessing them via FastBitmap if EXIF
                 // items are altered.
-                Type gifFormat = typeof(GifFormat);
-                if (this.CurrentImageFormat.GetType() != gifFormat && this.backupFormat.GetType() != gifFormat)
-                {
+                //Type gifFormat = typeof(GifFormat);
+                //if (this.CurrentImageFormat.GetType() != gifFormat && this.backupFormat.GetType() != gifFormat)
+                //{
                     // Clear property items.
                     if (!this.PreserveExifData)
                     {
@@ -1360,7 +1360,7 @@ namespace ImageProcessor
                             this.Image.SetPropertyItem(propertItem.Value);
                         }
                     }
-                }
+                //}
 
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image, this.CurrentBitDepth);
             }
@@ -1389,9 +1389,9 @@ namespace ImageProcessor
 
                 // Gif formats somehow get corrupted when accessing them via FastBitmap if EXIF
                 // items are altered.
-                Type gifFormat = typeof(GifFormat);
-                if (this.CurrentImageFormat.GetType() != gifFormat && this.backupFormat.GetType() != gifFormat)
-                {
+                //Type gifFormat = typeof(GifFormat);
+                //if (this.CurrentImageFormat.GetType() != gifFormat && this.backupFormat.GetType() != gifFormat)
+                //{
                     // Clear property items.
                     if (!this.PreserveExifData)
                     {
@@ -1404,7 +1404,7 @@ namespace ImageProcessor
                             this.Image.SetPropertyItem(propertItem.Value);
                         }
                     }
-                }
+                //}
 
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image, this.CurrentBitDepth);
                 if (stream.CanSeek)

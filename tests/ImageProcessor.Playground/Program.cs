@@ -65,6 +65,7 @@ namespace ImageProcessor.PlayGround
                     try
                     {
                         imageFactory.Load(inStream)
+                            .Format(new JpegFormat())
                             .Resize(size)
                             .Save(Path.GetFullPath(Path.Combine(outPath, "1" + fileInfo.Name)))
                             .Reset()
