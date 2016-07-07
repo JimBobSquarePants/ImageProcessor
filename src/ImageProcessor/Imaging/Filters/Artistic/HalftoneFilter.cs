@@ -239,10 +239,10 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                 using (Graphics graphicsKeyline = Graphics.FromImage(keyline))
                 {
                     // Set the quality properties.
-                    graphicsCyan.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                    graphicsMagenta.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                    graphicsYellow.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                    graphicsKeyline.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                    graphicsCyan.PixelOffsetMode = PixelOffsetMode.Half;
+                    graphicsMagenta.PixelOffsetMode = PixelOffsetMode.Half;
+                    graphicsYellow.PixelOffsetMode = PixelOffsetMode.Half;
+                    graphicsKeyline.PixelOffsetMode = PixelOffsetMode.Half;
 
                     graphicsCyan.SmoothingMode = SmoothingMode.AntiAlias;
                     graphicsMagenta.SmoothingMode = SmoothingMode.AntiAlias;

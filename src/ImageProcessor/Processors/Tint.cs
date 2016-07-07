@@ -13,10 +13,10 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
     /// Tints an image with the given color.
@@ -74,9 +74,7 @@ namespace ImageProcessor.Processors
 
                 using (Graphics graphics = Graphics.FromImage(newImage))
                 {
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                    graphics.CompositingQuality = CompositingQuality.HighQuality;
+                    GraphicsHelper.SetGraphicsOptions(graphics);
 
                     using (ImageAttributes attributes = new ImageAttributes())
                     {

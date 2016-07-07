@@ -16,6 +16,7 @@ namespace ImageProcessor.Processors
     using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
     /// Changes the background color of an image.
@@ -66,6 +67,8 @@ namespace ImageProcessor.Processors
                 // Make a graphics object from the empty bitmap.
                 using (Graphics graphics = Graphics.FromImage(newImage))
                 {
+                    GraphicsHelper.SetGraphicsOptions(graphics, true);
+
                     // Fill the background.
                     graphics.Clear(backgroundColor);
 
