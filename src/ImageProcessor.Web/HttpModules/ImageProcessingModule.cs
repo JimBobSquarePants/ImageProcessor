@@ -500,13 +500,13 @@ namespace ImageProcessor.Web.HttpModules
                         {
                             string[] paths = url.Split('?');
                             requestPath = protocol
-                                          + request.Path.TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/')
+                                          + request.Path.TrimStart(request.ApplicationPath).TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/')
                                           + "?" + paths[1];
                             queryString = paths[2];
                         }
                         else
                         {
-                            requestPath = protocol + request.Path.TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/');
+                            requestPath = protocol + request.Path.TrimStart(request.ApplicationPath).TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/');
                             queryString = request.QueryString.ToString();
                         }
                     }
