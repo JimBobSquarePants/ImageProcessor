@@ -84,7 +84,8 @@ namespace ImageProcessor.Imaging.Formats
         /// </returns>
         public virtual Image Load(Stream stream)
         {
-           return Image.FromStream(stream, true);
+            // Keep the colors but don't validate the data. The windows decoders are robust.
+            return Image.FromStream(stream, true, false);
         }
 
         /// <summary>

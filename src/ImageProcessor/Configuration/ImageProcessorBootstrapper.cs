@@ -66,6 +66,18 @@ namespace ImageProcessor.Configuration
         public NativeBinaryFactory NativeBinaryFactory { get; private set; }
 
         /// <summary>
+        /// Adds the given image formats to the supported format list. Useful for when 
+        /// The type finder fails to dynamically add the supported formats.
+        /// </summary>
+        /// <param name="format">
+        /// The <see cref="ISupportedImageFormat"/> instance to add.
+        /// </param>
+        public void AddImageFormats(params ISupportedImageFormat[] format)
+        {
+            this.SupportedImageFormats.ToList().AddRange(format);
+        }
+
+        /// <summary>
         /// Creates a list, using reflection, of supported image formats that ImageProcessor can run.
         /// </summary>
         private void LoadSupportedImageFormats()

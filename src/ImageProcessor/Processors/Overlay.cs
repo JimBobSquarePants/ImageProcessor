@@ -13,7 +13,6 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Drawing.Drawing2D;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
@@ -104,10 +103,7 @@ namespace ImageProcessor.Processors
 
                 using (Graphics graphics = Graphics.FromImage(image))
                 {
-                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                    graphics.CompositingQuality = CompositingQuality.HighQuality;
+                    GraphicsHelper.SetGraphicsOptions(graphics, true);
 
                     if (position != null)
                     {

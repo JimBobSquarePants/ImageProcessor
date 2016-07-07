@@ -26,7 +26,6 @@ namespace ImageProcessor
     // using ImageProcessor.Imaging.Filters.ObjectDetection;
     using ImageProcessor.Imaging.Filters.Photo;
     using ImageProcessor.Imaging.Formats;
-    using ImageProcessor.Imaging.Helpers;
     using ImageProcessor.Imaging.MetaData;
     using ImageProcessor.Processors;
 
@@ -238,12 +237,6 @@ namespace ImageProcessor
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
-            // Clear property items.
-            if (!this.PreserveExifData)
-            {
-                this.ClearExif(formatted);
-            }
-
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -317,12 +310,6 @@ namespace ImageProcessor
                     // Ensure the image is in the most efficient format.
                     Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
-                    // Clear property items.
-                    if (!this.PreserveExifData)
-                    {
-                        this.ClearExif(formatted);
-                    }
-
                     this.Image.Dispose();
                     this.Image = formatted;
 
@@ -388,12 +375,6 @@ namespace ImageProcessor
             // Ensure the image is in the most efficient format.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
-            // Clear property items.
-            if (!this.PreserveExifData)
-            {
-                this.ClearExif(formatted);
-            }
-
             this.Image.Dispose();
             this.Image = formatted;
 
@@ -418,26 +399,20 @@ namespace ImageProcessor
                     this.InputStream.Position = 0;
                 }
 
-                Image newImage = this.CurrentImageFormat.Load(this.InputStream);
+                // Reset properties.
+                this.CurrentImageFormat = this.backupFormat;
+                this.ExifPropertyItems = this.backupExifPropertyItems;
+                this.CurrentImageFormat.Quality = DefaultQuality;
+
+                Image newImage = this.backupFormat.Load(this.InputStream);
 
                 // Dispose and reassign the image.
                 // Ensure the image is in the most efficient format.
                 Image formatted = newImage.Copy(this.AnimationProcessMode);
 
-                // Clear property items.
-                if (!this.PreserveExifData)
-                {
-                    this.ClearExif(formatted);
-                }
-
                 newImage.Dispose();
                 this.Image.Dispose();
                 this.Image = formatted;
-
-                // Set the other properties.
-                this.CurrentImageFormat = this.backupFormat;
-                this.ExifPropertyItems = this.backupExifPropertyItems;
-                this.CurrentImageFormat.Quality = DefaultQuality;
             }
 
             return this;
@@ -459,10 +434,14 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Sanitize the input.
-                percentage = ImageMaths.Clamp(percentage, 0, 100);
+                // You can't make an image less transparent.
+                if (percentage < 0 || percentage > 99)
+                {
+                    return this;
+                }
 
                 Alpha alpha = new Alpha { DynamicParameter = percentage };
-                this.CurrentImageFormat.ApplyProcessor(alpha.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(alpha.ProcessImage, this);
             }
 
             return this;
@@ -480,7 +459,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 AutoRotate autoRotate = new AutoRotate();
-                this.CurrentImageFormat.ApplyProcessor(autoRotate.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(autoRotate.ProcessImage, this);
             }
 
             return this;
@@ -522,13 +501,13 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Sanitize the input.
-                if (percentage > 100 || percentage < -100)
+                if (percentage > 100 || percentage < -100 || percentage == 0)
                 {
-                    percentage = 0;
+                    return this;
                 }
 
                 Brightness brightness = new Brightness { DynamicParameter = percentage };
-                this.CurrentImageFormat.ApplyProcessor(brightness.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(brightness.ProcessImage, this);
             }
 
             return this;
@@ -548,7 +527,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 BackgroundColor backgroundColor = new BackgroundColor { DynamicParameter = color };
-                this.CurrentImageFormat.ApplyProcessor(backgroundColor.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(backgroundColor.ProcessImage, this);
             }
 
             return this;
@@ -592,11 +571,11 @@ namespace ImageProcessor
                 // Sanitize the input.
                 if (percentage > 100 || percentage < -100)
                 {
-                    percentage = 0;
+                    return this;
                 }
 
                 Contrast contrast = new Contrast { DynamicParameter = percentage };
-                this.CurrentImageFormat.ApplyProcessor(contrast.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(contrast.ProcessImage, this);
             }
 
             return this;
@@ -636,7 +615,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Crop crop = new Crop { DynamicParameter = cropLayer };
-                this.CurrentImageFormat.ApplyProcessor(crop.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(crop.ProcessImage, this);
             }
 
             return this;
@@ -659,7 +638,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 DetectEdges detectEdges = new DetectEdges { DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale) };
-                this.CurrentImageFormat.ApplyProcessor(detectEdges.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(detectEdges.ProcessImage, this);
             }
 
             return this;
@@ -685,14 +664,16 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // Sanitize the input.
-                horizontal = ImageMaths.Clamp(horizontal, 0, int.MaxValue);
-                vertical = ImageMaths.Clamp(vertical, 0, int.MaxValue);
+                if (horizontal < 0 || vertical < 0)
+                {
+                    return this;
+                }
 
                 Tuple<int, int, PropertyTagResolutionUnit> resolution =
                     new Tuple<int, int, PropertyTagResolutionUnit>(horizontal, vertical, unit);
 
                 Resolution dpi = new Resolution { DynamicParameter = resolution };
-                this.CurrentImageFormat.ApplyProcessor(dpi.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(dpi.ProcessImage, this);
             }
 
             return this;
@@ -703,7 +684,7 @@ namespace ImageProcessor
         //    if (this.ShouldProcess)
         //    {
         //        DetectObjects detectObjects = new DetectObjects { DynamicParameter = cascade };
-        //        this.CurrentImageFormat.ApplyProcessor(detectObjects.ProcessImage, this);
+        //        this.backupFormat.ApplyProcessor(detectObjects.ProcessImage, this);
         //    }
         //     return this;
         // }
@@ -722,7 +703,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 EntropyCrop autoCrop = new EntropyCrop { DynamicParameter = threshold };
-                this.CurrentImageFormat.ApplyProcessor(autoCrop.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(autoCrop.ProcessImage, this);
             }
 
             return this;
@@ -743,7 +724,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Filter filter = new Filter { DynamicParameter = matrixFilter };
-                this.CurrentImageFormat.ApplyProcessor(filter.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(filter.ProcessImage, this);
             }
 
             return this;
@@ -778,7 +759,7 @@ namespace ImageProcessor
                 }
 
                 Flip flip = new Flip { DynamicParameter = rotateFlipType };
-                this.CurrentImageFormat.ApplyProcessor(flip.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(flip.ProcessImage, this);
             }
 
             return this;
@@ -798,7 +779,7 @@ namespace ImageProcessor
                 this.CurrentImageFormat = format;
 
                 // Apply any fomatting quirks.
-                this.CurrentImageFormat.ApplyProcessor(factory => factory.Image, this);
+                // this.backupFormat.ApplyProcessor(factory => factory.Image, this);
             }
 
             return this;
@@ -820,12 +801,12 @@ namespace ImageProcessor
                 // Sanitize the input.
                 if (value > 5 || value < .1)
                 {
-                    value = 2.2F;
+                    return this;
                 }
 
                 this.CurrentGamma = value;
                 Gamma gamma = new Gamma { DynamicParameter = value };
-                this.CurrentImageFormat.ApplyProcessor(gamma.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(gamma.ProcessImage, this);
             }
 
             return this;
@@ -872,7 +853,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 GaussianBlur gaussianBlur = new GaussianBlur { DynamicParameter = gaussianLayer };
-                this.CurrentImageFormat.ApplyProcessor(gaussianBlur.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(gaussianBlur.ProcessImage, this);
             }
 
             return this;
@@ -919,7 +900,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 GaussianSharpen gaussianSharpen = new GaussianSharpen { DynamicParameter = gaussianLayer };
-                this.CurrentImageFormat.ApplyProcessor(gaussianSharpen.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(gaussianSharpen.ProcessImage, this);
             }
 
             return this;
@@ -941,15 +922,15 @@ namespace ImageProcessor
         public ImageFactory Hue(int degrees, bool rotate = false)
         {
             // Sanitize the input.
-            if (degrees > 360 || degrees < 0)
+            if (degrees > 360 || degrees < 0 || degrees == 0)
             {
-                degrees = 0;
+                return this;
             }
 
-            if (this.ShouldProcess && degrees > 0)
+            if (this.ShouldProcess)
             {
                 Hue hue = new Hue { DynamicParameter = new Tuple<int, bool>(degrees, rotate) };
-                this.CurrentImageFormat.ApplyProcessor(hue.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(hue.ProcessImage, this);
             }
 
             return this;
@@ -969,7 +950,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Halftone halftone = new Halftone { DynamicParameter = comicMode };
-                this.CurrentImageFormat.ApplyProcessor(halftone.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(halftone.ProcessImage, this);
             }
 
             return this;
@@ -993,7 +974,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Mask mask = new Mask { DynamicParameter = new Tuple<Image, Point?>(imageMask, point) };
-                this.CurrentImageFormat.ApplyProcessor(mask.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(mask.ProcessImage, this);
             }
 
             return this;
@@ -1014,7 +995,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Overlay watermark = new Overlay { DynamicParameter = imageLayer };
-                this.CurrentImageFormat.ApplyProcessor(watermark.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(watermark.ProcessImage, this);
             }
 
             return this;
@@ -1036,7 +1017,7 @@ namespace ImageProcessor
             if (this.ShouldProcess && pixelSize > 0)
             {
                 Pixelate pixelate = new Pixelate { DynamicParameter = new Tuple<int, Rectangle?>(pixelSize, rectangle) };
-                this.CurrentImageFormat.ApplyProcessor(pixelate.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(pixelate.ProcessImage, this);
             }
 
             return this;
@@ -1082,7 +1063,7 @@ namespace ImageProcessor
             // Sanitize the input.
             if (fuzziness < 0 || fuzziness > 128)
             {
-                fuzziness = 0;
+                return this;
             }
 
             if (this.ShouldProcess && target != Color.Empty && replacement != Color.Empty)
@@ -1091,7 +1072,7 @@ namespace ImageProcessor
                 {
                     DynamicParameter = new Tuple<Color, Color, int>(target, replacement, fuzziness)
                 };
-                this.CurrentImageFormat.ApplyProcessor(replaceColor.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(replaceColor.ProcessImage, this);
             }
 
             return this;
@@ -1140,7 +1121,7 @@ namespace ImageProcessor
                 };
 
                 Resize resize = new Resize { DynamicParameter = resizeLayer, Settings = resizeSettings };
-                this.CurrentImageFormat.ApplyProcessor(resize.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(resize.ProcessImage, this);
             }
 
             return this;
@@ -1160,7 +1141,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Rotate rotate = new Rotate { DynamicParameter = degrees };
-                this.CurrentImageFormat.ApplyProcessor(rotate.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(rotate.ProcessImage, this);
             }
 
             return this;
@@ -1189,7 +1170,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 RotateBounded rotate = new RotateBounded { DynamicParameter = new Tuple<float, bool>(degrees, keepSize) };
-                this.CurrentImageFormat.ApplyProcessor(rotate.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(rotate.ProcessImage, this);
             }
 
             return this;
@@ -1216,7 +1197,7 @@ namespace ImageProcessor
                 RoundedCornerLayer roundedCornerLayer = new RoundedCornerLayer(radius);
 
                 RoundedCorners roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
-                this.CurrentImageFormat.ApplyProcessor(roundedCorners.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(roundedCorners.ProcessImage, this);
             }
 
             return this;
@@ -1241,7 +1222,7 @@ namespace ImageProcessor
                 }
 
                 RoundedCorners roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
-                this.CurrentImageFormat.ApplyProcessor(roundedCorners.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(roundedCorners.ProcessImage, this);
             }
 
             return this;
@@ -1264,11 +1245,11 @@ namespace ImageProcessor
                 // Sanitize the input.
                 if (percentage > 100 || percentage < -100)
                 {
-                    percentage = 0;
+                    return this;
                 }
 
                 Saturation saturate = new Saturation { DynamicParameter = percentage };
-                this.CurrentImageFormat.ApplyProcessor(saturate.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(saturate.ProcessImage, this);
             }
 
             return this;
@@ -1288,7 +1269,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Tint tint = new Tint { DynamicParameter = color };
-                this.CurrentImageFormat.ApplyProcessor(tint.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(tint.ProcessImage, this);
             }
 
             return this;
@@ -1314,7 +1295,7 @@ namespace ImageProcessor
                                         : Color.Black
                 };
 
-                this.CurrentImageFormat.ApplyProcessor(vignette.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(vignette.ProcessImage, this);
             }
 
             return this;
@@ -1335,7 +1316,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 Watermark watermark = new Watermark { DynamicParameter = textLayer };
-                this.CurrentImageFormat.ApplyProcessor(watermark.ProcessImage, this);
+                this.backupFormat.ApplyProcessor(watermark.ProcessImage, this);
             }
 
             return this;
@@ -1362,6 +1343,25 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
+                // Gif formats somehow get corrupted when accessing them via FastBitmap if EXIF
+                // items are altered.
+                //Type gifFormat = typeof(GifFormat);
+                //if (this.CurrentImageFormat.GetType() != gifFormat && this.backupFormat.GetType() != gifFormat)
+                //{
+                    // Clear property items.
+                    if (!this.PreserveExifData)
+                    {
+                        this.ClearExif(this.Image);
+                    }
+                    else
+                    {
+                        foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
+                        {
+                            this.Image.SetPropertyItem(propertItem.Value);
+                        }
+                    }
+                //}
+
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image, this.CurrentBitDepth);
             }
 
@@ -1386,6 +1386,25 @@ namespace ImageProcessor
                 {
                     stream.SetLength(0);
                 }
+
+                // Gif formats somehow get corrupted when accessing them via FastBitmap if EXIF
+                // items are altered.
+                //Type gifFormat = typeof(GifFormat);
+                //if (this.CurrentImageFormat.GetType() != gifFormat && this.backupFormat.GetType() != gifFormat)
+                //{
+                    // Clear property items.
+                    if (!this.PreserveExifData)
+                    {
+                        this.ClearExif(this.Image);
+                    }
+                    else
+                    {
+                        foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
+                        {
+                            this.Image.SetPropertyItem(propertItem.Value);
+                        }
+                    }
+                //}
 
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image, this.CurrentBitDepth);
                 if (stream.CanSeek)

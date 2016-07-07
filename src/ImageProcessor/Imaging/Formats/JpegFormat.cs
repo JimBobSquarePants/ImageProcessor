@@ -11,7 +11,6 @@
 namespace ImageProcessor.Imaging.Formats
 {
     using System;
-    using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
@@ -41,26 +40,6 @@ namespace ImageProcessor.Imaging.Formats
         /// Gets the <see cref="ImageFormat" />.
         /// </summary>
         public override ImageFormat ImageFormat => ImageFormat.Jpeg;
-
-        /// <summary>
-        /// Applies the given processor the current image.
-        /// </summary>
-        /// <param name="processor">The processor delegate.</param>
-        /// <param name="factory">The <see cref="ImageFactory" />.</param>
-        public override void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
-        {
-            base.ApplyProcessor(processor, factory);
-
-            // Set the property item information from any Exif metadata.
-            // We do this here so that they can be changed between processor methods.
-            if (factory.PreserveExifData)
-            {
-                foreach (KeyValuePair<int, PropertyItem> propertItem in factory.ExifPropertyItems)
-                {
-                    factory.Image.SetPropertyItem(propertItem.Value);
-                }
-            }
-        }
 
         /// <summary>
         /// Saves the current image to the specified output stream.
