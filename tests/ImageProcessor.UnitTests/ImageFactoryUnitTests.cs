@@ -985,9 +985,9 @@ namespace ImageProcessor.UnitTests
             ResizeLayer boxPadSingleDimensionHeightLayer = new ResizeLayer(boxPadSingleDimensionHeightSize, ResizeMode.BoxPad);
 
             int i = 0;
-            foreach (ImageFactory imageFactory in this.ListInputImages())
+            foreach (ImageFactory imageFactory in this.ListInputImages(".gif"))
             {
-                Image original = (Image)imageFactory.Image.Clone();
+                Image original = imageFactory.Image.Copy();
 
                 // First stretch
                 imageFactory.Format(new JpegFormat()).Resize(stretchLayer);
