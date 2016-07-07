@@ -127,7 +127,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         protected virtual Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
         {
-            return this.ResizeLinear(source, width, height, destination, AnimationProcessMode.All);
+            return this.ResizeLinear(source, width, height, destination, this.AnimationProcessMode);
         }
 
         /// <summary>
