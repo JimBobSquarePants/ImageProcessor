@@ -231,7 +231,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             await blockBlob.UploadFromStreamAsync(stream);
 
             blockBlob.Properties.ContentType = contentType;
-            blockBlob.Properties.CacheControl = string.Format("public, max-age={0}", this.MaxDays * 86400);
+            blockBlob.Properties.CacheControl = string.Format("public, max-age={0}", this.BrowserMaxDays * 86400);
             await blockBlob.SetPropertiesAsync();
 
             blockBlob.Metadata.Add("ImageProcessedBy", "ImageProcessor.Web/" + AssemblyVersion);
