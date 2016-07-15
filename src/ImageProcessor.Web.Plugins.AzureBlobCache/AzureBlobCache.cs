@@ -81,7 +81,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// The full path for the image.
         /// </param>
         /// <param name="querystring">
-        /// The querystring containing instructions.
+        /// The query string containing instructions.
         /// </param>
         public AzureBlobCache(string requestPath, string fullPath, string querystring)
             : base(requestPath, fullPath, querystring)
@@ -378,24 +378,58 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
             if (this.streamCachedImage)
             {
+                // Map headers to enable 304s to pass through
+                if (context.Request.Headers["If-Modified-Since"] != null)
+                {
+                    request.IfModifiedSince = DateTime.Parse(context.Request.Headers["If-Modified-Since"]);
+                }
+
+                string[] mapRequestHeaders = { "Cache-Control", "If-None-Match" };
+                foreach (string h in mapRequestHeaders)
+                {
+                    if (context.Request.Headers[h] != null)
+                    {
+                        request.Headers.Add(h, context.Request.Headers[h]);
+                    }
+                }
+
                 // Write the blob storage directly to the stream
                 request.Method = "GET";
 
                 TryFiveTimes(
                     () =>
+                    {
+                        HttpWebResponse response;
+                        try
                         {
-                            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                            response = (HttpWebResponse)request.GetResponse();
+                        }
+                        catch (WebException ex)
+                        {
+                            // A 304 is not an error
+                            if (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
                             {
-                                Stream cachedStream = response.GetResponseStream();
-
-                                if (cachedStream != null)
-                                {
-                                    HttpResponse contextResponse = context.Response;
-                                    cachedStream.CopyTo(contextResponse.OutputStream);
-                                    ImageProcessingModule.SetHeaders(context, response.ContentType, null, this.BrowserMaxDays, response.StatusCode);
-                                }
+                                response = (HttpWebResponse)ex.Response;
                             }
-                        },
+                            else
+                            {
+                                throw;
+                            }
+                        }
+
+                        Stream cachedStream = response.GetResponseStream();
+
+                        if (cachedStream != null)
+                        {
+                            HttpResponse contextResponse = context.Response;
+                            contextResponse.Headers.Add("ETag", response.Headers["ETag"]);
+                            contextResponse.Headers.Add("Last-Modified", response.Headers["Last-Modified"]);
+                            cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
+                            ImageProcessingModule.SetHeaders(context, response.StatusCode == HttpStatusCode.NotModified ? null : response.ContentType, null, this.BrowserMaxDays, response.StatusCode);
+                        }
+
+                        response.Dispose();
+                    },
                 () =>
                 {
                     ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
@@ -408,14 +442,14 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
                 TryFiveTimes(
                     () =>
+                    {
+                        using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                         {
-                            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                            {
-                                HttpStatusCode responseCode = response.StatusCode;
-                                ImageProcessingModule.AddCorsRequestHeaders(context);
-                                context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
-                            }
-                        },
+                            HttpStatusCode responseCode = response.StatusCode;
+                            ImageProcessingModule.AddCorsRequestHeaders(context);
+                            context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
+                        }
+                    },
                 () =>
                 {
                     ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
