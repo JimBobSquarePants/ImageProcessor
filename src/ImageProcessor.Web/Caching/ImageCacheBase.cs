@@ -61,10 +61,23 @@ namespace ImageProcessor.Web.Caching
             this.RequestPath = requestPath;
             this.FullPath = fullPath;
             this.Querystring = querystring;
-            this.Settings = ImageProcessorConfiguration.Instance.ImageCacheSettings;
+            this.Settings = this.AugmentSettingsCore(ImageProcessorConfiguration.Instance.ImageCacheSettings);
             this.MaxDays = ImageProcessorConfiguration.Instance.ImageCacheMaxDays;
             this.BrowserMaxDays = ImageProcessorConfiguration.Instance.BrowserCacheMaxDays;
         }
+
+        /// <summary>
+        /// Provides an entry point to augmentation of the <see cref="Settings"/> dictionary
+        /// </summary>
+        /// <param name="settings">Dictionary of settings</param>
+        /// <returns>augmented dictionary of settings</returns>
+        private Dictionary<string, string> AugmentSettingsCore(Dictionary<string, string> settings)
+        {
+            AugmentSettings(settings);
+            return settings;
+        }
+
+        protected virtual void AugmentSettings(Dictionary<string, string> settings) { }
 
         /// <summary>
         /// Gets or sets any additional settings required by the cache.
