@@ -78,7 +78,7 @@ namespace ImageProcessorCore.Formats
         {
             huff = new huffman_class[maxTc + 1, maxTh + 1];
             quant = new Block[maxTq + 1];
-            tmp = new byte[2 * Block.blockSize];
+            tmp = new byte[2 * Block.BlockSize];
             comp = new Component[maxComponents];
             progCoeffs = new Block[maxComponents][];
             bits = new bits_class();
@@ -839,27 +839,27 @@ namespace ImageProcessorCore.Formats
                 switch (x >> 4)
                 {
                     case 0:
-                        if (n < Block.blockSize)
+                        if (n < Block.BlockSize)
                         {
                             done = true;
                             break;
                         }
-                        n -= Block.blockSize;
-                        readFull(tmp, 0, Block.blockSize);
+                        n -= Block.BlockSize;
+                        readFull(tmp, 0, Block.BlockSize);
 
-                        for (int i = 0; i < Block.blockSize; i++)
+                        for (int i = 0; i < Block.BlockSize; i++)
                             quant[tq][i] = tmp[i];
                         break;
                     case 1:
-                        if (n < 2 * Block.blockSize)
+                        if (n < 2 * Block.BlockSize)
                         {
                             done = true;
                             break;
                         }
-                        n -= 2 * Block.blockSize;
-                        readFull(tmp, 0, 2 * Block.blockSize);
+                        n -= 2 * Block.BlockSize;
+                        readFull(tmp, 0, 2 * Block.BlockSize);
 
-                        for (int i = 0; i < Block.blockSize; i++)
+                        for (int i = 0; i < Block.BlockSize; i++)
                             quant[tq][i] = ((int)tmp[2 * i] << 8) | (int)tmp[2 * i + 1];
                         break;
                     default:
@@ -1267,7 +1267,7 @@ namespace ImageProcessorCore.Formats
             //
             // For baseline JPEGs, these parameters are hard-coded to 0/63/0/0.
             int zigStart = 0;
-            int zigEnd = Block.blockSize - 1;
+            int zigEnd = Block.BlockSize - 1;
             int ah = 0;
             int al = 0;
 
@@ -1278,7 +1278,7 @@ namespace ImageProcessorCore.Formats
                 ah = (int)(this.tmp[3 + (2 * lnComp)] >> 4);
                 al = (int)(this.tmp[3 + (2 * lnComp)] & 0x0f);
 
-                if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || Block.blockSize <= zigEnd)
+                if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || Block.BlockSize <= zigEnd)
                 {
                     throw new ImageFormatException("bad spectral selection bounds");
                 }
@@ -1459,7 +1459,7 @@ namespace ImageProcessorCore.Formats
 
                             if (progressive)
                             {
-                                if (zigEnd != Block.blockSize - 1 || al != 0)
+                                if (zigEnd != Block.BlockSize - 1 || al != 0)
                                 {
                                     // We haven't completely decoded this 8x8 block. Save the coefficients.
                                     progCoeffs[compIndex][by * mxx * hi + bx] = b;
@@ -1474,7 +1474,7 @@ namespace ImageProcessorCore.Formats
                             }
 
                             // Dequantize, perform the inverse DCT and store the block to the image.
-                            for (int zig = 0; zig < Block.blockSize; zig++)
+                            for (int zig = 0; zig < Block.BlockSize; zig++)
                                 b[unzig[zig]] *= qt[zig];
 
                             IDCT.Transform(b);
