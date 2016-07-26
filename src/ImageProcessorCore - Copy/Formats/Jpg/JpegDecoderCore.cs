@@ -2,7 +2,6 @@
 // Copyright (c) James Jackson-South and contributors.
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
-
 namespace ImageProcessorCore.Formats
 {
     using System;
@@ -11,327 +10,121 @@ namespace ImageProcessorCore.Formats
 
     internal class JpegDecoderCore
     {
-        private class errMissingFF00 : Exception { }
-        private class errShortHuffmanData : Exception { }
-        private class errEOF : Exception { }
-
         // maxCodeLength is the maximum (inclusive) number of bits in a Huffman code.
         private const int maxCodeLength = 16;
+
         // maxNCodes is the maximum (inclusive) number of codes in a Huffman tree.
         private const int maxNCodes = 256;
+
         // lutSize is the log-2 size of the Huffman decoder's look-up table.
         private const int lutSize = 8;
+
         private const int maxComponents = 4;
+
         private const int maxTc = 1;
+
         private const int maxTh = 3;
+
         private const int maxTq = 3;
+
         private const int dcTable = 0;
+
         private const int acTable = 1;
 
-        private const int sof0Marker = 0xc0; // Start Of Frame (Baseline).
-        private const int sof1Marker = 0xc1; // Start Of Frame (Extended Sequential).
-        private const int sof2Marker = 0xc2; // Start Of Frame (Progressive).
-        private const int dhtMarker = 0xc4; // Define Huffman Table.
-        private const int rst0Marker = 0xd0; // ReSTart (0).
-        private const int rst7Marker = 0xd7; // ReSTart (7).
-        private const int soiMarker = 0xd8; // Start Of Image.
-        private const int eoiMarker = 0xd9; // End Of Image.
-        private const int sosMarker = 0xda; // Start Of Scan.
-        private const int dqtMarker = 0xdb; // Define Quantization Table.
-        private const int driMarker = 0xdd; // Define Restart Interval.
-        private const int comMarker = 0xfe; // COMment.
-        // "APPlication specific" markers aren't part of the JPEG spec per se,
-        // but in practice, their use is described at
-        // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html
-        private const int app0Marker = 0xe0;
-        private const int app14Marker = 0xee;
-        private const int app15Marker = 0xef;
-
-        // See http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
+        /// <summary>
+        /// <see href="http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe"/>
+        /// </summary>
         private const int adobeTransformUnknown = 0;
+
         private const int adobeTransformYCbCr = 1;
+
         private const int adobeTransformYCbCrK = 2;
 
-        // unzig maps from the zig-zag ordering to the natural ordering. For example,
-        // unzig[3] is the column and row of the fourth element in zig-zag order. The
-        // value is 16, which means first column (16%8 == 0) and third row (16/8 == 2).
-        private static readonly int[] unzig = new int[] {
-            0, 1, 8, 16, 9, 2, 3, 10,
-            17, 24, 32, 25, 18, 11, 4, 5,
-            12, 19, 26, 33, 40, 48, 41, 34,
-            27, 20, 13, 6, 7, 14, 21, 28,
-            35, 42, 49, 56, 57, 50, 43, 36,
-            29, 22, 15, 23, 30, 37, 44, 51,
-            58, 59, 52, 45, 38, 31, 39, 46,
-            53, 60, 61, 54, 47, 55, 62, 63,
+        /// <summary>
+        /// Unzig maps from the zig-zag ordering to the natural ordering. For example,
+        /// unzig[3] is the column and row of the fourth element in zig-zag order. The
+        /// value is 16, which means first column (16%8 == 0) and third row (16/8 == 2).
+        /// </summary>
+        private static readonly int[] Unzig =
+        {
+            0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26,
+            33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57,
+            50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31,
+            39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
         };
 
-        private class Component
-        {
-            public int h; // Horizontal sampling factor.
-            public int v; // Vertical sampling factor.
-            public byte c; // Component identifier.
-            public byte tq; // Quantization table destination selector.
-        }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JpegDecoderCore"/> class.
+        /// </summary>
         public JpegDecoderCore()
         {
-            huff = new huffman_class[maxTc + 1, maxTh + 1];
-            quant = new Block[maxTq + 1];
-            tmp = new byte[2 * Block.blockSize];
-            comp = new Component[maxComponents];
-            progCoeffs = new Block[maxComponents][];
-            bits = new bits_class();
-            bytes = new bytes_class();
+            this.huff = new Huffman[maxTc + 1, maxTh + 1];
+            this.quant = new Block[maxTq + 1];
+            this.tmp = new byte[2 * Block.BlockSize];
+            this.comp = new Component[maxComponents];
+            this.progCoeffs = new Block[maxComponents][];
+            this.bits = new bits_class();
+            this.bytes = new bytes_class();
 
             for (int i = 0; i < maxTc + 1; i++)
+            {
                 for (int j = 0; j < maxTh + 1; j++)
-                    huff[i, j] = new huffman_class();
-
-            for (int i = 0; i < quant.Length; i++)
-                quant[i] = new Block();
-
-            for (int i = 0; i < comp.Length; i++)
-                comp[i] = new Component();
-        }
-
-        private class img_ycbcr
-        {
-            public enum YCbCrSubsampleRatio
-            {
-                YCbCrSubsampleRatio444,
-                YCbCrSubsampleRatio422,
-                YCbCrSubsampleRatio420,
-                YCbCrSubsampleRatio440,
-                YCbCrSubsampleRatio411,
-                YCbCrSubsampleRatio410,
-            }
-
-            private static void yCbCrSize(int w, int h, YCbCrSubsampleRatio ratio, out int cw, out int ch)
-            {
-                switch (ratio)
                 {
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio422:
-                        cw = (w + 1) / 2;
-                        ch = h;
-                        break;
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio420:
-                        cw = (w + 1) / 2;
-                        ch = (h + 1) / 2;
-                        break;
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio440:
-                        cw = w;
-                        ch = (h + 1) / 2;
-                        break;
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio411:
-                        cw = (w + 3) / 4;
-                        ch = h;
-                        break;
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio410:
-                        cw = (w + 3) / 4;
-                        ch = (h + 1) / 2;
-                        break;
-                    default:
-                        // Default to 4:4:4 subsampling.
-                        cw = w;
-                        ch = h;
-                        break;
+                    this.huff[i, j] = new Huffman();
                 }
             }
 
-            private img_ycbcr()
+            for (int i = 0; i < this.quant.Length; i++)
             {
+                this.quant[i] = new Block();
             }
 
-            public byte[] pix_y, pix_cb, pix_cr;
-            public int y_stride, c_stride;
-            public int y_offset, c_offset;
-            public int x, y, w, h;
-            public YCbCrSubsampleRatio ratio;
-
-            public img_ycbcr(int w, int h, YCbCrSubsampleRatio ratio)
+            for (int i = 0; i < this.comp.Length; i++)
             {
-                int cw, ch;
-                yCbCrSize(w, h, ratio, out cw, out ch);
-                this.pix_y = new byte[w * h];
-                this.pix_cb = new byte[cw * ch];
-                this.pix_cr = new byte[cw * ch];
-                this.ratio = ratio;
-                this.y_stride = w;
-                this.c_stride = cw;
-                this.x = 0;
-                this.y = 0;
-                this.w = w;
-                this.h = h;
-            }
-
-            public img_ycbcr subimage(int x, int y, int w, int h)
-            {
-                var ret = new img_ycbcr
-                {
-                    w = w,
-                    h = h,
-                    pix_y = this.pix_y,
-                    pix_cb = this.pix_cb,
-                    pix_cr = this.pix_cr,
-                    ratio = this.ratio,
-                    y_stride = this.y_stride,
-                    c_stride = this.c_stride,
-                    y_offset = y * this.y_stride + x,
-                    c_offset = y * this.c_stride + x
-                };
-                return ret;
-            }
-
-            public int get_row_y_offset(int y)
-            {
-                return y * y_stride;
-            }
-
-            public int get_row_c_offset(int y)
-            {
-                switch (ratio)
-                {
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio422:
-                        return y * c_stride;
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio420:
-                        return (y / 2) * c_stride;
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio440:
-                        return (y / 2) * c_stride;
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio411:
-                        return y * c_stride;
-                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio410:
-                        return (y / 2) * c_stride;
-                    default:
-                        return y * c_stride;
-                }
+                this.comp[i] = new Component();
             }
         }
 
-        public class img_gray
-        {
-            public byte[] pixels;
-            public int stride;
-            public int x, y, w, h;
-            public int offset;
+        public int width;
 
-            private img_gray()
-            {
-            }
+        public int height;
 
-            public img_gray(int w, int h)
-            {
-                this.w = w;
-                this.h = h;
-                this.pixels = new byte[w * h];
-                this.stride = w;
-                this.offset = 0;
-            }
-
-            public img_gray subimage(int x, int y, int w, int h)
-            {
-                var ret = new img_gray
-                {
-                    w = w,
-                    h = h,
-                    pixels = this.pixels,
-                    stride = this.stride,
-                    offset = y * this.stride + x
-                };
-                return ret;
-            }
-
-            public int get_row_offset(int y)
-            {
-                return offset + y * stride;
-            }
-        }
-
-        private class huffman_class
-        {
-            public huffman_class()
-            {
-                lut = new ushort[1 << lutSize];
-                vals = new byte[maxNCodes];
-                minCodes = new int[maxCodeLength];
-                maxCodes = new int[maxCodeLength];
-                valsIndices = new int[maxCodeLength];
-                nCodes = 0;
-            }
-
-            // length is the number of codes in the tree.
-            public int nCodes;
-            // lut is the look-up table for the next lutSize bits in the bit-stream.
-            // The high 8 bits of the uint16 are the encoded value. The low 8 bits
-            // are 1 plus the code length, or 0 if the value is too large to fit in
-            // lutSize bits.
-            public ushort[] lut;
-            // vals are the decoded values, sorted by their encoding.
-            public byte[] vals;
-            // minCodes[i] is the minimum code of length i, or -1 if there are no
-            // codes of that length.
-            public int[] minCodes;
-            // maxCodes[i] is the maximum code of length i, or -1 if there are no
-            // codes of that length.
-            public int[] maxCodes;
-            // valsIndices[i] is the index into vals of minCodes[i].
-            public int[] valsIndices;
-        }
-
-        // bytes is a byte buffer, similar to a bufio.Reader, except that it
-        // has to be able to unread more than 1 byte, due to byte stuffing.
-        // Byte stuffing is specified in section F.1.2.3.
-        private class bytes_class
-        {
-            public bytes_class()
-            {
-                buf = new byte[4096];
-                i = 0;
-                j = 0;
-                nUnreadable = 0;
-            }
-
-            // buf[i:j] are the buffered bytes read from the underlying
-            // io.Reader that haven't yet been passed further on.
-            public byte[] buf;
-            public int i, j;
-            // nUnreadable is the number of bytes to back up i after
-            // overshooting. It can be 0, 1 or 2.
-            public int nUnreadable;
-        }
-
-        // bits holds the unprocessed bits that have been taken from the byte-stream.
-        // The n least significant bits of a form the unread bits, to be read in MSB to
-        // LSB order.
-        private class bits_class
-        {
-            public uint a; // accumulator.
-            public uint m; // mask. m==1<<(n-1) when n>0, with m==0 when n==0.
-            public int n; // the number of unread bits in a.
-        }
-
-        public int width, height;
         public int nComp;
-        public img_gray img1; //grayscale
-        //public img_rgb imgrgb; //RGB
 
-        private img_ycbcr img3; //YCrCb
+        public GrayImage grayImage; // grayscale
+
+        private YCbCrImage ycbcrImage; // YCrCb
+
         private Stream inputStream;
+
         private bits_class bits;
+
         private bytes_class bytes;
+
         private byte[] blackPix;
+
         private int blackStride;
 
         private int ri; // Restart Interval.
+
         private bool progressive;
+
         private bool jfif;
+
         private bool adobeTransformValid;
+
         private byte adobeTransform;
+
         private ushort eobRun; // End-of-Band run, specified in section G.1.2.2.
+
         private Component[] comp;
+
         private Block[][] progCoeffs; // Saved state between progressive-mode scans.
-        private huffman_class[,] huff;
+
+        private Huffman[,] huff;
+
         private Block[] quant; // Quantization tables, in zig-zag order.
+
         private byte[] tmp;
 
         // ensureNBits reads bytes from the byte buffer to ensure that bits.n is at
@@ -341,15 +134,12 @@ namespace ImageProcessorCore.Formats
         {
             while (true)
             {
-                var c = readByteStuffedByte();
-                bits.a = (bits.a << 8) | (uint)c;
-                bits.n += 8;
-                if (bits.m == 0)
-                    bits.m = 1 << 7;
-                else
-                    bits.m <<= 8;
-                if (bits.n >= n)
-                    break;
+                var c = this.ReadByteStuffedByte();
+                this.bits.a = (this.bits.a << 8) | (uint)c;
+                this.bits.n += 8;
+                if (this.bits.m == 0) this.bits.m = 1 << 7;
+                else this.bits.m <<= 8;
+                if (this.bits.n >= n) break;
             }
         }
 
@@ -357,38 +147,45 @@ namespace ImageProcessorCore.Formats
         // F.2.2.1.
         private int receiveExtend(byte t)
         {
-            if (bits.n < t)
-                ensureNBits(t);
+            if (this.bits.n < t) this.ensureNBits(t);
 
-            bits.n -= t;
-            bits.m >>= t;
+            this.bits.n -= t;
+            this.bits.m >>= t;
             int s = 1 << t;
-            int x = (int)((bits.a >> bits.n) & (s - 1));
-            if (x < (s >> 1))
-                x += ((-1) << t) + 1;
+            int x = (int)((this.bits.a >> this.bits.n) & (s - 1));
+            if (x < (s >> 1)) x += ((-1) << t) + 1;
             return x;
         }
 
-        // processDHT processes a Define Huffman Table marker, and initializes a huffman
-        // struct from its contents. Specified in section B.2.4.2.
-        private void processDHT(int n)
+        /// <summary>
+        /// Processes a Define Huffman Table marker, and initializes a huffman
+        /// struct from its contents. Specified in section B.2.4.2.
+        /// </summary>
+        /// <param name="n"></param>
+        private void ProcessDHT(int n)
         {
             while (n > 0)
             {
                 if (n < 17)
+                {
                     throw new ImageFormatException("DHT has wrong length");
+                }
 
-                readFull(tmp, 0, 17);
+                this.ReadFull(this.tmp, 0, 17);
 
-                int tc = tmp[0] >> 4;
+                int tc = this.tmp[0] >> 4;
                 if (tc > maxTc)
+                {
                     throw new ImageFormatException("bad Tc value");
+                }
 
-                int th = tmp[0] & 0x0f;
-                if (th > maxTh || !progressive && th > 1)
+                int th = this.tmp[0] & 0x0f;
+                if (th > maxTh || !this.progressive && th > 1)
+                {
                     throw new ImageFormatException("bad Th value");
+                }
 
-                huffman_class h = huff[tc, th];
+                Huffman h = this.huff[tc, th];
 
                 // Read nCodes and h.vals (and derive h.nCodes).
                 // nCodes[i] is the number of codes with code length i.
@@ -398,24 +195,20 @@ namespace ImageProcessorCore.Formats
                 int[] ncodes = new int[maxCodeLength];
                 for (int i = 0; i < ncodes.Length; i++)
                 {
-                    ncodes[i] = tmp[i + 1];
+                    ncodes[i] = this.tmp[i + 1];
                     h.nCodes += ncodes[i];
                 }
 
-                if (h.nCodes == 0)
-                    throw new ImageFormatException("Huffman table has zero length");
-                if (h.nCodes > maxNCodes)
-                    throw new ImageFormatException("Huffman table has excessive length");
+                if (h.nCodes == 0) throw new ImageFormatException("Huffman table has zero length");
+                if (h.nCodes > maxNCodes) throw new ImageFormatException("Huffman table has excessive length");
 
                 n -= h.nCodes + 17;
-                if (n < 0)
-                    throw new ImageFormatException("DHT has wrong length");
+                if (n < 0) throw new ImageFormatException("DHT has wrong length");
 
-                readFull(h.vals, 0, h.nCodes);
+                this.ReadFull(h.vals, 0, h.nCodes);
 
                 // Derive the look-up table.
-                for (int i = 0; i < h.lut.Length; i++)
-                    h.lut[i] = 0;
+                for (int i = 0; i < h.lut.Length; i++) h.lut[i] = 0;
 
                 uint x = 0, code = 0;
 
@@ -432,8 +225,7 @@ namespace ImageProcessorCore.Formats
                         // The low 8 bits are 1 plus the codeLength.
                         byte base2 = (byte)(code << (7 - i));
                         ushort lutValue = (ushort)(((ushort)h.vals[x] << 8) | (2 + i));
-                        for (int k = 0; k < 1 << (7 - i); k++)
-                            h.lut[base2 | k] = lutValue;
+                        for (int k = 0; k < 1 << (7 - i); k++) h.lut[base2 | k] = lutValue;
                         code++;
                         x++;
                     }
@@ -458,6 +250,7 @@ namespace ImageProcessorCore.Formats
                         c += nc;
                         index += nc;
                     }
+
                     c <<= 1;
                 }
             }
@@ -465,37 +258,34 @@ namespace ImageProcessorCore.Formats
 
         // decodeHuffman returns the next Huffman-coded value from the bit-stream,
         // decoded according to h.
-        private byte decodeHuffman(huffman_class h)
+        private byte decodeHuffman(Huffman h)
         {
-            if (h.nCodes == 0)
-                throw new ImageFormatException("uninitialized Huffman table");
+            if (h.nCodes == 0) throw new ImageFormatException("uninitialized Huffman table");
 
-            if (bits.n < 8)
+            if (this.bits.n < 8)
             {
                 try
                 {
-                    ensureNBits(8);
+                    this.ensureNBits(8);
                 }
-                catch (errMissingFF00)
+                catch (MissingFF00Exception)
                 {
-                    if (bytes.nUnreadable != 0)
-                        unreadByteStuffedByte();
+                    if (this.bytes.nUnreadable != 0) this.unreadByteStuffedByte();
                     goto slowPath;
                 }
-                catch (errShortHuffmanData)
+                catch (ShortHuffmanDataException)
                 {
-                    if (bytes.nUnreadable != 0)
-                        unreadByteStuffedByte();
+                    if (this.bytes.nUnreadable != 0) this.unreadByteStuffedByte();
                     goto slowPath;
                 }
             }
 
-            ushort v = h.lut[(bits.a >> (bits.n - lutSize)) & 0xff];
+            ushort v = h.lut[(this.bits.a >> (this.bits.n - lutSize)) & 0xff];
             if (v != 0)
             {
                 byte n = (byte)((v & 0xff) - 1);
-                bits.n -= n;
-                bits.m >>= n;
+                this.bits.n -= n;
+                this.bits.m >>= n;
                 return (byte)(v >> 8);
             }
 
@@ -503,14 +293,11 @@ namespace ImageProcessorCore.Formats
             int code = 0;
             for (int i = 0; i < maxCodeLength; i++)
             {
-                if (bits.n == 0)
-                    ensureNBits(1);
-                if ((bits.a & bits.m) != 0)
-                    code |= 1;
-                bits.n--;
-                bits.m >>= 1;
-                if (code <= h.maxCodes[i])
-                    return h.vals[h.valsIndices[i] + code - h.minCodes[i]];
+                if (this.bits.n == 0) this.ensureNBits(1);
+                if ((this.bits.a & this.bits.m) != 0) code |= 1;
+                this.bits.n--;
+                this.bits.m >>= 1;
+                if (code <= h.maxCodes[i]) return h.vals[h.valsIndices[i] + code - h.minCodes[i]];
                 code <<= 1;
             }
 
@@ -519,24 +306,22 @@ namespace ImageProcessorCore.Formats
 
         private bool decodeBit()
         {
-            if (bits.n == 0)
-                ensureNBits(1);
+            if (this.bits.n == 0) this.ensureNBits(1);
 
-            bool ret = (bits.a & bits.m) != 0;
-            bits.n--;
-            bits.m >>= 1;
+            bool ret = (this.bits.a & this.bits.m) != 0;
+            this.bits.n--;
+            this.bits.m >>= 1;
             return ret;
         }
 
         private uint decodeBits(int n)
         {
-            if (bits.n < n)
-                ensureNBits(n);
+            if (this.bits.n < n) this.ensureNBits(n);
 
-            uint ret = bits.a >> (bits.n - n);
+            uint ret = this.bits.a >> (this.bits.n - n);
             ret = (uint)(ret & ((1 << n) - 1));
-            bits.n -= n;
-            bits.m >>= n;
+            this.bits.n -= n;
+            this.bits.m >>= n;
             return ret;
         }
 
@@ -544,24 +329,22 @@ namespace ImageProcessorCore.Formats
         // should only be called when there are no unread bytes in bytes.
         private void fill()
         {
-            if (bytes.i != bytes.j)
-                throw new ImageFormatException("jpeg: fill called when unread bytes exist");
+            if (this.bytes.i != this.bytes.j) throw new ImageFormatException("jpeg: fill called when unread bytes exist");
 
             // Move the last 2 bytes to the start of the buffer, in case we need
             // to call unreadByteStuffedByte.
-            if (bytes.j > 2)
+            if (this.bytes.j > 2)
             {
-                bytes.buf[0] = bytes.buf[bytes.j - 2];
-                bytes.buf[1] = bytes.buf[bytes.j - 1];
-                bytes.i = 2;
-                bytes.j = 2;
+                this.bytes.buf[0] = this.bytes.buf[this.bytes.j - 2];
+                this.bytes.buf[1] = this.bytes.buf[this.bytes.j - 1];
+                this.bytes.i = 2;
+                this.bytes.j = 2;
             }
 
             // Fill in the rest of the buffer.
-            int n = inputStream.Read(bytes.buf, bytes.j, bytes.buf.Length - bytes.j);
-            if (n == 0)
-                throw new errEOF();
-            bytes.j += n;
+            int n = this.inputStream.Read(this.bytes.buf, this.bytes.j, this.bytes.buf.Length - this.bytes.j);
+            if (n == 0) throw new EOFException();
+            this.bytes.j += n;
         }
 
         // unreadByteStuffedByte undoes the most recent readByteStuffedByte call,
@@ -571,89 +354,94 @@ namespace ImageProcessorCore.Formats
         // can happen when expecting to read a 0xff 0x00 byte-stuffed byte.
         private void unreadByteStuffedByte()
         {
-            bytes.i -= bytes.nUnreadable;
-            bytes.nUnreadable = 0;
-            if (bits.n >= 8)
+            this.bytes.i -= this.bytes.nUnreadable;
+            this.bytes.nUnreadable = 0;
+            if (this.bits.n >= 8)
             {
-                bits.a >>= 8;
-                bits.n -= 8;
-                bits.m >>= 8;
+                this.bits.a >>= 8;
+                this.bits.n -= 8;
+                this.bits.m >>= 8;
             }
         }
 
         // readByte returns the next byte, whether buffered or not buffere It does
         // not care about byte stuffing.
-        private byte readByte()
+        private byte ReadByte()
         {
-            while (bytes.i == bytes.j)
-                fill();
-            byte x = bytes.buf[bytes.i];
-            bytes.i++;
-            bytes.nUnreadable = 0;
+            while (this.bytes.i == this.bytes.j) this.fill();
+            byte x = this.bytes.buf[this.bytes.i];
+            this.bytes.i++;
+            this.bytes.nUnreadable = 0;
             return x;
         }
 
-        // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
-        private byte readByteStuffedByte()
+        /// <summary>
+        /// ReadByteStuffedByte is like ReadByte but is for byte-stuffed Huffman data.
+        /// </summary>
+        /// <returns>The <see cref="byte"/></returns>
+        private byte ReadByteStuffedByte()
         {
             byte x;
 
             // Take the fast path if bytes.buf contains at least two bytes.
-            if (bytes.i + 2 <= bytes.j)
+            if (this.bytes.i + 2 <= this.bytes.j)
             {
-                x = bytes.buf[bytes.i];
-                bytes.i++;
-                bytes.nUnreadable = 1;
-                if (x != 0xff)
+                x = this.bytes.buf[this.bytes.i];
+                this.bytes.i++;
+                this.bytes.nUnreadable = 1;
+                if (x != JpegConstants.Markers.XFF)
+                {
                     return x;
-                if (bytes.buf[bytes.i] != 0x00)
-                    throw new errMissingFF00();
-                bytes.i++;
-                bytes.nUnreadable = 2;
+                }
+
+                if (this.bytes.buf[this.bytes.i] != 0x00)
+                {
+                    throw new MissingFF00Exception();
+                }
+
+                this.bytes.i++;
+                this.bytes.nUnreadable = 2;
                 return 0xff;
             }
 
-            bytes.nUnreadable = 0;
+            this.bytes.nUnreadable = 0;
 
-            x = readByte();
-            bytes.nUnreadable = 1;
-            if (x != 0xff)
-                return x;
-            x = readByte();
-            bytes.nUnreadable = 2;
-            if (x != 0x00)
-                throw new errMissingFF00();
+            x = this.ReadByte();
+            this.bytes.nUnreadable = 1;
+            if (x != 0xff) return x;
+            x = this.ReadByte();
+            this.bytes.nUnreadable = 2;
+            if (x != 0x00) throw new MissingFF00Exception();
             return 0xff;
         }
 
         // readFull reads exactly len(p) bytes into p. It does not care about byte
         // stuffing.
-        void readFull(byte[] data, int offset, int len)
+        private void ReadFull(byte[] data, int offset, int len)
         {
             // Unread the overshot bytes, if any.
-            if (bytes.nUnreadable != 0)
+            if (this.bytes.nUnreadable != 0)
             {
-                if (bits.n >= 8)
-                    unreadByteStuffedByte();
-                bytes.nUnreadable = 0;
+                if (this.bits.n >= 8) this.unreadByteStuffedByte();
+                this.bytes.nUnreadable = 0;
             }
 
             while (len > 0)
             {
-                if (bytes.j - bytes.i >= len)
+                if (this.bytes.j - this.bytes.i >= len)
                 {
-                    Array.Copy(bytes.buf, bytes.i, data, offset, len);
-                    bytes.i += len;
+                    Array.Copy(this.bytes.buf, this.bytes.i, data, offset, len);
+                    this.bytes.i += len;
                     len -= len;
                 }
                 else
                 {
-                    Array.Copy(bytes.buf, bytes.i, data, offset, bytes.j - bytes.i);
-                    offset += bytes.j - bytes.i;
-                    len -= bytes.j - bytes.i;
-                    bytes.i += bytes.j - bytes.i;
+                    Array.Copy(this.bytes.buf, this.bytes.i, data, offset, this.bytes.j - this.bytes.i);
+                    offset += this.bytes.j - this.bytes.i;
+                    len -= this.bytes.j - this.bytes.i;
+                    this.bytes.i += this.bytes.j - this.bytes.i;
 
-                    fill();
+                    this.fill();
                 }
             }
         }
@@ -662,84 +450,97 @@ namespace ImageProcessorCore.Formats
         private void ignore(int n)
         {
             // Unread the overshot bytes, if any.
-            if (bytes.nUnreadable != 0)
+            if (this.bytes.nUnreadable != 0)
             {
-                if (bits.n >= 8)
-                    unreadByteStuffedByte();
-                bytes.nUnreadable = 0;
+                if (this.bits.n >= 8) this.unreadByteStuffedByte();
+                this.bytes.nUnreadable = 0;
             }
 
             while (true)
             {
-                int m = bytes.j - bytes.i;
+                int m = this.bytes.j - this.bytes.i;
                 if (m > n) m = n;
-                bytes.i += m;
+                this.bytes.i += m;
                 n -= m;
-                if (n == 0)
-                    break;
-                else
-                    fill();
+                if (n == 0) break;
+                else this.fill();
             }
         }
 
         // Specified in section B.2.2.
-        private void processSOF(int n)
+        private void ProcessSOF(int n)
         {
-            if (nComp != 0)
+            if (this.nComp != 0)
+            {
                 throw new ImageFormatException("multiple SOF markers");
+            }
 
             switch (n)
             {
-                case 6 + 3 * 1: // Grayscale image.
-                    nComp = 1;
+                case 6 + (3 * 1): // Grayscale image.
+                    this.nComp = 1;
                     break;
-                case 6 + 3 * 3: // YCbCr or RGB image.
-                    nComp = 3;
+                case 6 + (3 * 3): // YCbCr or RGB image.
+                    this.nComp = 3;
                     break;
-                case 6 + 3 * 4: // YCbCrK or CMYK image.
-                    nComp = 4;
+                case 6 + (3 * 4): // YCbCrK or CMYK image.
+                    this.nComp = 4;
                     break;
                 default:
-                    throw new ImageFormatException("number of components");
+                    throw new ImageFormatException("Incorrect number of components");
             }
 
-            readFull(tmp, 0, n);
+            this.ReadFull(this.tmp, 0, n);
 
             // We only support 8-bit precision.
-            if (tmp[0] != 8)
-                throw new ImageFormatException("precision");
-
-            height = (tmp[1] << 8) + tmp[2];
-            width = (tmp[3] << 8) + tmp[4];
-            if (tmp[5] != nComp)
-                throw new ImageFormatException("SOF has wrong length");
-
-            for (int i = 0; i < nComp; i++)
+            if (this.tmp[0] != 8)
             {
-                comp[i].c = tmp[6 + 3 * i];
+                throw new ImageFormatException("Only 8-Bit precision supported.");
+            }
+
+            this.height = (this.tmp[1] << 8) + this.tmp[2];
+            this.width = (this.tmp[3] << 8) + this.tmp[4];
+            if (this.tmp[5] != this.nComp)
+            {
+                throw new ImageFormatException("SOF has wrong length");
+            }
+
+            for (int i = 0; i < this.nComp; i++)
+            {
+                this.comp[i].c = this.tmp[6 + (3 * i)];
+
                 // Section B.2.2 states that "the value of C_i shall be different from
                 // the values of C_1 through C_(i-1)".
                 for (int j = 0; j < i; j++)
                 {
-                    if (comp[i].c == comp[j].c)
+                    if (this.comp[i].c == this.comp[j].c)
+                    {
                         throw new ImageFormatException("Repeated component identifier");
+                    }
                 }
 
-                comp[i].tq = tmp[8 + 3 * i];
-                if (comp[i].tq > maxTq)
+                this.comp[i].tq = this.tmp[8 + (3 * i)];
+                if (this.comp[i].tq > maxTq)
+                {
                     throw new ImageFormatException("Bad Tq value");
+                }
 
-                byte hv = tmp[7 + 3 * i];
+                byte hv = this.tmp[7 + (3 * i)];
                 int h = hv >> 4;
                 int v = hv & 0x0f;
                 if (h < 1 || 4 < h || v < 1 || 4 < v)
+                {
                     throw new ImageFormatException("Unsupported Luma/chroma subsampling ratio");
+                }
                 if (h == 3 || v == 3)
+                {
                     throw new ImageFormatException("Lnsupported subsampling ratio");
+                }
 
-                switch (nComp)
+                switch (this.nComp)
                 {
                     case 1:
+
                         // If a JPEG image has only one component, section A.2 says "this data
                         // is non-interleaved by definition" and section A.2.2 says "[in this
                         // case...] the order of data units within a scan shall be left-to-right
@@ -756,6 +557,7 @@ namespace ImageProcessorCore.Formats
                         break;
 
                     case 3:
+
                         // For YCbCr images, we only support 4:4:4, 4:4:0, 4:2:2, 4:2:0,
                         // 4:1:1 or 4:1:0 chroma subsampling ratios. This implies that the
                         // (h, v) values for the Y component are either (1, 1), (1, 2),
@@ -765,61 +567,72 @@ namespace ImageProcessorCore.Formats
                         // ratio.
                         switch (i)
                         {
-                            case 0: // Y.
+                            case 0:
                                 {
+                                    // Y.
                                     // We have already verified, above, that h and v are both
                                     // either 1, 2 or 4, so invalid (h, v) combinations are those
                                     // with v == 4.
                                     if (v == 4)
+                                    {
                                         throw new ImageFormatException("unsupported subsampling ratio");
+                                    }
                                     break;
                                 }
-                            case 1: // Cb.
+
+                            case 1:
                                 {
-                                    if (comp[0].h % h != 0 || comp[0].v % v != 0)
+                                    // Cb.
+                                    if (this.comp[0].h % h != 0 || this.comp[0].v % v != 0)
+                                    {
                                         throw new ImageFormatException("unsupported subsampling ratio");
+                                    }
                                     break;
                                 }
-                            case 2: // Cr.
+
+                            case 2:
                                 {
-                                    if (comp[1].h != h || comp[1].v != v)
+                                    // Cr.
+                                    if (this.comp[1].h != h || this.comp[1].v != v)
+                                    {
                                         throw new ImageFormatException("unsupported subsampling ratio");
+                                    }
                                     break;
                                 }
                         }
+
                         break;
 
                     case 4:
+
                         // For 4-component images (either CMYK or YCbCrK), we only support two
                         // hv vectors: [0x11 0x11 0x11 0x11] and [0x22 0x11 0x11 0x22].
                         // Theoretically, 4-component JPEG images could mix and match hv values
                         // but in practice, those two combinations are the only ones in use,
                         // and it simplifies the applyBlack code below if we can assume that:
-                        //  - for CMYK, the C and K channels have full samples, and if the M
-                        //    and Y channels subsample, they subsample both horizontally and
-                        //    vertically.
-                        //  - for YCbCrK, the Y and K channels have full samples.
+                        // - for CMYK, the C and K channels have full samples, and if the M
+                        // and Y channels subsample, they subsample both horizontally and
+                        // vertically.
+                        // - for YCbCrK, the Y and K channels have full samples.
                         switch (i)
                         {
                             case 0:
-                                if (hv != 0x11 && hv != 0x22)
-                                    throw new ImageFormatException("unsupported subsampling ratio");
+                                if (hv != 0x11 && hv != 0x22) throw new ImageFormatException("unsupported subsampling ratio");
                                 break;
                             case 1:
                             case 2:
-                                if (hv != 0x11)
-                                    throw new ImageFormatException("unsupported subsampling ratio");
+                                if (hv != 0x11) throw new ImageFormatException("unsupported subsampling ratio");
                                 break;
                             case 3:
-                                if (comp[0].h != h || comp[0].v != v)
-                                    throw new ImageFormatException("unsupported subsampling ratio");
+                                if (this.comp[0].h != h || this.comp[0].v != v) throw new ImageFormatException("unsupported subsampling ratio");
                                 break;
                         }
+
                         break;
                 }
 
-                comp[i].h = h;
-                comp[i].v = v;
+                this.comp[i].h = h;
+                this.comp[i].v = v;
             }
         }
 
@@ -831,104 +644,108 @@ namespace ImageProcessorCore.Formats
                 bool done = false;
 
                 n--;
-                byte x = readByte();
+                byte x = this.ReadByte();
                 byte tq = (byte)(x & 0x0f);
-                if (tq > maxTq)
-                    throw new ImageFormatException("bad Tq value");
+                if (tq > maxTq) throw new ImageFormatException("bad Tq value");
 
                 switch (x >> 4)
                 {
                     case 0:
-                        if (n < Block.blockSize)
+                        if (n < Block.BlockSize)
                         {
                             done = true;
                             break;
                         }
-                        n -= Block.blockSize;
-                        readFull(tmp, 0, Block.blockSize);
 
-                        for (int i = 0; i < Block.blockSize; i++)
-                            quant[tq][i] = tmp[i];
+                        n -= Block.BlockSize;
+                        this.ReadFull(this.tmp, 0, Block.BlockSize);
+
+                        for (int i = 0; i < Block.BlockSize; i++) this.quant[tq][i] = this.tmp[i];
                         break;
                     case 1:
-                        if (n < 2 * Block.blockSize)
+                        if (n < 2 * Block.BlockSize)
                         {
                             done = true;
                             break;
                         }
-                        n -= 2 * Block.blockSize;
-                        readFull(tmp, 0, 2 * Block.blockSize);
 
-                        for (int i = 0; i < Block.blockSize; i++)
-                            quant[tq][i] = ((int)tmp[2 * i] << 8) | (int)tmp[2 * i + 1];
+                        n -= 2 * Block.BlockSize;
+                        this.ReadFull(this.tmp, 0, 2 * Block.BlockSize);
+
+                        for (int i = 0; i < Block.BlockSize; i++) this.quant[tq][i] = ((int)this.tmp[2 * i] << 8) | (int)this.tmp[2 * i + 1];
                         break;
                     default:
                         throw new ImageFormatException("bad Pq value");
                 }
 
-                if (done)
-                    break;
+                if (done) break;
             }
 
-            if (n != 0)
-                throw new ImageFormatException("DQT has wrong length");
+            if (n != 0) throw new ImageFormatException("DQT has wrong length");
         }
 
         // Specified in section B.2.4.4.
         private void processDRI(int n)
         {
-            if (n != 2)
-                throw new ImageFormatException("DRI has wrong length");
+            if (n != 2) throw new ImageFormatException("DRI has wrong length");
 
-            readFull(tmp, 0, 2);
-            ri = ((int)tmp[0] << 8) + (int)tmp[1];
+            this.ReadFull(this.tmp, 0, 2);
+            this.ri = ((int)this.tmp[0] << 8) + (int)this.tmp[1];
         }
 
         private void processApp0Marker(int n)
         {
             if (n < 5)
             {
-                ignore(n);
+                this.ignore(n);
                 return;
             }
 
-            readFull(tmp, 0, 5);
+            this.ReadFull(this.tmp, 0, 5);
             n -= 5;
 
-            jfif = tmp[0] == 'J' && tmp[1] == 'F' && tmp[2] == 'I' && tmp[3] == 'F' && tmp[4] == '\x00';
-            if (n > 0)
-                ignore(n);
+            this.jfif = this.tmp[0] == 'J' && this.tmp[1] == 'F' && this.tmp[2] == 'I' && this.tmp[3] == 'F'
+                        && this.tmp[4] == '\x00';
+            if (n > 0) this.ignore(n);
         }
 
         private void processApp14Marker(int n)
         {
             if (n < 12)
             {
-                ignore(n);
+                this.ignore(n);
                 return;
             }
 
-            readFull(tmp, 0, 12);
+            this.ReadFull(this.tmp, 0, 12);
             n -= 12;
 
-            if (tmp[0] == 'A' && tmp[1] == 'd' && tmp[2] == 'o' && tmp[3] == 'b' && tmp[4] == 'e')
+            if (this.tmp[0] == 'A' && this.tmp[1] == 'd' && this.tmp[2] == 'o' && this.tmp[3] == 'b'
+                && this.tmp[4] == 'e')
             {
-                adobeTransformValid = true;
-                adobeTransform = tmp[11];
+                this.adobeTransformValid = true;
+                this.adobeTransform = this.tmp[11];
             }
 
-            if (n > 0)
-                ignore(n);
+            if (n > 0) this.ignore(n);
         }
 
-        // decode reads a JPEG image from r and returns it as an image.Image.
+        /// <summary>
+        /// Decodes the image from the specified this._stream and sets
+        /// the data to image.
+        /// </summary>
+        /// <param name="stream">The stream, where the image should be
+        /// decoded from. Cannot be null (Nothing in Visual Basic).</param>
+        /// <param name="image">The image, where the data should be set to.
+        /// Cannot be null (Nothing in Visual Basic).</param>
+        /// <param name="configOnly">Whether to decode metadata only.</param>
         public void Decode(Stream stream, ImageBase image, bool configOnly)
         {
             this.inputStream = stream;
 
             // Check for the Start Of Image marker.
-            readFull(tmp, 0, 2);
-            if (tmp[0] != 0xff || tmp[1] != soiMarker)
+            this.ReadFull(this.tmp, 0, 2);
+            if (this.tmp[0] != JpegConstants.Markers.XFF || this.tmp[1] != JpegConstants.Markers.SOI)
             {
                 throw new ImageFormatException("Missing SOI marker.");
             }
@@ -936,8 +753,8 @@ namespace ImageProcessorCore.Formats
             // Process the remaining segments until the End Of Image marker.
             while (true)
             {
-                readFull(tmp, 0, 2);
-                while (tmp[0] != 0xff)
+                this.ReadFull(this.tmp, 0, 2);
+                while (this.tmp[0] != 0xff)
                 {
                     // Strictly speaking, this is a format error. However, libjpeg is
                     // liberal in what it accepts. As of version 9, next_marker in
@@ -950,19 +767,17 @@ namespace ImageProcessorCore.Formats
                     // and thus it can silently ignore a small number of extraneous
                     // non-marker bytes before next_marker has a chance to see them (and
                     // print a warning).
-                    //
                     // We are therefore also liberal in what we accept. Extraneous data
                     // is silently ignore
-                    //
                     // This is similar to, but not exactly the same as, the restart
                     // mechanism within a scan (the RST[0-7] markers).
-                    //
                     // Note that extraneous 0xff bytes in e.g. SOS data are escaped as
                     // "\xff\x00", and so are detected a little further down below.
-                    tmp[0] = tmp[1];
-                    tmp[1] = readByte();
+                    this.tmp[0] = this.tmp[1];
+                    this.tmp[1] = this.ReadByte();
                 }
-                byte marker = tmp[1];
+
+                byte marker = this.tmp[1];
                 if (marker == 0)
                 {
                     // Treat "\xff\x00" as extraneous data.
@@ -973,21 +788,21 @@ namespace ImageProcessorCore.Formats
                 {
                     // Section B.1.1.2 says, "Any marker may optionally be preceded by any
                     // number of fill bytes, which are bytes assigned code X'FF'".
-                    marker = readByte();
+                    marker = this.ReadByte();
                 }
 
                 // End Of Image.
-                if (marker == eoiMarker)
+                if (marker == JpegConstants.Markers.EOI)
                 {
                     break;
                 }
 
-                if (rst0Marker <= marker && marker <= rst7Marker)
+                if (JpegConstants.Markers.RST0 <= marker && marker <= JpegConstants.Markers.RST7)
                 {
                     // Figures B.2 and B.16 of the specification suggest that restart markers should
                     // only occur between Entropy Coded Segments and not after the final ECS.
                     // However, some encoders may generate incorrect JPEGs with a final restart
-                    // marker. That restart marker will be seen here instead of inside the processSOS
+                    // marker. That restart marker will be seen here instead of inside the ProcessSOS
                     // method, and is ignored as a harmless error. Restart markers have no extra data,
                     // so we check for this before we read the 16-bit length of the segment.
                     continue;
@@ -995,83 +810,101 @@ namespace ImageProcessorCore.Formats
 
                 // Read the 16-bit length of the segment. The value includes the 2 bytes for the
                 // length itself, so we subtract 2 to get the number of remaining bytes.
-                readFull(tmp, 0, 2);
-                int n = ((int)tmp[0] << 8) + (int)tmp[1] - 2;
+                this.ReadFull(this.tmp, 0, 2);
+                int n = ((int)this.tmp[0] << 8) + (int)this.tmp[1] - 2;
                 if (n < 0)
-                    throw new ImageFormatException("short segment length");
+                {
+                    throw new ImageFormatException("Short segment length.");
+                }
 
                 switch (marker)
                 {
-                    case sof0Marker:
-                    case sof1Marker:
-                    case sof2Marker:
-                        progressive = (marker == sof2Marker);
-                        processSOF(n);
-                        if (configOnly && jfif)
+                    case JpegConstants.Markers.SOF0:
+                    case JpegConstants.Markers.SOF1:
+                    case JpegConstants.Markers.SOF2:
+                        this.progressive = marker == JpegConstants.Markers.SOF2;
+                        this.ProcessSOF(n);
+                        if (configOnly && this.jfif)
                         {
                             return;
                         }
 
                         break;
-                    case dhtMarker:
+                    case JpegConstants.Markers.DHT:
                         if (configOnly)
-                            ignore(n);
+                        {
+                            this.ignore(n);
+                        }
                         else
-                            processDHT(n);
+                        {
+                            this.ProcessDHT(n);
+                        }
+
                         break;
-                    case dqtMarker:
+                    case JpegConstants.Markers.DQT:
                         if (configOnly)
-                            ignore(n);
-                        else
-                            processDQT(n);
+                        {
+                            this.ignore(n);
+                        }
+                        else this.processDQT(n);
                         break;
-                    case sosMarker:
+                    case JpegConstants.Markers.SOS:
                         if (configOnly)
                         {
                             return;
                         }
 
-                        ProcessSOS(n);
+                        this.ProcessSOS(n);
                         break;
-                    case driMarker:
+                    case JpegConstants.Markers.DRI:
                         if (configOnly)
-                            ignore(n);
+                        {
+                            this.ignore(n);
+                        }
                         else
-                            processDRI(n);
+                        {
+                            this.processDRI(n);
+                        }
+
                         break;
-                    case app0Marker:
-                        processApp0Marker(n);
+                    case JpegConstants.Markers.APP0:
+                        this.processApp0Marker(n);
                         break;
-                    case app14Marker:
-                        processApp14Marker(n);
+                    case JpegConstants.Markers.APP14:
+                        this.processApp14Marker(n);
                         break;
                     default:
-                        if (app0Marker <= marker && marker <= app15Marker || marker == comMarker)
+                        if (JpegConstants.Markers.APP0 <= marker && marker <= JpegConstants.Markers.APP15 || marker == JpegConstants.Markers.COM)
                         {
-                            ignore(n);
+                            this.ignore(n);
                         }
-                        else if (marker < 0xc0) // See Table B.1 "Marker code assignments".
+                        else if (marker < JpegConstants.Markers.SOF0)
+                        {
+                            // See Table B.1 "Marker code assignments".
                             throw new ImageFormatException("Unknown marker");
+                        }
                         else
+                        {
                             throw new ImageFormatException("Unknown marker");
+                        }
+
                         break;
                 }
             }
 
-            if (this.img1 != null)
+            if (this.grayImage != null)
             {
-                return;
+                this.ConvertFromGrayScale(this.width, this.height, image);
             }
-
-            if (this.img3 != null)
+            else if (this.ycbcrImage != null)
             {
                 if (this.IsRGB())
                 {
-                    this.ConvertDirectToRGB(this.width, this.height, image);
+                    this.ConvertFromRGB(this.width, this.height, image);
                 }
                 else
                 {
-                    this.ConvertToRGB(this.width, this.height, image);
+                    this.ConvertFromYCbCr(this.width, this.height, image);
                 }
             }
             else
@@ -1080,86 +913,116 @@ namespace ImageProcessorCore.Formats
             }
         }
 
-        private void ConvertToRGB(int width, int height, ImageBase image)
+        /// <summary>
+        /// Converts the image from the original grayscale image pixels.
+        /// </summary>
+        /// <param name="imageWidth">The width.</param>
+        /// <param name="imageHeight">The height.</param>
+        /// <param name="image">The image.</param>
+        private void ConvertFromGrayScale(int imageWidth, int imageHeight, ImageBase image)
         {
-            int cScale = comp[0].h / comp[1].h;
+            float[] pixels = new float[imageWidth * imageHeight * 4];
 
+            Parallel.For(
+                0,
+                imageHeight,
+                y =>
+                {
+                    int yoff = this.grayImage.GetRowOffset(y);
+                    for (int x = 0; x < imageWidth; x++)
+                    {
+                        int offset = ((y * imageWidth) + x) * 4;
+
+                        pixels[offset] = this.grayImage.pixels[yoff + x] / 255f;
+                        pixels[offset + 1] = this.grayImage.pixels[yoff + x] / 255f;
+                        pixels[offset + 2] = this.grayImage.pixels[yoff + x] / 255f;
+                        pixels[offset + 3] = 1;
+                    }
+                });
+
+            image.SetPixels(imageWidth, imageHeight, pixels);
+        }
+
+        /// <summary>
+        /// Converts the image from the original YCbCr image pixels.
+        /// </summary>
+        /// <param name="imageWidth">The width.</param>
+        /// <param name="imageHeight">The height.</param>
+        /// <param name="image">The image.</param>
+        private void ConvertFromYCbCr(int imageWidth, int imageHeight, ImageBase image)
+        {
+            int scale = this.comp[0].h / this.comp[1].h;
+
+            float[] pixels = new float[imageWidth * imageHeight * 4];
+
+            Parallel.For(
+                0,
+                imageHeight,
+                y =>
+                    {
+                        int yo = this.ycbcrImage.get_row_y_offset(y);
+                        int co = this.ycbcrImage.get_row_c_offset(y);
+
+                        for (int x = 0; x < imageWidth; x++)
+                        {
+                            byte yy = this.ycbcrImage.pix_y[yo + x];
+                            byte cb = this.ycbcrImage.pix_cb[co + (x / scale)];
+                            byte cr = this.ycbcrImage.pix_cr[co + (x / scale)];
+
+                            int index = ((y * imageWidth) + x) * 4;
+
+                            // Implicit casting FTW
+                            Color color = new YCbCr(yy, cb, cr);
+                            pixels[index] = color.R;
+                            pixels[index + 1] = color.G;
+                            pixels[index + 2] = color.B;
+                            pixels[index + 3] = color.A;
+                        }
+                    });
+
+            image.SetPixels(imageWidth, imageHeight, pixels);
+        }
+
+        /// <summary>
+        /// Converts the image from the original RBG image pixels.
+        /// </summary>
+        /// <param name="width">The width.</param>
+        /// <param name="height">The height.</param>
+        /// <param name="image">The image.</param>
+        private void ConvertFromRGB(int width, int height, ImageBase image)
+        {
+            int scale = this.comp[0].h / this.comp[1].h;
             float[] pixels = new float[width * height * 4];
 
             Parallel.For(
                 0,
                 height,
                 y =>
-                {
-                    int yo = img3.get_row_y_offset(y);
-                    int co = img3.get_row_c_offset(y);
-
-                    for (int x = 0; x < width; x++)
                     {
-                        byte yy = img3.pix_y[yo + x];
-                        byte cb = img3.pix_cb[co + (x / cScale)];
-                        byte cr = img3.pix_cr[co + (x / cScale)];
+                        int yo = this.ycbcrImage.get_row_y_offset(y);
+                        int co = this.ycbcrImage.get_row_c_offset(y);
 
-                        int index = ((y * width) + x) * 4;
+                        for (int x = 0; x < width; x++)
+                        {
+                            byte red = this.ycbcrImage.pix_y[yo + x];
+                            byte green = this.ycbcrImage.pix_cb[co + (x / scale)];
+                            byte blue = this.ycbcrImage.pix_cr[co + (x / scale)];
 
-                        // Implicit casting FTW
-                        Color color = new YCbCr(yy, cb, cr);
-                        pixels[index] = color.R;
-                        pixels[index + 1] = color.G;
-                        pixels[index + 2] = color.B;
-                        pixels[index + 3] = color.A;
-                    }
-                });
-
-            image.SetPixels(width, height, pixels);
-        }
-
-        private void ConvertDirectToRGB(int width, int height, ImageBase image)
-        {
-            int cScale = comp[0].h / comp[1].h;
-            float[] pixels = new float[width * height * 4];
-
-            Parallel.For(
-               0,
-               height,
-               y =>
-               {
-                   int yo = img3.get_row_y_offset(y);
-                   int co = img3.get_row_c_offset(y);
-
-                   for (int x = 0; x < width; x++)
-                   {
-                       byte red = img3.pix_y[yo + x];
-                       byte green = img3.pix_cb[co + x / cScale];
-                       byte blue = img3.pix_cr[co + x / cScale];
-
-                       int index = ((y * width) + x) * 4;
-                       Color color = new Bgra32(red, green, blue);
-                       pixels[index] = color.R;
-                       pixels[index + 1] = color.G;
-                       pixels[index + 2] = color.B;
-                       pixels[index + 3] = color.A;
-                   }
-               });
+                            int index = ((y * width) + x) * 4;
+                            Color color = new Bgra32(red, green, blue);
+                            pixels[index] = color.R;
+                            pixels[index + 1] = color.G;
+                            pixels[index + 2] = color.B;
+                            pixels[index + 3] = color.A;
+                        }
+                    });
 
             image.SetPixels(width, height, pixels);
-        }
-
-        private struct Scan
-        {
-            public byte compIndex;
-            public byte td;
-            public byte ta;
         }
 
         /// <summary>
         /// Processes the SOS (Start of scan marker).
         /// </summary>
-        /// <remarks>
-        /// TODO: This is throwing an error when decoding progressive images taken from 
-        /// Facebook. The second segment is returning 1 component (first is 3) this is 
-        /// throwing an error on line 1208.
-        /// </remarks>
         /// <remarks>
         /// TODO: This also needs some significant refactoring to follow a more OO format.
         /// </remarks>
@@ -1182,11 +1045,10 @@ namespace ImageProcessorCore.Formats
                 throw new ImageFormatException("SOS has wrong length");
             }
 
-
-            this.readFull(this.tmp, 0, n);
+            this.ReadFull(this.tmp, 0, n);
             byte lnComp = this.tmp[0];
 
-            if (n != 4 + 2 * lnComp)
+            if (n != 4 + (2 * lnComp))
             {
                 throw new ImageFormatException("SOS length inconsistent with number of components");
             }
@@ -1253,7 +1115,6 @@ namespace ImageProcessorCore.Formats
             // zigStart and zigEnd are the spectral selection bounds.
             // ah and al are the successive approximation high and low values.
             // The spec calls these values Ss, Se, Ah and Al.
-            //
             // For progressive JPEGs, these are the two more-or-less independent
             // aspects of progression. Spectral selection progression is when not
             // all of a block's 64 DCT coefficients are transmitted in one pass.
@@ -1264,10 +1125,9 @@ namespace ImageProcessorCore.Formats
             // three passes could transmit the 6 most significant bits, followed
             // by the second-least significant bit, followed by the least
             // significant bit.
-            //
             // For baseline JPEGs, these parameters are hard-coded to 0/63/0/0.
             int zigStart = 0;
-            int zigEnd = Block.blockSize - 1;
+            int zigEnd = Block.BlockSize - 1;
             int ah = 0;
             int al = 0;
 
@@ -1278,19 +1138,19 @@ namespace ImageProcessorCore.Formats
                 ah = (int)(this.tmp[3 + (2 * lnComp)] >> 4);
                 al = (int)(this.tmp[3 + (2 * lnComp)] & 0x0f);
 
-                if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || Block.blockSize <= zigEnd)
+                if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || Block.BlockSize <= zigEnd)
                 {
-                    throw new ImageFormatException("bad spectral selection bounds");
+                    throw new ImageFormatException("Bad spectral selection bounds");
                 }
 
                 if (zigStart != 0 && lnComp != 1)
                 {
-                    throw new ImageFormatException("progressive AC coefficients for more than one component");
+                    throw new ImageFormatException("Progressive AC coefficients for more than one component");
                 }
 
                 if (ah != 0 && ah != al + 1)
                 {
-                    throw new ImageFormatException("bad successive approximation values");
+                    throw new ImageFormatException("Bad successive approximation values");
                 }
             }
 
@@ -1300,9 +1160,9 @@ namespace ImageProcessorCore.Formats
             int mxx = (this.width + (8 * h0) - 1) / (8 * h0);
             int myy = (this.height + (8 * v0) - 1) / (8 * v0);
 
-            if (this.img1 == null && this.img3 == null)
+            if (this.grayImage == null && this.ycbcrImage == null)
             {
-                this.makeImg(mxx, myy);
+                this.MakeImg(mxx, myy);
             }
 
             if (this.progressive)
@@ -1312,7 +1172,8 @@ namespace ImageProcessorCore.Formats
                     int compIndex = scan[i].compIndex;
                     if (this.progCoeffs[compIndex] == null)
                     {
-                        this.progCoeffs[compIndex] = new Block[mxx * myy * this.comp[compIndex].h * this.comp[compIndex].v];
+                        this.progCoeffs[compIndex] =
+                            new Block[mxx * myy * this.comp[compIndex].h * this.comp[compIndex].v];
 
                         for (int j = 0; j < this.progCoeffs[compIndex].Length; j++)
                         {
@@ -1325,7 +1186,7 @@ namespace ImageProcessorCore.Formats
             this.bits = new bits_class();
 
             int mcu = 0;
-            byte expectedRST = rst0Marker;
+            byte expectedRST = JpegConstants.Markers.RST0;
 
             // b is the decoded coefficients, in natural (not zig-zag) order.
             Block b = new Block();
@@ -1342,37 +1203,34 @@ namespace ImageProcessorCore.Formats
                     for (int i = 0; i < lnComp; i++)
                     {
                         int compIndex = scan[i].compIndex;
-                        int hi = comp[compIndex].h;
-                        int vi = comp[compIndex].v;
-                        Block qt = quant[comp[compIndex].tq];
+                        int hi = this.comp[compIndex].h;
+                        int vi = this.comp[compIndex].v;
+                        Block qt = this.quant[this.comp[compIndex].tq];
 
                         for (int j = 0; j < hi * vi; j++)
                         {
                             // The blocks are traversed one MCU at a time. For 4:2:0 chroma
                             // subsampling, there are four Y 8x8 blocks in every 16x16 MCU.
-                            //
                             // For a baseline 32x16 pixel image, the Y blocks visiting order is:
-                            //  0 1 4 5
-                            //  2 3 6 7
-                            //
+                            // 0 1 4 5
+                            // 2 3 6 7
                             // For progressive images, the interleaved scans (those with nComp > 1)
                             // are traversed as above, but non-interleaved scans are traversed left
                             // to right, top to bottom:
-                            //  0 1 2 3
-                            //  4 5 6 7
+                            // 0 1 2 3
+                            // 4 5 6 7
                             // Only DC scans (zigStart == 0) can be interleave AC scans must have
                             // only one component.
-                            //
                             // To further complicate matters, for non-interleaved scans, there is no
                             // data for any blocks that are inside the image at the MCU level but
                             // outside the image at the pixel level. For example, a 24x16 pixel 4:2:0
                             // progressive image consists of two 16x16 MCUs. The interleaved scans
                             // will process 8 Y blocks:
-                            //  0 1 4 5
-                            //  2 3 6 7
+                            // 0 1 4 5
+                            // 2 3 6 7
                             // The non-interleaved scans will process only 6 Y blocks:
-                            //  0 1 2
-                            //  3 4 5
+                            // 0 1 2
+                            // 3 4 5
                             if (lnComp != 1)
                             {
                                 bx = hi * mx + j % hi;
@@ -1384,19 +1242,16 @@ namespace ImageProcessorCore.Formats
                                 bx = blockCount % q;
                                 by = blockCount / q;
                                 blockCount++;
-                                if (bx * 8 >= width || by * 8 >= height)
-                                    continue;
+                                if (bx * 8 >= this.width || by * 8 >= this.height) continue;
                             }
 
                             // Load the previous partially decoded coefficients, if applicable.
-                            if (progressive)
-                                b = progCoeffs[compIndex][by * mxx * hi + bx];
-                            else
-                                b = new Block();
+                            if (this.progressive) b = this.progCoeffs[compIndex][by * mxx * hi + bx];
+                            else b = new Block();
 
                             if (ah != 0)
                             {
-                                refine(b, huff[acTable, scan[i].ta], zigStart, zigEnd, 1 << al);
+                                this.Refine(b, this.huff[acTable, scan[i].ta], zigStart, zigEnd, 1 << al);
                             }
                             else
                             {
@@ -1406,63 +1261,67 @@ namespace ImageProcessorCore.Formats
                                     zig++;
 
                                     // Decode the DC coefficient, as specified in section F.2.2.1.
-                                    byte value = decodeHuffman(huff[dcTable, scan[i].td]);
+                                    byte value = this.decodeHuffman(this.huff[dcTable, scan[i].td]);
                                     if (value > 16)
                                     {
                                         throw new ImageFormatException("Excessive DC component");
                                     }
 
-                                    int dcDelta = receiveExtend(value);
+                                    int dcDelta = this.receiveExtend(value);
                                     dc[compIndex] += dcDelta;
                                     b[0] = dc[compIndex] << al;
                                 }
 
-                                if (zig <= zigEnd && eobRun > 0)
+                                if (zig <= zigEnd && this.eobRun > 0)
                                 {
-                                    eobRun--;
+                                    this.eobRun--;
                                 }
                                 else
                                 {
                                     // Decode the AC coefficients, as specified in section F.2.2.2.
-                                    var huffv = huff[acTable, scan[i].ta];
+                                    var huffv = this.huff[acTable, scan[i].ta];
                                     for (; zig <= zigEnd; zig++)
                                     {
-                                        byte value = decodeHuffman(huffv);
+                                        byte value = this.decodeHuffman(huffv);
                                         byte val0 = (byte)(value >> 4);
                                         byte val1 = (byte)(value & 0x0f);
                                         if (val1 != 0)
                                         {
                                             zig += val0;
                                             if (zig > zigEnd)
+                                            {
                                                 break;
+                                            }
 
-                                            var ac = receiveExtend(val1);
-                                            b[unzig[zig]] = ac << al;
+                                            int ac = this.receiveExtend(val1);
+                                            b[Unzig[zig]] = ac << al;
                                         }
                                         else
                                         {
                                             if (val0 != 0x0f)
                                             {
-                                                eobRun = (ushort)(1 << val0);
+                                                this.eobRun = (ushort)(1 << val0);
                                                 if (val0 != 0)
                                                 {
-                                                    eobRun |= (ushort)decodeBits(val0);
+                                                    this.eobRun |= (ushort)this.decodeBits(val0);
                                                 }
-                                                eobRun--;
+
+                                                this.eobRun--;
                                                 break;
                                             }
+
                                             zig += 0x0f;
                                         }
                                     }
                                 }
                             }
 
-                            if (progressive)
+                            if (this.progressive)
                             {
-                                if (zigEnd != Block.blockSize - 1 || al != 0)
+                                if (zigEnd != Block.BlockSize - 1 || al != 0)
                                 {
                                     // We haven't completely decoded this 8x8 block. Save the coefficients.
-                                    progCoeffs[compIndex][by * mxx * hi + bx] = b;
+                                    this.progCoeffs[compIndex][by * mxx * hi + bx] = b;
 
                                     // At this point, we could execute the rest of the loop body to dequantize and
                                     // perform the inverse DCT, to save early stages of a progressive image to the
@@ -1474,44 +1333,47 @@ namespace ImageProcessorCore.Formats
                             }
 
                             // Dequantize, perform the inverse DCT and store the block to the image.
-                            for (int zig = 0; zig < Block.blockSize; zig++)
-                                b[unzig[zig]] *= qt[zig];
+                            for (int zig = 0; zig < Block.BlockSize; zig++)
+                            {
+                                b[Unzig[zig]] *= qt[zig];
+                            }
 
                             IDCT.Transform(b);
 
-                            byte[] dst = null;
-                            int offset = 0;
-                            int stride = 0;
+                            byte[] dst;
+                            int offset;
+                            int stride;
 
-                            if (nComp == 1)
+                            if (this.nComp == 1)
                             {
-                                dst = img1.pixels;
-                                stride = img1.stride;
-                                offset = img1.offset + 8 * (by * img1.stride + bx);
+                                dst = this.grayImage.pixels;
+                                stride = this.grayImage.stride;
+                                offset = this.grayImage.offset + 8 * (by * this.grayImage.stride + bx);
                             }
                             else
                             {
                                 switch (compIndex)
                                 {
                                     case 0:
-                                        dst = img3.pix_y;
-                                        stride = img3.y_stride;
-                                        offset = img3.y_offset + 8 * (by * img3.y_stride + bx);
+                                        dst = this.ycbcrImage.pix_y;
+                                        stride = this.ycbcrImage.y_stride;
+                                        offset = this.ycbcrImage.y_offset + 8 * (by * this.ycbcrImage.y_stride + bx);
                                         break;
 
                                     case 1:
-                                        dst = img3.pix_cb;
-                                        stride = img3.c_stride;
-                                        offset = img3.c_offset + 8 * (by * img3.c_stride + bx);
+                                        dst = this.ycbcrImage.pix_cb;
+                                        stride = this.ycbcrImage.c_stride;
+                                        offset = this.ycbcrImage.c_offset + 8 * (by * this.ycbcrImage.c_stride + bx);
                                         break;
 
                                     case 2:
-                                        dst = img3.pix_cr;
-                                        stride = img3.c_stride;
-                                        offset = img3.c_offset + 8 * (by * img3.c_stride + bx);
+                                        dst = this.ycbcrImage.pix_cr;
+                                        stride = this.ycbcrImage.c_stride;
+                                        offset = this.ycbcrImage.c_offset + 8 * (by * this.ycbcrImage.c_stride + bx);
                                         break;
 
                                     case 3:
+
                                         // dst, stride = blackPix[8*(by*blackStride+bx):], blackStride
                                         // break;
                                         // TODO: Check this.
@@ -1544,8 +1406,6 @@ namespace ImageProcessorCore.Formats
                                         c += 128;
                                     }
 
-                                    // TODO: I think we can cut out all the double looping by
-                                    // assigning the color here.
                                     dst[yStride + x + offset] = (byte)c;
                                 }
                             }
@@ -1554,30 +1414,30 @@ namespace ImageProcessorCore.Formats
 
                     mcu++;
 
-                    if (ri > 0 && mcu % ri == 0 && mcu < mxx * myy)
+                    if (this.ri > 0 && mcu % this.ri == 0 && mcu < mxx * myy)
                     {
                         // A more sophisticated decoder could use RST[0-7] markers to resynchronize from corrupt input,
                         // but this one assumes well-formed input, and hence the restart marker follows immediately.
-                        readFull(tmp, 0, 2);
-                        if (tmp[0] != 0xff || tmp[1] != expectedRST)
+                        this.ReadFull(this.tmp, 0, 2);
+                        if (this.tmp[0] != 0xff || this.tmp[1] != expectedRST)
                         {
                             throw new ImageFormatException("Bad RST marker");
                         }
 
                         expectedRST++;
-                        if (expectedRST == rst7Marker + 1)
+                        if (expectedRST == JpegConstants.Markers.RST7 + 1)
                         {
-                            expectedRST = rst0Marker;
+                            expectedRST = JpegConstants.Markers.RST0;
                         }
 
                         // Reset the Huffman decoder.
-                        bits = new bits_class();
+                        this.bits = new bits_class();
 
                         // Reset the DC components, as per section F.2.1.3.1.
                         dc = new int[maxComponents];
 
                         // Reset the progressive decoder state, as per section G.1.2.2.
-                        eobRun = 0;
+                        this.eobRun = 0;
                     }
                 } // for mx
             } // for my
@@ -1585,30 +1445,28 @@ namespace ImageProcessorCore.Formats
 
         // refine decodes a successive approximation refinement block, as specified in
         // section G.1.2.
-        private void refine(Block b, huffman_class h, int zigStart, int zigEnd, int delta)
+        private void Refine(Block b, Huffman h, int zigStart, int zigEnd, int delta)
         {
             // Refining a DC component is trivial.
             if (zigStart == 0)
             {
-                if (zigEnd != 0)
-                    throw new ImageFormatException("Invalid state for zig DC component");
+                if (zigEnd != 0) throw new ImageFormatException("Invalid state for zig DC component");
 
-                bool bit = decodeBit();
-                if (bit)
-                    b[0] |= delta;
+                bool bit = this.decodeBit();
+                if (bit) b[0] |= delta;
 
                 return;
             }
 
             // Refining AC components is more complicated; see sections G.1.2.2 and G.1.2.3.
             int zig = zigStart;
-            if (eobRun == 0)
+            if (this.eobRun == 0)
             {
                 for (; zig <= zigEnd; zig++)
                 {
                     bool done = false;
                     int z = 0;
-                    var val = decodeHuffman(h);
+                    var val = this.decodeHuffman(h);
                     int val0 = val >> 4;
                     int val1 = val & 0x0f;
 
@@ -1617,112 +1475,105 @@ namespace ImageProcessorCore.Formats
                         case 0:
                             if (val0 != 0x0f)
                             {
-                                eobRun = (ushort)(1 << val0);
+                                this.eobRun = (ushort)(1 << val0);
                                 if (val0 != 0)
                                 {
-                                    uint bits = decodeBits(val0);
-                                    eobRun |= (ushort)bits;
+                                    uint bits = this.decodeBits(val0);
+                                    this.eobRun |= (ushort)bits;
                                 }
 
                                 done = true;
                             }
+
                             break;
                         case 1:
                             z = delta;
-                            bool bit = decodeBit();
-                            if (!bit)
-                                z = -z;
+                            bool bit = this.decodeBit();
+                            if (!bit) z = -z;
                             break;
                         default:
                             throw new ImageFormatException("unexpected Huffman code");
                     }
 
-                    if (done)
-                        break;
+                    if (done) break;
 
-                    zig = refineNonZeroes(b, zig, zigEnd, val0, delta);
-                    if (zig > zigEnd)
-                        throw new ImageFormatException(string.Format("too many coefficients {0} > {1}", zig, zigEnd));
+                    zig = this.RefineNonZeroes(b, zig, zigEnd, val0, delta);
+                    if (zig > zigEnd) throw new ImageFormatException(string.Format("too many coefficients {0} > {1}", zig, zigEnd));
 
-                    if (z != 0)
-                        b[unzig[zig]] = z;
+                    if (z != 0) b[Unzig[zig]] = z;
                 }
             }
 
-            if (eobRun > 0)
+            if (this.eobRun > 0)
             {
-                eobRun--;
-                refineNonZeroes(b, zig, zigEnd, -1, delta);
+                this.eobRun--;
+                this.RefineNonZeroes(b, zig, zigEnd, -1, delta);
             }
         }
 
         // refineNonZeroes refines non-zero entries of b in zig-zag order. If nz >= 0,
         // the first nz zero entries are skipped over.
-        public int refineNonZeroes(Block b, int zig, int zigEnd, int nz, int delta)
+        public int RefineNonZeroes(Block b, int zig, int zigEnd, int nz, int delta)
         {
             for (; zig <= zigEnd; zig++)
             {
-                int u = unzig[zig];
+                int u = Unzig[zig];
                 if (b[u] == 0)
                 {
-                    if (nz == 0)
-                        break;
+                    if (nz == 0) break;
                     nz--;
                     continue;
                 }
 
-                bool bit = decodeBit();
-                if (!bit)
-                    continue;
+                bool bit = this.decodeBit();
+                if (!bit) continue;
 
-                if (b[u] >= 0)
-                    b[u] += delta;
-                else
-                    b[u] -= delta;
+                if (b[u] >= 0) b[u] += delta;
+                else b[u] -= delta;
             }
 
             return zig;
         }
 
-        private void makeImg(int mxx, int myy)
+        private void MakeImg(int mxx, int myy)
         {
-            if (nComp == 1)
+            if (this.nComp == 1)
             {
-                var m = new img_gray(8 * mxx, 8 * myy);
-                img1 = m.subimage(0, 0, width, height);
+                var m = new GrayImage(8 * mxx, 8 * myy);
+                this.grayImage = m.subimage(0, 0, this.width, this.height);
             }
             else
             {
-                var h0 = comp[0].h;
-                var v0 = comp[0].v;
-                var hRatio = h0 / comp[1].h;
-                var vRatio = v0 / comp[1].v;
+                var h0 = this.comp[0].h;
+                var v0 = this.comp[0].v;
+                var hRatio = h0 / this.comp[1].h;
+                var vRatio = v0 / this.comp[1].v;
 
-                var ratio = img_ycbcr.YCbCrSubsampleRatio.YCbCrSubsampleRatio444;
+                var ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio444;
                 switch ((hRatio << 4) | vRatio)
                 {
                     case 0x11:
-                        ratio = img_ycbcr.YCbCrSubsampleRatio.YCbCrSubsampleRatio444;
+                        ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio444;
                         break;
                     case 0x12:
-                        ratio = img_ycbcr.YCbCrSubsampleRatio.YCbCrSubsampleRatio440;
+                        ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio440;
                         break;
                     case 0x21:
-                        ratio = img_ycbcr.YCbCrSubsampleRatio.YCbCrSubsampleRatio422;
+                        ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio422;
                         break;
                     case 0x22:
-                        ratio = img_ycbcr.YCbCrSubsampleRatio.YCbCrSubsampleRatio420;
+                        ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio420;
                         break;
                     case 0x41:
-                        ratio = img_ycbcr.YCbCrSubsampleRatio.YCbCrSubsampleRatio411;
+                        ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio411;
                         break;
                     case 0x42:
-                        ratio = img_ycbcr.YCbCrSubsampleRatio.YCbCrSubsampleRatio410;
+                        ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio410;
                         break;
                 }
 
-                var m = new img_ycbcr(8 * h0 * mxx, 8 * v0 * myy, ratio);
-                img3 = m.subimage(0, 0, width, height);
+                var m = new YCbCrImage(8 * h0 * mxx, 8 * v0 * myy, ratio);
+                this.ycbcrImage = m.subimage(0, 0, this.width, this.height);
 
                 /*if d.nComp == 4 {
                     h3, v3 := d.comp[3].h, d.comp[3].v
@@ -1732,6 +1583,12 @@ namespace ImageProcessorCore.Formats
             }
         }
 
+        /// <summary>
+        /// Returns a value indicating whether the image in an RGB image.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
         private bool IsRGB()
         {
             if (this.jfif)
@@ -1747,6 +1604,300 @@ namespace ImageProcessorCore.Formats
             }
 
             return this.comp[0].c == 'R' && this.comp[1].c == 'G' && this.comp[2].c == 'B';
+        }
+
+        private class Component
+        {
+            public int h; // Horizontal sampling factor.
+
+            public int v; // Vertical sampling factor.
+
+            public byte c; // Component identifier.
+
+            public byte tq; // Quantization table destination selector.
+        }
+
+        private class YCbCrImage
+        {
+            public enum YCbCrSubsampleRatio
+            {
+                YCbCrSubsampleRatio444,
+
+                YCbCrSubsampleRatio422,
+
+                YCbCrSubsampleRatio420,
+
+                YCbCrSubsampleRatio440,
+
+                YCbCrSubsampleRatio411,
+
+                YCbCrSubsampleRatio410,
+            }
+
+            private static void yCbCrSize(int w, int h, YCbCrSubsampleRatio ratio, out int cw, out int ch)
+            {
+                switch (ratio)
+                {
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio422:
+                        cw = (w + 1) / 2;
+                        ch = h;
+                        break;
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio420:
+                        cw = (w + 1) / 2;
+                        ch = (h + 1) / 2;
+                        break;
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio440:
+                        cw = w;
+                        ch = (h + 1) / 2;
+                        break;
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio411:
+                        cw = (w + 3) / 4;
+                        ch = h;
+                        break;
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio410:
+                        cw = (w + 3) / 4;
+                        ch = (h + 1) / 2;
+                        break;
+                    default:
+
+                        // Default to 4:4:4 subsampling.
+                        cw = w;
+                        ch = h;
+                        break;
+                }
+            }
+
+            private YCbCrImage()
+            {
+            }
+
+            public byte[] pix_y;
+
+            public byte[] pix_cb;
+
+            public byte[] pix_cr;
+
+            public int y_stride;
+
+            public int c_stride;
+
+            public int y_offset;
+
+            public int c_offset;
+
+            public int x;
+
+            public int y;
+
+            public int w;
+
+            public int h;
+
+            public YCbCrSubsampleRatio ratio;
+
+            public YCbCrImage(int w, int h, YCbCrSubsampleRatio ratio)
+            {
+                int cw, ch;
+                yCbCrSize(w, h, ratio, out cw, out ch);
+                this.pix_y = new byte[w * h];
+                this.pix_cb = new byte[cw * ch];
+                this.pix_cr = new byte[cw * ch];
+                this.ratio = ratio;
+                this.y_stride = w;
+                this.c_stride = cw;
+                this.x = 0;
+                this.y = 0;
+                this.w = w;
+                this.h = h;
+            }
+
+            public YCbCrImage subimage(int x, int y, int w, int h)
+            {
+                var ret = new YCbCrImage
+                {
+                    w = w,
+                    h = h,
+                    pix_y = this.pix_y,
+                    pix_cb = this.pix_cb,
+                    pix_cr = this.pix_cr,
+                    ratio = this.ratio,
+                    y_stride = this.y_stride,
+                    c_stride = this.c_stride,
+                    y_offset = y * this.y_stride + x,
+                    c_offset = y * this.c_stride + x
+                };
+                return ret;
+            }
+
+            public int get_row_y_offset(int y)
+            {
+                return y * this.y_stride;
+            }
+
+            public int get_row_c_offset(int y)
+            {
+                switch (this.ratio)
+                {
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio422:
+                        return y * this.c_stride;
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio420:
+                        return (y / 2) * this.c_stride;
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio440:
+                        return (y / 2) * this.c_stride;
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio411:
+                        return y * this.c_stride;
+                    case YCbCrSubsampleRatio.YCbCrSubsampleRatio410:
+                        return (y / 2) * this.c_stride;
+                    default:
+                        return y * this.c_stride;
+                }
+            }
+        }
+
+        public class GrayImage
+        {
+            public byte[] pixels;
+
+            public int stride;
+
+            public int x;
+
+            public int y;
+
+            public int w;
+
+            public int h;
+
+            public int offset;
+
+            private GrayImage()
+            {
+            }
+
+            public GrayImage(int w, int h)
+            {
+                this.w = w;
+                this.h = h;
+                this.pixels = new byte[w * h];
+                this.stride = w;
+                this.offset = 0;
+            }
+
+            public GrayImage subimage(int x, int y, int w, int h)
+            {
+                var ret = new GrayImage
+                {
+                    w = w,
+                    h = h,
+                    pixels = this.pixels,
+                    stride = this.stride,
+                    offset = y * this.stride + x
+                };
+                return ret;
+            }
+
+            public int GetRowOffset(int y)
+            {
+                return this.offset + y * this.stride;
+            }
+        }
+
+        private class Huffman
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Huffman"/> class. 
+            /// </summary>
+            public Huffman()
+            {
+                this.lut = new ushort[1 << lutSize];
+                this.vals = new byte[maxNCodes];
+                this.minCodes = new int[maxCodeLength];
+                this.maxCodes = new int[maxCodeLength];
+                this.valsIndices = new int[maxCodeLength];
+                this.nCodes = 0;
+            }
+
+            // length is the number of codes in the tree.
+            public int nCodes;
+
+            // lut is the look-up table for the next lutSize bits in the bit-stream.
+            // The high 8 bits of the uint16 are the encoded value. The low 8 bits
+            // are 1 plus the code length, or 0 if the value is too large to fit in
+            // lutSize bits.
+            public ushort[] lut;
+
+            // vals are the decoded values, sorted by their encoding.
+            public byte[] vals;
+
+            // minCodes[i] is the minimum code of length i, or -1 if there are no
+            // codes of that length.
+            public int[] minCodes;
+
+            // maxCodes[i] is the maximum code of length i, or -1 if there are no
+            // codes of that length.
+            public int[] maxCodes;
+
+            // valsIndices[i] is the index into vals of minCodes[i].
+            public int[] valsIndices;
+        }
+
+        // bytes is a byte buffer, similar to a bufio.Reader, except that it
+        // has to be able to unread more than 1 byte, due to byte stuffing.
+        // Byte stuffing is specified in section F.1.2.3.
+        private class bytes_class
+        {
+            public bytes_class()
+            {
+                this.buf = new byte[4096];
+                this.i = 0;
+                this.j = 0;
+                this.nUnreadable = 0;
+            }
+
+            // buf[i:j] are the buffered bytes read from the underlying
+            // io.Reader that haven't yet been passed further on.
+            public byte[] buf;
+
+            public int i;
+
+            public int j;
+
+            // nUnreadable is the number of bytes to back up i after
+            // overshooting. It can be 0, 1 or 2.
+            public int nUnreadable;
+        }
+
+        // bits holds the unprocessed bits that have been taken from the byte-stream.
+        // The n least significant bits of a form the unread bits, to be read in MSB to
+        // LSB order.
+        private class bits_class
+        {
+            public uint a; // accumulator.
+
+            public uint m; // mask. m==1<<(n-1) when n>0, with m==0 when n==0.
+
+            public int n; // the number of unread bits in a.
+        }
+
+        private class MissingFF00Exception : Exception
+        {
+        }
+
+        private class ShortHuffmanDataException : Exception
+        {
+        }
+
+        private class EOFException : Exception
+        {
+        }
+
+        private struct Scan
+        {
+            public byte compIndex;
+
+            public byte td;
+
+            public byte ta;
         }
     }
 }
