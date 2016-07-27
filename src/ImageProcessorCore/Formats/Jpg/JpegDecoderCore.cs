@@ -53,38 +53,6 @@ namespace ImageProcessorCore.Formats
             39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
         };
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JpegDecoderCore"/> class.
-        /// </summary>
-        public JpegDecoderCore()
-        {
-            this.huff = new Huffman[maxTc + 1, maxTh + 1];
-            this.quant = new Block[maxTq + 1];
-            this.tmp = new byte[2 * Block.BlockSize];
-            this.comp = new Component[maxComponents];
-            this.progCoeffs = new Block[maxComponents][];
-            this.bits = new bits_class();
-            this.bytes = new bytes_class();
-
-            for (int i = 0; i < maxTc + 1; i++)
-            {
-                for (int j = 0; j < maxTh + 1; j++)
-                {
-                    this.huff[i, j] = new Huffman();
-                }
-            }
-
-            for (int i = 0; i < this.quant.Length; i++)
-            {
-                this.quant[i] = new Block();
-            }
-
-            for (int i = 0; i < this.comp.Length; i++)
-            {
-                this.comp[i] = new Component();
-            }
-        }
-
         public int width;
 
         public int height;
@@ -127,10 +95,52 @@ namespace ImageProcessorCore.Formats
 
         private byte[] tmp;
 
+        /// <summary>
+        /// The horizontal resolution. Calculated if the image has a JFIF header.
+        /// </summary>
+        private short horizontalResolution;
+
+        /// <summary>
+        /// The vertical resolution. Calculated if the image has a JFIF header.
+        /// </summary>
+        private short verticalResolution;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JpegDecoderCore"/> class.
+        /// </summary>
+        public JpegDecoderCore()
+        {
+            this.huff = new Huffman[maxTc + 1, maxTh + 1];
+            this.quant = new Block[maxTq + 1];
+            this.tmp = new byte[2 * Block.BlockSize];
+            this.comp = new Component[maxComponents];
+            this.progCoeffs = new Block[maxComponents][];
+            this.bits = new bits_class();
+            this.bytes = new bytes_class();
+
+            for (int i = 0; i < maxTc + 1; i++)
+            {
+                for (int j = 0; j < maxTh + 1; j++)
+                {
+                    this.huff[i, j] = new Huffman();
+                }
+            }
+
+            for (int i = 0; i < this.quant.Length; i++)
+            {
+                this.quant[i] = new Block();
+            }
+
+            for (int i = 0; i < this.comp.Length; i++)
+            {
+                this.comp[i] = new Component();
+            }
+        }
+
         // ensureNBits reads bytes from the byte buffer to ensure that bits.n is at
         // least n. For best performance (avoiding function calls inside hot loops),
         // the caller is the one responsible for first checking that bits.n < n.
-        private void ensureNBits(int n)
+        private void EnsureNBits(int n)
         {
             while (true)
             {
@@ -145,9 +155,9 @@ namespace ImageProcessorCore.Formats
 
         // receiveExtend is the composition of RECEIVE and EXTEND, specified in section
         // F.2.2.1.
-        private int receiveExtend(byte t)
+        private int ReceiveExtend(byte t)
         {
-            if (this.bits.n < t) this.ensureNBits(t);
+            if (this.bits.n < t) this.EnsureNBits(t);
 
             this.bits.n -= t;
             this.bits.m >>= t;
@@ -266,7 +276,7 @@ namespace ImageProcessorCore.Formats
             {
                 try
                 {
-                    this.ensureNBits(8);
+                    this.EnsureNBits(8);
                 }
                 catch (MissingFF00Exception)
                 {
@@ -293,7 +303,7 @@ namespace ImageProcessorCore.Formats
             int code = 0;
             for (int i = 0; i < maxCodeLength; i++)
             {
-                if (this.bits.n == 0) this.ensureNBits(1);
+                if (this.bits.n == 0) this.EnsureNBits(1);
                 if ((this.bits.a & this.bits.m) != 0) code |= 1;
                 this.bits.n--;
                 this.bits.m >>= 1;
@@ -306,7 +316,7 @@ namespace ImageProcessorCore.Formats
 
         private bool decodeBit()
         {
-            if (this.bits.n == 0) this.ensureNBits(1);
+            if (this.bits.n == 0) this.EnsureNBits(1);
 
             bool ret = (this.bits.a & this.bits.m) != 0;
             this.bits.n--;
@@ -316,7 +326,7 @@ namespace ImageProcessorCore.Formats
 
         private uint decodeBits(int n)
         {
-            if (this.bits.n < n) this.ensureNBits(n);
+            if (this.bits.n < n) this.EnsureNBits(n);
 
             uint ret = this.bits.a >> (this.bits.n - n);
             ret = (uint)(ret & ((1 << n) - 1));
@@ -693,7 +703,7 @@ namespace ImageProcessorCore.Formats
             this.ri = ((int)this.tmp[0] << 8) + (int)this.tmp[1];
         }
 
-        private void processApp0Marker(int n)
+        private void ProcessApp0Marker(int n)
         {
             if (n < 5)
             {
@@ -701,15 +711,29 @@ namespace ImageProcessorCore.Formats
                 return;
             }
 
-            this.ReadFull(this.tmp, 0, 5);
-            n -= 5;
+            this.ReadFull(this.tmp, 0, 13);
+            n -= 13;
 
-            this.jfif = this.tmp[0] == 'J' && this.tmp[1] == 'F' && this.tmp[2] == 'I' && this.tmp[3] == 'F'
-                        && this.tmp[4] == '\x00';
-            if (n > 0) this.ignore(n);
+            // TODO: We should be able to read the resolution here.
+            this.jfif = this.tmp[0] == 'J'
+                     && this.tmp[1] == 'F'
+                     && this.tmp[2] == 'I'
+                     && this.tmp[3] == 'F'
+                     && this.tmp[4] == '\x00';
+
+            if (this.jfif)
+            {
+                this.horizontalResolution = (short)(this.tmp[9] + (this.tmp[10] << 8));
+                this.verticalResolution = (short)(this.tmp[11] + (this.tmp[12] << 8));
+            }
+
+            if (n > 0)
+            {
+                this.ignore(n);
+            }
         }
 
-        private void processApp14Marker(int n)
+        private void ProcessApp14Marker(int n)
         {
             if (n < 12)
             {
@@ -727,7 +751,10 @@ namespace ImageProcessorCore.Formats
                 this.adobeTransform = this.tmp[11];
             }
 
-            if (n > 0) this.ignore(n);
+            if (n > 0)
+            {
+                this.ignore(n);
+            }
         }
 
         /// <summary>
@@ -870,10 +897,10 @@ namespace ImageProcessorCore.Formats
 
                         break;
                     case JpegConstants.Markers.APP0:
-                        this.processApp0Marker(n);
+                        this.ProcessApp0Marker(n);
                         break;
                     case JpegConstants.Markers.APP14:
-                        this.processApp14Marker(n);
+                        this.ProcessApp14Marker(n);
                         break;
                     default:
                         if (JpegConstants.Markers.APP0 <= marker && marker <= JpegConstants.Markers.APP15 || marker == JpegConstants.Markers.COM)
@@ -932,6 +959,7 @@ namespace ImageProcessorCore.Formats
             Parallel.For(
                 0,
                 imageHeight,
+                Bootstrapper.Instance.ParallelOptions,
                 y =>
                 {
                     int yoff = this.grayImage.GetRowOffset(y);
@@ -947,6 +975,7 @@ namespace ImageProcessorCore.Formats
                 });
 
             image.SetPixels(imageWidth, imageHeight, pixels);
+            this.AssignResolution(image);
         }
 
         /// <summary>
@@ -968,6 +997,7 @@ namespace ImageProcessorCore.Formats
             Parallel.For(
                 0,
                 imageHeight,
+                Bootstrapper.Instance.ParallelOptions,
                 y =>
                     {
                         int yo = this.ycbcrImage.get_row_y_offset(y);
@@ -990,6 +1020,7 @@ namespace ImageProcessorCore.Formats
                     });
 
             image.SetPixels(imageWidth, imageHeight, pixels);
+            this.AssignResolution(image);
         }
 
         /// <summary>
@@ -1010,6 +1041,7 @@ namespace ImageProcessorCore.Formats
             Parallel.For(
                 0,
                 imageHeight,
+                Bootstrapper.Instance.ParallelOptions,
                 y =>
                     {
                         int yo = this.ycbcrImage.get_row_y_offset(y);
@@ -1030,6 +1062,24 @@ namespace ImageProcessorCore.Formats
                     });
 
             image.SetPixels(imageWidth, imageHeight, pixels);
+            this.AssignResolution(image);
+        }
+
+        /// <summary>
+        /// Assigns the horizontal and vertical resolution to the image if it has a JFIF header.
+        /// </summary>
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="image">The image to assign the resolution to.</param>
+        private void AssignResolution<T, TP>(ImageBase<T, TP> image)
+            where T : IPackedVector<TP>
+            where TP : struct
+        {
+            if (this.jfif && this.horizontalResolution > 0 && this.verticalResolution > 0)
+            {
+                ((Image<T, TP>)image).HorizontalResolution = this.horizontalResolution;
+                ((Image<T, TP>)image).VerticalResolution = this.verticalResolution;
+            }
         }
 
         /// <summary>
@@ -1279,7 +1329,7 @@ namespace ImageProcessorCore.Formats
                                         throw new ImageFormatException("Excessive DC component");
                                     }
 
-                                    int dcDelta = this.receiveExtend(value);
+                                    int dcDelta = this.ReceiveExtend(value);
                                     dc[compIndex] += dcDelta;
                                     b[0] = dc[compIndex] << al;
                                 }
@@ -1305,7 +1355,7 @@ namespace ImageProcessorCore.Formats
                                                 break;
                                             }
 
-                                            int ac = this.receiveExtend(val1);
+                                            int ac = this.ReceiveExtend(val1);
                                             b[Unzig[zig]] = ac << al;
                                         }
                                         else
