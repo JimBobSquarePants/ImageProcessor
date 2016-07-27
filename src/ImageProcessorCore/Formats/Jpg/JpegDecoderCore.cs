@@ -714,7 +714,7 @@ namespace ImageProcessorCore.Formats
             this.ReadFull(this.tmp, 0, 13);
             n -= 13;
 
-            // TODO: We should be able to read the resolution here.
+            // TODO: We should be using constants for this.
             this.jfif = this.tmp[0] == 'J'
                      && this.tmp[1] == 'F'
                      && this.tmp[2] == 'I'
