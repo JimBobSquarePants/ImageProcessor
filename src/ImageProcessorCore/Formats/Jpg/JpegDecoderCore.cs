@@ -969,7 +969,7 @@ namespace ImageProcessorCore.Formats
                         byte rgb = this.grayImage.pixels[yoff + x];
 
                         T packed = default(T);
-                        packed.PackBytes(rgb, rgb, rgb, rgb);
+                        packed.PackBytes(rgb, rgb, rgb, 255);
                         pixels[offset] = packed;
                     }
                 });
