@@ -85,7 +85,7 @@ namespace ImageProcessor.Processors
                 {
                     using (Font font = this.GetFont(textLayer.FontFamily, fontSize, fontStyle))
                     {
-                        using (StringFormat drawFormat = StringFormat.GenericTypographic)
+                        using (StringFormat drawFormat = new StringFormat(StringFormat.GenericTypographic))
                         {
                             StringFormatFlags? formatFlags = this.GetFlags(textLayer);
                             if (formatFlags != null)
