@@ -77,6 +77,18 @@ namespace ImageProcessor.Configuration
             this.SupportedImageFormats.ToList().AddRange(format);
         }
 
+#if NET45
+        /// <summary>
+        /// Allows the setting of the default logger. Useful for when 
+        /// The type finder fails to dynamically add the custom logger implementation.
+        /// </summary>
+        /// <param name="logger"></param>
+        public void SetLogger(ILogger logger)
+        {
+            this.Logger = logger;
+        }
+#endif
+
         /// <summary>
         /// Creates a list, using reflection, of supported image formats that ImageProcessor can run.
         /// </summary>
