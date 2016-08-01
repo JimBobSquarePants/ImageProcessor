@@ -13,6 +13,7 @@ namespace ImageProcessor.Imaging.Formats
     using System;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Linq;
 
     using ImageProcessor.Imaging.MetaData;
 
@@ -51,8 +52,10 @@ namespace ImageProcessor.Imaging.Formats
                 this.IsAnimated = true;
                 this.FrameCount = image.GetFrameCount(FrameDimension.Time);
 
-                // Loop info is stored at byte 20737.
-                this.LoopCount = BitConverter.ToInt16(image.GetPropertyItem((int)ExifPropertyTag.LoopCount).Value, 0);
+                // Loop info is stored at byte 20737. Default to infinite loop if not found.
+                this.LoopCount = image.PropertyIdList.Contains((int)ExifPropertyTag.LoopCount)
+                    ? BitConverter.ToInt16(image.GetPropertyItem((int)ExifPropertyTag.LoopCount).Value, 0)
+                    : 0;
             }
             else
             {
