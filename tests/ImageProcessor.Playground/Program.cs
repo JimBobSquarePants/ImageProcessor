@@ -60,24 +60,9 @@ namespace ImageProcessor.PlayGround
                 using (MemoryStream inStream = new MemoryStream(photoBytes))
                 using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
                 {
-                    Size size = new Size(50, 0);
-
-                    ResizeLayer layer = new ResizeLayer(size);
                     try
                     {
                         imageFactory.Load(inStream)
-                            .Watermark(new TextLayer
-                            {
-                                Text = "NoVertical",
-                                Vertical = false,
-                                FontColor = Color.Black,
-                                Opacity = 35,
-                                FontSize = imageFactory.Image.Height / 20,
-                                DropShadow = true,
-                                Position = new Point(30, 30)
-                            })
-                            .Save(Path.GetFullPath(Path.Combine(outPath, "NoVertical" + fileInfo.Name)))
-                            .Reset()
                             .Watermark(new TextLayer
                             {
                                 Text = "Vertical",
@@ -88,17 +73,6 @@ namespace ImageProcessor.PlayGround
                                 DropShadow = true,
                                 Position = new Point(30, 30)
                             })
-                            //.Format(new JpegFormat())
-                            //.Resize(size)
-                            //.Save(Path.GetFullPath(Path.Combine(outPath, "1" + fileInfo.Name)))
-                            //.Reset()
-                            //.Resize(size)
-                            //.BitDepth(1)
-                            //.DetectEdges(new SobelEdgeFilter())
-                            //.Format(new JpegFormat())
-                            //.Format(new GifFormat())
-                            //.Resolution(400, 400)
-                            //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
                             .Save(Path.GetFullPath(Path.Combine(outPath, "Vertical" + fileInfo.Name)));
                     }
                     catch (Exception ex)
@@ -106,10 +80,34 @@ namespace ImageProcessor.PlayGround
                         Console.WriteLine(ex.Message);
                     }
 
-                    stopwatch.Stop();
+                    // stopwatch.Stop();
+                }
 
-                    // trans.gif says it's (0, 0, 0, 0) but the image saves as black.
-                    // Color first = ((Bitmap)imageFactory.Image).GetPixel(0, 0);
+                using (MemoryStream inStream = new MemoryStream(photoBytes))
+                using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
+                {
+                    try
+                    {
+                        imageFactory.Load(inStream)
+                            .Watermark(
+                                new TextLayer
+                                    {
+                                        Text = "NoVertical",
+                                        Vertical = false,
+                                        FontColor = Color.Black,
+                                        Opacity = 35,
+                                        FontSize = imageFactory.Image.Height / 20,
+                                        DropShadow = true,
+                                        Position = new Point(30, 30)
+                                    })
+                            .Save(Path.GetFullPath(Path.Combine(outPath, "NoVertical" + fileInfo.Name)));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+
+                    stopwatch.Stop();
                 }
 
                 // Report back.
