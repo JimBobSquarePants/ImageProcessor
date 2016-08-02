@@ -498,16 +498,16 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <param name="exceptionAction">The delegate to throw on error.</param>
         private static void TryFiveTimes(Action delegateAction, Action exceptionAction)
         {
-            for (int retry = 0;; retry++)
+            for (int retry = 0; retry < 5; retry++)
             {
                 try
                 {
                     delegateAction();
-                    return;
+                    break;
                 }
                 catch (Exception)
                 {
-                    if (retry >= 5)
+                    if (retry == 4)
                     {
                         exceptionAction();
                         throw;

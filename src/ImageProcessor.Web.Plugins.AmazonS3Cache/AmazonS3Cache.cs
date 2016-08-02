@@ -29,6 +29,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
     using ImageProcessor.Web.Extensions;
     using ImageProcessor.Web.Helpers;
     using ImageProcessor.Web.HttpModules;
+    using ImageProcessor.Configuration;
 
     /// <summary>
     /// Provides an <see cref="IImageCache"/> implementation that uses Amazon S3 storage.
@@ -378,24 +379,29 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.CachedPath);
             request.Method = "HEAD";
 
-            TryFiveTimes(() =>
-            {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            TryFiveTimes(
+                () =>
                 {
-                    HttpStatusCode responseCode = response.StatusCode;
-                    context.Response.Redirect(
-                        responseCode == HttpStatusCode.NotFound ? this.RequestPath : this.CachedPath,
-                        false);
-                }
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    {
+                        HttpStatusCode responseCode = response.StatusCode;
+                        context.Response.Redirect(
+                            responseCode == HttpStatusCode.NotFound ? this.RequestPath : this.CachedPath,
+                            false);
+                    }
 
-                // TODO: Above seems wrong. We should be using something like below toggling between CDN and Bucket URL
-                //using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                //{
-                //    HttpStatusCode responseCode = response.StatusCode;
-                //    ImageProcessingModule.AddCorsRequestHeaders(context);
-                //    context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
-                //}
-            });
+                    // TODO: Above seems wrong. We should be using something like below toggling between CDN and Bucket URL
+                    //using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    //{
+                    //    HttpStatusCode responseCode = response.StatusCode;
+                    //    ImageProcessingModule.AddCorsRequestHeaders(context);
+                    //    context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
+                    //}
+                },
+                () =>
+                {
+                    ImageProcessorBootstrapper.Instance.Logger.Log<AmazonS3Cache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
+                });
         }
 
         /// <summary>
@@ -419,6 +425,31 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             }
 
             return output;
+        }
+
+        /// <summary>
+        /// Tries to execute a delegate action five times.
+        /// </summary>
+        /// <param name="delegateAction">The delegate to be executed</param>
+        /// <param name="exceptionAction">The delegate to throw on error.</param>
+        private static void TryFiveTimes(Action delegateAction, Action exceptionAction)
+        {
+            for (int retry = 0; retry < 5; retry++)
+            {
+                try
+                {
+                    delegateAction();
+                    break;
+                }
+                catch (Exception)
+                {
+                    if (retry == 4)
+                    {
+                        exceptionAction();
+                        throw;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -476,29 +507,6 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 // Set EUWest1 as default RegionEndoint
                 default:
                     return RegionEndpoint.EUWest1;
-            }
-        }
-
-        /// <summary>
-        /// Tries to execute a delegate action five times.
-        /// </summary>
-        /// <param name="delegateAction">The delegate to be executed</param>
-        private static void TryFiveTimes(Action delegateAction)
-        {
-            for (int retry = 0; ; retry++)
-            {
-                try
-                {
-                    delegateAction();
-                    return;
-                }
-                catch (Exception)
-                {
-                    if (retry >= 5)
-                    {
-                        throw;
-                    }
-                }
             }
         }
     }
