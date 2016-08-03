@@ -59,6 +59,8 @@ configuration files.
         <setting key="UseCachedContainerInUrl" value="true"/>
         <!-- Full CDN root url e.g http://123456.vo.msecnd.net/ -->
         <setting key="CachedCDNRoot" value="[CdnRootUrl]"/>
+        <!-- Optional setting for a timeout limit in milliseconds when attempting to communicate with the CDN url. -->
+        <setting key="CachedCDNTimeout" value="1000"/>
         <!-- 
             Optional settings for better identifcation of source images if stored in 
             Azure blob storage.
