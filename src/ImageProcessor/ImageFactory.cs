@@ -1466,9 +1466,8 @@ namespace ImageProcessor
             {
                 foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
                 {
-                    // The Gif decoder specifically requires this property so
-                    // we must not delete it.
-                    if (item.Key != (int)ExifPropertyTag.LoopCount)
+                    // The Gif decoder specifically requires these properties so we must not delete them.
+                    if (item.Key != (int)ExifPropertyTag.LoopCount && item.Key != (int)ExifPropertyTag.FrameDelay)
                     {
                         image.RemovePropertyItem(item.Key);
                     }

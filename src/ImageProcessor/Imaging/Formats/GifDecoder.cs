@@ -106,8 +106,10 @@ namespace ImageProcessor.Imaging.Formats
             // Reset the image
             image.SelectActiveFrame(FrameDimension.Time, 0);
 
-            // Get the times stored in the gif.
-            byte[] times = image.GetPropertyItem((int)ExifPropertyTag.FrameDelay).Value;
+            // Get the times stored in the gif. Default to 0 if not found.
+            byte[] times = image.PropertyIdList.Contains((int)ExifPropertyTag.FrameDelay)
+                               ? image.GetPropertyItem((int)ExifPropertyTag.FrameDelay).Value
+                               : new byte[4];
 
             // Convert each 4-byte chunk into an integer.
             // GDI returns a single array with all delays, while Mono returns a different array for each frame.
