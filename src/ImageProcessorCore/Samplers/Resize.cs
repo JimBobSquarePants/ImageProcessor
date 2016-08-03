@@ -3,170 +3,151 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
-    using System.Threading.Tasks;
+    using Processors;
 
     /// <summary>
-    /// Provides methods that allow the resizing of images using various algorithms.
+    /// Extension methods for the <see cref="Image{T,TP}"/> type.
     /// </summary>
-    public class Resize : Resampler
+    public static partial class ImageExtensions
     {
         /// <summary>
-        /// The image used for storing the first pass pixels.
+        /// Resizes an image in accordance with the given <see cref="ResizeOptions"/>.
         /// </summary>
-        private Image firstPass;
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to resize.</param>
+        /// <param name="options">The resize options.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/></returns>
+        /// <remarks>Passing zero for one of height or width within the resize options will automatically preserve the aspect ratio of the original image</remarks>
+        public static Image<T, TP> Resize<T, TP>(this Image<T, TP> source, ResizeOptions options, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
+        {
+            // Ensure size is populated across both dimensions.
+            if (options.Size.Width == 0 && options.Size.Height > 0)
+            {
+                options.Size = new Size(source.Width * options.Size.Height / source.Height, options.Size.Height);
+            }
+
+            if (options.Size.Height == 0 && options.Size.Width > 0)
+            {
+                options.Size = new Size(options.Size.Width, source.Height * options.Size.Width / source.Width);
+            }
+
+            Rectangle targetRectangle = ResizeHelper.CalculateTargetLocationAndBounds(source, options);
+
+            return Resize(source, options.Size.Width, options.Size.Height, options.Sampler, source.Bounds, targetRectangle, options.Compand, progressHandler);
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Resize"/> class.
+        /// Resizes an image to the given width and height.
         /// </summary>
-        /// <param name="sampler">
-        /// The sampler to perform the resize operation.
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to resize.</param>
+        /// <param name="width">The target image width.</param>
+        /// <param name="height">The target image height.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/></returns>
+        /// <remarks>Passing zero for one of height or width will automatically preserve the aspect ratio of the original image</remarks>
+        public static Image<T, TP> Resize<T, TP>(this Image<T, TP> source, int width, int height, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
+        {
+            return Resize(source, width, height, new BicubicResampler(), false, progressHandler);
+        }
+
+        /// <summary>
+        /// Resizes an image to the given width and height.
+        /// </summary>
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to resize.</param>
+        /// <param name="width">The target image width.</param>
+        /// <param name="height">The target image height.</param>
+        /// <param name="compand">Whether to compress and expand the image color-space to gamma correct the image during processing.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/></returns>
+        /// <remarks>Passing zero for one of height or width will automatically preserve the aspect ratio of the original image</remarks>
+        public static Image<T, TP> Resize<T, TP>(this Image<T, TP> source, int width, int height, bool compand, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
+        {
+            return Resize(source, width, height, new BicubicResampler(), compand, progressHandler);
+        }
+
+        /// <summary>
+        /// Resizes an image to the given width and height with the given sampler.
+        /// </summary>
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to resize.</param>
+        /// <param name="width">The target image width.</param>
+        /// <param name="height">The target image height.</param>
+        /// <param name="sampler">The <see cref="IResampler"/> to perform the resampling.</param>
+        /// <param name="compand">Whether to compress and expand the image color-space to gamma correct the image during processing.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/></returns>
+        /// <remarks>Passing zero for one of height or width will automatically preserve the aspect ratio of the original image</remarks>
+        public static Image<T, TP> Resize<T, TP>(this Image<T, TP> source, int width, int height, IResampler sampler, bool compand, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
+        {
+            return Resize(source, width, height, sampler, source.Bounds, new Rectangle(0, 0, width, height), compand, progressHandler);
+        }
+
+        /// <summary>
+        /// Resizes an image to the given width and height with the given sampler and
+        /// source rectangle.
+        /// </summary>
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to resize.</param>
+        /// <param name="width">The target image width.</param>
+        /// <param name="height">The target image height.</param>
+        /// <param name="sampler">The <see cref="IResampler"/> to perform the resampling.</param>
+        /// <param name="sourceRectangle">
+        /// The <see cref="Rectangle"/> structure that specifies the portion of the image object to draw.
         /// </param>
-        public Resize(IResampler sampler)
-            : base(sampler)
+        /// <param name="targetRectangle">
+        /// The <see cref="Rectangle"/> structure that specifies the portion of the target image object to draw to.
+        /// </param>
+        /// <param name="compand">Whether to compress and expand the image color-space to gamma correct the image during processing.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/></returns>
+        /// <remarks>Passing zero for one of height or width will automatically preserve the aspect ratio of the original image</remarks>
+        public static Image<T, TP> Resize<T, TP>(this Image<T, TP> source, int width, int height, IResampler sampler, Rectangle sourceRectangle, Rectangle targetRectangle, bool compand = false, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-        }
-
-        /// <inheritdoc/>
-        public override int Parallelism { get; set; } = 1;
-
-        /// <inheritdoc/>
-        protected override void OnApply(ImageBase source, ImageBase target, Rectangle targetRectangle, Rectangle sourceRectangle)
-        {
-            if (!(this.Sampler is NearestNeighborResampler))
+            if (width == 0 && height > 0)
             {
-                this.HorizontalWeights = this.PrecomputeWeights(targetRectangle.Width, sourceRectangle.Width);
-                this.VerticalWeights = this.PrecomputeWeights(targetRectangle.Height, sourceRectangle.Height);
+                width = source.Width * height / source.Height;
+                targetRectangle.Width = width;
             }
 
-            this.firstPass = new Image(target.Width, source.Height);
-        }
-
-        /// <inheritdoc/>
-        protected override void Apply(ImageBase target, ImageBase source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
-        {
-            // Jump out, we'll deal with that later.
-            if (source.Bounds == target.Bounds)
+            if (height == 0 && width > 0)
             {
-                return;
+                height = source.Height * width / source.Width;
+                targetRectangle.Height = height;
             }
 
-            int sourceBottom = source.Bounds.Bottom;
-            int targetY = targetRectangle.Y;
-            int targetBottom = targetRectangle.Bottom;
-            int startX = targetRectangle.X;
-            int endX = targetRectangle.Right;
-            bool compand = this.Compand;
+            Guard.MustBeGreaterThan(width, 0, nameof(width));
+            Guard.MustBeGreaterThan(height, 0, nameof(height));
 
-            if (this.Sampler is NearestNeighborResampler)
+            ResizeProcessor<T, TP> processor = new ResizeProcessor<T, TP>(sampler) { Compand = compand };
+            processor.OnProgress += progressHandler;
+
+            try
             {
-                // Scaling factors
-                float widthFactor = source.Width / (float)target.Width;
-                float heightFactor = source.Height / (float)target.Height;
-
-                Parallel.For(
-                    startY,
-                    endY,
-                    y =>
-                    {
-                        if (y >= targetY && y < targetBottom)
-                        {
-                            // Y coordinates of source points
-                            int originY = (int)((y - targetY) * heightFactor);
-
-                            for (int x = startX; x < endX; x++)
-                            {
-                                // X coordinates of source points
-                                int originX = (int)((x - startX) * widthFactor);
-
-                                target[x, y] = source[originX, originY];
-                            }
-                            this.OnRowProcessed();
-                        }
-                    });
-
-                // Break out now.
-                return;
+                return source.Process(width, height, sourceRectangle, targetRectangle, processor);
             }
-
-            // Interpolate the image using the calculated weights.
-            // A 2-pass 1D algorithm appears to be faster than splitting a 1-pass 2D algorithm 
-            // First process the columns.
-            Parallel.For(
-                0,
-                sourceBottom,
-                y =>
-                {
-                    for (int x = startX; x < endX; x++)
-                    {
-                        float sum = this.HorizontalWeights[x].Sum;
-                        Weight[] horizontalValues = this.HorizontalWeights[x].Values;
-
-                        // Destination color components
-                        Color destination = new Color();
-
-                        for (int i = 0; i < sum; i++)
-                        {
-                            Weight xw = horizontalValues[i];
-                            int originX = xw.Index;
-                            Color sourceColor = compand ? Color.Expand(source[originX, y]) : source[originX, y];
-                            destination += sourceColor * xw.Value;
-                        }
-
-                        if (compand)
-                        {
-                            destination = Color.Compress(destination);
-                        }
-
-                        this.firstPass[x, y] = destination;
-                    }
-                });
-
-            // Now process the rows.
-            Parallel.For(
-                startY,
-                endY,
-                y =>
-                {
-                    if (y >= targetY && y < targetBottom)
-                    {
-                        float sum = this.VerticalWeights[y].Sum;
-                        Weight[] verticalValues = this.VerticalWeights[y].Values;
-
-                        for (int x = startX; x < endX; x++)
-                        {
-                            // Destination color components
-                            Color destination = new Color();
-
-                            for (int i = 0; i < sum; i++)
-                            {
-                                Weight yw = verticalValues[i];
-                                int originY = yw.Index;
-                                Color sourceColor = compand ? Color.Expand(this.firstPass[x, originY]) : this.firstPass[x, originY];
-                                destination += sourceColor * yw.Value;
-                            }
-
-                            if (compand)
-                            {
-                                destination = Color.Compress(destination);
-                            }
-
-                            target[x, y] = destination;
-                        }
-
-                        this.OnRowProcessed();
-                    }
-                });
-        }
-
-        /// <inheritdoc/>
-        protected override void AfterApply(ImageBase source, ImageBase target, Rectangle targetRectangle, Rectangle sourceRectangle)
-        {
-            // Copy the pixels over.
-            if (source.Bounds == target.Bounds)
+            finally
             {
-                target.ClonePixels(target.Width, target.Height, source.Pixels);
+                processor.OnProgress -= progressHandler;
             }
         }
     }

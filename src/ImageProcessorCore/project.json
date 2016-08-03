@@ -5,29 +5,35 @@
   "authors": [
     "James Jackson-South and contributors"
   ],
-  "tags": [
-    "Image Resize Crop Quality Gif Jpg Jpeg Bitmap Png Fluent Animated"
-  ],
-  "compilationOptions": {
-    "allowUnsafe": true
+  "packOptions": {
+    "projectUrl": "https://github.com/JimBobSquarePants/ImageProcessor",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "tags": [
+      "Image Resize Crop Quality Gif Jpg Jpeg Bitmap Png Fluent Animated"
+    ]
   },
-  "projectUrl": "",
-  "licenseUrl": "",
+  "buildOptions": {
+    "allowUnsafe": true,
+    "debugType": "portable"
+  },
   "dependencies": {
-    "System.Collections": "4.0.11-beta-23516",
-    "System.Linq": "4.0.1-beta-23516",
-    "System.Threading": "4.0.11-beta-23516",
-    "System.Runtime": "4.0.21-beta-23516",
-    "Microsoft.CSharp": "4.0.1-beta-23516",
-    "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23516",
-    "System.Runtime.Extensions": "4.0.11-beta-23516",
-    "System.Reflection": "4.1.0-beta-23516",
-    "System.IO": "4.0.11-beta-23516",
-    "StyleCop.Analyzers": "1.0.0",
-    "Microsoft.NETCore": "5.0.1-beta-23516",
-    "Microsoft.NETCore.Platforms": "1.0.1-beta-23516"
+    "System.Collections": "4.0.11",
+    "System.Diagnostics.Debug": "4.0.11",
+    "System.Diagnostics.Tools": "4.0.1",
+    "System.IO": "4.1.0",
+    "System.IO.Compression": "4.1.0",
+    "System.Linq": "4.1.0",
+    "System.Numerics.Vectors": "4.1.1",
+    "System.ObjectModel": "4.0.12",
+    "System.Resources.ResourceManager": "4.0.1",
+    "System.Runtime.Extensions": "4.1.0",
+    "System.Runtime.InteropServices": "4.1.0",
+    "System.Text.Encoding.Extensions": "4.0.11",
+    "System.Threading": "4.0.11",
+    "System.Threading.Tasks": "4.0.11",
+    "System.Threading.Tasks.Parallel": "4.0.1"
   },
   "frameworks": {
-    "dotnet5.5": { }
+    "netstandard1.1": {}
   }
 }

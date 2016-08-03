@@ -3,38 +3,74 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
-    using System.Threading.Tasks;
+    using Processors;
 
     /// <summary>
-    /// Provides methods to allow the cropping of an image.
+    /// Extension methods for the <see cref="Image{T,TP}"/> type.
     /// </summary>
-    public class Crop : ImageSampler
+    public static partial class ImageExtensions
     {
-        /// <inheritdoc/>
-        protected override void Apply(ImageBase target, ImageBase source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
+        /// <summary>
+        /// Crops an image to the given width and height.
+        /// </summary>
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to resize.</param>
+        /// <param name="width">The target image width.</param>
+        /// <param name="height">The target image height.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/></returns>
+        public static Image<T, TP> Crop<T, TP>(this Image<T, TP> source, int width, int height, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            int targetY = targetRectangle.Y;
-            int targetBottom = targetRectangle.Bottom;
-            int startX = targetRectangle.X;
-            int endX = targetRectangle.Right;
+            return Crop(source, width, height, source.Bounds, progressHandler);
+        }
 
-            Parallel.For(
-            startY,
-            endY,
-            y =>
+        /// <summary>
+        /// Crops an image to the given width and height with the given source rectangle.
+        /// <remarks>
+        /// If the source rectangle is smaller than the target dimensions then the
+        /// area within the source is resized performing a zoomed crop.
+        /// </remarks>
+        /// </summary>
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to crop.</param>
+        /// <param name="width">The target image width.</param>
+        /// <param name="height">The target image height.</param>
+        /// <param name="sourceRectangle">
+        /// The <see cref="Rectangle"/> structure that specifies the portion of the image object to draw.
+        /// </param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image"/></returns>
+        public static Image<T, TP> Crop<T, TP>(this Image<T, TP> source, int width, int height, Rectangle sourceRectangle, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
+        {
+            Guard.MustBeGreaterThan(width, 0, nameof(width));
+            Guard.MustBeGreaterThan(height, 0, nameof(height));
+
+            if (sourceRectangle.Width < width || sourceRectangle.Height < height)
             {
-                if (y >= targetY && y < targetBottom)
-                {
-                    for (int x = startX; x < endX; x++)
-                    {
-                        target[x, y] = source[x, y];
-                    }
+                // If the source rectangle is smaller than the target perform a
+                // cropped zoom.
+                source = source.Resize(sourceRectangle.Width, sourceRectangle.Height);
+            }
 
-                    this.OnRowProcessed();
-                }
-            });
+            CropProcessor<T, TP> processor = new CropProcessor<T, TP>();
+            processor.OnProgress += progressHandler;
+
+            try
+            {
+                return source.Process(width, height, sourceRectangle, new Rectangle(0, 0, width, height), processor);
+            }
+            finally
+            {
+                processor.OnProgress -= progressHandler;
+            }
         }
     }
 }

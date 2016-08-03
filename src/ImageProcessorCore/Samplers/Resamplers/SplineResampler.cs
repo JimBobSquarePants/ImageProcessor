@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
     /// <summary>
     /// The function implements the spline algorithm.
@@ -17,8 +17,8 @@ namespace ImageProcessorCore.Samplers
         /// <inheritdoc/>
         public float GetValue(float x)
         {
-            const float B = 1;
-            const float C = 0;
+            const float B = 1F;
+            const float C = 0F;
 
             return ImageMaths.GetBcValue(x, B, C);
         }

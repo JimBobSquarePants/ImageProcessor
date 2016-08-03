@@ -1,13 +1,23 @@
-# ImageProcessor
 
-## This branch contains the new cross platform version: ImageProcessorCore.
+# ImageProcessorCore
+
+<img src="build/icons/imageprocessor-logo-512.png" width="128" height="128"/>
+
+**ImageProcessorCore** is a new cross-platform 2D graphics API designed to allow the processing of images without the use of `System.Drawing`. It's still in early stages (alpha) but progress has been pretty quick. 
+
+**Please do not use on production environments until the library reaches release candidate status.**
+
+[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr/branch/Core?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor/branch/Core)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/JimBobSquarePants/ImageProcessor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+For the older `ImageFactory` based API that uses `System.Drawing` please check out the [Framework](https://github.com/JimBobSquarePants/ImageProcessor/tree/Framework) branch.
 
 ---
 ## ImageProcessor Needs Your Help
 
 **ImageProcessor is the work of a very, very, small number of developers who struggle balancing time to contribute to the project with family time and work commitments. If the project is to survive we need more contribution from the community at large. There are several issues, most notably [#264](https://github.com/JimBobSquarePants/ImageProcessor/issues/264) and [#347](https://github.com/JimBobSquarePants/ImageProcessor/issues/347) that we cannot possibly solve on our own.**
 
-**We, and we believe many others in the community at large want a first-class 2D imaging library with a simple API that is not simply a wrapper round an existing library. We want it to have a low contribution bar which we believe can only happen if the library is written in C#. We want it to be written to cover as many use cases as possible. We want to write the same code once and have it work on any platform supporting CoreFX.**
+**We, and we believe many others in the community at large want a first-class 2D imaging library with a simple API that is not simply a wrapper round an existing library. We want it to have a low contribution bar which we believe can only happen if the library is written in C#. We want it to be written to cover as many use cases as possible. We want to write the same code once and have it work on any platform supporting .NET Core.**
 
 **With your help we can make all that a reality.**
 
@@ -15,15 +25,6 @@
 
 **Thankyou for reading this**
 ---
-
-This is a complete rewrite from the ground up to allow the processing of images without the use of `System.Drawing` using a cross-platform class library. It's still in early stages but progress has been pretty quick.
-
-[![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr/branch/Core?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor/branch/Core)
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/JimBobSquarePants/ImageProcessor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-###Why am I writing this?
-
-With NETCore there is currently no version of `System.Drawing` to allow continued progress of the existing ImageProcessor library. 
 
 ### Installation
 At present the code is pre-release but when ready it will be available on [Nuget](http://www.nuget.org). 
@@ -36,11 +37,8 @@ We already have a [MyGet package repository](https://www.myget.org/gallery/image
 
 If you prefer, you can compile ImageProcessorCore yourself (please do and help!), you'll need:
 
-- Visual Studio 2015 (or above)
-- The [Windows 10 development tools](https://dev.windows.com/en-us/downloads) - Click `Get Visual Studio Community`.
-- Dnvm and Dnx installed
-
-To install the last two please see the instructions at the [DotNet documentation](http://dotnet.readthedocs.org/en/latest/getting-started/installing-core-windows.html)
+- [Visual Studio 2015 with Update 3 (or above)](https://www.visualstudio.com/news/releasenotes/vs2015-update3-vs)
+- The [.NET Core 1.0 SDK Installer](https://www.microsoft.com/net/core#windows) - Non VSCode link.
 
 To clone it locally click the "Clone in Windows" button above or run the following git commands.
 
@@ -74,9 +72,10 @@ git clone https://github.com/JimBobSquarePants/ImageProcessor
  - [x] Size
  - [x] Point
  - [x] Ellipse
-- Resampling algorithms. (Optional gamma correction, Performance improvements?)
+- Resampling algorithms. (Optional gamma correction, resize modes, Performance improvements?)
  - [x] Box
  - [x] Bicubic
+ - [x] Lanczos2
  - [x] Lanczos3
  - [x] Lanczos5
  - [x] Lanczos8
@@ -84,22 +83,26 @@ git clone https://github.com/JimBobSquarePants/ImageProcessor
  - [x] Nearest Neighbour 
  - [x] Robidoux
  - [x] Robidoux Sharp
- - [x] Robidoux Soft
  - [x] Spline
  - [x] Triangle
  - [x] Welch
+- Padding 
+ - [x] Pad
+ - [x] ResizeMode.Pad
+ - [x] ResizeMode.BoxPad
 - Cropping
  - [x] Rectangular Crop
  - [ ] Elliptical Crop
  - [x] Entropy Crop
+ - [x] ResizeMode.Crop
 - Rotation/Skew
  - [x] Flip (90, 270, FlipType etc)
- - [x] Rotate by angle and center point.
+ - [x] Rotate by angle and center point (Expandable canvas).
  - [x] Skew by x/y angles and center point.
 - ColorMatrix operations (Uses Matrix4x4)
  - [x] BlackWhite
- - [x] Greyscale BT709
- - [x] Greyscale BT601
+ - [x] Grayscale BT709
+ - [x] Grayscale BT601
  - [x] Hue
  - [x] Saturation
  - [x] Lomograph
@@ -158,37 +161,20 @@ With this version the API will change dramatically. Without the constraints of `
 
 Image methods are also fluent which allow chaining much like the `ImageFactory` class in the Framework version.
 
-Here's an example of the code required to resize an image using the default Bicubic resampler then turn the colors into their greyscale equivalent using the BT709 standard matrix.
+Here's an example of the code required to resize an image using the default Bicubic resampler then turn the colors into their grayscale equivalent using the BT709 standard matrix.
 
 ```csharp
 using (FileStream stream = File.OpenRead("foo.jpg"))
-using (Image image = new Image(stream))
 using (FileStream output = File.OpenWrite("bar.jpg"))
 {
+    Image image = new Image(stream);
     image.Resize(image.Width / 2, image.Height / 2)
-         .Greyscale()
+         .Grayscale()
          .Save(output);
 }
 ```
 
-It will also be possible to pass collections of processors as params to manipulate images. For example here I am applying a Gaussian blur with a sigma of 5 to an image, then detecting the edges using a Sobel operator working in greyscale mode.
-
-```csharp
-using (FileStream stream = File.OpenRead("foo.jpg"))
-using (Image image = new Image(stream))
-using (FileStream output = File.OpenWrite("bar.jpg"))
-{
-    List<IImageProcessor> processors = new List<IImageProcessor>()
-    {
-        new GuassianBlur(5),
-        new Sobel { Greyscale = true }
-    };
-
-    image.Process(processors.ToArray())
-         .Save(output);
-}
-```
-Individual processors can be initialised and apply processing against images. This allows nesting which will allow the powerful combination of processing methods:
+Individual processors can be initialised and apply processing against images. This allows nesting which brings the potential for powerful combinations of processing methods:
 
 ```csharp
 new Brightness(50).Apply(sourceImage, targetImage, sourceImage.Bounds);
@@ -200,7 +186,7 @@ All in all this should allow image processing to be much more accessible to deve
 
 Please... Spread the word, contribute algorithms, submit performance improvements, unit tests. Help me set up CI for nightly releases. 
 
-Performance is a biggie, if you know anything about the new vector types and can apply some fancy new stuff with that it would be awesome. 
+[Performance is a biggie](https://github.com/JimBobSquarePants/ImageProcessor/issues/347), if you know anything about the new vector types and can apply some fancy new stuff with that it would be awesome. 
 
 There's a lot of developers out there who could write this stuff a lot better and faster than I and I would love to see what we collectively can come up with so please, if you can help in any way it would be most welcome and benificial for all.
 
@@ -214,4 +200,3 @@ Core Team
 - [Thomas Broust](https://github.com/cosmo0)
 - [Christopher Bauer](https://github.com/christopherbauer)
 - [Jeavon Leopold](https://github.com/jeavon)
-

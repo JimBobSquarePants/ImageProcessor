@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
     /// <summary>
     /// The function implements the Robidoux Sharp algorithm.
@@ -17,8 +17,8 @@ namespace ImageProcessorCore.Samplers
         /// <inheritdoc/>
         public float GetValue(float x)
         {
-            const float B = 0.26201451F;
-            const float C = 0.36899274F;
+            const float B = 0.2620145123990142F;
+            const float C = 0.3689927438004929F;
 
             return ImageMaths.GetBcValue(x, B, C);
         }

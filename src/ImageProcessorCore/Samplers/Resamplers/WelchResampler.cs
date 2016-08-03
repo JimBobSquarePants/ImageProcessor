@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
     /// <summary>
     /// The function implements the welch algorithm.
@@ -17,17 +17,17 @@ namespace ImageProcessorCore.Samplers
         /// <inheritdoc/>
         public float GetValue(float x)
         {
-            if (x < 0)
+            if (x < 0F)
             {
                 x = -x;
             }
 
-            if (x < 3)
+            if (x < 3F)
             {
-                return ImageMaths.SinC(x) * (1.0f - (x * x / 9.0f));
+                return ImageMaths.SinC(x) * (1F - (x * x / 9.0F));
             }
 
-            return 0;
+            return 0F;
         }
     }
 }

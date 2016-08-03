@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
     /// <summary>
     /// The function implements the mitchell algorithm as described on
@@ -17,8 +17,8 @@ namespace ImageProcessorCore.Samplers
         /// <inheritdoc/>
         public float GetValue(float x)
         {
-            const float B = 1 / 3f;
-            const float C = 1 / 3f;
+            const float B = 0.3333333F;
+            const float C = 0.3333333F;
 
             return ImageMaths.GetBcValue(x, B, C);
         }

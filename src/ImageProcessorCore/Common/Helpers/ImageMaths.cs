@@ -6,6 +6,7 @@
 namespace ImageProcessorCore
 {
     using System;
+    using System.Linq;
     using System.Numerics;
 
     /// <summary>
@@ -13,12 +14,6 @@ namespace ImageProcessorCore
     /// </summary>
     internal static class ImageMaths
     {
-        /// <summary>
-        /// Represents PI, the ratio of a circle's circumference to its diameter.
-        /// </summary>
-        // ReSharper disable once InconsistentNaming
-        public const float PI = 3.1415926535897931f;
-
         /// <summary>
         /// Returns how many bits are required to store the specified number of colors.
         /// Performs a Log2() on the value.
@@ -41,7 +36,7 @@ namespace ImageProcessorCore
         public static float Gaussian(float x, float sigma)
         {
             const float Numerator = 1.0f;
-            float denominator = (float)(Math.Sqrt(2 * PI) * sigma);
+            float denominator = (float)(Math.Sqrt(2 * Math.PI) * sigma);
 
             float exponentNumerator = -x * x;
             float exponentDenominator = (float)(2 * Math.Pow(sigma, 2));
@@ -66,43 +61,41 @@ namespace ImageProcessorCore
         {
             float temp;
 
-            if (x < 0)
+            if (x < 0F)
             {
                 x = -x;
             }
 
             temp = x * x;
-            if (x < 1)
+            if (x < 1F)
             {
                 x = ((12 - (9 * b) - (6 * c)) * (x * temp)) + ((-18 + (12 * b) + (6 * c)) * temp) + (6 - (2 * b));
-                return x / 6;
+                return x / 6F;
             }
 
-            if (x < 2)
+            if (x < 2F)
             {
                 x = ((-b - (6 * c)) * (x * temp)) + (((6 * b) + (30 * c)) * temp) + (((-12 * b) - (48 * c)) * x) + ((8 * b) + (24 * c));
-                return x / 6;
+                return x / 6F;
             }
 
-            return 0;
+            return 0F;
         }
 
         /// <summary>
         /// Gets the result of a sine cardinal function for the given value.
         /// </summary>
-        /// <param name="x">
-        /// The value to calculate the result for.
-        /// </param>
+        /// <param name="x">The value to calculate the result for.</param>
         /// <returns>
         /// The <see cref="float"/>.
         /// </returns>
         public static float SinC(float x)
         {
-            const float Epsilon = .00001f;
+            const float Epsilon = .00001F;
 
             if (Math.Abs(x) > Epsilon)
             {
-                x *= PI;
+                x *= (float)Math.PI;
                 return Clean((float)Math.Sin(x) / x);
             }
 
@@ -112,15 +105,13 @@ namespace ImageProcessorCore
         /// <summary>
         /// Returns the given degrees converted to radians.
         /// </summary>
-        /// <param name="angleInDegrees">
-        /// The angle in degrees.
-        /// </param>
+        /// <param name="degrees">The angle in degrees.</param>
         /// <returns>
-        /// The <see cref="double"/> representing the degree as radians.
+        /// The <see cref="float"/> representing the degree as radians.
         /// </returns>
-        public static double DegreesToRadians(double angleInDegrees)
+        public static float DegreesToRadians(float degrees)
         {
-            return angleInDegrees * (PI / 180);
+            return degrees * (float)(Math.PI / 180);
         }
 
         /// <summary>
@@ -141,54 +132,41 @@ namespace ImageProcessorCore
         }
 
         /// <summary>
-        /// Calculates the new size after rotation.
+        /// Gets the bounding <see cref="Rectangle"/> from the given matrix.
         /// </summary>
-        /// <param name="width">The width of the image.</param>
-        /// <param name="height">The height of the image.</param>
-        /// <param name="angleInDegrees">The angle of rotation.</param>
-        /// <returns>The new size of the image</returns>
-        public static Rectangle GetBoundingRotatedRectangle(int width, int height, float angleInDegrees)
+        /// <param name="rectangle">The source rectangle.</param>
+        /// <param name="matrix">The transformation matrix.</param>
+        /// <returns>
+        /// The <see cref="Rectangle"/>.
+        /// </returns>
+        public static Rectangle GetBoundingRectangle(Rectangle rectangle, Matrix3x2 matrix)
         {
-            // Check first clockwise.
-            double radians = DegreesToRadians(angleInDegrees);
-            double radiansSin = Math.Sin(radians);
-            double radiansCos = Math.Cos(radians);
-            double width1 = (height * radiansSin) + (width * radiansCos);
-            double height1 = (width * radiansSin) + (height * radiansCos);
+            Vector2 leftTop = Vector2.Transform(new Vector2(rectangle.Left, rectangle.Top), matrix);
+            Vector2 rightTop = Vector2.Transform(new Vector2(rectangle.Right, rectangle.Top), matrix);
+            Vector2 leftBottom = Vector2.Transform(new Vector2(rectangle.Left, rectangle.Bottom), matrix);
+            Vector2 rightBottom = Vector2.Transform(new Vector2(rectangle.Right, rectangle.Bottom), matrix);
 
-            // Find dimensions in the other direction
-            radiansSin = Math.Sin(-radians);
-            radiansCos = Math.Cos(-radians);
-            double width2 = (height * radiansSin) + (width * radiansCos);
-            double height2 = (width * radiansSin) + (height * radiansCos);
-
-            // Get the external vertex for the rotation
-            Rectangle result = new Rectangle(
-                0,
-                0,
-                Convert.ToInt32(Math.Max(Math.Abs(width1), Math.Abs(width2))),
-                Convert.ToInt32(Math.Max(Math.Abs(height1), Math.Abs(height2))));
-
-            return result;
+            Vector2[] allCorners = { leftTop, rightTop, leftBottom, rightBottom };
+            float extentX = allCorners.Select(v => v.X).Max() - allCorners.Select(v => v.X).Min();
+            float extentY = allCorners.Select(v => v.Y).Max() - allCorners.Select(v => v.Y).Min();
+            return new Rectangle(0, 0, (int)extentX, (int)extentY);
         }
 
         /// <summary>
         /// Finds the bounding rectangle based on the first instance of any color component other
         /// than the given one.
         /// </summary>
-        /// <param name="bitmap">
-        /// The <see cref="Image"/> to search within.
-        /// </param>
-        /// <param name="componentValue">
-        /// The color component value to remove.
-        /// </param>
-        /// <param name="channel">
-        /// The <see cref="RgbaComponent"/> channel to test against.
-        /// </param>
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="bitmap">The <see cref="Image"/> to search within.</param>
+        /// <param name="componentValue">The color component value to remove.</param>
+        /// <param name="channel">The <see cref="RgbaComponent"/> channel to test against.</param>
         /// <returns>
         /// The <see cref="Rectangle"/>.
         /// </returns>
-        public static Rectangle GetFilteredBoundingRectangle(ImageBase bitmap, float componentValue, RgbaComponent channel = RgbaComponent.B)
+        public static Rectangle GetFilteredBoundingRectangle<T, TP>(ImageBase<T, TP> bitmap, float componentValue, RgbaComponent channel = RgbaComponent.B)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
             const float Epsilon = .00001f;
             int width = bitmap.Width;
@@ -196,35 +174,35 @@ namespace ImageProcessorCore
             Point topLeft = new Point();
             Point bottomRight = new Point();
 
-            Func<ImageBase, int, int, float, bool> delegateFunc;
+            Func<IPixelAccessor<T, TP>, int, int, float, bool> delegateFunc;
 
             // Determine which channel to check against
             switch (channel)
             {
                 case RgbaComponent.R:
-                    delegateFunc = (imageBase, x, y, b) => Math.Abs(imageBase[x, y].R - b) > Epsilon;
+                    delegateFunc = (pixels, x, y, b) => Math.Abs(pixels[x, y].ToBytes()[0] - b) > Epsilon;
                     break;
 
                 case RgbaComponent.G:
-                    delegateFunc = (imageBase, x, y, b) => Math.Abs(imageBase[x, y].G - b) > Epsilon;
+                    delegateFunc = (pixels, x, y, b) => Math.Abs(pixels[x, y].ToBytes()[1] - b) > Epsilon;
                     break;
 
-                case RgbaComponent.A:
-                    delegateFunc = (imageBase, x, y, b) => Math.Abs(imageBase[x, y].A - b) > Epsilon;
+                case RgbaComponent.B:
+                    delegateFunc = (pixels, x, y, b) => Math.Abs(pixels[x, y].ToBytes()[2] - b) > Epsilon;
                     break;
 
                 default:
-                    delegateFunc = (imageBase, x, y, b) => Math.Abs(imageBase[x, y].B - b) > Epsilon;
+                    delegateFunc = (pixels, x, y, b) => Math.Abs(pixels[x, y].ToBytes()[3] - b) > Epsilon;
                     break;
             }
 
-            Func<ImageBase, int> getMinY = imageBase =>
+            Func<IPixelAccessor<T, TP>, int> getMinY = pixels =>
             {
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        if (delegateFunc(imageBase, x, y, componentValue))
+                        if (delegateFunc(pixels, x, y, componentValue))
                         {
                             return y;
                         }
@@ -234,13 +212,13 @@ namespace ImageProcessorCore
                 return 0;
             };
 
-            Func<ImageBase, int> getMaxY = imageBase =>
+            Func<IPixelAccessor<T, TP>, int> getMaxY = pixels =>
             {
                 for (int y = height - 1; y > -1; y--)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        if (delegateFunc(imageBase, x, y, componentValue))
+                        if (delegateFunc(pixels, x, y, componentValue))
                         {
                             return y;
                         }
@@ -250,13 +228,13 @@ namespace ImageProcessorCore
                 return height;
             };
 
-            Func<ImageBase, int> getMinX = imageBase =>
+            Func<IPixelAccessor<T, TP>, int> getMinX = pixels =>
             {
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (delegateFunc(imageBase, x, y, componentValue))
+                        if (delegateFunc(pixels, x, y, componentValue))
                         {
                             return x;
                         }
@@ -266,13 +244,13 @@ namespace ImageProcessorCore
                 return 0;
             };
 
-            Func<ImageBase, int> getMaxX = imageBase =>
+            Func<IPixelAccessor<T, TP>, int> getMaxX = pixels =>
             {
                 for (int x = width - 1; x > -1; x--)
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (delegateFunc(imageBase, x, y, componentValue))
+                        if (delegateFunc(pixels, x, y, componentValue))
                         {
                             return x;
                         }
@@ -282,10 +260,13 @@ namespace ImageProcessorCore
                 return height;
             };
 
-            topLeft.Y = getMinY(bitmap);
-            topLeft.X = getMinX(bitmap);
-            bottomRight.Y = (getMaxY(bitmap) + 1).Clamp(0, height);
-            bottomRight.X = (getMaxX(bitmap) + 1).Clamp(0, width);
+            using (IPixelAccessor<T, TP> bitmapPixels = bitmap.Lock())
+            {
+                topLeft.Y = getMinY(bitmapPixels);
+                topLeft.X = getMinX(bitmapPixels);
+                bottomRight.Y = (getMaxY(bitmapPixels) + 1).Clamp(0, height);
+                bottomRight.X = (getMaxX(bitmapPixels) + 1).Clamp(0, width);
+            }
 
             return GetBoundingRectangle(topLeft, bottomRight);
         }
@@ -299,11 +280,11 @@ namespace ImageProcessorCore
         /// </returns>.
         private static float Clean(float x)
         {
-            const float Epsilon = .00001f;
+            const float Epsilon = .00001F;
 
             if (Math.Abs(x) < Epsilon)
             {
-                return 0f;
+                return 0F;
             }
 
             return x;

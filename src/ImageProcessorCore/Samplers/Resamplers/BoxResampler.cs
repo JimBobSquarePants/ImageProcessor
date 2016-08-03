@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
     /// <summary>
     /// The function implements the box algorithm. Similar to nearest neighbour when upscaling.
@@ -17,7 +17,7 @@ namespace ImageProcessorCore.Samplers
         /// <inheritdoc/>
         public float GetValue(float x)
         {
-            if (x > -0.5 && x <= 0.5)
+            if (x > -0.5F && x <= 0.5F)
             {
                 return 1;
             }

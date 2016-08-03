@@ -3,63 +3,58 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Filters
+namespace ImageProcessorCore
 {
-    using System;
-    using System.Numerics;
-    using System.Threading.Tasks;
+    using Processors;
 
     /// <summary>
-    /// An <see cref="IImageProcessor"/> to change the brightness of an <see cref="Image"/>.
+    /// Extension methods for the <see cref="Image{T,TP}"/> type.
     /// </summary>
-    public class Brightness : ParallelImageProcessor
+    public static partial class ImageExtensions
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Brightness"/> class.
+        /// Alters the brightness component of the image.
         /// </summary>
-        /// <param name="brightness">The new brightness of the image. Must be between -100 and 100.</param>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="brightness"/> is less than -100 or is greater than 100.
-        /// </exception>
-        public Brightness(int brightness)
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image this method extends.</param>
+        /// <param name="amount">The new brightness of the image. Must be between -100 and 100.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/>.</returns>
+        public static Image<T, TP> Brightness<T, TP>(this Image<T, TP> source, int amount, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            Guard.MustBeBetweenOrEqualTo(brightness, -100, 100, nameof(brightness));
-            this.Value = brightness;
+            return Brightness(source, amount, source.Bounds, progressHandler);
         }
 
         /// <summary>
-        /// Gets the brightness value.
+        /// Alters the brightness component of the image.
         /// </summary>
-        public int Value { get; }
-
-        /// <inheritdoc/>
-        protected override void Apply(ImageBase target, ImageBase source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image this method extends.</param>
+        /// <param name="amount">The new brightness of the image. Must be between -100 and 100.</param>
+        /// <param name="rectangle">
+        /// The <see cref="Rectangle"/> structure that specifies the portion of the image object to alter.
+        /// </param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/>.</returns>
+        public static Image<T, TP> Brightness<T, TP>(this Image<T, TP> source, int amount, Rectangle rectangle, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            float brightness = this.Value / 100f;
-            int sourceY = sourceRectangle.Y;
-            int sourceBottom = sourceRectangle.Bottom;
-            int startX = sourceRectangle.X;
-            int endX = sourceRectangle.Right;
+            BrightnessProcessor<T, TP> processor = new BrightnessProcessor<T, TP>(amount);
+            processor.OnProgress += progressHandler;
 
-            Parallel.For(
-                startY,
-                endY,
-                y =>
-                    {
-                        if (y >= sourceY && y < sourceBottom)
-                        {
-                            for (int x = startX; x < endX; x++)
-                            {
-                                Color color = Color.Expand(source[x, y]);
-
-                                Vector3 vector3 = color.ToVector3();
-                                vector3 += new Vector3(brightness);
-
-                                target[x, y] = Color.Compress(new Color(vector3, color.A));
-                            }
-                            this.OnRowProcessed();
-                        }
-                    });
+            try
+            {
+                return source.Process(rectangle, processor);
+            }
+            finally
+            {
+                processor.OnProgress -= progressHandler;
+            }
         }
     }
 }

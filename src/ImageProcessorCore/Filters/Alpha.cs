@@ -3,61 +3,58 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Filters
+namespace ImageProcessorCore
 {
-    using System;
-    using System.Numerics;
-    using System.Threading.Tasks;
+    using Processors;
 
     /// <summary>
-    /// An <see cref="IImageProcessor"/> to change the Alpha of an <see cref="Image"/>.
+    /// Extension methods for the <see cref="Image"/> type.
     /// </summary>
-    public class Alpha : ParallelImageProcessor
+    public static partial class ImageExtensions
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Alpha"/> class.
+        /// Alters the alpha component of the image.
         /// </summary>
-        /// <param name="percent">The percentage to adjust the opacity of the image. Must be between 0 and 100.</param>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="percent"/> is less than 0 or is greater than 100.
-        /// </exception>
-        public Alpha(int percent)
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image this method extends.</param>
+        /// <param name="percent">The new opacity of the image. Must be between 0 and 100.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image{T,TP}"/>.</returns>
+        public static Image<T, TP> Alpha<T, TP>(this Image<T, TP> source, int percent, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            Guard.MustBeBetweenOrEqualTo(percent, 0, 100, nameof(percent));
-            this.Value = percent;
+            return Alpha(source, percent, source.Bounds, progressHandler);
         }
 
         /// <summary>
-        /// Gets the alpha value.
+        /// Alters the alpha component of the image.
         /// </summary>
-        public int Value { get; }
-
-        /// <inheritdoc/>
-        protected override void Apply(ImageBase target, ImageBase source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image this method extends.</param>
+        /// <param name="percent">The new opacity of the image. Must be between 0 and 100.</param>
+        /// <param name="rectangle">
+        /// The <see cref="Rectangle"/> structure that specifies the portion of the image object to alter.
+        /// </param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image"/>.</returns>
+        public static Image<T, TP> Alpha<T, TP>(this Image<T, TP> source, int percent, Rectangle rectangle, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            float alpha = this.Value / 100f;
-            int sourceY = sourceRectangle.Y;
-            int sourceBottom = sourceRectangle.Bottom;
-            int startX = sourceRectangle.X;
-            int endX = sourceRectangle.Right;
-            Vector4 alphaVector = new Vector4(1, 1, 1, alpha);
+            AlphaProcessor<T, TP> processor = new AlphaProcessor<T, TP>(percent);
+            processor.OnProgress += progressHandler;
 
-            Parallel.For(
-                startY,
-                endY,
-                y =>
-                    {
-                        if (y >= sourceY && y < sourceBottom)
-                        {
-                            for (int x = startX; x < endX; x++)
-                            {
-                                Vector4 color = Color.ToNonPremultiplied(source[x, y]).ToVector4();
-                                color *= alphaVector;
-                                target[x, y] = Color.FromNonPremultiplied(new Color(color));
-                            }
-                            this.OnRowProcessed();
-                        }
-                    });
+            try
+            {
+                return source.Process(rectangle, processor);
+            }
+            finally
+            {
+                processor.OnProgress -= progressHandler;
+            }
         }
     }
 }

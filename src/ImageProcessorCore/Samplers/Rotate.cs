@@ -3,90 +3,56 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
-    using System.Threading.Tasks;
+    using Processors;
 
     /// <summary>
-    /// Provides methods that allow the rotating of images.
+    /// Extension methods for the <see cref="Image{T,TP}"/> type.
     /// </summary>
-    public class Rotate : ImageSampler
+    public static partial class ImageExtensions
     {
         /// <summary>
-        /// The angle of rotation.
+        /// Rotates an image by the given angle in degrees, expanding the image to fit the rotated result.
         /// </summary>
-        private float angle;
-
-        /// <summary>
-        /// Gets or sets the angle of rotation.
-        /// </summary>
-        public float Angle
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to rotate.</param>
+        /// <param name="degrees">The angle in degrees to perform the rotation.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image"/></returns>
+        public static Image<T, TP> Rotate<T, TP>(this Image<T, TP> source, float degrees, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            get
-            {
-                return this.angle;
-            }
-
-            set
-            {
-                if (value > 360)
-                {
-                    value -= 360;
-                }
-
-                if (value < 0)
-                {
-                    value += 360;
-                }
-
-                this.angle = value;
-            }
+            return Rotate(source, degrees, true, progressHandler);
         }
 
         /// <summary>
-        /// Gets or sets the center point.
+        /// Rotates an image by the given angle in degrees.
         /// </summary>
-        public Point Center { get; set; }
-
-        /// <inheritdoc/>
-        protected override void Apply(ImageBase target, ImageBase source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to rotate.</param>
+        /// <param name="degrees">The angle in degrees to perform the rotation.</param>
+        /// <param name="expand">Whether to expand the image to fit the rotated result.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image"/></returns>
+        public static Image<T, TP> Rotate<T, TP>(this Image<T, TP> source, float degrees, bool expand, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            int targetY = targetRectangle.Y;
-            int targetBottom = targetRectangle.Bottom;
-            int startX = targetRectangle.X;
-            int endX = targetRectangle.Right;
-            float negativeAngle = -this.angle;
-            Point centre = this.Center == Point.Empty ? Rectangle.Center(sourceRectangle) : this.Center;
+            RotateProcessor<T, TP> processor = new RotateProcessor<T, TP> { Angle = degrees, Expand = expand };
+            processor.OnProgress += progressHandler;
 
-            // Scaling factors
-            float widthFactor = source.Width / (float)target.Width;
-            float heightFactor = source.Height / (float)target.Height;
-
-            Parallel.For(
-                startY,
-                endY,
-                y =>
-                {
-                    if (y >= targetY && y < targetBottom)
-                    {
-                        // Y coordinates of source points
-                        int originY = (int)((y - targetY) * heightFactor);
-
-                        for (int x = startX; x < endX; x++)
-                        {
-                            // X coordinates of source points
-                            int originX = (int)((x - startX) * widthFactor);
-
-                            // Rotate at the centre point
-                            Point rotated = Point.Rotate(new Point(originX, originY), centre, negativeAngle);
-                            if (sourceRectangle.Contains(rotated.X, rotated.Y))
-                            {
-                                target[x, y] = source[rotated.X, rotated.Y];
-                            }
-                        }
-                        this.OnRowProcessed();
-                    }
-                });
+            try
+            {
+                return source.Process(source.Width, source.Height, source.Bounds, source.Bounds, processor);
+            }
+            finally
+            {
+                processor.OnProgress -= progressHandler;
+            }
         }
     }
 }

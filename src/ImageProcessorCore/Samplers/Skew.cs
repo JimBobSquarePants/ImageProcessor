@@ -3,122 +3,58 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
-    using System.Threading.Tasks;
+    using Processors;
 
     /// <summary>
-    /// Provides methods that allow the skewing of images.
+    /// Extension methods for the <see cref="Image{T,TP}"/> type.
     /// </summary>
-    public class Skew : ImageSampler
+    public static partial class ImageExtensions
     {
         /// <summary>
-        /// The angle of rotation along the x-axis.
+        /// Skews an image by the given angles in degrees, expanding the image to fit the skewed result.
         /// </summary>
-        private float angleX;
-
-        /// <summary>
-        /// The angle of rotation along the y-axis.
-        /// </summary>
-        private float angleY;
-
-        /// <summary>
-        /// Gets or sets the angle of rotation along the x-axis in degrees.
-        /// </summary>
-        public float AngleX
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to skew.</param>
+        /// <param name="degreesX">The angle in degrees to perform the rotation along the x-axis.</param>
+        /// <param name="degreesY">The angle in degrees to perform the rotation along the y-axis.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image"/></returns>
+        public static Image<T, TP> Skew<T, TP>(this Image<T, TP> source, float degreesX, float degreesY, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            get
-            {
-                return this.angleX;
-            }
-
-            set
-            {
-                if (value > 360)
-                {
-                    value -= 360;
-                }
-
-                if (value < 0)
-                {
-                    value += 360;
-                }
-
-                this.angleX = value;
-            }
+            return Skew(source, degreesX, degreesY, true, progressHandler);
         }
 
         /// <summary>
-        /// Gets or sets the angle of rotation along the y-axis in degrees.
+        /// Skews an image by the given angles in degrees.
         /// </summary>
-        public float AngleY
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <param name="source">The image to skew.</param>
+        /// <param name="degreesX">The angle in degrees to perform the rotation along the x-axis.</param>
+        /// <param name="degreesY">The angle in degrees to perform the rotation along the y-axis.</param>
+        /// <param name="expand">Whether to expand the image to fit the skewed result.</param>
+        /// <param name="progressHandler">A delegate which is called as progress is made processing the image.</param>
+        /// <returns>The <see cref="Image"/></returns>
+        public static Image<T, TP> Skew<T, TP>(this Image<T, TP> source, float degreesX, float degreesY, bool expand, ProgressEventHandler progressHandler = null)
+            where T : IPackedVector<TP>
+            where TP : struct
         {
-            get
+            SkewProcessor<T, TP> processor = new SkewProcessor<T, TP> { AngleX = degreesX, AngleY = degreesY, Expand = expand };
+            processor.OnProgress += progressHandler;
+
+            try
             {
-                return this.angleY;
+                return source.Process(source.Width, source.Height, source.Bounds, source.Bounds, processor);
             }
-
-            set
+            finally
             {
-                if (value > 360)
-                {
-                    value -= 360;
-                }
-
-                if (value < 0)
-                {
-                    value += 360;
-                }
-
-                this.angleY = value;
+                processor.OnProgress -= progressHandler;
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the center point.
-        /// </summary>
-        public Point Center { get; set; }
-
-        /// <inheritdoc/>
-        protected override void Apply(ImageBase target, ImageBase source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
-        {
-            int targetY = targetRectangle.Y;
-            int targetBottom = targetRectangle.Bottom;
-            int startX = targetRectangle.X;
-            int endX = targetRectangle.Right;
-            float negativeAngleX = -this.angleX;
-            float negativeAngleY = -this.angleY;
-            Point centre = this.Center == Point.Empty ? Rectangle.Center(sourceRectangle) : this.Center;
-
-            // Scaling factors
-            float widthFactor = source.Width / (float)target.Width;
-            float heightFactor = source.Height / (float)target.Height;
-
-            Parallel.For(
-                startY,
-                endY,
-                y =>
-                {
-                    if (y >= targetY && y < targetBottom)
-                    {
-                        // Y coordinates of source points
-                        int originY = (int)((y - targetY) * heightFactor);
-
-                        for (int x = startX; x < endX; x++)
-                        {
-                            // X coordinates of source points
-                            int originX = (int)((x - startX) * widthFactor);
-
-                            // Skew at the centre point
-                            Point skewed = Point.Skew(new Point(originX, originY), centre, negativeAngleX, negativeAngleY);
-                            if (sourceRectangle.Contains(skewed.X, skewed.Y))
-                            {
-                                target[x, y] = source[skewed.X, skewed.Y];
-                            }
-                        }
-                        this.OnRowProcessed();
-                    }
-                });
         }
     }
 }

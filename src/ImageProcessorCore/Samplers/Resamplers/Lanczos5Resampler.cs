@@ -3,11 +3,12 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
     /// <summary>
     /// The function implements the Lanczos kernel algorithm as described on
     /// <see href="https://en.wikipedia.org/wiki/Lanczos_resampling#Algorithm">Wikipedia</see>
+    /// with a radius of 5 pixels.
     /// </summary>
     public class Lanczos5Resampler : IResampler
     {
@@ -17,17 +18,17 @@ namespace ImageProcessorCore.Samplers
         /// <inheritdoc/>
         public float GetValue(float x)
         {
-            if (x < 0)
+            if (x < 0F)
             {
                 x = -x;
             }
 
-            if (x < 5)
+            if (x < 5F)
             {
-                return ImageMaths.SinC(x) * ImageMaths.SinC(x / 5f);
+                return ImageMaths.SinC(x) * ImageMaths.SinC(x / 5F);
             }
 
-            return 0;
+            return 0F;
         }
     }
 }

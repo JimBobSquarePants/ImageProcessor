@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
 
-namespace ImageProcessorCore.Samplers
+namespace ImageProcessorCore
 {
     /// <summary>
     /// The function implements the Robidoux algorithm.
@@ -17,8 +17,8 @@ namespace ImageProcessorCore.Samplers
         /// <inheritdoc/>
         public float GetValue(float x)
         {
-            const float B = 0.3782158F;
-            const float C = 0.3108921F;
+            const float B = 0.37821575509399867F;
+            const float C = 0.31089212245300067F;
 
             return ImageMaths.GetBcValue(x, B, C);
         }

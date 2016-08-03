@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0-*",
+  "description": "ImageProcessorCore.Benchmarks Console Application",
+  "authors": [ "James.South" ],
+  "packOptions": {
+    "projectUrl": "https://github.com/JimBobSquarePants/ImageProcessor",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "tags": [
+      "Image Resize Crop Quality Gif Jpg Jpeg Bitmap Png Fluent Animated"
+    ]
+  },
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "BenchmarkDotNet.Diagnostics.Windows": "0.9.8.78",
+    "ImageProcessorCore": "1.0.0-*"
+  },
+  "commands": {
+    "ImageProcessorCore.Benchmarks": "ImageProcessorCore.Benchmarks"
+  },
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+      },
+      "frameworkAssemblies": {
+        "System.Drawing": ""
+      }
+    }
+  }
+}
