@@ -72,6 +72,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private readonly bool streamCachedImage;
 
         /// <summary>
+        /// The timeout length for requesting the CDN url.
+        /// </summary>
+        private readonly int timeout = 1000;
+
+        /// <summary>
         /// The cached rewrite path.
         /// </summary>
         private string cachedRewritePath;
@@ -122,6 +127,13 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
                                          ? this.Settings["CachedCDNRoot"]
                                          : cloudCachedBlobContainer.Uri.ToString().TrimEnd(cloudCachedBlobContainer.Name.ToCharArray());
+
+            if (this.Settings.ContainsKey("CachedCDNTimout"))
+            {
+                int t;
+                int.TryParse(this.Settings["CachedCDNTimout"], out t);
+                this.timeout = t;
+            }
 
             // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
             // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site. 
@@ -453,7 +465,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             {
                 // Redirect the request to the blob URL
                 request.Method = "HEAD";
-
+                request.Timeout = this.timeout;
                 TryFiveTimes(
                     () =>
                     {
