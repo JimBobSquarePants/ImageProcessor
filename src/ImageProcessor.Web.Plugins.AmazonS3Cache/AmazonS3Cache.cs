@@ -25,11 +25,11 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
     using Amazon.S3.Model;
     using Amazon.S3.Transfer;
 
+    using ImageProcessor.Configuration;
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Extensions;
     using ImageProcessor.Web.Helpers;
     using ImageProcessor.Web.HttpModules;
-    using ImageProcessor.Configuration;
 
     /// <summary>
     /// Provides an <see cref="IImageCache"/> implementation that uses Amazon S3 storage.
@@ -106,15 +106,9 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// Gets a value indicating whether Amazon S3 Access Key, Secret Key or Bucket Name are empty strings: 
         /// i.e. whether <see cref="AwsIsValid"/>.
         /// </summary>
-        private bool AwsIsValid
-        {
-            get
-            {
-                return !string.IsNullOrWhiteSpace(this.awsAccessKey)
-                    && !string.IsNullOrWhiteSpace(this.awsSecretKey)
-                    && !string.IsNullOrWhiteSpace(this.awsBucketName);
-            }
-        }
+        private bool AwsIsValid => !string.IsNullOrWhiteSpace(this.awsAccessKey)
+                                   && !string.IsNullOrWhiteSpace(this.awsSecretKey)
+                                   && !string.IsNullOrWhiteSpace(this.awsBucketName);
 
         /// <summary>
         /// Gets a value indicating whether the image is new or updated in an asynchronous manner.
@@ -238,11 +232,14 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 BucketName = this.awsBucketName,
                 InputStream = stream,
                 Key = key,
-                CannedACL = S3CannedACL.PublicRead
+                CannedACL = S3CannedACL.PublicRead,
+                Headers =
+                {
+                    CacheControl = string.Format("public, max-age={0}",this.MaxDays* 86400),
+                    ContentType = contentType
+                }
             };
 
-            transferUtilityUploadRequest.Headers.CacheControl = string.Format("public, max-age={0}", this.MaxDays * 86400);
-            transferUtilityUploadRequest.Headers.ContentType = contentType;
             transferUtilityUploadRequest.Metadata.Add("x-amz-meta-ImageProcessedBy", "ImageProcessor.Web/" + AssemblyVersion);
 
             await transferUtility.UploadAsync(transferUtilityUploadRequest);
@@ -400,7 +397,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 },
                 () =>
                 {
-                    ImageProcessorBootstrapper.Instance.Logger.Log<AmazonS3Cache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
+                    ImageProcessorBootstrapper.Instance.Logger.Log<AmazonS3Cache>("Unable to rewrite cached path to: " + this.CachedPath);
                 });
         }
 
@@ -475,7 +472,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <returns>Region Endpoint</returns>
         private RegionEndpoint GetRegionEndpoint()
         {
-            string regionEndpointAsString = null;
+            string regionEndpointAsString;
             if (this.Settings.TryGetValue("RegionEndpoint", out regionEndpointAsString))
             {
                 regionEndpointAsString = regionEndpointAsString.ToUpperInvariant();
