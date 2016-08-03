@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5368AF57-74ED-4499-BCCD-38BCB18C4629}"
 EndProject
@@ -54,6 +54,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuspecs", "Nuspecs", "{E0B8
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessor.TestWebsite", "tests\ImageProcessor.TestWebsite\ImageProcessor.TestWebsite.csproj", "{A74AE40C-5374-4B15-BEBF-94D74C16AC3A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transforms", "Transforms", "{19517DBA-58AA-4294-97BF-0D02902749B4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ImageProcessor.Web.Config", "ImageProcessor.Web.Config", "{62AD9636-93CD-472C-B88D-F5A1EDB26FD1}"
+	ProjectSection(SolutionItems) = preProject
+		build\content\ImageProcessor.Web.Config\web.config.transform = build\content\ImageProcessor.Web.Config\web.config.transform
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ImageProcessor.Web.Plugins.AzureBlobCache", "ImageProcessor.Web.Plugins.AzureBlobCache", "{44E1864C-333A-4CC2-BFCD-4DF741FDD025}"
+	ProjectSection(SolutionItems) = preProject
+		build\content\ImageProcessor.Web.Plugins.AzureBlobCache\config\imageprocessor\cache.config.transform = build\content\ImageProcessor.Web.Plugins.AzureBlobCache\config\imageprocessor\cache.config.transform
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ImageProcessor.Plugins.WebP", "ImageProcessor.Plugins.WebP", "{73F53C94-37CC-4981-A31B-BC727ABDB34F}"
+	ProjectSection(SolutionItems) = preProject
+		build\content\ImageProcessor.Plugins.WebP\web.config.transform = build\content\ImageProcessor.Plugins.WebP\web.config.transform
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ImageProcessor.Web", "ImageProcessor.Web", "{63F86021-9430-43EE-9F59-A74C526A4AB3}"
+	ProjectSection(SolutionItems) = preProject
+		build\content\ImageProcessor.Web\web.config.transform = build\content\ImageProcessor.Web\web.config.transform
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ImageProcessor.Web.Plugins.AmazonS3Cache", "ImageProcessor.Web.Plugins.AmazonS3Cache", "{CC88B6F8-0164-4E1E-BE17-A1C2D0597F2C}"
+	ProjectSection(SolutionItems) = preProject
+		build\content\ImageProcessor.Web.Plugins.AmazonS3Cache\config\imageprocessor\cache.config.transform = build\content\ImageProcessor.Web.Plugins.AmazonS3Cache\config\imageprocessor\cache.config.transform
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,5 +170,11 @@ Global
 		{7BF5274B-56A7-4B62-8105-E9BDF25BAFE7} = {0E113662-D6E2-473E-92BA-6005EB412C00}
 		{E0B81C77-6E29-4500-9E9F-F0B72EBE8241} = {4E1AB050-8CC4-4099-80AF-7FF2BFC000E9}
 		{A74AE40C-5374-4B15-BEBF-94D74C16AC3A} = {0E113662-D6E2-473E-92BA-6005EB412C00}
+		{19517DBA-58AA-4294-97BF-0D02902749B4} = {4E1AB050-8CC4-4099-80AF-7FF2BFC000E9}
+		{62AD9636-93CD-472C-B88D-F5A1EDB26FD1} = {19517DBA-58AA-4294-97BF-0D02902749B4}
+		{44E1864C-333A-4CC2-BFCD-4DF741FDD025} = {19517DBA-58AA-4294-97BF-0D02902749B4}
+		{73F53C94-37CC-4981-A31B-BC727ABDB34F} = {19517DBA-58AA-4294-97BF-0D02902749B4}
+		{63F86021-9430-43EE-9F59-A74C526A4AB3} = {19517DBA-58AA-4294-97BF-0D02902749B4}
+		{CC88B6F8-0164-4E1E-BE17-A1C2D0597F2C} = {19517DBA-58AA-4294-97BF-0D02902749B4}
 	EndGlobalSection
 EndGlobal
