@@ -46,6 +46,7 @@ namespace ImageProcessor.PlayGround
 
             DirectoryInfo di = new DirectoryInfo(inPath);
             IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".png", ".tif");
+            //IEnumerable<FileInfo> files = GetFilesByName(di, "Test.jpg");
 
             foreach (FileInfo fileInfo in files)
             {
@@ -57,26 +58,50 @@ namespace ImageProcessor.PlayGround
                 stopwatch.Start();
 
                 using (MemoryStream inStream = new MemoryStream(photoBytes))
-                using (ImageFactory imageFactory = new ImageFactory(true, true) { AnimationProcessMode = AnimationProcessMode.All })
+                using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
                 {
-                    Size size = new Size(50, 0);
-
-                    ResizeLayer layer = new ResizeLayer(size);
                     try
                     {
                         imageFactory.Load(inStream)
-                            .Format(new JpegFormat())
-                            .Resize(size)
-                            .Save(Path.GetFullPath(Path.Combine(outPath, "1" + fileInfo.Name)))
-                            .Reset()
-                            .Resize(size)
-                            //.BitDepth(1)
-                            //.DetectEdges(new SobelEdgeFilter())
-                            //.Format(new JpegFormat())
-                            //.Format(new GifFormat())
-                            //.Resolution(400, 400)
-                            //.ReplaceColor(Color.LightGray, Color.Yellow, 10)
-                            .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
+                            //.Watermark(new TextLayer
+                            //{
+                            //    Text = "Vertical",
+                            //    Vertical = true,
+                            //    FontColor = Color.Black,
+                            //    Opacity = 35,
+                            //    FontSize = imageFactory.Image.Height / 20,
+                            //    DropShadow = true,
+                            //    Position = new Point(30, 30)
+                            //})
+                            .Resize(new Size(imageFactory.Image.Width / 2, imageFactory.Image.Height / 2))
+                            .Save(Path.GetFullPath(Path.Combine(outPath, "Vertical" + fileInfo.Name)));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+
+                    // stopwatch.Stop();
+                }
+
+                using (MemoryStream inStream = new MemoryStream(photoBytes))
+                using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
+                {
+                    try
+                    {
+                        imageFactory.Load(inStream)
+                            .Watermark(
+                                new TextLayer
+                                    {
+                                        Text = "NoVertical",
+                                        Vertical = false,
+                                        FontColor = Color.Black,
+                                        Opacity = 35,
+                                        FontSize = imageFactory.Image.Height / 20,
+                                        DropShadow = true,
+                                        Position = new Point(30, 30)
+                                    })
+                            .Save(Path.GetFullPath(Path.Combine(outPath, "NoVertical" + fileInfo.Name)));
                     }
                     catch (Exception ex)
                     {
@@ -84,9 +109,6 @@ namespace ImageProcessor.PlayGround
                     }
 
                     stopwatch.Stop();
-
-                    // trans.gif says it's (0, 0, 0, 0) but the image saves as black.
-                    // Color first = ((Bitmap)imageFactory.Image).GetPixel(0, 0);
                 }
 
                 // Report back.
@@ -114,11 +136,33 @@ namespace ImageProcessor.PlayGround
         {
             if (extensions == null)
             {
-                throw new ArgumentNullException("extensions");
+                throw new ArgumentNullException(nameof(extensions));
             }
 
             IEnumerable<FileInfo> files = dir.EnumerateFiles("*.*", SearchOption.AllDirectories);
             return files.Where(f => extensions.Contains(f.Extension, StringComparer.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Gets all files in a given directory by name.
+        /// </summary>
+        /// <param name="dir">The directory to search within.</param>
+        /// <param name="name">The file extensions.</param>
+        /// <returns>
+        /// The <see cref="IEnumerable{FileInfo}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if no extensions are given.
+        /// </exception>
+        public static IEnumerable<FileInfo> GetFilesByName(DirectoryInfo dir, params string[] name)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            IEnumerable<FileInfo> files = dir.EnumerateFiles("*.*", SearchOption.AllDirectories);
+            return files.Where(f => name.Contains(f.Name, StringComparer.OrdinalIgnoreCase));
         }
     }
 }

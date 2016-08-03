@@ -162,7 +162,7 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         internal async Task<WebResponse> GetWebResponseAsync()
         {
-            WebResponse response;
+            WebResponse response = null;
             try
             {
                 response = await this.GetWebRequest().GetResponseAsync();
@@ -175,7 +175,14 @@ namespace ImageProcessor.Web.Helpers
                     throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + this.Uri);
                 }
 
-                throw;
+                if (errorResponse?.StatusCode == HttpStatusCode.NotModified)
+                {
+                    response = errorResponse;
+                }
+                else
+                {
+                    throw;
+                }
             }
 
             if (response != null)
@@ -198,7 +205,7 @@ namespace ImageProcessor.Web.Helpers
                 if ((this.MaxDownloadSize > 0) && (contentLength > this.MaxDownloadSize))
                 {
                     response.Close();
-                    string message ="An attempt to download a remote file has been halted because the file is larger than allowed.";
+                    string message = "An attempt to download a remote file has been halted because the file is larger than allowed.";
                     ImageProcessorBootstrapper.Instance.Logger.Log<RemoteFile>(message);
                     throw new SecurityException(message);
                 }

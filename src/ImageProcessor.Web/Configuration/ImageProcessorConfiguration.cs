@@ -192,7 +192,7 @@ namespace ImageProcessor.Web.Configuration
         {
             List<IWebGraphicsProcessor> processors = new List<IWebGraphicsProcessor>();
 
-            foreach (KeyValuePair<Type, Dictionary<string, string>> pair in AvailableWebGraphicsProcessors)
+            foreach (KeyValuePair<Type, Dictionary<string, string>> pair in this.AvailableWebGraphicsProcessors)
             {
                 IWebGraphicsProcessor processor = (IWebGraphicsProcessor)Activator.CreateInstance(pair.Key);
                 processor.Processor.Settings = pair.Value;

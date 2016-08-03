@@ -61,7 +61,7 @@ namespace ImageProcessor.Web.Caching
             this.RequestPath = requestPath;
             this.FullPath = fullPath;
             this.Querystring = querystring;
-            this.Settings = ImageProcessorConfiguration.Instance.ImageCacheSettings;
+            this.Settings = this.AugmentSettingsCore(ImageProcessorConfiguration.Instance.ImageCacheSettings);
             this.MaxDays = ImageProcessorConfiguration.Instance.ImageCacheMaxDays;
             this.BrowserMaxDays = ImageProcessorConfiguration.Instance.BrowserCacheMaxDays;
         }
@@ -198,6 +198,27 @@ namespace ImageProcessor.Web.Caching
         protected virtual bool IsExpired(DateTime creationDate)
         {
             return creationDate < DateTime.UtcNow.AddDays(-this.MaxDays);
+        }
+
+        /// <summary>
+        /// Provides a means to augment the cache settings taken from the configuration in derived classes. 
+        /// This allows for configuration of cache objects outside the normal configuration files, for example
+        /// by using app settings in the Azure platform.
+        /// </summary>
+        /// <param name="settings">The current settings.</param>
+        protected virtual void AugmentSettings(Dictionary<string, string> settings)
+        {
+        }
+
+        /// <summary>
+        /// Provides an entry point to augmentation of the <see cref="Settings"/> dictionary
+        /// </summary>
+        /// <param name="settings">Dictionary of settings</param>
+        /// <returns>augmented dictionary of settings</returns>
+        private Dictionary<string, string> AugmentSettingsCore(Dictionary<string, string> settings)
+        {
+            this.AugmentSettings(settings);
+            return settings;
         }
     }
 }

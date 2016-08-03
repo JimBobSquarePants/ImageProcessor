@@ -47,14 +47,19 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private static readonly string AssemblyVersion = typeof(ImageProcessingModule).Assembly.GetName().Version.ToString();
 
         /// <summary>
+        /// The cloud blob client, thread-safe so can be re-used
+        /// </summary>
+        private static CloudBlobClient cloudCachedBlobClient;
+
+        /// <summary>
         /// The cloud cached blob container.
         /// </summary>
-        private readonly CloudBlobContainer cloudCachedBlobContainer;
+        private static CloudBlobContainer cloudCachedBlobContainer;
 
         /// <summary>
         /// The cloud source blob container.
         /// </summary>
-        private readonly CloudBlobContainer cloudSourceBlobContainer;
+        private static CloudBlobContainer cloudSourceBlobContainer;
 
         /// <summary>
         /// The cached root url for a content delivery network.
@@ -65,6 +70,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// Determines if the CDN request is redirected or rewritten
         /// </summary>
         private readonly bool streamCachedImage;
+
+        /// <summary>
+        /// The timeout length for requesting the CDN url.
+        /// </summary>
+        private readonly int timeout = 1000;
 
         /// <summary>
         /// The cached rewrite path.
@@ -81,33 +91,49 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// The full path for the image.
         /// </param>
         /// <param name="querystring">
-        /// The querystring containing instructions.
+        /// The query string containing instructions.
         /// </param>
         public AzureBlobCache(string requestPath, string fullPath, string querystring)
             : base(requestPath, fullPath, querystring)
         {
-            // Retrieve storage accounts from connection string.
-            CloudStorageAccount cloudCachedStorageAccount = CloudStorageAccount.Parse(this.Settings["CachedStorageAccount"]);
-
-            // Create the blob clients.
-            CloudBlobClient cloudCachedBlobClient = cloudCachedStorageAccount.CreateCloudBlobClient();
-
-            // Retrieve references to a container.
-            this.cloudCachedBlobContainer = CreateContainer(cloudCachedBlobClient, this.Settings["CachedBlobContainer"], BlobContainerPublicAccessType.Blob);
-
-            string sourceAccount = this.Settings.ContainsKey("SourceStorageAccount") ? this.Settings["SourceStorageAccount"] : string.Empty;
-
-            // Repeat for source if it exists
-            if (!string.IsNullOrWhiteSpace(sourceAccount))
+            if (cloudCachedBlobClient == null)
             {
-                CloudStorageAccount cloudSourceStorageAccount = CloudStorageAccount.Parse(this.Settings["SourceStorageAccount"]);
-                CloudBlobClient cloudSourceBlobClient = cloudSourceStorageAccount.CreateCloudBlobClient();
-                this.cloudSourceBlobContainer = cloudSourceBlobClient.GetContainerReference(this.Settings["SourceBlobContainer"]);
+                // Retrieve storage accounts from connection string.
+                CloudStorageAccount cloudCachedStorageAccount = CloudStorageAccount.Parse(this.Settings["CachedStorageAccount"]);
+
+                // Create the blob clients.
+                cloudCachedBlobClient = cloudCachedStorageAccount.CreateCloudBlobClient();
+            }
+
+            if (cloudCachedBlobContainer == null)
+            {
+                // Retrieve references to a container.
+                cloudCachedBlobContainer = CreateContainer(cloudCachedBlobClient, this.Settings["CachedBlobContainer"], BlobContainerPublicAccessType.Blob);
+            }
+
+            if (cloudSourceBlobContainer == null)
+            {
+                string sourceAccount = this.Settings.ContainsKey("SourceStorageAccount") ? this.Settings["SourceStorageAccount"] : string.Empty;
+
+                // Repeat for source if it exists
+                if (!string.IsNullOrWhiteSpace(sourceAccount))
+                {
+                    CloudStorageAccount cloudSourceStorageAccount = CloudStorageAccount.Parse(this.Settings["SourceStorageAccount"]);
+                    CloudBlobClient cloudSourceBlobClient = cloudSourceStorageAccount.CreateCloudBlobClient();
+                    cloudSourceBlobContainer = cloudSourceBlobClient.GetContainerReference(this.Settings["SourceBlobContainer"]);
+                }
             }
 
             this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
-                                     ? this.Settings["CachedCDNRoot"]
-                                     : this.cloudCachedBlobContainer.Uri.ToString().TrimEnd(this.cloudCachedBlobContainer.Name.ToCharArray());
+                                         ? this.Settings["CachedCDNRoot"]
+                                         : cloudCachedBlobContainer.Uri.ToString().TrimEnd(cloudCachedBlobContainer.Name.ToCharArray());
+
+            if (this.Settings.ContainsKey("CachedCDNTimeout"))
+            {
+                int t;
+                int.TryParse(this.Settings["CachedCDNTimeout"], out t);
+                this.timeout = t;
+            }
 
             // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
             // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site. 
@@ -128,7 +154,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // Collision rate of about 1 in 10000 for the folder structure.
             // That gives us massive scope to store millions of files.
             string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
-            this.CachedPath = Path.Combine(this.cloudCachedBlobContainer.Uri.ToString(), pathFromKey, cachedFileName).Replace(@"\", "/");
+            this.CachedPath = Path.Combine(cloudCachedBlobContainer.Uri.ToString(), pathFromKey, cachedFileName).Replace(@"\", "/");
 
             // Do we insert the cache container? This seems to break some setups.
             bool useCachedContainerInUrl = this.Settings.ContainsKey("UseCachedContainerInUrl")
@@ -137,7 +163,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             if (useCachedContainerInUrl)
             {
                 this.cachedRewritePath =
-                    Path.Combine(this.cachedCdnRoot, this.cloudCachedBlobContainer.Name, pathFromKey, cachedFileName)
+                    Path.Combine(this.cachedCdnRoot, cloudCachedBlobContainer.Name, pathFromKey, cachedFileName)
                         .Replace(@"\", "/");
             }
             else
@@ -171,8 +197,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
             if (cachedImage == null)
             {
-                string blobPath = this.CachedPath.Substring(this.cloudCachedBlobContainer.Uri.ToString().Length + 1);
-                CloudBlockBlob blockBlob = this.cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
+                string blobPath = this.CachedPath.Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
+                CloudBlockBlob blockBlob = cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
 
                 if (await blockBlob.ExistsAsync())
                 {
@@ -225,13 +251,13 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </returns>
         public override async Task AddImageToCacheAsync(Stream stream, string contentType)
         {
-            string blobPath = this.CachedPath.Substring(this.cloudCachedBlobContainer.Uri.ToString().Length + 1);
-            CloudBlockBlob blockBlob = this.cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
+            string blobPath = this.CachedPath.Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
+            CloudBlockBlob blockBlob = cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
 
             await blockBlob.UploadFromStreamAsync(stream);
 
             blockBlob.Properties.ContentType = contentType;
-            blockBlob.Properties.CacheControl = string.Format("public, max-age={0}", this.MaxDays * 86400);
+            blockBlob.Properties.CacheControl = string.Format("public, max-age={0}", this.BrowserMaxDays * 86400);
             await blockBlob.SetPropertiesAsync();
 
             blockBlob.Metadata.Add("ImageProcessedBy", "ImageProcessor.Web/" + AssemblyVersion);
@@ -247,7 +273,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         public override async Task TrimCacheAsync()
         {
             Uri uri = new Uri(this.CachedPath);
-            string path = uri.GetLeftPart(UriPartial.Path).Substring(this.cloudCachedBlobContainer.Uri.ToString().Length + 1);
+            string path = uri.GetLeftPart(UriPartial.Path).Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
             string directory = path.Substring(0, path.LastIndexOf('/'));
             string parent = directory.Substring(0, directory.LastIndexOf('/'));
 
@@ -257,7 +283,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // Loop through the all the files in a non blocking fashion.
             do
             {
-                BlobResultSegment response = await this.cloudCachedBlobContainer
+                BlobResultSegment response = await cloudCachedBlobContainer
                     .ListBlobsSegmentedAsync(parent, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null);
                 continuationToken = response.ContinuationToken;
                 results.AddRange(response.Results);
@@ -310,12 +336,12 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         streamHash = string.Format("{0}{1}", creation, length);
                     }
                 }
-                else if (this.cloudSourceBlobContainer != null)
+                else if (cloudSourceBlobContainer != null)
                 {
-                    string container = RemoteRegex.Replace(this.cloudSourceBlobContainer.Uri.ToString(), string.Empty);
+                    string container = RemoteRegex.Replace(cloudSourceBlobContainer.Uri.ToString(), string.Empty);
                     string blobPath = RemoteRegex.Replace(this.RequestPath, string.Empty);
                     blobPath = blobPath.Replace(container, string.Empty).TrimStart('/');
-                    CloudBlockBlob blockBlob = this.cloudSourceBlobContainer.GetBlockBlobReference(blobPath);
+                    CloudBlockBlob blockBlob = cloudSourceBlobContainer.GetBlockBlobReference(blobPath);
 
                     if (await blockBlob.ExistsAsync())
                     {
@@ -378,24 +404,58 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
             if (this.streamCachedImage)
             {
+                // Map headers to enable 304s to pass through
+                if (context.Request.Headers["If-Modified-Since"] != null)
+                {
+                    request.IfModifiedSince = DateTime.Parse(context.Request.Headers["If-Modified-Since"]);
+                }
+
+                string[] mapRequestHeaders = { "Cache-Control", "If-None-Match" };
+                foreach (string h in mapRequestHeaders)
+                {
+                    if (context.Request.Headers[h] != null)
+                    {
+                        request.Headers.Add(h, context.Request.Headers[h]);
+                    }
+                }
+
                 // Write the blob storage directly to the stream
                 request.Method = "GET";
 
                 TryFiveTimes(
                     () =>
+                    {
+                        HttpWebResponse response;
+                        try
                         {
-                            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                            response = (HttpWebResponse)request.GetResponse();
+                        }
+                        catch (WebException ex)
+                        {
+                            // A 304 is not an error
+                            if (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
                             {
-                                Stream cachedStream = response.GetResponseStream();
-
-                                if (cachedStream != null)
-                                {
-                                    HttpResponse contextResponse = context.Response;
-                                    cachedStream.CopyTo(contextResponse.OutputStream);
-                                    ImageProcessingModule.SetHeaders(context, response.ContentType, null, this.BrowserMaxDays, response.StatusCode);
-                                }
+                                response = (HttpWebResponse)ex.Response;
                             }
-                        },
+                            else
+                            {
+                                throw;
+                            }
+                        }
+
+                        Stream cachedStream = response.GetResponseStream();
+
+                        if (cachedStream != null)
+                        {
+                            HttpResponse contextResponse = context.Response;
+                            contextResponse.Headers.Add("ETag", response.Headers["ETag"]);
+                            contextResponse.Headers.Add("Last-Modified", response.Headers["Last-Modified"]);
+                            cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
+                            ImageProcessingModule.SetHeaders(context, response.StatusCode == HttpStatusCode.NotModified ? null : response.ContentType, null, this.BrowserMaxDays, response.StatusCode);
+                        }
+
+                        response.Dispose();
+                    },
                 () =>
                 {
                     ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
@@ -405,17 +465,17 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             {
                 // Redirect the request to the blob URL
                 request.Method = "HEAD";
-
+                request.Timeout = this.timeout;
                 TryFiveTimes(
                     () =>
+                    {
+                        using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                         {
-                            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                            {
-                                HttpStatusCode responseCode = response.StatusCode;
-                                ImageProcessingModule.AddCorsRequestHeaders(context);
-                                context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
-                            }
-                        },
+                            HttpStatusCode responseCode = response.StatusCode;
+                            ImageProcessingModule.AddCorsRequestHeaders(context);
+                            context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
+                        }
+                    },
                 () =>
                 {
                     ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
@@ -434,8 +494,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         {
             CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
 
-            container.CreateIfNotExists();
-            container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
+            if (!container.Exists())
+            {
+                container.Create();
+                container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
+            }
 
             return container;
         }
@@ -447,16 +510,16 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <param name="exceptionAction">The delegate to throw on error.</param>
         private static void TryFiveTimes(Action delegateAction, Action exceptionAction)
         {
-            for (int retry = 0;; retry++)
+            for (int retry = 0; retry < 5; retry++)
             {
                 try
                 {
                     delegateAction();
-                    return;
+                    break;
                 }
                 catch (Exception)
                 {
-                    if (retry >= 5)
+                    if (retry == 4)
                     {
                         exceptionAction();
                         throw;
