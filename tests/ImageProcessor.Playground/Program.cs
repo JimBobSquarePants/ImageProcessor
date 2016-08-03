@@ -45,8 +45,8 @@ namespace ImageProcessor.PlayGround
             string outPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(root), OutputImages));
 
             DirectoryInfo di = new DirectoryInfo(inPath);
-            //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".png", ".tif");
-            IEnumerable<FileInfo> files = GetFilesByName(di, "Test.jpg");
+            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".png", ".tif");
+            //IEnumerable<FileInfo> files = GetFilesByName(di, "Test.jpg");
 
             foreach (FileInfo fileInfo in files)
             {
@@ -63,16 +63,17 @@ namespace ImageProcessor.PlayGround
                     try
                     {
                         imageFactory.Load(inStream)
-                            .Watermark(new TextLayer
-                            {
-                                Text = "Vertical",
-                                Vertical = true,
-                                FontColor = Color.Black,
-                                Opacity = 35,
-                                FontSize = imageFactory.Image.Height / 20,
-                                DropShadow = true,
-                                Position = new Point(30, 30)
-                            })
+                            //.Watermark(new TextLayer
+                            //{
+                            //    Text = "Vertical",
+                            //    Vertical = true,
+                            //    FontColor = Color.Black,
+                            //    Opacity = 35,
+                            //    FontSize = imageFactory.Image.Height / 20,
+                            //    DropShadow = true,
+                            //    Position = new Point(30, 30)
+                            //})
+                            .Resize(new Size(imageFactory.Image.Width / 2, imageFactory.Image.Height / 2))
                             .Save(Path.GetFullPath(Path.Combine(outPath, "Vertical" + fileInfo.Name)));
                     }
                     catch (Exception ex)
