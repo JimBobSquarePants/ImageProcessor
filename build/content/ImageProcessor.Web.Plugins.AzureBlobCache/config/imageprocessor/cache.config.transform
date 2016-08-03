@@ -6,6 +6,7 @@
         <setting key="CachedBlobContainer" value="cache"/>
         <setting key="UseCachedContainerInUrl" value="true"/>
         <setting key="CachedCDNRoot" value="[CdnRootUrl]"/>
+        <setting key="CachedCDNTimeout" value="1000"/>
         <setting key="SourceStorageAccount" value=""/>
         <setting key="SourceBlobContainer" value=""/>
         <setting key="StreamCachedImage" value="false"/>

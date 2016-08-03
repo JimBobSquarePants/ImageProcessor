@@ -1343,24 +1343,18 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
-                // Gif formats somehow get corrupted when accessing them via FastBitmap if EXIF
-                // items are altered.
-                //Type gifFormat = typeof(GifFormat);
-                //if (this.CurrentImageFormat.GetType() != gifFormat && this.backupFormat.GetType() != gifFormat)
-                //{
-                    // Clear property items.
-                    if (!this.PreserveExifData)
+                // Clear property items.
+                if (!this.PreserveExifData)
+                {
+                    this.ClearExif(this.Image);
+                }
+                else
+                {
+                    foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
                     {
-                        this.ClearExif(this.Image);
+                        this.Image.SetPropertyItem(propertItem.Value);
                     }
-                    else
-                    {
-                        foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
-                        {
-                            this.Image.SetPropertyItem(propertItem.Value);
-                        }
-                    }
-                //}
+                }
 
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image, this.CurrentBitDepth);
             }
@@ -1387,24 +1381,18 @@ namespace ImageProcessor
                     stream.SetLength(0);
                 }
 
-                // Gif formats somehow get corrupted when accessing them via FastBitmap if EXIF
-                // items are altered.
-                //Type gifFormat = typeof(GifFormat);
-                //if (this.CurrentImageFormat.GetType() != gifFormat && this.backupFormat.GetType() != gifFormat)
-                //{
-                    // Clear property items.
-                    if (!this.PreserveExifData)
+                // Clear property items.
+                if (!this.PreserveExifData)
+                {
+                    this.ClearExif(this.Image);
+                }
+                else
+                {
+                    foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
                     {
-                        this.ClearExif(this.Image);
+                        this.Image.SetPropertyItem(propertItem.Value);
                     }
-                    else
-                    {
-                        foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
-                        {
-                            this.Image.SetPropertyItem(propertItem.Value);
-                        }
-                    }
-                //}
+                }
 
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image, this.CurrentBitDepth);
                 if (stream.CanSeek)
@@ -1478,7 +1466,11 @@ namespace ImageProcessor
             {
                 foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
                 {
-                    image.RemovePropertyItem(item.Key);
+                    // The Gif decoder specifically requires these properties so we must not delete them.
+                    if (item.Key != (int)ExifPropertyTag.LoopCount && item.Key != (int)ExifPropertyTag.FrameDelay)
+                    {
+                        image.RemovePropertyItem(item.Key);
+                    }
                 }
             }
         }

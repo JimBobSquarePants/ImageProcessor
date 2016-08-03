@@ -13,6 +13,7 @@ namespace ImageProcessor.Imaging.Formats
     using System;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Linq;
 
     using ImageProcessor.Imaging.MetaData;
 
@@ -51,8 +52,10 @@ namespace ImageProcessor.Imaging.Formats
                 this.IsAnimated = true;
                 this.FrameCount = image.GetFrameCount(FrameDimension.Time);
 
-                // Loop info is stored at byte 20737.
-                this.LoopCount = BitConverter.ToInt16(image.GetPropertyItem((int)ExifPropertyTag.LoopCount).Value, 0);
+                // Loop info is stored at byte 20737. Default to infinite loop if not found.
+                this.LoopCount = image.PropertyIdList.Contains((int)ExifPropertyTag.LoopCount)
+                    ? BitConverter.ToInt16(image.GetPropertyItem((int)ExifPropertyTag.LoopCount).Value, 0)
+                    : 0;
             }
             else
             {
@@ -103,8 +106,10 @@ namespace ImageProcessor.Imaging.Formats
             // Reset the image
             image.SelectActiveFrame(FrameDimension.Time, 0);
 
-            // Get the times stored in the gif.
-            byte[] times = image.GetPropertyItem((int)ExifPropertyTag.FrameDelay).Value;
+            // Get the times stored in the gif. Default to 0 if not found.
+            byte[] times = image.PropertyIdList.Contains((int)ExifPropertyTag.FrameDelay)
+                               ? image.GetPropertyItem((int)ExifPropertyTag.FrameDelay).Value
+                               : new byte[4];
 
             // Convert each 4-byte chunk into an integer.
             // GDI returns a single array with all delays, while Mono returns a different array for each frame.
