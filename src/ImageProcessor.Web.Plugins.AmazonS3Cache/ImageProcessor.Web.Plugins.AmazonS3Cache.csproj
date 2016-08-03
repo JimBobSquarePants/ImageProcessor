@@ -54,6 +54,10 @@
       <Project>{D011A778-59C8-4BFA-A770-C350216BF161}</Project>
       <Name>ImageProcessor.Web</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ImageProcessor\ImageProcessor.csproj">
+      <Project>{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}</Project>
+      <Name>ImageProcessor</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
