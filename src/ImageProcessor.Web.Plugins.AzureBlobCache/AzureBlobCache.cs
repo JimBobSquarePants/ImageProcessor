@@ -128,10 +128,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                                          ? this.Settings["CachedCDNRoot"]
                                          : cloudCachedBlobContainer.Uri.ToString().TrimEnd(cloudCachedBlobContainer.Name.ToCharArray());
 
-            if (this.Settings.ContainsKey("CachedCDNTimout"))
+            if (this.Settings.ContainsKey("CachedCDNTimeout"))
             {
                 int t;
-                int.TryParse(this.Settings["CachedCDNTimout"], out t);
+                int.TryParse(this.Settings["CachedCDNTimeout"], out t);
                 this.timeout = t;
             }
 
