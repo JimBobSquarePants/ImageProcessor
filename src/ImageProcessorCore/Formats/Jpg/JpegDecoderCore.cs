@@ -703,6 +703,58 @@ namespace ImageProcessorCore.Formats
             this.ri = ((int)this.tmp[0] << 8) + (int)this.tmp[1];
         }
 
+        private void ProcessApp1Marker<T, TP>(Image<T, TP> image, int n)
+            where T : IPackedVector<TP>
+            where TP : struct
+        {
+            if (n < 5)
+            {
+                this.ignore(n);
+                return;
+            }
+
+            this.ReadFull(this.tmp, 0, 6);
+            n -= 6;
+
+            var exif = tmp[0] == 'E' && tmp[1] == 'x' && tmp[2] == 'i' && tmp[3] == 'f' && tmp[4] == '\0' && tmp[5] == '\0';
+            if (exif)
+            {
+                // n should be the number of bytes used by the tiff image. However, the input stream
+                // has already moved past the start of the tiff image... because it reads 4096 chunks at a time.
+
+                var currPos = inputStream.Seek(0, SeekOrigin.Current); // mark our position in the stream
+
+                // For now, don't let the jpeg processing blow up if we can't parse the exif data.
+                try
+                {
+                    var tiffPosition = currPos - (4096 - bytes.i);
+                    inputStream.Seek(tiffPosition, SeekOrigin.Begin);
+
+                    TiffDecoderCore tiffDecoder = TiffDecoderCore.Create(inputStream);
+                    if (tiffDecoder != null)
+                    {
+                        // First decode the tiff file into it's directory structure
+                        tiffDecoder.Decode();
+
+                        // now extract the exif properties
+                        tiffDecoder.FillExifProperties( image.Properties );    
+                    }
+
+                }
+                catch
+                {
+                }
+
+                inputStream.Seek(currPos, SeekOrigin.Begin); // put the position back to where it was....
+
+            }
+
+            if (n > 0)
+            {
+                this.ignore(n);
+            }
+        }
+
         private void ProcessApp0Marker(int n)
         {
             if (n < 5)
@@ -898,6 +950,9 @@ namespace ImageProcessorCore.Formats
                         break;
                     case JpegConstants.Markers.APP0:
                         this.ProcessApp0Marker(n);
+                        break;
+                    case JpegConstants.Markers.APP1:
+                        this.ProcessApp1Marker(image, n);
                         break;
                     case JpegConstants.Markers.APP14:
                         this.ProcessApp14Marker(n);
