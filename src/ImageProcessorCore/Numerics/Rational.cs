@@ -1,16 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Rational.cs" company="James South">
-//   Copyright (c) James South.
-//   Licensed under the Apache License, Version 2.0.
+﻿// <copyright file="Rational.cs" company="James Jackson-South">
+// Copyright (c) James Jackson-South and contributors.
+// Licensed under the Apache License, Version 2.0.
 // </copyright>
-// <summary>
-//   Represents a rational number. Any number that can be expressed as the quotient or fraction p/q of two
-//   numbers, p and q, with the denominator q not equal to zero.
-//   <remarks>
-//   Adapted from <see href="https://github.com/mckamey/exif-utils.net" /> by Stephen McKamey.
-//   </remarks>
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace ImageProcessorCore
 {
@@ -18,7 +9,9 @@ namespace ImageProcessorCore
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
+    using System.Linq;
     using System.Reflection;
+    using System.Text;
 
     /// <summary>
     /// Represents a rational number. Any number that can be expressed as the quotient or fraction p/q of two 
@@ -32,10 +25,9 @@ namespace ImageProcessorCore
     /// </typeparam>
     [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Reviewed. Suppression is OK here. Better readability.")]
     public struct Rational<T> :
-        IConvertible,
         IComparable,
         IComparable<T>
-        where T : IConvertible
+        where T : struct
     {
         /// <summary>
         /// Represents an empty instance of <see cref="Rational{T}"/>.
@@ -144,26 +136,17 @@ namespace ImageProcessorCore
         /// <summary>
         /// Gets and sets the numerator of the rational number
         /// </summary>
-        public T Numerator
-        {
-            get { return this.numerator; }
-        }
+        public T Numerator => this.numerator;
 
         /// <summary>
         /// Gets and sets the denominator of the rational number
         /// </summary>
-        public T Denominator
-        {
-            get { return this.denominator; }
-        }
+        public T Denominator => this.denominator;
 
         /// <summary>
         /// Gets a value indicating whether the current instance is empty.
         /// </summary>
-        public bool IsEmpty
-        {
-            get { return this.Equals(Empty); }
-        }
+        public bool IsEmpty => this.Equals(Empty);
 
         /// <summary>
         /// Gets the MaxValue
@@ -174,7 +157,7 @@ namespace ImageProcessorCore
             {
                 if (maxValue == default(decimal))
                 {
-                    FieldInfo max = typeof(T).GetField("MaxValue", BindingFlags.Static | BindingFlags.Public);
+                    FieldInfo max = typeof(T).GetTypeInfo().GetDeclaredField("MaxValue");
                     if (max != null)
                     {
                         try
@@ -347,9 +330,7 @@ namespace ImageProcessorCore
         /// </exception>
         private static ParseDelegate BuildParser()
         {
-            MethodInfo parse = typeof(T).GetMethod(
-                "Parse",
-                BindingFlags.Public | BindingFlags.Static);
+            MethodInfo parse = typeof(T).GetTypeInfo().GetDeclaredMethod("Parse");
 
             if (parse == null)
             {
@@ -389,9 +370,7 @@ namespace ImageProcessorCore
         private static TryParseDelegate BuildTryParser()
         {
             // http://stackoverflow.com/questions/1933369
-            MethodInfo tryParse = typeof(T).GetMethod(
-                "TryParse",
-                BindingFlags.Public | BindingFlags.Static);
+            MethodInfo tryParse = typeof(T).GetTypeInfo().GetDeclaredMethod("TryParse");
 
             if (tryParse == null)
             {
@@ -534,8 +513,6 @@ namespace ImageProcessorCore
 
         #endregion Math Methods
 
-        #region IConvertible Members
-
         /// <summary>
         /// Converts the value of this instance to an equivalent <see cref="T:System.String"/> using the specified 
         /// culture-specific formatting information.
@@ -549,10 +526,9 @@ namespace ImageProcessorCore
         /// </param>
         public string ToString(IFormatProvider provider)
         {
-            return string.Concat(
-                this.numerator.ToString(provider),
-                Delim,
-                this.denominator.ToString(provider));
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat(provider, "{0}{1}{2}", this.numerator, Delim, this.denominator);
+            return sb.ToString();
         }
 
         /// <summary>
@@ -570,24 +546,24 @@ namespace ImageProcessorCore
         {
             try
             {
-                decimal d = this.denominator.ToDecimal(provider);
+                decimal d = Convert.ToDecimal(this.denominator, provider);
                 if (d == 0m)
                 {
                     return 0m;
                 }
 
-                return this.numerator.ToDecimal(provider) / d;
+                return Convert.ToDecimal(this.numerator, provider) / d;
             }
             catch (InvalidCastException)
             {
-                long d = this.denominator.ToInt64(provider);
+                long d = Convert.ToInt64(this.denominator, provider);
                 if (d == 0L)
                 {
                     return 0L;
                 }
 
-                return ((IConvertible)this.numerator.ToInt64(provider)).ToDecimal(provider) /
-                    ((IConvertible)d).ToDecimal(provider);
+                return Convert.ToDecimal(Convert.ToInt64(this.numerator, provider), provider)
+                       / Convert.ToDecimal(d, provider);
             }
         }
 
@@ -604,13 +580,13 @@ namespace ImageProcessorCore
         /// </param>
         public double ToDouble(IFormatProvider provider)
         {
-            double d = this.denominator.ToDouble(provider);
+            double d = Convert.ToDouble(this.denominator, provider);
             if (Math.Abs(d) < 0.000001)
             {
                 return 0.0;
             }
 
-            return this.numerator.ToDouble(provider) / d;
+            return Convert.ToDouble(this.numerator, provider) / d;
         }
 
         /// <summary>
@@ -626,13 +602,13 @@ namespace ImageProcessorCore
         /// </param>
         public float ToSingle(IFormatProvider provider)
         {
-            float d = this.denominator.ToSingle(provider);
+            float d = Convert.ToSingle(this.denominator, provider);
             if (Math.Abs(d) < 0.000001)
             {
                 return 0.0f;
             }
 
-            return this.numerator.ToSingle(provider) / d;
+            return Convert.ToSingle(this.numerator, provider) / d;
         }
 
         /// <summary>
@@ -646,9 +622,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        bool IConvertible.ToBoolean(IFormatProvider provider)
+        public bool ToBoolean(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToBoolean(provider);
+            return Convert.ToBoolean(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -662,9 +638,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that 
         /// supplies culture-specific formatting information. 
         /// </param>
-        byte IConvertible.ToByte(IFormatProvider provider)
+        public byte ToByte(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToByte(provider);
+            return Convert.ToByte(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -678,9 +654,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        char IConvertible.ToChar(IFormatProvider provider)
+        public char ToChar(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToChar(provider);
+            return Convert.ToChar(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -694,9 +670,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        short IConvertible.ToInt16(IFormatProvider provider)
+        public short ToInt16(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToInt16(provider);
+            return Convert.ToInt16(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -710,9 +686,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        int IConvertible.ToInt32(IFormatProvider provider)
+        public int ToInt32(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToInt32(provider);
+            return Convert.ToInt32(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -726,9 +702,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        long IConvertible.ToInt64(IFormatProvider provider)
+        public long ToInt64(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToInt64(provider);
+            return Convert.ToInt64(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -742,9 +718,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        sbyte IConvertible.ToSByte(IFormatProvider provider)
+        public sbyte ToSByte(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToSByte(provider);
+            return Convert.ToSByte(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -758,9 +734,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        ushort IConvertible.ToUInt16(IFormatProvider provider)
+        public ushort ToUInt16(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToUInt16(provider);
+            return Convert.ToUInt16(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -774,9 +750,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        uint IConvertible.ToUInt32(IFormatProvider provider)
+        public uint ToUInt32(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToUInt32(provider);
+            return Convert.ToUInt32(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -790,9 +766,9 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that 
         /// supplies culture-specific formatting information. 
         /// </param>
-        ulong IConvertible.ToUInt64(IFormatProvider provider)
+        public ulong ToUInt64(IFormatProvider provider)
         {
-            return ((IConvertible)this.ToDecimal(provider)).ToUInt64(provider);
+            return Convert.ToUInt64(this.ToDecimal(provider), provider);
         }
 
         /// <summary>
@@ -806,21 +782,21 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        DateTime IConvertible.ToDateTime(IFormatProvider provider)
+        public DateTime ToDateTime(IFormatProvider provider)
         {
-            return new DateTime(((IConvertible)this).ToInt64(provider));
+            return new DateTime(this.ToInt64(provider));
         }
 
         /// <summary>
-        /// Returns the <see cref="T:System.TypeCode"/> for this instance.
+        /// Returns the <see cref="T:System.Type"/> for this instance.
         /// </summary>
         /// <returns>
         /// The enumerated constant that is the <see cref="T:System.TypeCode"/> of the class or value type that 
         /// implements this interface.
         /// </returns>
-        TypeCode IConvertible.GetTypeCode()
+        public Type GetTypeCode()
         {
-            return this.numerator.GetTypeCode();
+            return this.numerator.GetType();
         }
 
         /// <summary>
@@ -839,11 +815,11 @@ namespace ImageProcessorCore
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        object IConvertible.ToType(Type conversionType, IFormatProvider provider)
+        public object ToType(Type conversionType, IFormatProvider provider)
         {
             if (conversionType == null)
             {
-                throw new ArgumentNullException("conversionType");
+                throw new ArgumentNullException(nameof(conversionType));
             }
 
             Type thisType = this.GetType();
@@ -861,14 +837,18 @@ namespace ImageProcessorCore
             }
 
             // auto-convert between Rational<T> types by converting Numerator/Denominator
-            Type genericArg = conversionType.GetGenericArguments()[0];
+            Type genericArg = conversionType.GetTypeInfo().GenericTypeArguments[0];
             object[] ctorArgs =
             {
                 Convert.ChangeType(this.Numerator, genericArg, provider),
                 Convert.ChangeType(this.Denominator, genericArg, provider)
             };
 
-            ConstructorInfo ctor = conversionType.GetConstructor(new[] { genericArg, genericArg });
+            ConstructorInfo ctor = conversionType
+                .GetTypeInfo().DeclaredConstructors
+                .FirstOrDefault(
+                c => c.GetParameters().Select(p => p.ParameterType).SequenceEqual(new[] { genericArg, genericArg }));
+
             if (ctor == null)
             {
                 throw new InvalidCastException("Unable to find constructor for Rational<" + genericArg.Name + ">.");
@@ -876,8 +856,6 @@ namespace ImageProcessorCore
 
             return ctor.Invoke(ctorArgs);
         }
-
-        #endregion IConvertible Members
 
         #region IComparable Members
 

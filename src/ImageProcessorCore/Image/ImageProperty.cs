@@ -38,7 +38,7 @@ namespace ImageProcessorCore
         /// <summary>
         /// The value of this <see cref="ImageProperty"/>.
         /// </summary>
-        public string Value { get; }
+        public object Value { get; }
 
         /// <summary>
         /// Compares two <see cref="ImageProperty"/> objects. The result specifies whether the values

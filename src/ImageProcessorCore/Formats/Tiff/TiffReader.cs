@@ -68,15 +68,36 @@ namespace ImageProcessorCore.Formats
 
         public TiffDataFormatInfo GetTypeInfo(TiffDataFormat fieldType)
         {
-            var enumName = Enum.GetName(typeof(TiffDataFormat), fieldType);
-            if (enumName == null)
+            switch (fieldType)
             {
-                // this is an unknown type
-                return null;
-            }
+                case TiffDataFormat.Byte:
+                    return new TiffDataFormatInfo(1);
+                case TiffDataFormat.AsciiString:
+                    return new TiffDataFormatInfo(1);
+                case TiffDataFormat.Short:
+                    return new TiffDataFormatInfo(2);
+                case TiffDataFormat.Long:
+                    return new TiffDataFormatInfo(4);
+                case TiffDataFormat.Rational:
+                    return new TiffDataFormatInfo(8);
+                case TiffDataFormat.SByte:
+                    return new TiffDataFormatInfo(1);
+                case TiffDataFormat.Undfined:
+                    return new TiffDataFormatInfo(1);
+                case TiffDataFormat.SShort:
+                    return new TiffDataFormatInfo(2);
+                case TiffDataFormat.SLong:
+                    return new TiffDataFormatInfo(4);
+                case TiffDataFormat.SRational:
+                    return new TiffDataFormatInfo(8);
+                case TiffDataFormat.Float:
+                    return new TiffDataFormatInfo(4);
+                case TiffDataFormat.Double:
+                    return new TiffDataFormatInfo(8);
+                default:
+                    throw new ArgumentException("Unknown field type", nameof(fieldType));
 
-            MemberInfo[] members = typeof(TiffDataFormat).GetMember(enumName);
-            return members.First().GetCustomAttribute<TiffDataFormatInfo>();
+            }
         }
 
         public void Dispose()

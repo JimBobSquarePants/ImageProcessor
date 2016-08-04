@@ -36,7 +36,6 @@ namespace ImageProcessor.Tests.Formats
                 // probably need to put the tag in the property
                 // so we can query the property list by tag to find the one we are looking for
                 // it also has other goodies like a description of the tag...
-                Assert.Equal(typeof(Rational<int>), exifProperties[0].ValueType );
                 Rational<int> xResolution = (Rational<int>) exifProperties[0].Value; 
                 Assert.Equal(1, xResolution.Denominator);
                 Assert.Equal(350, xResolution.Numerator);

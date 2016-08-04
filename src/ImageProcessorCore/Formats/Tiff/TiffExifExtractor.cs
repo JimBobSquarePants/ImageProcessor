@@ -41,7 +41,7 @@ namespace ImageProcessorCore.Formats
             {
                 if (property.Value != null)
                 {
-                    ImageProperty imageProperty = new ImageProperty(property.Tag.Name, property.Value);
+                    ImageProperty imageProperty = new ImageProperty(property.Tag.Name, property.Value.ToString());
                     _properties.Add(imageProperty);
                 }
             }

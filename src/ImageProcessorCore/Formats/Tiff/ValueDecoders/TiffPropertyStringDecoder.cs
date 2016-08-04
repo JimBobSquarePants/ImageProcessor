@@ -14,7 +14,7 @@ namespace ImageProcessorCore.Formats
 
             //TODO: Is this the best we can do?
             byte[] data = reader.ReadBytes(count);
-            property.Value = Encoding.ASCII.GetString(data).TrimEnd((Char)0);
+            property.Value = Encoding.UTF8.GetString(data, 0, count).TrimEnd((Char)0);
 
             return true;
         }

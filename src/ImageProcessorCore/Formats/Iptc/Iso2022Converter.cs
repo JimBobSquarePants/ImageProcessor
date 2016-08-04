@@ -52,7 +52,7 @@ namespace ImageProcessorCore.Formats
 
             if (ascii)
             {
-                return Encoding.ASCII;
+                return Encoding.UTF8;
             }
 
             var utf8 = false;

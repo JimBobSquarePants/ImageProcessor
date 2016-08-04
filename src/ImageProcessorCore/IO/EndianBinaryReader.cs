@@ -88,7 +88,7 @@ namespace ImageProcessorCore.IO
             this.decoder = encoding.GetDecoder();
             this.minBytesPerChar = 1;
 
-            if (encoding is UnicodeEncoding)
+            if (encoding.WebName == System.Text.Encoding.Unicode.WebName)
             {
                 this.minBytesPerChar = 2;
             }
