@@ -1,4 +1,4 @@
-﻿// <copyright file="ResizeProcessor.cs" company="James Jackson-South">
+﻿// <copyright file="CompandingResizeProcessor.cs" company="James Jackson-South">
 // Copyright (c) James Jackson-South and contributors.
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
@@ -10,27 +10,28 @@ namespace ImageProcessorCore.Processors
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Provides methods that allow the resizing of images using various algorithms.
+    /// Provides methods that allow the resizing of images using various algorithms. 
+    /// This version will expand and compress the image to and from a linear color space during processing.
     /// </summary>
-    /// <remarks>
-    /// This version and the <see cref="CompandingResizeProcessor{T,TP}"/> have been separated out to improve performance.
-    /// </remarks>
     /// <typeparam name="T">The pixel format.</typeparam>
     /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
-    public class ResizeProcessor<T, TP> : ResamplingWeightedProcessor<T, TP>
+    public class CompandingResizeProcessor<T, TP> : ResamplingWeightedProcessor<T, TP>
         where T : IPackedVector<TP>
         where TP : struct
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResizeProcessor{T,TP}"/> class.
+        /// Initializes a new instance of the <see cref="CompandingResizeProcessor{T,TP}"/> class.
         /// </summary>
         /// <param name="sampler">
         /// The sampler to perform the resize operation.
         /// </param>
-        public ResizeProcessor(IResampler sampler)
+        public CompandingResizeProcessor(IResampler sampler)
             : base(sampler)
         {
         }
+
+        /// <inheritdoc/>
+        public override bool Compand { get; set; } = true;
 
         /// <inheritdoc/>
         protected override void Apply(ImageBase<T, TP> target, ImageBase<T, TP> source, Rectangle targetRectangle, Rectangle sourceRectangle, int startY, int endY)
@@ -119,11 +120,11 @@ namespace ImageProcessorCore.Processors
                             for (int i = 0; i < horizontalValues.Length; i++)
                             {
                                 Weight xw = horizontalValues[i];
-                                destination += sourcePixels[xw.Index, y].ToVector4() * xw.Value;
+                                destination += sourcePixels[xw.Index, y].ToVector4().Expand() * xw.Value;
                             }
 
                             T d = default(T);
-                            d.PackFromVector4(destination);
+                            d.PackFromVector4(destination.Compress());
                             firstPassPixels[x, y] = d;
                         }
                     });
@@ -146,16 +147,17 @@ namespace ImageProcessorCore.Processors
                             for (int i = 0; i < verticalValues.Length; i++)
                             {
                                 Weight yw = verticalValues[i];
-                                destination += firstPassPixels[x, yw.Index].ToVector4() * yw.Value;
+                                destination += firstPassPixels[x, yw.Index].ToVector4().Expand() * yw.Value;
                             }
 
                             T d = default(T);
-                            d.PackFromVector4(destination);
+                            d.PackFromVector4(destination.Compress());
                             targetPixels[x, y] = d;
                         }
 
                         this.OnRowProcessed();
                     });
+
             }
         }
     }

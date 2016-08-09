@@ -24,7 +24,7 @@ namespace ImageProcessorCore.Tests
                 //{ "Lanczos3", new Lanczos3Resampler() },
                 //{ "Lanczos5", new Lanczos5Resampler() },
                 //{ "Lanczos8", new Lanczos8Resampler() },
-                //{ "MitchellNetravali", new MitchellNetravaliResampler() },
+                { "MitchellNetravali", new MitchellNetravaliResampler() },
                 //{ "Hermite", new HermiteResampler() },
                 //{ "Spline", new SplineResampler() },
                 //{ "Robidoux", new RobidouxResampler() },
@@ -51,17 +51,19 @@ namespace ImageProcessorCore.Tests
                     Image image = new Image(stream);
                     using (FileStream output = File.OpenWrite($"{path}/{filename}"))
                     {
-                        image.Resize(image.Width / 2, image.Height / 2, sampler, false, this.ProgressUpdate)
+                        image.Resize(image.Width / 2, image.Height / 2, sampler, true, this.ProgressUpdate)
+                        //image.Resize(555, 275, sampler, false, this.ProgressUpdate)
                              .Save(output);
                     }
                 }
             }
         }
 
-        [Fact]
-        public void ImageShouldResizeWidthAndKeepAspect()
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeWidthAndKeepAspect(string name, IResampler sampler)
         {
-            const string name = "FixedWidth";
+            name = name + "-FixedWidth";
 
             if (!Directory.Exists(path))
             {
@@ -77,17 +79,18 @@ namespace ImageProcessorCore.Tests
                     Image image = new Image(stream);
                     using (FileStream output = File.OpenWrite($"{path}/{filename}"))
                     {
-                        image.Resize(image.Width / 3, 0, new TriangleResampler(), false, this.ProgressUpdate)
+                        image.Resize(image.Width / 3, 0, sampler, false, this.ProgressUpdate)
                              .Save(output);
                     }
                 }
             }
         }
 
-        [Fact]
-        public void ImageShouldResizeHeightAndKeepAspect()
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeHeightAndKeepAspect(string name, IResampler sampler)
         {
-            const string name = "FixedHeight";
+            name = name + "-FixedHeight";
 
             if (!Directory.Exists(path))
             {
@@ -103,17 +106,18 @@ namespace ImageProcessorCore.Tests
                     Image image = new Image(stream);
                     using (FileStream output = File.OpenWrite($"{path}/{filename}"))
                     {
-                        image.Resize(0, image.Height / 3, new TriangleResampler(), false, this.ProgressUpdate)
+                        image.Resize(0, image.Height / 3, sampler, false, this.ProgressUpdate)
                              .Save(output);
                     }
                 }
             }
         }
 
-        [Fact]
-        public void ImageShouldResizeWithCropMode()
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeWithCropWidthMode(string name, IResampler sampler)
         {
-            const string name = "Crop";
+            name = name + "-CropWidth";
 
             if (!Directory.Exists(path))
             {
@@ -131,6 +135,7 @@ namespace ImageProcessorCore.Tests
                     {
                         ResizeOptions options = new ResizeOptions()
                         {
+                            Sampler = sampler,
                             Size = new Size(image.Width / 2, image.Height)
                         };
 
@@ -141,10 +146,44 @@ namespace ImageProcessorCore.Tests
             }
         }
 
-        [Fact]
-        public void ImageShouldResizeWithPadMode()
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeWithCropHeightMode(string name, IResampler sampler)
         {
-            const string name = "Pad";
+            name = name + "-CropHeight";
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            foreach (string file in Files)
+            {
+                using (FileStream stream = File.OpenRead(file))
+                {
+                    string filename = Path.GetFileNameWithoutExtension(file) + "-" + name + Path.GetExtension(file);
+
+                    Image image = new Image(stream);
+                    using (FileStream output = File.OpenWrite($"{path}/{filename}"))
+                    {
+                        ResizeOptions options = new ResizeOptions()
+                        {
+                            Sampler = sampler,
+                            Size = new Size(image.Width, image.Height / 2)
+                        };
+
+                        image.Resize(options, this.ProgressUpdate)
+                             .Save(output);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeWithPadMode(string name, IResampler sampler)
+        {
+            name = name + "-Pad";
 
             if (!Directory.Exists(path))
             {
@@ -173,10 +212,11 @@ namespace ImageProcessorCore.Tests
             }
         }
 
-        [Fact]
-        public void ImageShouldResizeWithBoxPadMode()
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeWithBoxPadMode(string name, IResampler sampler)
         {
-            const string name = "BoxPad";
+            name = name + "-BoxPad";
 
             if (!Directory.Exists(path))
             {
@@ -194,6 +234,7 @@ namespace ImageProcessorCore.Tests
                     {
                         ResizeOptions options = new ResizeOptions()
                         {
+                            Sampler = sampler,
                             Size = new Size(image.Width + 200, image.Height + 200),
                             Mode = ResizeMode.BoxPad
                         };
@@ -205,10 +246,11 @@ namespace ImageProcessorCore.Tests
             }
         }
 
-        [Fact]
-        public void ImageShouldResizeWithMaxMode()
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeWithMaxMode(string name, IResampler sampler)
         {
-            const string name = "Max";
+            name = name + "Max";
 
             if (!Directory.Exists(path))
             {
@@ -226,6 +268,7 @@ namespace ImageProcessorCore.Tests
                     {
                         ResizeOptions options = new ResizeOptions()
                         {
+                            Sampler = sampler,
                             Size = new Size(300, 300),
                             Mode = ResizeMode.Max
                         };
@@ -237,10 +280,11 @@ namespace ImageProcessorCore.Tests
             }
         }
 
-        [Fact]
-        public void ImageShouldResizeWithMinMode()
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeWithMinMode(string name, IResampler sampler)
         {
-            const string name = "Min";
+            name = name + "-Min";
 
             if (!Directory.Exists(path))
             {
@@ -258,6 +302,7 @@ namespace ImageProcessorCore.Tests
                     {
                         ResizeOptions options = new ResizeOptions()
                         {
+                            Sampler = sampler,
                             Size = new Size(image.Width - 50, image.Height - 25),
                             Mode = ResizeMode.Min
                         };
@@ -269,10 +314,11 @@ namespace ImageProcessorCore.Tests
             }
         }
 
-        [Fact]
-        public void ImageShouldResizeWithStretchMode()
+        [Theory]
+        [MemberData("ReSamplers")]
+        public void ImageShouldResizeWithStretchMode(string name, IResampler sampler)
         {
-            const string name = "Stretch";
+            name = name + "Stretch";
 
             if (!Directory.Exists(path))
             {
@@ -290,6 +336,7 @@ namespace ImageProcessorCore.Tests
                     {
                         ResizeOptions options = new ResizeOptions()
                         {
+                            Sampler = sampler,
                             Size = new Size(image.Width - 200, image.Height),
                             Mode = ResizeMode.Stretch
                         };
