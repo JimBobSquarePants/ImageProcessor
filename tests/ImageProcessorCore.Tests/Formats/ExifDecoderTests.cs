@@ -30,7 +30,7 @@ namespace ImageProcessor.Tests.Formats
                 
                 List<ImageProperty> exifProperties = new List<ImageProperty>();
                 decoder.FillExifProperties(exifProperties);
-                Assert.Equal(28, exifProperties.Count);
+                Assert.Equal(32, exifProperties.Count);
 
                 // check the x resolution
                 // probably need to put the tag in the property
@@ -52,7 +52,7 @@ namespace ImageProcessor.Tests.Formats
 
                 List<ImageProperty> exifProperties = new List<ImageProperty>();
                 decoder.FillExifProperties(exifProperties);
-                Assert.Equal(45, exifProperties.Count);
+                Assert.Equal(47, exifProperties.Count);
 
 
             }

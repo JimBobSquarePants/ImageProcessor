@@ -15,7 +15,7 @@
             int numerator = reader.ReadInt32();
             int denominator = reader.ReadInt32();
 
-            property.Value = new Rational<int>(numerator, denominator);
+            property.Value = numerator;// new Rational<int>(numerator, denominator);
            
             return true;
         }
