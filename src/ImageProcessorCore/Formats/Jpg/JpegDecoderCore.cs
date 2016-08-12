@@ -950,7 +950,7 @@ namespace ImageProcessorCore.Formats
         /// <param name="imageWidth">The width.</param>
         /// <param name="imageHeight">The height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromGrayScale<T, TP>(int imageWidth, int imageHeight, ImageBase<T, TP> image)
+        private void ConvertFromGrayScale<T, TP>(int imageWidth, int imageHeight, Image<T, TP> image)
             where T : IPackedVector<TP>
             where TP : struct
         {
@@ -986,7 +986,7 @@ namespace ImageProcessorCore.Formats
         /// <param name="imageWidth">The width.</param>
         /// <param name="imageHeight">The height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromYCbCr<T, TP>(int imageWidth, int imageHeight, ImageBase<T, TP> image)
+        private void ConvertFromYCbCr<T, TP>(int imageWidth, int imageHeight, Image<T, TP> image)
             where T : IPackedVector<TP>
             where TP : struct
         {
@@ -1031,7 +1031,7 @@ namespace ImageProcessorCore.Formats
         /// <param name="imageWidth">The width.</param>
         /// <param name="imageHeight">The height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromRGB<T, TP>(int imageWidth, int imageHeight, ImageBase<T, TP> image)
+        private void ConvertFromRGB<T, TP>(int imageWidth, int imageHeight, Image<T, TP> image)
             where T : IPackedVector<TP>
             where TP : struct
         {
@@ -1071,14 +1071,14 @@ namespace ImageProcessorCore.Formats
         /// <typeparam name="T">The pixel format.</typeparam>
         /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
         /// <param name="image">The image to assign the resolution to.</param>
-        private void AssignResolution<T, TP>(ImageBase<T, TP> image)
+        private void AssignResolution<T, TP>(Image<T, TP> image)
             where T : IPackedVector<TP>
             where TP : struct
         {
             if (this.jfif && this.horizontalResolution > 0 && this.verticalResolution > 0)
             {
-                ((Image<T, TP>)image).HorizontalResolution = this.horizontalResolution;
-                ((Image<T, TP>)image).VerticalResolution = this.verticalResolution;
+                image.HorizontalResolution = this.horizontalResolution;
+                image.VerticalResolution = this.verticalResolution;
             }
         }
 
