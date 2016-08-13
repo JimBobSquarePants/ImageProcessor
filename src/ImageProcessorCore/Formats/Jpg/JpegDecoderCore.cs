@@ -733,6 +733,30 @@ namespace ImageProcessorCore.Formats
             }
         }
 
+        private void ProcessApp1Marker<T, TP>(int n, Image<T, TP> image)
+            where T : IPackedVector<TP>
+            where TP : struct
+        {
+            if (n < 6)
+            {
+                this.ignore(n);
+                return;
+            }
+
+            byte[] profile = new byte[n];
+            this.ReadFull(profile, 0, n);
+
+            if (profile[0] == 'E' &&
+                profile[1] == 'x' &&
+                profile[2] == 'i' &&
+                profile[3] == 'f' &&
+                profile[4] == '\0' &&
+                profile[5] == '\0')
+            {
+                image.ExifProfile = new ExifProfile(profile);
+            }
+        }
+
         private void ProcessApp14Marker(int n)
         {
             if (n < 12)
@@ -898,6 +922,9 @@ namespace ImageProcessorCore.Formats
                         break;
                     case JpegConstants.Markers.APP0:
                         this.ProcessApp0Marker(n);
+                        break;
+                    case JpegConstants.Markers.APP1:
+                        this.ProcessApp1Marker(n, image);
                         break;
                     case JpegConstants.Markers.APP14:
                         this.ProcessApp14Marker(n);
