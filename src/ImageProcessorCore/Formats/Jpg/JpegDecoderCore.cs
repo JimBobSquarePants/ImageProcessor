@@ -733,9 +733,9 @@ namespace ImageProcessorCore.Formats
             }
         }
 
-        private void ProcessApp1Marker<T, TP>(int n, Image<T, TP> image)
-            where T : IPackedVector<TP>
-            where TP : struct
+        private void ProcessApp1Marker<TColor, TPacked>(int n, Image<TColor, TPacked> image)
+            where TColor : IPackedVector<TPacked>
+            where TPacked : struct
         {
             if (n < 6)
             {
@@ -790,9 +790,9 @@ namespace ImageProcessorCore.Formats
         /// <param name="image">The image, where the data should be set to.
         /// Cannot be null (Nothing in Visual Basic).</param>
         /// <param name="configOnly">Whether to decode metadata only.</param>
-        public void Decode<T, TP>(Image<T, TP> image, Stream stream, bool configOnly)
-            where T : IPackedVector<TP>
-            where TP : struct
+        public void Decode<TColor, TPacked>(Image<TColor, TPacked> image, Stream stream, bool configOnly)
+            where TColor : IPackedVector<TPacked>
+            where TPacked : struct
         {
             this.inputStream = stream;
 
@@ -972,16 +972,16 @@ namespace ImageProcessorCore.Formats
         /// <summary>
         /// Converts the image from the original grayscale image pixels.
         /// </summary>
-        /// <typeparam name="T">The pixel format.</typeparam>
-        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <typeparam name="TColor">The pixel format.</typeparam>
+        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
         /// <param name="imageWidth">The width.</param>
         /// <param name="imageHeight">The height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromGrayScale<T, TP>(int imageWidth, int imageHeight, Image<T, TP> image)
-            where T : IPackedVector<TP>
-            where TP : struct
+        private void ConvertFromGrayScale<TColor, TPacked>(int imageWidth, int imageHeight, Image<TColor, TPacked> image)
+            where TColor : IPackedVector<TPacked>
+            where TPacked : struct
         {
-            T[] pixels = new T[imageWidth * imageHeight];
+            TColor[] pixels = new TColor[imageWidth * imageHeight];
 
             Parallel.For(
                 0,
@@ -995,7 +995,7 @@ namespace ImageProcessorCore.Formats
                         int offset = (y * imageWidth) + x;
                         byte rgb = this.grayImage.pixels[yoff + x];
 
-                        T packed = default(T);
+                        TColor packed = default(TColor);
                         packed.PackFromBytes(rgb, rgb, rgb, 255);
                         pixels[offset] = packed;
                     }
@@ -1008,18 +1008,18 @@ namespace ImageProcessorCore.Formats
         /// <summary>
         /// Converts the image from the original YCbCr image pixels.
         /// </summary>
-        /// <typeparam name="T">The pixel format.</typeparam>
-        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <typeparam name="TColor">The pixel format.</typeparam>
+        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
         /// <param name="imageWidth">The width.</param>
         /// <param name="imageHeight">The height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromYCbCr<T, TP>(int imageWidth, int imageHeight, Image<T, TP> image)
-            where T : IPackedVector<TP>
-            where TP : struct
+        private void ConvertFromYCbCr<TColor, TPacked>(int imageWidth, int imageHeight, Image<TColor, TPacked> image)
+            where TColor : IPackedVector<TPacked>
+            where TPacked : struct
         {
             int scale = this.comp[0].h / this.comp[1].h;
 
-            T[] pixels = new T[imageWidth * imageHeight];
+            TColor[] pixels = new TColor[imageWidth * imageHeight];
 
             Parallel.For(
                 0,
@@ -1040,7 +1040,7 @@ namespace ImageProcessorCore.Formats
 
                             // Implicit casting FTW
                             Color color = new YCbCr(yy, cb, cr);
-                            T packed = default(T);
+                            TColor packed = default(TColor);
                             packed.PackFromBytes(color.R, color.G, color.B, color.A);
                             pixels[index] = packed;
                         }
@@ -1053,17 +1053,17 @@ namespace ImageProcessorCore.Formats
         /// <summary>
         /// Converts the image from the original RBG image pixels.
         /// </summary>
-        /// <typeparam name="T">The pixel format.</typeparam>
-        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <typeparam name="TColor">The pixel format.</typeparam>
+        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
         /// <param name="imageWidth">The width.</param>
         /// <param name="imageHeight">The height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromRGB<T, TP>(int imageWidth, int imageHeight, Image<T, TP> image)
-            where T : IPackedVector<TP>
-            where TP : struct
+        private void ConvertFromRGB<TColor, TPacked>(int imageWidth, int imageHeight, Image<TColor, TPacked> image)
+            where TColor : IPackedVector<TPacked>
+            where TPacked : struct
         {
             int scale = this.comp[0].h / this.comp[1].h;
-            T[] pixels = new T[imageWidth * imageHeight];
+            TColor[] pixels = new TColor[imageWidth * imageHeight];
 
             Parallel.For(
                 0,
@@ -1081,7 +1081,7 @@ namespace ImageProcessorCore.Formats
                             byte blue = this.ycbcrImage.pix_cr[co + (x / scale)];
 
                             int index = (y * imageWidth) + x;
-                            T packed = default(T);
+                            TColor packed = default(TColor);
                             packed.PackFromBytes(red, green, blue, 255);
 
                             pixels[index] = packed;
@@ -1095,12 +1095,12 @@ namespace ImageProcessorCore.Formats
         /// <summary>
         /// Assigns the horizontal and vertical resolution to the image if it has a JFIF header.
         /// </summary>
-        /// <typeparam name="T">The pixel format.</typeparam>
-        /// <typeparam name="TP">The packed format. <example>long, float.</example></typeparam>
+        /// <typeparam name="TColor">The pixel format.</typeparam>
+        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
         /// <param name="image">The image to assign the resolution to.</param>
-        private void AssignResolution<T, TP>(Image<T, TP> image)
-            where T : IPackedVector<TP>
-            where TP : struct
+        private void AssignResolution<TColor, TPacked>(Image<TColor, TPacked> image)
+            where TColor : IPackedVector<TPacked>
+            where TPacked : struct
         {
             if (this.jfif && this.horizontalResolution > 0 && this.verticalResolution > 0)
             {
