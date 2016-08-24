@@ -996,7 +996,7 @@ namespace ImageProcessorCore.Formats
                         byte rgb = this.grayImage.pixels[yoff + x];
 
                         TColor packed = default(TColor);
-                        packed.PackFromBytes(rgb, rgb, rgb, 255);
+                        packed.PackFromVector4(new Color(rgb, rgb, rgb).ToVector4());
                         pixels[offset] = packed;
                     }
                 });
@@ -1041,7 +1041,7 @@ namespace ImageProcessorCore.Formats
                             // Implicit casting FTW
                             Color color = new YCbCr(yy, cb, cr);
                             TColor packed = default(TColor);
-                            packed.PackFromBytes(color.R, color.G, color.B, color.A);
+                            packed.PackFromVector4(color.ToVector4());
                             pixels[index] = packed;
                         }
                     });
@@ -1082,7 +1082,7 @@ namespace ImageProcessorCore.Formats
 
                             int index = (y * imageWidth) + x;
                             TColor packed = default(TColor);
-                            packed.PackFromBytes(red, green, blue, 255);
+                            packed.PackFromVector4(new Color(red, green, blue).ToVector4());
 
                             pixels[index] = packed;
                         }
