@@ -785,6 +785,8 @@ namespace ImageProcessorCore.Formats
         /// Decodes the image from the specified this._stream and sets
         /// the data to image.
         /// </summary>
+        /// <typeparam name="TColor">The pixel format.</typeparam>
+        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
         /// <param name="stream">The stream, where the image should be
         /// decoded from. Cannot be null (Nothing in Visual Basic).</param>
         /// <param name="image">The image, where the data should be set to.
@@ -972,8 +974,8 @@ namespace ImageProcessorCore.Formats
         /// <summary>
         /// Converts the image from the original grayscale image pixels.
         /// </summary>
-        /// <typeparam name="TColor">The pixel format.</typeparam>
-        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
+        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TPacked">The packed format. <example>long, float.</example></typeparam>
         /// <param name="imageWidth">The width.</param>
         /// <param name="imageHeight">The height.</param>
         /// <param name="image">The image.</param>
