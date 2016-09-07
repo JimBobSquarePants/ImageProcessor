@@ -956,14 +956,28 @@ namespace ImageProcessorCore.Formats
             }
             else if (this.ycbcrImage != null)
             {
-                if (this.IsRGB())
+                if (this.nComp == 4)
                 {
-                    this.ConvertFromRGB(this.width, this.height, image);
+                    this.ConvertFromCmyk(this.width, this.height, image);
+
+                    // We have 3 components now.
+                    this.nComp = 3;
+                    return;
                 }
-                else
+
+                if (this.nComp == 3)
                 {
+                    if (this.IsRGB())
+                    {
+                        this.ConvertFromRGB(this.width, this.height, image);
+                        return;
+                    }
+
                     this.ConvertFromYCbCr(this.width, this.height, image);
+                    return;
                 }
+
+                throw new ImageFormatException("JpegDecoder only supports RGB, CMYK and Grayscale color spaces.");
             }
             else
             {
@@ -972,9 +986,63 @@ namespace ImageProcessorCore.Formats
         }
 
         /// <summary>
+        /// Converts the image from the original Cmyk image pixels.
+        /// </summary>
+        /// <typeparam name="TColor">The pixel format.</typeparam>
+        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
+        /// <param name="imageWidth">The width.</param>
+        /// <param name="imageHeight">The height.</param>
+        /// <param name="image">The image.</param>
+        private void ConvertFromCmyk<TColor, TPacked>(int imageWidth, int imageHeight, Image<TColor, TPacked> image)
+            where TColor : IPackedVector<TPacked>
+            where TPacked : struct
+        {
+            if (!adobeTransformValid)
+            {
+                throw new ImageFormatException("Unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata");
+            }
+
+            if (adobeTransform != adobeTransformUnknown)
+            {
+                int scale = comp[0].h / comp[1].h;
+
+                TColor[] pixels = new TColor[imageWidth * imageHeight];
+
+                Parallel.For(
+                    0,
+                    imageHeight,
+                    y =>
+                    {
+                        int yo = ycbcrImage.get_row_y_offset(y);
+                        int co = ycbcrImage.get_row_c_offset(y);
+
+                        for (int x = 0; x < imageWidth; x++)
+                        {
+                            byte yy = ycbcrImage.pix_y[yo + x];
+                            byte cb = ycbcrImage.pix_cb[co + (x / scale)];
+                            byte cr = ycbcrImage.pix_cr[co + (x / scale)];
+
+                            int index = (y * imageWidth) + x;
+
+                            // Implicit casting FTW
+                            Color color = new YCbCr(yy, cb, cr);
+                            int keyline = 255 - blackPix[y * blackStride + x];
+                            Color final = new Cmyk(color.R / 255F, color.G / 255F, color.B / 255F, keyline / 255F);
+
+                            TColor packed = default(TColor);
+                            packed.PackFromVector4(final.ToVector4());
+                            pixels[index] = packed;
+                        }
+                    });
+
+                image.SetPixels(imageWidth, imageHeight, pixels);
+            }
+        }
+
+        /// <summary>
         /// Converts the image from the original grayscale image pixels.
         /// </summary>
-        /// <typeparam name="T">The pixel format.</typeparam>
+        /// <typeparam name="TColor">The pixel format.</typeparam>
         /// <typeparam name="TPacked">The packed format. <example>long, float.</example></typeparam>
         /// <param name="imageWidth">The width.</param>
         /// <param name="imageHeight">The height.</param>
@@ -1468,7 +1536,11 @@ namespace ImageProcessorCore.Formats
                                         // dst, stride = blackPix[8*(by*blackStride+bx):], blackStride
                                         // break;
                                         // TODO: Check this.
-                                        throw new ImageFormatException("Too many components");
+                                        dst = blackPix;
+                                        stride = blackStride;
+                                        offset = 8 * (by * blackStride + bx);
+                                        break;
+                                    //throw new ImageFormatException("Too many components");
 
                                     default:
                                         throw new ImageFormatException("Too many components");
@@ -1665,6 +1737,14 @@ namespace ImageProcessorCore.Formats
 
                 var m = new YCbCrImage(8 * h0 * mxx, 8 * v0 * myy, ratio);
                 this.ycbcrImage = m.subimage(0, 0, this.width, this.height);
+
+                if (nComp == 4)
+                {
+                    int h3 = comp[3].h;
+                    int v3 = comp[3].v;
+                    blackPix = new byte[8 * h3 * mxx * 8 * v3 * myy];
+                    blackStride = 8 * h3 * mxx;
+                }
 
                 /*if d.nComp == 4 {
                     h3, v3 := d.comp[3].h, d.comp[3].v
