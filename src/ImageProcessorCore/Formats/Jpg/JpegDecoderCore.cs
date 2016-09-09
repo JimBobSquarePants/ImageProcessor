@@ -8,16 +8,25 @@ namespace ImageProcessorCore.Formats
     using System.IO;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Performs the jpeg decoding operation.
+    /// </summary>
     internal class JpegDecoderCore
     {
-        // maxCodeLength is the maximum (inclusive) number of bits in a Huffman code.
-        private const int maxCodeLength = 16;
+        /// <summary>
+        /// The maximum (inclusive) number of bits in a Huffman code.
+        /// </summary>
+        private const int MaxCodeLength = 16;
 
-        // maxNCodes is the maximum (inclusive) number of codes in a Huffman tree.
-        private const int maxNCodes = 256;
+        /// <summary>
+        /// The maximum (inclusive) number of codes in a Huffman tree.
+        /// </summary>
+        private const int MaxNCodes = 256;
 
-        // lutSize is the log-2 size of the Huffman decoder's look-up table.
-        private const int lutSize = 8;
+        /// <summary>
+        /// The log-2 size of the Huffman decoder's look-up table.
+        /// </summary>
+        private const int LutSize = 8;
 
         private const int maxComponents = 4;
 
@@ -53,15 +62,30 @@ namespace ImageProcessorCore.Formats
             39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
         };
 
-        public int width;
+        /// <summary>
+        /// The image width
+        /// </summary>
+        private int widthG;
 
-        public int height;
+        /// <summary>
+        /// The image height
+        /// </summary>
+        private int heightG;
 
-        public int nComp;
+        /// <summary>
+        /// The number of color components within the image.
+        /// </summary>
+        private int componentCount;
 
-        public GrayImage grayImage; // grayscale
+        /// <summary>
+        /// A grayscale image to decode to.
+        /// </summary>
+        private GrayImage grayImage;
 
-        private YCbCrImage ycbcrImage; // YCrCb
+        /// <summary>
+        /// The full color image to decode to.
+        /// </summary>
+        private YCbCrImage ycbcrImage;
 
         private Stream inputStream;
 
@@ -73,21 +97,36 @@ namespace ImageProcessorCore.Formats
 
         private int blackStride;
 
-        private int ri; // Restart Interval.
+        /// <summary>
+        /// The restart interval
+        /// </summary>
+        private int restartInterval;
 
-        private bool progressive;
+        /// <summary>
+        /// Whether the image is interlaced (progressive)
+        /// </summary>
+        private bool isProgressive;
 
-        private bool jfif;
+        /// <summary>
+        /// Whether the image has a Jfif header
+        /// </summary>
+        private bool isJfif;
 
         private bool adobeTransformValid;
 
         private byte adobeTransform;
 
-        private ushort eobRun; // End-of-Band run, specified in section G.1.2.2.
+        /// <summary>
+        /// End-of-Band run, specified in section G.1.2.2.
+        /// </summary>
+        private ushort eobRun;
 
         private Component[] comp;
 
-        private Block[][] progCoeffs; // Saved state between progressive-mode scans.
+        /// <summary>
+        /// Saved state between progressive-mode scans.
+        /// </summary>
+        private Block[][] progCoeffs;
 
         private Huffman[,] huff;
 
@@ -144,7 +183,7 @@ namespace ImageProcessorCore.Formats
         {
             while (true)
             {
-                var c = this.ReadByteStuffedByte();
+                byte c = this.ReadByteStuffedByte();
                 this.bits.a = (this.bits.a << 8) | (uint)c;
                 this.bits.n += 8;
                 if (this.bits.m == 0) this.bits.m = 1 << 7;
@@ -190,7 +229,7 @@ namespace ImageProcessorCore.Formats
                 }
 
                 int th = this.tmp[0] & 0x0f;
-                if (th > maxTh || !this.progressive && th > 1)
+                if (th > maxTh || !this.isProgressive && th > 1)
                 {
                     throw new ImageFormatException("bad Th value");
                 }
@@ -202,7 +241,7 @@ namespace ImageProcessorCore.Formats
                 // h.nCodes is the total number of codes.
                 h.nCodes = 0;
 
-                int[] ncodes = new int[maxCodeLength];
+                int[] ncodes = new int[MaxCodeLength];
                 for (int i = 0; i < ncodes.Length; i++)
                 {
                     ncodes[i] = this.tmp[i + 1];
@@ -210,7 +249,7 @@ namespace ImageProcessorCore.Formats
                 }
 
                 if (h.nCodes == 0) throw new ImageFormatException("Huffman table has zero length");
-                if (h.nCodes > maxNCodes) throw new ImageFormatException("Huffman table has excessive length");
+                if (h.nCodes > MaxNCodes) throw new ImageFormatException("Huffman table has excessive length");
 
                 n -= h.nCodes + 17;
                 if (n < 0) throw new ImageFormatException("DHT has wrong length");
@@ -222,7 +261,7 @@ namespace ImageProcessorCore.Formats
 
                 uint x = 0, code = 0;
 
-                for (int i = 0; i < lutSize; i++)
+                for (int i = 0; i < LutSize; i++)
                 {
                     code <<= 1;
 
@@ -290,7 +329,7 @@ namespace ImageProcessorCore.Formats
                 }
             }
 
-            ushort v = h.lut[(this.bits.a >> (this.bits.n - lutSize)) & 0xff];
+            ushort v = h.lut[(this.bits.a >> (this.bits.n - LutSize)) & 0xff];
             if (v != 0)
             {
                 byte n = (byte)((v & 0xff) - 1);
@@ -301,7 +340,7 @@ namespace ImageProcessorCore.Formats
 
             slowPath:
             int code = 0;
-            for (int i = 0; i < maxCodeLength; i++)
+            for (int i = 0; i < MaxCodeLength; i++)
             {
                 if (this.bits.n == 0) this.EnsureNBits(1);
                 if ((this.bits.a & this.bits.m) != 0) code |= 1;
@@ -480,7 +519,7 @@ namespace ImageProcessorCore.Formats
         // Specified in section B.2.2.
         private void ProcessSOF(int n)
         {
-            if (this.nComp != 0)
+            if (this.componentCount != 0)
             {
                 throw new ImageFormatException("multiple SOF markers");
             }
@@ -488,13 +527,13 @@ namespace ImageProcessorCore.Formats
             switch (n)
             {
                 case 6 + (3 * 1): // Grayscale image.
-                    this.nComp = 1;
+                    this.componentCount = 1;
                     break;
                 case 6 + (3 * 3): // YCbCr or RGB image.
-                    this.nComp = 3;
+                    this.componentCount = 3;
                     break;
                 case 6 + (3 * 4): // YCbCrK or CMYK image.
-                    this.nComp = 4;
+                    this.componentCount = 4;
                     break;
                 default:
                     throw new ImageFormatException("Incorrect number of components");
@@ -508,29 +547,29 @@ namespace ImageProcessorCore.Formats
                 throw new ImageFormatException("Only 8-Bit precision supported.");
             }
 
-            this.height = (this.tmp[1] << 8) + this.tmp[2];
-            this.width = (this.tmp[3] << 8) + this.tmp[4];
-            if (this.tmp[5] != this.nComp)
+            this.heightG = (this.tmp[1] << 8) + this.tmp[2];
+            this.widthG = (this.tmp[3] << 8) + this.tmp[4];
+            if (this.tmp[5] != this.componentCount)
             {
                 throw new ImageFormatException("SOF has wrong length");
             }
 
-            for (int i = 0; i < this.nComp; i++)
+            for (int i = 0; i < this.componentCount; i++)
             {
-                this.comp[i].c = this.tmp[6 + (3 * i)];
+                this.comp[i].Identifier = this.tmp[6 + (3 * i)];
 
                 // Section B.2.2 states that "the value of C_i shall be different from
                 // the values of C_1 through C_(i-1)".
                 for (int j = 0; j < i; j++)
                 {
-                    if (this.comp[i].c == this.comp[j].c)
+                    if (this.comp[i].Identifier == this.comp[j].Identifier)
                     {
                         throw new ImageFormatException("Repeated component identifier");
                     }
                 }
 
-                this.comp[i].tq = this.tmp[8 + (3 * i)];
-                if (this.comp[i].tq > maxTq)
+                this.comp[i].Selector = this.tmp[8 + (3 * i)];
+                if (this.comp[i].Selector > maxTq)
                 {
                     throw new ImageFormatException("Bad Tq value");
                 }
@@ -542,12 +581,13 @@ namespace ImageProcessorCore.Formats
                 {
                     throw new ImageFormatException("Unsupported Luma/chroma subsampling ratio");
                 }
+
                 if (h == 3 || v == 3)
                 {
                     throw new ImageFormatException("Lnsupported subsampling ratio");
                 }
 
-                switch (this.nComp)
+                switch (this.componentCount)
                 {
                     case 1:
 
@@ -587,26 +627,29 @@ namespace ImageProcessorCore.Formats
                                     {
                                         throw new ImageFormatException("unsupported subsampling ratio");
                                     }
+
                                     break;
                                 }
 
                             case 1:
                                 {
                                     // Cb.
-                                    if (this.comp[0].h % h != 0 || this.comp[0].v % v != 0)
+                                    if (this.comp[0].HorizontalFactor % h != 0 || this.comp[0].VerticalFactor % v != 0)
                                     {
                                         throw new ImageFormatException("unsupported subsampling ratio");
                                     }
+
                                     break;
                                 }
 
                             case 2:
                                 {
                                     // Cr.
-                                    if (this.comp[1].h != h || this.comp[1].v != v)
+                                    if (this.comp[1].HorizontalFactor != h || this.comp[1].VerticalFactor != v)
                                     {
                                         throw new ImageFormatException("unsupported subsampling ratio");
                                     }
+
                                     break;
                                 }
                         }
@@ -634,15 +677,15 @@ namespace ImageProcessorCore.Formats
                                 if (hv != 0x11) throw new ImageFormatException("unsupported subsampling ratio");
                                 break;
                             case 3:
-                                if (this.comp[0].h != h || this.comp[0].v != v) throw new ImageFormatException("unsupported subsampling ratio");
+                                if (this.comp[0].HorizontalFactor != h || this.comp[0].VerticalFactor != v) throw new ImageFormatException("unsupported subsampling ratio");
                                 break;
                         }
 
                         break;
                 }
 
-                this.comp[i].h = h;
-                this.comp[i].v = v;
+                this.comp[i].HorizontalFactor = h;
+                this.comp[i].VerticalFactor = v;
             }
         }
 
@@ -700,7 +743,7 @@ namespace ImageProcessorCore.Formats
             if (n != 2) throw new ImageFormatException("DRI has wrong length");
 
             this.ReadFull(this.tmp, 0, 2);
-            this.ri = ((int)this.tmp[0] << 8) + (int)this.tmp[1];
+            this.restartInterval = ((int)this.tmp[0] << 8) + (int)this.tmp[1];
         }
 
         private void ProcessApp0Marker(int n)
@@ -715,13 +758,13 @@ namespace ImageProcessorCore.Formats
             n -= 13;
 
             // TODO: We should be using constants for this.
-            this.jfif = this.tmp[0] == 'J'
+            this.isJfif = this.tmp[0] == 'J'
                      && this.tmp[1] == 'F'
                      && this.tmp[2] == 'I'
                      && this.tmp[3] == 'F'
                      && this.tmp[4] == '\x00';
 
-            if (this.jfif)
+            if (this.isJfif)
             {
                 this.horizontalResolution = (short)(this.tmp[9] + (this.tmp[10] << 8));
                 this.verticalResolution = (short)(this.tmp[11] + (this.tmp[12] << 8));
@@ -877,9 +920,9 @@ namespace ImageProcessorCore.Formats
                     case JpegConstants.Markers.SOF0:
                     case JpegConstants.Markers.SOF1:
                     case JpegConstants.Markers.SOF2:
-                        this.progressive = marker == JpegConstants.Markers.SOF2;
+                        this.isProgressive = marker == JpegConstants.Markers.SOF2;
                         this.ProcessSOF(n);
-                        if (configOnly && this.jfif)
+                        if (configOnly && this.isJfif)
                         {
                             return;
                         }
@@ -909,7 +952,7 @@ namespace ImageProcessorCore.Formats
                             return;
                         }
 
-                        this.ProcessSOS(n);
+                        this.ProcessStartOfScan(n);
                         break;
                     case JpegConstants.Markers.DRI:
                         if (configOnly)
@@ -952,28 +995,28 @@ namespace ImageProcessorCore.Formats
 
             if (this.grayImage != null)
             {
-                this.ConvertFromGrayScale(this.width, this.height, image);
+                this.ConvertFromGrayScale(this.widthG, this.heightG, image);
             }
             else if (this.ycbcrImage != null)
             {
-                if (this.nComp == 4)
+                if (this.componentCount == 4)
                 {
-                    this.ConvertFromCmyk(this.width, this.height, image);
+                    this.ConvertFromCmyk(this.widthG, this.heightG, image);
 
                     // We have 3 components now.
-                    this.nComp = 3;
+                    this.componentCount = 3;
                     return;
                 }
 
-                if (this.nComp == 3)
+                if (this.componentCount == 3)
                 {
                     if (this.IsRGB())
                     {
-                        this.ConvertFromRGB(this.width, this.height, image);
+                        this.ConvertFromRGB(this.widthG, this.heightG, image);
                         return;
                     }
 
-                    this.ConvertFromYCbCr(this.width, this.height, image);
+                    this.ConvertFromYCbCr(this.widthG, this.heightG, image);
                     return;
                 }
 
@@ -990,10 +1033,10 @@ namespace ImageProcessorCore.Formats
         /// </summary>
         /// <typeparam name="TColor">The pixel format.</typeparam>
         /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
-        /// <param name="imageWidth">The width.</param>
-        /// <param name="imageHeight">The height.</param>
+        /// <param name="width">The image width.</param>
+        /// <param name="height">The image height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromCmyk<TColor, TPacked>(int imageWidth, int imageHeight, Image<TColor, TPacked> image)
+        private void ConvertFromCmyk<TColor, TPacked>(int width, int height, Image<TColor, TPacked> image)
             where TColor : IPackedVector<TPacked>
             where TPacked : struct
         {
@@ -1004,25 +1047,25 @@ namespace ImageProcessorCore.Formats
 
             if (adobeTransform != adobeTransformUnknown)
             {
-                int scale = comp[0].h / comp[1].h;
+                int scale = comp[0].HorizontalFactor / comp[1].HorizontalFactor;
 
-                TColor[] pixels = new TColor[imageWidth * imageHeight];
+                TColor[] pixels = new TColor[width * height];
 
                 Parallel.For(
                     0,
-                    imageHeight,
+                    height,
                     y =>
                     {
                         int yo = ycbcrImage.get_row_y_offset(y);
                         int co = ycbcrImage.get_row_c_offset(y);
 
-                        for (int x = 0; x < imageWidth; x++)
+                        for (int x = 0; x < width; x++)
                         {
                             byte yy = ycbcrImage.pix_y[yo + x];
                             byte cb = ycbcrImage.pix_cb[co + (x / scale)];
                             byte cr = ycbcrImage.pix_cr[co + (x / scale)];
 
-                            int index = (y * imageWidth) + x;
+                            int index = (y * width) + x;
 
                             // Implicit casting FTW
                             Color color = new YCbCr(yy, cb, cr);
@@ -1035,7 +1078,7 @@ namespace ImageProcessorCore.Formats
                         }
                     });
 
-                image.SetPixels(imageWidth, imageHeight, pixels);
+                image.SetPixels(width, height, pixels);
             }
         }
 
@@ -1044,26 +1087,26 @@ namespace ImageProcessorCore.Formats
         /// </summary>
         /// <typeparam name="TColor">The pixel format.</typeparam>
         /// <typeparam name="TPacked">The packed format. <example>long, float.</example></typeparam>
-        /// <param name="imageWidth">The width.</param>
-        /// <param name="imageHeight">The height.</param>
+        /// <param name="width">The image width.</param>
+        /// <param name="height">The image height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromGrayScale<TColor, TPacked>(int imageWidth, int imageHeight, Image<TColor, TPacked> image)
+        private void ConvertFromGrayScale<TColor, TPacked>(int width, int height, Image<TColor, TPacked> image)
             where TColor : IPackedVector<TPacked>
             where TPacked : struct
         {
-            TColor[] pixels = new TColor[imageWidth * imageHeight];
+            TColor[] pixels = new TColor[width * height];
 
             Parallel.For(
                 0,
-                imageHeight,
+                height,
                 Bootstrapper.Instance.ParallelOptions,
                 y =>
                 {
                     int yoff = this.grayImage.GetRowOffset(y);
-                    for (int x = 0; x < imageWidth; x++)
+                    for (int x = 0; x < width; x++)
                     {
-                        int offset = (y * imageWidth) + x;
-                        byte rgb = this.grayImage.pixels[yoff + x];
+                        int offset = (y * width) + x;
+                        byte rgb = this.grayImage.Pixels[yoff + x];
 
                         TColor packed = default(TColor);
                         packed.PackFromVector4(new Color(rgb, rgb, rgb).ToVector4());
@@ -1071,7 +1114,7 @@ namespace ImageProcessorCore.Formats
                     }
                 });
 
-            image.SetPixels(imageWidth, imageHeight, pixels);
+            image.SetPixels(width, height, pixels);
             this.AssignResolution(image);
         }
 
@@ -1080,33 +1123,33 @@ namespace ImageProcessorCore.Formats
         /// </summary>
         /// <typeparam name="TColor">The pixel format.</typeparam>
         /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
-        /// <param name="imageWidth">The width.</param>
-        /// <param name="imageHeight">The height.</param>
+        /// <param name="width">The image width.</param>
+        /// <param name="height">The image height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromYCbCr<TColor, TPacked>(int imageWidth, int imageHeight, Image<TColor, TPacked> image)
+        private void ConvertFromYCbCr<TColor, TPacked>(int width, int height, Image<TColor, TPacked> image)
             where TColor : IPackedVector<TPacked>
             where TPacked : struct
         {
-            int scale = this.comp[0].h / this.comp[1].h;
+            int scale = this.comp[0].HorizontalFactor / this.comp[1].HorizontalFactor;
 
-            TColor[] pixels = new TColor[imageWidth * imageHeight];
+            TColor[] pixels = new TColor[width * height];
 
             Parallel.For(
                 0,
-                imageHeight,
+                height,
                 Bootstrapper.Instance.ParallelOptions,
                 y =>
                     {
                         int yo = this.ycbcrImage.get_row_y_offset(y);
                         int co = this.ycbcrImage.get_row_c_offset(y);
 
-                        for (int x = 0; x < imageWidth; x++)
+                        for (int x = 0; x < width; x++)
                         {
                             byte yy = this.ycbcrImage.pix_y[yo + x];
                             byte cb = this.ycbcrImage.pix_cb[co + (x / scale)];
                             byte cr = this.ycbcrImage.pix_cr[co + (x / scale)];
 
-                            int index = (y * imageWidth) + x;
+                            int index = (y * width) + x;
 
                             // Implicit casting FTW
                             Color color = new YCbCr(yy, cb, cr);
@@ -1116,7 +1159,7 @@ namespace ImageProcessorCore.Formats
                         }
                     });
 
-            image.SetPixels(imageWidth, imageHeight, pixels);
+            image.SetPixels(width, height, pixels);
             this.AssignResolution(image);
         }
 
@@ -1125,32 +1168,32 @@ namespace ImageProcessorCore.Formats
         /// </summary>
         /// <typeparam name="TColor">The pixel format.</typeparam>
         /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
-        /// <param name="imageWidth">The width.</param>
-        /// <param name="imageHeight">The height.</param>
+        /// <param name="width">The image width.</param>
+        /// <param name="height">The height.</param>
         /// <param name="image">The image.</param>
-        private void ConvertFromRGB<TColor, TPacked>(int imageWidth, int imageHeight, Image<TColor, TPacked> image)
+        private void ConvertFromRGB<TColor, TPacked>(int width, int height, Image<TColor, TPacked> image)
             where TColor : IPackedVector<TPacked>
             where TPacked : struct
         {
-            int scale = this.comp[0].h / this.comp[1].h;
-            TColor[] pixels = new TColor[imageWidth * imageHeight];
+            int scale = this.comp[0].HorizontalFactor / this.comp[1].HorizontalFactor;
+            TColor[] pixels = new TColor[width * height];
 
             Parallel.For(
                 0,
-                imageHeight,
+                height,
                 Bootstrapper.Instance.ParallelOptions,
                 y =>
                     {
                         int yo = this.ycbcrImage.get_row_y_offset(y);
                         int co = this.ycbcrImage.get_row_c_offset(y);
 
-                        for (int x = 0; x < imageWidth; x++)
+                        for (int x = 0; x < width; x++)
                         {
                             byte red = this.ycbcrImage.pix_y[yo + x];
                             byte green = this.ycbcrImage.pix_cb[co + (x / scale)];
                             byte blue = this.ycbcrImage.pix_cr[co + (x / scale)];
 
-                            int index = (y * imageWidth) + x;
+                            int index = (y * width) + x;
                             TColor packed = default(TColor);
                             packed.PackFromVector4(new Color(red, green, blue).ToVector4());
 
@@ -1158,7 +1201,7 @@ namespace ImageProcessorCore.Formats
                         }
                     });
 
-            image.SetPixels(imageWidth, imageHeight, pixels);
+            image.SetPixels(width, height, pixels);
             this.AssignResolution(image);
         }
 
@@ -1172,7 +1215,7 @@ namespace ImageProcessorCore.Formats
             where TColor : IPackedVector<TPacked>
             where TPacked : struct
         {
-            if (this.jfif && this.horizontalResolution > 0 && this.verticalResolution > 0)
+            if (this.isJfif && this.horizontalResolution > 0 && this.verticalResolution > 0)
             {
                 image.HorizontalResolution = this.horizontalResolution;
                 image.VerticalResolution = this.verticalResolution;
@@ -1192,14 +1235,14 @@ namespace ImageProcessorCore.Formats
         /// Missing SOF Marker
         /// SOS has wrong length
         /// </exception>
-        private void ProcessSOS(int n)
+        private void ProcessStartOfScan(int n)
         {
-            if (this.nComp == 0)
+            if (this.componentCount == 0)
             {
                 throw new ImageFormatException("missing SOF marker");
             }
 
-            if (n < 6 || 4 + (2 * this.nComp) < n || n % 2 != 0)
+            if (n < 6 || 4 + (2 * this.componentCount) < n || n % 2 != 0)
             {
                 throw new ImageFormatException("SOS has wrong length");
             }
@@ -1220,10 +1263,10 @@ namespace ImageProcessorCore.Formats
                 // Component selector.
                 int cs = this.tmp[1 + (2 * i)];
                 int compIndex = -1;
-                for (int j = 0; j < this.nComp; j++)
+                for (int j = 0; j < this.componentCount; j++)
                 {
                     Component compv = this.comp[j];
-                    if (cs == compv.c)
+                    if (cs == compv.Identifier)
                     {
                         compIndex = j;
                     }
@@ -1249,7 +1292,7 @@ namespace ImageProcessorCore.Formats
                     }
                 }
 
-                totalHV += this.comp[compIndex].h * this.comp[compIndex].v;
+                totalHV += this.comp[compIndex].HorizontalFactor * this.comp[compIndex].VerticalFactor;
 
                 scan[i].td = (byte)(this.tmp[2 + (2 * i)] >> 4);
                 if (scan[i].td > maxTh)
@@ -1266,7 +1309,7 @@ namespace ImageProcessorCore.Formats
 
             // Section B.2.3 states that if there is more than one component then the
             // total H*V values in a scan must be <= 10.
-            if (this.nComp > 1 && totalHV > 10)
+            if (this.componentCount > 1 && totalHV > 10)
             {
                 throw new ImageFormatException("Total sampling factors too large.");
             }
@@ -1290,7 +1333,7 @@ namespace ImageProcessorCore.Formats
             int ah = 0;
             int al = 0;
 
-            if (this.progressive)
+            if (this.isProgressive)
             {
                 zigStart = (int)this.tmp[1 + (2 * lnComp)];
                 zigEnd = (int)this.tmp[2 + (2 * lnComp)];
@@ -1314,17 +1357,17 @@ namespace ImageProcessorCore.Formats
             }
 
             // mxx and myy are the number of MCUs (Minimum Coded Units) in the image.
-            int h0 = this.comp[0].h;
-            int v0 = this.comp[0].v;
-            int mxx = (this.width + (8 * h0) - 1) / (8 * h0);
-            int myy = (this.height + (8 * v0) - 1) / (8 * v0);
+            int h0 = this.comp[0].HorizontalFactor;
+            int v0 = this.comp[0].VerticalFactor;
+            int mxx = (this.widthG + (8 * h0) - 1) / (8 * h0);
+            int myy = (this.heightG + (8 * v0) - 1) / (8 * v0);
 
             if (this.grayImage == null && this.ycbcrImage == null)
             {
-                this.MakeImg(mxx, myy);
+                this.MakeImage(mxx, myy);
             }
 
-            if (this.progressive)
+            if (this.isProgressive)
             {
                 for (int i = 0; i < lnComp; i++)
                 {
@@ -1332,7 +1375,7 @@ namespace ImageProcessorCore.Formats
                     if (this.progCoeffs[compIndex] == null)
                     {
                         this.progCoeffs[compIndex] =
-                            new Block[mxx * myy * this.comp[compIndex].h * this.comp[compIndex].v];
+                            new Block[mxx * myy * this.comp[compIndex].HorizontalFactor * this.comp[compIndex].VerticalFactor];
 
                         for (int j = 0; j < this.progCoeffs[compIndex].Length; j++)
                         {
@@ -1345,7 +1388,7 @@ namespace ImageProcessorCore.Formats
             this.bits = new bits_class();
 
             int mcu = 0;
-            byte expectedRST = JpegConstants.Markers.RST0;
+            byte expectedRst = JpegConstants.Markers.RST0;
 
             // b is the decoded coefficients, in natural (not zig-zag) order.
             Block b = new Block();
@@ -1362,9 +1405,9 @@ namespace ImageProcessorCore.Formats
                     for (int i = 0; i < lnComp; i++)
                     {
                         int compIndex = scan[i].compIndex;
-                        int hi = this.comp[compIndex].h;
-                        int vi = this.comp[compIndex].v;
-                        Block qt = this.quant[this.comp[compIndex].tq];
+                        int hi = this.comp[compIndex].HorizontalFactor;
+                        int vi = this.comp[compIndex].VerticalFactor;
+                        Block qt = this.quant[this.comp[compIndex].Selector];
 
                         for (int j = 0; j < hi * vi; j++)
                         {
@@ -1401,12 +1444,21 @@ namespace ImageProcessorCore.Formats
                                 bx = blockCount % q;
                                 by = blockCount / q;
                                 blockCount++;
-                                if (bx * 8 >= this.width || by * 8 >= this.height) continue;
+                                if (bx * 8 >= this.widthG || by * 8 >= this.heightG)
+                                {
+                                    continue;
+                                }
                             }
 
                             // Load the previous partially decoded coefficients, if applicable.
-                            if (this.progressive) b = this.progCoeffs[compIndex][by * mxx * hi + bx];
-                            else b = new Block();
+                            if (this.isProgressive)
+                            {
+                                b = this.progCoeffs[compIndex][by * mxx * hi + bx];
+                            }
+                            else
+                            {
+                                b = new Block();
+                            }
 
                             if (ah != 0)
                             {
@@ -1438,7 +1490,7 @@ namespace ImageProcessorCore.Formats
                                 else
                                 {
                                     // Decode the AC coefficients, as specified in section F.2.2.2.
-                                    var huffv = this.huff[acTable, scan[i].ta];
+                                    Huffman huffv = this.huff[acTable, scan[i].ta];
                                     for (; zig <= zigEnd; zig++)
                                     {
                                         byte value = this.decodeHuffman(huffv);
@@ -1475,7 +1527,7 @@ namespace ImageProcessorCore.Formats
                                 }
                             }
 
-                            if (this.progressive)
+                            if (this.isProgressive)
                             {
                                 if (zigEnd != Block.BlockSize - 1 || al != 0)
                                 {
@@ -1503,11 +1555,11 @@ namespace ImageProcessorCore.Formats
                             int offset;
                             int stride;
 
-                            if (this.nComp == 1)
+                            if (this.componentCount == 1)
                             {
-                                dst = this.grayImage.pixels;
-                                stride = this.grayImage.stride;
-                                offset = this.grayImage.offset + 8 * (by * this.grayImage.stride + bx);
+                                dst = this.grayImage.Pixels;
+                                stride = this.grayImage.Stride;
+                                offset = this.grayImage.Offset + 8 * (by * this.grayImage.Stride + bx);
                             }
                             else
                             {
@@ -1533,14 +1585,10 @@ namespace ImageProcessorCore.Formats
 
                                     case 3:
 
-                                        // dst, stride = blackPix[8*(by*blackStride+bx):], blackStride
-                                        // break;
-                                        // TODO: Check this.
-                                        dst = blackPix;
-                                        stride = blackStride;
+                                        dst = this.blackPix;
+                                        stride = this.blackStride;
                                         offset = 8 * (by * blackStride + bx);
                                         break;
-                                    //throw new ImageFormatException("Too many components");
 
                                     default:
                                         throw new ImageFormatException("Too many components");
@@ -1572,25 +1620,27 @@ namespace ImageProcessorCore.Formats
                                     dst[yStride + x + offset] = (byte)c;
                                 }
                             }
-                        } // for j
-                    } // for i
+                        }
+                        // for j
+                    }
+                    // for i
 
                     mcu++;
 
-                    if (this.ri > 0 && mcu % this.ri == 0 && mcu < mxx * myy)
+                    if (this.restartInterval > 0 && mcu % this.restartInterval == 0 && mcu < mxx * myy)
                     {
                         // A more sophisticated decoder could use RST[0-7] markers to resynchronize from corrupt input,
                         // but this one assumes well-formed input, and hence the restart marker follows immediately.
                         this.ReadFull(this.tmp, 0, 2);
-                        if (this.tmp[0] != 0xff || this.tmp[1] != expectedRST)
+                        if (this.tmp[0] != 0xff || this.tmp[1] != expectedRst)
                         {
                             throw new ImageFormatException("Bad RST marker");
                         }
 
-                        expectedRST++;
-                        if (expectedRST == JpegConstants.Markers.RST7 + 1)
+                        expectedRst++;
+                        if (expectedRst == JpegConstants.Markers.RST7 + 1)
                         {
-                            expectedRST = JpegConstants.Markers.RST0;
+                            expectedRst = JpegConstants.Markers.RST0;
                         }
 
                         // Reset the Huffman decoder.
@@ -1602,21 +1652,35 @@ namespace ImageProcessorCore.Formats
                         // Reset the progressive decoder state, as per section G.1.2.2.
                         this.eobRun = 0;
                     }
-                } // for mx
-            } // for my
+                }
+                // for mx
+            }
+            // for my
         }
 
-        // refine decodes a successive approximation refinement block, as specified in
-        // section G.1.2.
+        /// <summary>
+        /// Decodes a successive approximation refinement block, as specified in section G.1.2.
+        /// </summary>
+        /// <param name="b"></param>
+        /// <param name="h"></param>
+        /// <param name="zigStart"></param>
+        /// <param name="zigEnd"></param>
+        /// <param name="delta"></param>
         private void Refine(Block b, Huffman h, int zigStart, int zigEnd, int delta)
         {
             // Refining a DC component is trivial.
             if (zigStart == 0)
             {
-                if (zigEnd != 0) throw new ImageFormatException("Invalid state for zig DC component");
+                if (zigEnd != 0)
+                {
+                    throw new ImageFormatException("Invalid state for zig DC component");
+                }
 
                 bool bit = this.decodeBit();
-                if (bit) b[0] |= delta;
+                if (bit)
+                {
+                    b[0] |= delta;
+                }
 
                 return;
             }
@@ -1629,7 +1693,7 @@ namespace ImageProcessorCore.Formats
                 {
                     bool done = false;
                     int z = 0;
-                    var val = this.decodeHuffman(h);
+                    byte val = this.decodeHuffman(h);
                     int val0 = val >> 4;
                     int val1 = val & 0x0f;
 
@@ -1652,18 +1716,28 @@ namespace ImageProcessorCore.Formats
                         case 1:
                             z = delta;
                             bool bit = this.decodeBit();
-                            if (!bit) z = -z;
+                            if (!bit)
+                            {
+                                z = -z;
+                            }
+
                             break;
                         default:
-                            throw new ImageFormatException("unexpected Huffman code");
+                            throw new ImageFormatException("Unexpected Huffman code");
                     }
 
                     if (done) break;
 
                     zig = this.RefineNonZeroes(b, zig, zigEnd, val0, delta);
-                    if (zig > zigEnd) throw new ImageFormatException(string.Format("too many coefficients {0} > {1}", zig, zigEnd));
+                    if (zig > zigEnd)
+                    {
+                        throw new ImageFormatException($"Too many coefficients {zig} > {zigEnd}");
+                    }
 
-                    if (z != 0) b[Unzig[zig]] = z;
+                    if (z != 0)
+                    {
+                        b[Unzig[zig]] = z;
+                    }
                 }
             }
 
@@ -1676,7 +1750,7 @@ namespace ImageProcessorCore.Formats
 
         // refineNonZeroes refines non-zero entries of b in zig-zag order. If nz >= 0,
         // the first nz zero entries are skipped over.
-        public int RefineNonZeroes(Block b, int zig, int zigEnd, int nz, int delta)
+        private int RefineNonZeroes(Block b, int zig, int zigEnd, int nz, int delta)
         {
             for (; zig <= zigEnd; zig++)
             {
@@ -1689,31 +1763,40 @@ namespace ImageProcessorCore.Formats
                 }
 
                 bool bit = this.decodeBit();
-                if (!bit) continue;
+                if (!bit)
+                {
+                    continue;
+                }
 
-                if (b[u] >= 0) b[u] += delta;
-                else b[u] -= delta;
+                if (b[u] >= 0)
+                {
+                    b[u] += delta;
+                }
+                else
+                {
+                    b[u] -= delta;
+                }
             }
 
             return zig;
         }
 
-        private void MakeImg(int mxx, int myy)
+        private void MakeImage(int mxx, int myy)
         {
-            if (this.nComp == 1)
+            if (this.componentCount == 1)
             {
-                var m = new GrayImage(8 * mxx, 8 * myy);
-                this.grayImage = m.subimage(0, 0, this.width, this.height);
+                GrayImage m = new GrayImage(8 * mxx, 8 * myy);
+                this.grayImage = m.Subimage(0, 0, this.widthG, this.heightG);
             }
             else
             {
-                var h0 = this.comp[0].h;
-                var v0 = this.comp[0].v;
-                var hRatio = h0 / this.comp[1].h;
-                var vRatio = v0 / this.comp[1].v;
+                int h0 = this.comp[0].HorizontalFactor;
+                int v0 = this.comp[0].VerticalFactor;
+                int horizontalRatio = h0 / this.comp[1].HorizontalFactor;
+                int verticalRatio = v0 / this.comp[1].VerticalFactor;
 
-                var ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio444;
-                switch ((hRatio << 4) | vRatio)
+                YCbCrImage.YCbCrSubsampleRatio ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio444;
+                switch ((horizontalRatio << 4) | verticalRatio)
                 {
                     case 0x11:
                         ratio = YCbCrImage.YCbCrSubsampleRatio.YCbCrSubsampleRatio444;
@@ -1735,22 +1818,16 @@ namespace ImageProcessorCore.Formats
                         break;
                 }
 
-                var m = new YCbCrImage(8 * h0 * mxx, 8 * v0 * myy, ratio);
-                this.ycbcrImage = m.subimage(0, 0, this.width, this.height);
+                YCbCrImage m = new YCbCrImage(8 * h0 * mxx, 8 * v0 * myy, ratio);
+                this.ycbcrImage = m.subimage(0, 0, this.widthG, this.heightG);
 
-                if (nComp == 4)
+                if (this.componentCount == 4)
                 {
-                    int h3 = comp[3].h;
-                    int v3 = comp[3].v;
-                    blackPix = new byte[8 * h3 * mxx * 8 * v3 * myy];
-                    blackStride = 8 * h3 * mxx;
+                    int h3 = this.comp[3].HorizontalFactor;
+                    int v3 = this.comp[3].VerticalFactor;
+                    this.blackPix = new byte[8 * h3 * mxx * 8 * v3 * myy];
+                    this.blackStride = 8 * h3 * mxx;
                 }
-
-                /*if d.nComp == 4 {
-                    h3, v3 := d.comp[3].h, d.comp[3].v
-                    d.blackPix = make([]byte, 8*h3*mxx*8*v3*myy)
-                    d.blackStride = 8 * h3 * mxx
-                }*/
             }
         }
 
@@ -1762,7 +1839,7 @@ namespace ImageProcessorCore.Formats
         /// </returns>
         private bool IsRGB()
         {
-            if (this.jfif)
+            if (this.isJfif)
             {
                 return false;
             }
@@ -1774,18 +1851,33 @@ namespace ImageProcessorCore.Formats
                 return true;
             }
 
-            return this.comp[0].c == 'R' && this.comp[1].c == 'G' && this.comp[2].c == 'B';
+            return this.comp[0].Identifier == 'R' && this.comp[1].Identifier == 'G' && this.comp[2].Identifier == 'B';
         }
 
+        /// <summary>
+        /// Represents a single color component
+        /// </summary>
         private class Component
         {
-            public int h; // Horizontal sampling factor.
+            /// <summary>
+            /// Gets or sets the horizontal sampling factor.
+            /// </summary>
+            public int HorizontalFactor { get; set; }
 
-            public int v; // Vertical sampling factor.
+            /// <summary>
+            /// Gets or sets the vertical sampling factor.
+            /// </summary>
+            public int VerticalFactor { get; set; }
 
-            public byte c; // Component identifier.
+            /// <summary>
+            /// Gets or sets the identifier
+            /// </summary>
+            public byte Identifier { get; set; }
 
-            public byte tq; // Quantization table destination selector.
+            /// <summary>
+            /// Gets or sets the quantization table destination selector.
+            /// </summary>
+            public byte Selector { get; set; }
         }
 
         private class YCbCrImage
@@ -1805,7 +1897,7 @@ namespace ImageProcessorCore.Formats
                 YCbCrSubsampleRatio410,
             }
 
-            private static void yCbCrSize(int w, int h, YCbCrSubsampleRatio ratio, out int cw, out int ch)
+            private static void YCbCrSize(int w, int h, YCbCrSubsampleRatio ratio, out int cw, out int ch)
             {
                 switch (ratio)
                 {
@@ -1869,7 +1961,7 @@ namespace ImageProcessorCore.Formats
             public YCbCrImage(int w, int h, YCbCrSubsampleRatio ratio)
             {
                 int cw, ch;
-                yCbCrSize(w, h, ratio, out cw, out ch);
+                YCbCrSize(w, h, ratio, out cw, out ch);
                 this.pix_y = new byte[w * h];
                 this.pix_cb = new byte[cw * ch];
                 this.pix_cr = new byte[cw * ch];
@@ -1884,7 +1976,7 @@ namespace ImageProcessorCore.Formats
 
             public YCbCrImage subimage(int x, int y, int w, int h)
             {
-                var ret = new YCbCrImage
+                YCbCrImage ret = new YCbCrImage
                 {
                     w = w,
                     h = h,
@@ -1925,51 +2017,97 @@ namespace ImageProcessorCore.Formats
             }
         }
 
-        public class GrayImage
+        /// <summary>
+        /// Represents a grayscale image
+        /// </summary>
+        private class GrayImage
         {
-            public byte[] pixels;
+            /// <summary>
+            /// Initializes a new instance of the <see cref="GrayImage"/> class.
+            /// </summary>
+            /// <param name="width">The width.</param>
+            /// <param name="height">The height.</param>
+            public GrayImage(int width, int height)
+            {
+                this.Width = width;
+                this.Height = height;
+                this.Pixels = new byte[width * height];
+                this.Stride = width;
+                this.Offset = 0;
+            }
 
-            public int stride;
-
-            public int x;
-
-            public int y;
-
-            public int w;
-
-            public int h;
-
-            public int offset;
-
+            /// <summary>
+            /// Prevents a default instance of the <see cref="GrayImage"/> class from being created.
+            /// </summary>
             private GrayImage()
             {
             }
 
-            public GrayImage(int w, int h)
-            {
-                this.w = w;
-                this.h = h;
-                this.pixels = new byte[w * h];
-                this.stride = w;
-                this.offset = 0;
-            }
+            /// <summary>
+            /// Gets or sets the pixels.
+            /// </summary>
+            public byte[] Pixels { get; set; }
 
-            public GrayImage subimage(int x, int y, int w, int h)
+            /// <summary>
+            /// Gets or sets the stride.
+            /// </summary>
+            public int Stride { get; set; }
+
+            /// <summary>
+            /// Gets or sets the horizontal position.
+            /// </summary>
+            public int X { get; set; }
+
+            /// <summary>
+            /// Gets or sets the vertical position.
+            /// </summary>
+            public int Y { get; set; }
+
+            /// <summary>
+            /// Gets or sets the width.
+            /// </summary>
+            public int Width { get; set; }
+
+            /// <summary>
+            /// Gets or sets the height.
+            /// </summary>
+            public int Height { get; set; }
+
+            /// <summary>
+            /// Gets or sets the offset
+            /// </summary>
+            public int Offset { get; set; }
+
+            /// <summary>
+            /// Gets an image made up of a subset of the originals pixels.
+            /// </summary>
+            /// <param name="x">The x-coordinate of the image.</param>
+            /// <param name="y">The y-coordinate of the image.</param>
+            /// <param name="width">The width.</param>
+            /// <param name="height">The height.</param>
+            /// <returns>
+            /// The <see cref="GrayImage"/>.
+            /// </returns>
+            public GrayImage Subimage(int x, int y, int width, int height)
             {
-                var ret = new GrayImage
+                return new GrayImage
                 {
-                    w = w,
-                    h = h,
-                    pixels = this.pixels,
-                    stride = this.stride,
-                    offset = y * this.stride + x
+                    Width = width,
+                    Height = height,
+                    Pixels = this.Pixels,
+                    Stride = this.Stride,
+                    Offset = (y * this.Stride) + x
                 };
-                return ret;
             }
 
+            /// <summary>
+            /// Gets the row offset at the given position
+            /// </summary>
+            /// <param name="y">The y-coordinate of the image.</param>
+            /// <returns>The <see cref="int"/></returns>
             public int GetRowOffset(int y)
             {
-                return this.offset + y * this.stride;
+                return this.Offset + (y * this.Stride);
             }
         }
 
@@ -1980,11 +2118,11 @@ namespace ImageProcessorCore.Formats
             /// </summary>
             public Huffman()
             {
-                this.lut = new ushort[1 << lutSize];
-                this.vals = new byte[maxNCodes];
-                this.minCodes = new int[maxCodeLength];
-                this.maxCodes = new int[maxCodeLength];
-                this.valsIndices = new int[maxCodeLength];
+                this.lut = new ushort[1 << LutSize];
+                this.vals = new byte[MaxNCodes];
+                this.minCodes = new int[MaxCodeLength];
+                this.maxCodes = new int[MaxCodeLength];
+                this.valsIndices = new int[MaxCodeLength];
                 this.nCodes = 0;
             }
 
