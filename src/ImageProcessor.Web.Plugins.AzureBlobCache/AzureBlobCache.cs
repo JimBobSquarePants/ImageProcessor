@@ -425,7 +425,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 TryFiveTimes(
                     () =>
                     {
-                        HttpWebResponse response;
+                        HttpWebResponse response = null;
                         try
                         {
                             response = (HttpWebResponse)request.GetResponse();
@@ -439,6 +439,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                             }
                             else
                             {
+                                response?.Dispose();
                                 throw;
                             }
                         }
