@@ -30,7 +30,7 @@
   
   <project>
     <name>ImageProcessor Web Azure Blob Cache plugin</name>
-    <version>1.1.1.0</version>
+    <version>1.1.2.0</version>
     <folder>..\src\ImageProcessor.Web.Plugins.AzureBlobCache</folder>
     <projfile>ImageProcessor.Web.Plugins.AzureBlobCache.csproj</projfile>
     <outputs>
