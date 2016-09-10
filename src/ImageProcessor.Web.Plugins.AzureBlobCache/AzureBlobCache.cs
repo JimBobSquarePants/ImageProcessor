@@ -448,8 +448,17 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         if (cachedStream != null)
                         {
                             HttpResponse contextResponse = context.Response;
-                            contextResponse.Headers.Add("ETag", response.Headers["ETag"]);
-                            contextResponse.Headers.Add("Last-Modified", response.Headers["Last-Modified"]);
+							var etagHeader = response.Headers["ETag"];
+							if (!string.IsNullOrWhiteSpace(etagHeader))
+							{
+								contextResponse.Headers.Add("ETag", etagHeader);
+							}
+
+							var lastModifiedHeader = response.Headers["Last-Modified"];
+							if (!string.IsNullOrWhiteSpace(lastModifiedHeader))
+							{
+								contextResponse.Headers.Add("Last-Modified", lastModifiedHeader);
+							}
                             cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
                             ImageProcessingModule.SetHeaders(context, response.StatusCode == HttpStatusCode.NotModified ? null : response.ContentType, null, this.BrowserMaxDays, response.StatusCode);
                         }
