@@ -425,7 +425,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 TryFiveTimes(
                     () =>
                     {
-                        HttpWebResponse response;
+                        HttpWebResponse response = null;
                         try
                         {
                             response = (HttpWebResponse)request.GetResponse();
@@ -439,6 +439,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                             }
                             else
                             {
+                                response?.Dispose();
                                 throw;
                             }
                         }
@@ -448,8 +449,21 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         if (cachedStream != null)
                         {
                             HttpResponse contextResponse = context.Response;
-                            contextResponse.Headers.Add("ETag", response.Headers["ETag"]);
-                            contextResponse.Headers.Add("Last-Modified", response.Headers["Last-Modified"]);
+
+                            // If streaming but not using a CDN the headers will be null.
+                            // See https://github.com/JimBobSquarePants/ImageProcessor/pull/466
+                            string etagHeader = response.Headers["ETag"];
+                            if (!string.IsNullOrWhiteSpace(etagHeader))
+                            {
+                                contextResponse.Headers.Add("ETag", etagHeader);
+                            }
+
+                            string lastModifiedHeader = response.Headers["Last-Modified"];
+                            if (!string.IsNullOrWhiteSpace(lastModifiedHeader))
+                            {
+                                contextResponse.Headers.Add("Last-Modified", lastModifiedHeader);
+                            }
+
                             cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
                             ImageProcessingModule.SetHeaders(context, response.StatusCode == HttpStatusCode.NotModified ? null : response.ContentType, null, this.BrowserMaxDays, response.StatusCode);
                         }
