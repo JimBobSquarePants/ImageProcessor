@@ -108,7 +108,7 @@ namespace ImageProcessorCore.Formats
         private bool isProgressive;
 
         /// <summary>
-        /// Whether the image has a Jfif header
+        /// Whether the image has a JFIF header
         /// </summary>
         private bool isJfif;
 
@@ -260,37 +260,37 @@ namespace ImageProcessorCore.Formats
                 // Read nCodes and h.vals (and derive h.nCodes).
                 // nCodes[i] is the number of codes with code length i.
                 // h.nCodes is the total number of codes.
-                h.nCodes = 0;
+                h.Length = 0;
 
                 int[] ncodes = new int[MaxCodeLength];
                 for (int i = 0; i < ncodes.Length; i++)
                 {
                     ncodes[i] = this.tmp[i + 1];
-                    h.nCodes += ncodes[i];
+                    h.Length += ncodes[i];
                 }
 
-                if (h.nCodes == 0)
+                if (h.Length == 0)
                 {
                     throw new ImageFormatException("Huffman table has zero length");
                 }
 
-                if (h.nCodes > MaxNCodes)
+                if (h.Length > MaxNCodes)
                 {
                     throw new ImageFormatException("Huffman table has excessive length");
                 }
 
-                n -= h.nCodes + 17;
+                n -= h.Length + 17;
                 if (n < 0)
                 {
                     throw new ImageFormatException("DHT has wrong length");
                 }
 
-                this.ReadFull(h.vals, 0, h.nCodes);
+                this.ReadFull(h.Values, 0, h.Length);
 
                 // Derive the look-up table.
-                for (int i = 0; i < h.lut.Length; i++)
+                for (int i = 0; i < h.Lut.Length; i++)
                 {
-                    h.lut[i] = 0;
+                    h.Lut[i] = 0;
                 }
 
                 uint x = 0, code = 0;
@@ -307,11 +307,11 @@ namespace ImageProcessorCore.Formats
                         // The high 8 bits of lutValue are the encoded value.
                         // The low 8 bits are 1 plus the codeLength.
                         byte base2 = (byte)(code << (7 - i));
-                        ushort lutValue = (ushort)(((ushort)h.vals[x] << 8) | (2 + i));
+                        ushort lutValue = (ushort)(((ushort)h.Values[x] << 8) | (2 + i));
 
                         for (int k = 0; k < 1 << (7 - i); k++)
                         {
-                            h.lut[base2 | k] = lutValue;
+                            h.Lut[base2 | k] = lutValue;
                         }
 
                         code++;
@@ -326,15 +326,15 @@ namespace ImageProcessorCore.Formats
                     int nc = ncodes[i];
                     if (nc == 0)
                     {
-                        h.minCodes[i] = -1;
-                        h.maxCodes[i] = -1;
-                        h.valsIndices[i] = -1;
+                        h.MinCodes[i] = -1;
+                        h.MaxCodes[i] = -1;
+                        h.Indices[i] = -1;
                     }
                     else
                     {
-                        h.minCodes[i] = c;
-                        h.maxCodes[i] = c + nc - 1;
-                        h.valsIndices[i] = index;
+                        h.MinCodes[i] = c;
+                        h.MaxCodes[i] = c + nc - 1;
+                        h.Indices[i] = index;
                         c += nc;
                         index += nc;
                     }
@@ -352,7 +352,7 @@ namespace ImageProcessorCore.Formats
         /// <returns>The <see cref="byte"/></returns>
         private byte DecodeHuffman(Huffman huffman)
         {
-            if (huffman.nCodes == 0)
+            if (huffman.Length == 0)
             {
                 throw new ImageFormatException("Uninitialized Huffman table");
             }
@@ -383,7 +383,8 @@ namespace ImageProcessorCore.Formats
                 }
             }
 
-            ushort v = huffman.lut[(this.bits.a >> (this.bits.n - LutSize)) & 0xff];
+            ushort v = huffman.Lut[(this.bits.a >> (this.bits.n - LutSize)) & 0xff];
+
             if (v != 0)
             {
                 byte n = (byte)((v & 0xff) - 1);
@@ -409,9 +410,9 @@ namespace ImageProcessorCore.Formats
                 this.bits.n--;
                 this.bits.m >>= 1;
 
-                if (code <= huffman.maxCodes[i])
+                if (code <= huffman.MaxCodes[i])
                 {
-                    return huffman.vals[huffman.valsIndices[i] + code - huffman.minCodes[i]];
+                    return huffman.Values[huffman.Indices[i] + code - huffman.MinCodes[i]];
                 }
 
                 code <<= 1;
@@ -1137,12 +1138,19 @@ namespace ImageProcessorCore.Formats
                 throw new ImageFormatException("Unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata");
             }
 
+            // If the 4-component JPEG image isn't explicitly marked as "Unknown (RGB
+            // or CMYK)" as per
+            // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
             if (adobeTransform != adobeTransformUnknown)
             {
                 int scale = componentArray[0].HorizontalFactor / componentArray[1].HorizontalFactor;
 
                 TColor[] pixels = new TColor[width * height];
 
+                // Convert the YCbCr part of the YCbCrK to RGB, invert the RGB to get
+                // CMY, and patch in the original K. The RGB to CMY inversion cancels
+                // out the 'Adobe inversion' described in the applyBlack doc comment
+                // above, so in practice, only the fourth channel (black) is inverted.
                 Parallel.For(
                     0,
                     height,
@@ -2210,36 +2218,48 @@ namespace ImageProcessorCore.Formats
             /// </summary>
             public Huffman()
             {
-                this.lut = new ushort[1 << LutSize];
-                this.vals = new byte[MaxNCodes];
-                this.minCodes = new int[MaxCodeLength];
-                this.maxCodes = new int[MaxCodeLength];
-                this.valsIndices = new int[MaxCodeLength];
-                this.nCodes = 0;
+                this.Lut = new ushort[1 << LutSize];
+                this.Values = new byte[MaxNCodes];
+                this.MinCodes = new int[MaxCodeLength];
+                this.MaxCodes = new int[MaxCodeLength];
+                this.Indices = new int[MaxCodeLength];
+                this.Length = 0;
             }
 
-            // length is the number of codes in the tree.
-            public int nCodes;
+            /// <summary>
+            /// Gets or sets the number of codes in the tree.
+            /// </summary>
+            public int Length { get; set; }
 
-            // lut is the look-up table for the next lutSize bits in the bit-stream.
-            // The high 8 bits of the uint16 are the encoded value. The low 8 bits
-            // are 1 plus the code length, or 0 if the value is too large to fit in
-            // lutSize bits.
-            public ushort[] lut;
+            /// <summary>
+            /// Gets the look-up table for the next LutSize bits in the bit-stream.
+            /// The high 8 bits of the uint16 are the encoded value. The low 8 bits
+            /// are 1 plus the code length, or 0 if the value is too large to fit in
+            /// lutSize bits.
+            /// </summary>
+            public ushort[] Lut { get; }
 
-            // vals are the decoded values, sorted by their encoding.
-            public byte[] vals;
+            /// <summary>
+            /// Gets the the decoded values, sorted by their encoding.
+            /// </summary>
+            public byte[] Values { get; }
 
-            // minCodes[i] is the minimum code of length i, or -1 if there are no
-            // codes of that length.
-            public int[] minCodes;
+            /// <summary>
+            /// Gets the array of minimum codes.
+            /// MinCodes[i] is the minimum code of length i, or -1 if there are no codes of that length.
+            /// </summary>
+            public int[] MinCodes { get; }
 
-            // maxCodes[i] is the maximum code of length i, or -1 if there are no
-            // codes of that length.
-            public int[] maxCodes;
+            /// <summary>
+            /// Gets the array of maximum codes.
+            /// MaxCodes[i] is the maximum code of length i, or -1 if there are no codes of that length.
+            /// </summary>
+            public int[] MaxCodes { get; }
 
-            // valsIndices[i] is the index into vals of minCodes[i].
-            public int[] valsIndices;
+            /// <summary>
+            /// Gets the array of indices. Indices[i] is the index into Values of MinCodes[i].
+            /// </summary>
+            public int[] Indices { get; }
         }
 
         // bytes is a byte buffer, similar to a bufio.Reader, except that it
