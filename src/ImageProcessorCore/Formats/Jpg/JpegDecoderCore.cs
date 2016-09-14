@@ -44,16 +44,7 @@ namespace ImageProcessorCore.Formats
         private const int acTable = 1;
 
         /// <summary>
-        /// <see href="http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe"/>
-        /// </summary>
-        private const int adobeTransformUnknown = 0;
-
-        private const int adobeTransformYCbCr = 1;
-
-        private const int adobeTransformYCbCrK = 2;
-
-        /// <summary>
-        /// Unzig maps from the zig-zag ordering to the natural ordering. For example,
+        /// Unzig maps from the zigzag ordering to the natural ordering. For example,
         /// unzig[3] is the column and row of the fourth element in zigzag order. The
         /// value is 16, which means first column (16%8 == 0) and third row (16/8 == 2).
         /// </summary>
@@ -93,12 +84,12 @@ namespace ImageProcessorCore.Formats
         /// <summary>
         /// The image width
         /// </summary>
-        private int widthG;
+        private int imageWidth;
 
         /// <summary>
         /// The image height
         /// </summary>
-        private int heightG;
+        private int imageHeight;
 
         /// <summary>
         /// The number of color components within the image.
@@ -206,15 +197,219 @@ namespace ImageProcessorCore.Formats
             }
         }
 
-        // ensureNBits reads bytes from the byte buffer to ensure that bits.UnreadBits is at
-        // least n. For best performance (avoiding function calls inside hot loops),
-        // the caller is the one responsible for first checking that bits.n < n.
+        /// <summary>
+        /// Decodes the image from the specified this._stream and sets
+        /// the data to image.
+        /// </summary>
+        /// <typeparam name="TColor">The pixel format.</typeparam>
+        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
+        /// <param name="stream">The stream, where the image should be
+        /// decoded from. Cannot be null (Nothing in Visual Basic).</param>
+        /// <param name="image">The image, where the data should be set to.
+        /// Cannot be null (Nothing in Visual Basic).</param>
+        /// <param name="configOnly">Whether to decode metadata only.</param>
+        public void Decode<TColor, TPacked>(Image<TColor, TPacked> image, Stream stream, bool configOnly)
+            where TColor : IPackedVector<TPacked>
+            where TPacked : struct
+        {
+            this.inputStream = stream;
+
+            // Check for the Start Of Image marker.
+            this.ReadFull(this.temp, 0, 2);
+            if (this.temp[0] != JpegConstants.Markers.XFF || this.temp[1] != JpegConstants.Markers.SOI)
+            {
+                throw new ImageFormatException("Missing SOI marker.");
+            }
+
+            // Process the remaining segments until the End Of Image marker.
+            while (true)
+            {
+                this.ReadFull(this.temp, 0, 2);
+                while (this.temp[0] != 0xff)
+                {
+                    // Strictly speaking, this is a format error. However, libjpeg is
+                    // liberal in what it accepts. As of version 9, next_marker in
+                    // jdmarker.c treats this as a warning (JWRN_EXTRANEOUS_DATA) and
+                    // continues to decode the stream. Even before next_marker sees
+                    // extraneous data, jpeg_fill_bit_buffer in jdhuff.c reads as many
+                    // bytes as it can, possibly past the end of a scan's data. It
+                    // effectively puts back any markers that it overscanned (e.g. an
+                    // "\xff\xd9" EOI marker), but it does not put back non-marker data,
+                    // and thus it can silently ignore a small number of extraneous
+                    // non-marker bytes before next_marker has a chance to see them (and
+                    // print a warning).
+                    // We are therefore also liberal in what we accept. Extraneous data
+                    // is silently ignore
+                    // This is similar to, but not exactly the same as, the restart
+                    // mechanism within a scan (the RST[0-7] markers).
+                    // Note that extraneous 0xff bytes in e.g. SOS data are escaped as
+                    // "\xff\x00", and so are detected a little further down below.
+                    this.temp[0] = this.temp[1];
+                    this.temp[1] = this.ReadByte();
+                }
+
+                byte marker = this.temp[1];
+                if (marker == 0)
+                {
+                    // Treat "\xff\x00" as extraneous data.
+                    continue;
+                }
+
+                while (marker == 0xff)
+                {
+                    // Section B.1.1.2 says, "Any marker may optionally be preceded by any
+                    // number of fill bytes, which are bytes assigned code X'FF'".
+                    marker = this.ReadByte();
+                }
+
+                // End Of Image.
+                if (marker == JpegConstants.Markers.EOI)
+                {
+                    break;
+                }
+
+                if (JpegConstants.Markers.RST0 <= marker && marker <= JpegConstants.Markers.RST7)
+                {
+                    // Figures B.2 and B.16 of the specification suggest that restart markers should
+                    // only occur between Entropy Coded Segments and not after the final ECS.
+                    // However, some encoders may generate incorrect JPEGs with a final restart
+                    // marker. That restart marker will be seen here instead of inside the ProcessSOS
+                    // method, and is ignored as a harmless error. Restart markers have no extra data,
+                    // so we check for this before we read the 16-bit length of the segment.
+                    continue;
+                }
+
+                // Read the 16-bit length of the segment. The value includes the 2 bytes for the
+                // length itself, so we subtract 2 to get the number of remaining bytes.
+                this.ReadFull(this.temp, 0, 2);
+                int remaining = ((int)this.temp[0] << 8) + (int)this.temp[1] - 2;
+                if (remaining < 0)
+                {
+                    throw new ImageFormatException("Short segment length.");
+                }
+
+                switch (marker)
+                {
+                    case JpegConstants.Markers.SOF0:
+                    case JpegConstants.Markers.SOF1:
+                    case JpegConstants.Markers.SOF2:
+                        this.isProgressive = marker == JpegConstants.Markers.SOF2;
+                        this.ProcessSOF(remaining);
+                        if (configOnly && this.isJfif)
+                        {
+                            return;
+                        }
+
+                        break;
+                    case JpegConstants.Markers.DHT:
+                        if (configOnly)
+                        {
+                            this.Skip(remaining);
+                        }
+                        else
+                        {
+                            this.ProcessDht(remaining);
+                        }
+
+                        break;
+                    case JpegConstants.Markers.DQT:
+                        if (configOnly)
+                        {
+                            this.Skip(remaining);
+                        }
+                        else this.ProcessDqt(remaining);
+                        break;
+                    case JpegConstants.Markers.SOS:
+                        if (configOnly)
+                        {
+                            return;
+                        }
+
+                        this.ProcessStartOfScan(remaining);
+                        break;
+                    case JpegConstants.Markers.DRI:
+                        if (configOnly)
+                        {
+                            this.Skip(remaining);
+                        }
+                        else
+                        {
+                            this.ProcessDri(remaining);
+                        }
+
+                        break;
+                    case JpegConstants.Markers.APP0:
+                        this.ProcessApp0Marker(remaining);
+                        break;
+                    case JpegConstants.Markers.APP1:
+                        this.ProcessApp1Marker(remaining, image);
+                        break;
+                    case JpegConstants.Markers.APP14:
+                        this.ProcessApp14Marker(remaining);
+                        break;
+                    default:
+                        if (JpegConstants.Markers.APP0 <= marker && marker <= JpegConstants.Markers.APP15 || marker == JpegConstants.Markers.COM)
+                        {
+                            this.Skip(remaining);
+                        }
+                        else if (marker < JpegConstants.Markers.SOF0)
+                        {
+                            // See Table B.1 "Marker code assignments".
+                            throw new ImageFormatException("Unknown marker");
+                        }
+                        else
+                        {
+                            throw new ImageFormatException("Unknown marker");
+                        }
+
+                        break;
+                }
+            }
+
+            if (this.grayImage != null)
+            {
+                this.ConvertFromGrayScale(this.imageWidth, this.imageHeight, image);
+            }
+            else if (this.ycbcrImage != null)
+            {
+                if (this.componentCount == 4)
+                {
+                    this.ConvertFromCmyk(this.imageWidth, this.imageHeight, image);
+                    return;
+                }
+
+                if (this.componentCount == 3)
+                {
+                    if (this.IsRGB())
+                    {
+                        this.ConvertFromRGB(this.imageWidth, this.imageHeight, image);
+                        return;
+                    }
+
+                    this.ConvertFromYCbCr(this.imageWidth, this.imageHeight, image);
+                    return;
+                }
+
+                throw new ImageFormatException("JpegDecoder only supports RGB, CMYK and Grayscale color spaces.");
+            }
+            else
+            {
+                throw new ImageFormatException("Missing SOS marker.");
+            }
+        }
+
+        /// <summary>
+        /// Reads bytes from the byte buffer to ensure that bits.UnreadBits is at
+        /// least n. For best performance (avoiding function calls inside hot loops),
+        /// the caller is the one responsible for first checking that bits.UnreadBits &lt; n.
+        /// </summary>
+        /// <param name="n">The number of bits to ensure.</param>
         private void EnsureNBits(int n)
         {
             while (true)
             {
                 byte c = this.ReadByteStuffedByte();
-                this.bits.Accumulator = (this.bits.Accumulator << 8) | (uint)c;
+                this.bits.Accumulator = (this.bits.Accumulator << 8) | c;
                 this.bits.UnreadBits += 8;
                 if (this.bits.Mask == 0)
                 {
@@ -287,9 +482,9 @@ namespace ImageProcessorCore.Formats
 
                 Huffman huffman = this.huffmanTrees[tc, th];
 
-                // Read nCodes and h.vals (and derive h.nCodes).
+                // Read nCodes and huffman.Valuess (and derive h.Length).
                 // nCodes[i] is the number of codes with code length i.
-                // h.nCodes is the total number of codes.
+                // h.Length is the total number of codes.
                 huffman.Length = 0;
 
                 int[] ncodes = new int[MaxCodeLength];
@@ -337,7 +532,7 @@ namespace ImageProcessorCore.Formats
                         // The high 8 bits of lutValue are the encoded value.
                         // The low 8 bits are 1 plus the codeLength.
                         byte base2 = (byte)(code << (7 - i));
-                        ushort lutValue = (ushort)(((ushort)huffman.Values[x] << 8) | (2 + i));
+                        ushort lutValue = (ushort)((huffman.Values[x] << 8) | (2 + i));
 
                         for (int k = 0; k < 1 << (7 - i); k++)
                         {
@@ -597,9 +792,13 @@ namespace ImageProcessorCore.Formats
             return JpegConstants.Markers.XFF;
         }
 
-        // readFull reads exactly len(p) bytes into p. It does not care about byte
-        // stuffing.
-        private void ReadFull(byte[] data, int offset, int len)
+        /// <summary>
+        /// Reads exactly length bytes into data. It does not care about byte stuffing.
+        /// </summary>
+        /// <param name="data">The data to write to.</param>
+        /// <param name="offset">The offset in the source buffer</param>
+        /// <param name="length">The number of bytes to read</param>
+        private void ReadFull(byte[] data, int offset, int length)
         {
             // Unread the overshot bytes, if any.
             if (this.bytes.UnreadableBytes != 0)
@@ -612,19 +811,19 @@ namespace ImageProcessorCore.Formats
                 this.bytes.UnreadableBytes = 0;
             }
 
-            while (len > 0)
+            while (length > 0)
             {
-                if (this.bytes.J - this.bytes.I >= len)
+                if (this.bytes.J - this.bytes.I >= length)
                 {
-                    Array.Copy(this.bytes.Buffer, this.bytes.I, data, offset, len);
-                    this.bytes.I += len;
-                    len -= len;
+                    Array.Copy(this.bytes.Buffer, this.bytes.I, data, offset, length);
+                    this.bytes.I += length;
+                    length -= length;
                 }
                 else
                 {
                     Array.Copy(this.bytes.Buffer, this.bytes.I, data, offset, this.bytes.J - this.bytes.I);
                     offset += this.bytes.J - this.bytes.I;
-                    len -= this.bytes.J - this.bytes.I;
+                    length -= this.bytes.J - this.bytes.I;
                     this.bytes.I += this.bytes.J - this.bytes.I;
 
                     this.Fill();
@@ -633,10 +832,10 @@ namespace ImageProcessorCore.Formats
         }
 
         /// <summary>
-        /// Ignores the next n bytes.
+        /// Skips the next n bytes.
         /// </summary>
         /// <param name="count">The number of bytes to ignore.</param>
-        private void Ignore(int count)
+        private void Skip(int count)
         {
             // Unread the overshot bytes, if any.
             if (this.bytes.UnreadableBytes != 0)
@@ -699,8 +898,8 @@ namespace ImageProcessorCore.Formats
                 throw new ImageFormatException("Only 8-Bit precision supported.");
             }
 
-            this.heightG = (this.temp[1] << 8) + this.temp[2];
-            this.widthG = (this.temp[3] << 8) + this.temp[4];
+            this.imageHeight = (this.temp[1] << 8) + this.temp[2];
+            this.imageWidth = (this.temp[3] << 8) + this.temp[4];
             if (this.temp[5] != this.componentCount)
             {
                 throw new ImageFormatException("SOF has wrong length");
@@ -777,7 +976,7 @@ namespace ImageProcessorCore.Formats
                                     // with v == 4.
                                     if (v == 4)
                                     {
-                                        throw new ImageFormatException("unsupported subsampling ratio");
+                                        throw new ImageFormatException("Unsupported subsampling ratio");
                                     }
 
                                     break;
@@ -788,7 +987,7 @@ namespace ImageProcessorCore.Formats
                                     // Cb.
                                     if (this.componentArray[0].HorizontalFactor % h != 0 || this.componentArray[0].VerticalFactor % v != 0)
                                     {
-                                        throw new ImageFormatException("unsupported subsampling ratio");
+                                        throw new ImageFormatException("Unsupported subsampling ratio");
                                     }
 
                                     break;
@@ -799,7 +998,7 @@ namespace ImageProcessorCore.Formats
                                     // Cr.
                                     if (this.componentArray[1].HorizontalFactor != h || this.componentArray[1].VerticalFactor != v)
                                     {
-                                        throw new ImageFormatException("unsupported subsampling ratio");
+                                        throw new ImageFormatException("Unsupported subsampling ratio");
                                     }
 
                                     break;
@@ -824,7 +1023,7 @@ namespace ImageProcessorCore.Formats
                             case 0:
                                 if (hv != 0x11 && hv != 0x22)
                                 {
-                                    throw new ImageFormatException("unsupported subsampling ratio");
+                                    throw new ImageFormatException("Unsupported subsampling ratio");
                                 }
 
                                 break;
@@ -832,7 +1031,7 @@ namespace ImageProcessorCore.Formats
                             case 2:
                                 if (hv != 0x11)
                                 {
-                                    throw new ImageFormatException("unsupported subsampling ratio");
+                                    throw new ImageFormatException("Unsupported subsampling ratio");
                                 }
 
                                 break;
@@ -934,7 +1133,7 @@ namespace ImageProcessorCore.Formats
         {
             if (n < 5)
             {
-                this.Ignore(n);
+                this.Skip(n);
                 return;
             }
 
@@ -942,11 +1141,11 @@ namespace ImageProcessorCore.Formats
             n -= 13;
 
             // TODO: We should be using constants for this.
-            this.isJfif = this.temp[0] == 'J'
-                     && this.temp[1] == 'F'
-                     && this.temp[2] == 'I'
-                     && this.temp[3] == 'F'
-                     && this.temp[4] == '\x00';
+            this.isJfif = this.temp[0] == 'J' &&
+                          this.temp[1] == 'F' &&
+                          this.temp[2] == 'I' &&
+                          this.temp[3] == 'F' &&
+                          this.temp[4] == '\x00';
 
             if (this.isJfif)
             {
@@ -956,7 +1155,7 @@ namespace ImageProcessorCore.Formats
 
             if (n > 0)
             {
-                this.Ignore(n);
+                this.Skip(n);
             }
         }
 
@@ -973,7 +1172,7 @@ namespace ImageProcessorCore.Formats
         {
             if (n < 6)
             {
-                this.Ignore(n);
+                this.Skip(n);
                 return;
             }
 
@@ -995,15 +1194,18 @@ namespace ImageProcessorCore.Formats
         {
             if (n < 12)
             {
-                this.Ignore(n);
+                this.Skip(n);
                 return;
             }
 
             this.ReadFull(this.temp, 0, 12);
             n -= 12;
 
-            if (this.temp[0] == 'A' && this.temp[1] == 'd' && this.temp[2] == 'o' && this.temp[3] == 'b'
-                && this.temp[4] == 'e')
+            if (this.temp[0] == 'A' &&
+                this.temp[1] == 'd' &&
+                this.temp[2] == 'o' &&
+                this.temp[3] == 'b' &&
+                this.temp[4] == 'e')
             {
                 this.adobeTransformValid = true;
                 this.adobeTransform = this.temp[11];
@@ -1011,208 +1213,7 @@ namespace ImageProcessorCore.Formats
 
             if (n > 0)
             {
-                this.Ignore(n);
-            }
-        }
-
-        /// <summary>
-        /// Decodes the image from the specified this._stream and sets
-        /// the data to image.
-        /// </summary>
-        /// <typeparam name="TColor">The pixel format.</typeparam>
-        /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
-        /// <param name="stream">The stream, where the image should be
-        /// decoded from. Cannot be null (Nothing in Visual Basic).</param>
-        /// <param name="image">The image, where the data should be set to.
-        /// Cannot be null (Nothing in Visual Basic).</param>
-        /// <param name="configOnly">Whether to decode metadata only.</param>
-        public void Decode<TColor, TPacked>(Image<TColor, TPacked> image, Stream stream, bool configOnly)
-            where TColor : IPackedVector<TPacked>
-            where TPacked : struct
-        {
-            this.inputStream = stream;
-
-            // Check for the Start Of Image marker.
-            this.ReadFull(this.temp, 0, 2);
-            if (this.temp[0] != JpegConstants.Markers.XFF || this.temp[1] != JpegConstants.Markers.SOI)
-            {
-                throw new ImageFormatException("Missing SOI marker.");
-            }
-
-            // Process the remaining segments until the End Of Image marker.
-            while (true)
-            {
-                this.ReadFull(this.temp, 0, 2);
-                while (this.temp[0] != 0xff)
-                {
-                    // Strictly speaking, this is a format error. However, libjpeg is
-                    // liberal in what it accepts. As of version 9, next_marker in
-                    // jdmarker.c treats this as a warning (JWRN_EXTRANEOUS_DATA) and
-                    // continues to decode the stream. Even before next_marker sees
-                    // extraneous data, jpeg_fill_bit_buffer in jdhuff.c reads as many
-                    // bytes as it can, possibly past the end of a scan's data. It
-                    // effectively puts back any markers that it overscanned (e.g. an
-                    // "\xff\xd9" EOI marker), but it does not put back non-marker data,
-                    // and thus it can silently ignore a small number of extraneous
-                    // non-marker bytes before next_marker has a chance to see them (and
-                    // print a warning).
-                    // We are therefore also liberal in what we accept. Extraneous data
-                    // is silently ignore
-                    // This is similar to, but not exactly the same as, the restart
-                    // mechanism within a scan (the RST[0-7] markers).
-                    // Note that extraneous 0xff bytes in e.g. SOS data are escaped as
-                    // "\xff\x00", and so are detected a little further down below.
-                    this.temp[0] = this.temp[1];
-                    this.temp[1] = this.ReadByte();
-                }
-
-                byte marker = this.temp[1];
-                if (marker == 0)
-                {
-                    // Treat "\xff\x00" as extraneous data.
-                    continue;
-                }
-
-                while (marker == 0xff)
-                {
-                    // Section B.1.1.2 says, "Any marker may optionally be preceded by any
-                    // number of fill bytes, which are bytes assigned code X'FF'".
-                    marker = this.ReadByte();
-                }
-
-                // End Of Image.
-                if (marker == JpegConstants.Markers.EOI)
-                {
-                    break;
-                }
-
-                if (JpegConstants.Markers.RST0 <= marker && marker <= JpegConstants.Markers.RST7)
-                {
-                    // Figures B.2 and B.16 of the specification suggest that restart markers should
-                    // only occur between Entropy Coded Segments and not after the final ECS.
-                    // However, some encoders may generate incorrect JPEGs with a final restart
-                    // marker. That restart marker will be seen here instead of inside the ProcessSOS
-                    // method, and is ignored as a harmless error. Restart markers have no extra data,
-                    // so we check for this before we read the 16-bit length of the segment.
-                    continue;
-                }
-
-                // Read the 16-bit length of the segment. The value includes the 2 bytes for the
-                // length itself, so we subtract 2 to get the number of remaining bytes.
-                this.ReadFull(this.temp, 0, 2);
-                int remaining = ((int)this.temp[0] << 8) + (int)this.temp[1] - 2;
-                if (remaining < 0)
-                {
-                    throw new ImageFormatException("Short segment length.");
-                }
-
-                switch (marker)
-                {
-                    case JpegConstants.Markers.SOF0:
-                    case JpegConstants.Markers.SOF1:
-                    case JpegConstants.Markers.SOF2:
-                        this.isProgressive = marker == JpegConstants.Markers.SOF2;
-                        this.ProcessSOF(remaining);
-                        if (configOnly && this.isJfif)
-                        {
-                            return;
-                        }
-
-                        break;
-                    case JpegConstants.Markers.DHT:
-                        if (configOnly)
-                        {
-                            this.Ignore(remaining);
-                        }
-                        else
-                        {
-                            this.ProcessDht(remaining);
-                        }
-
-                        break;
-                    case JpegConstants.Markers.DQT:
-                        if (configOnly)
-                        {
-                            this.Ignore(remaining);
-                        }
-                        else this.ProcessDqt(remaining);
-                        break;
-                    case JpegConstants.Markers.SOS:
-                        if (configOnly)
-                        {
-                            return;
-                        }
-
-                        this.ProcessStartOfScan(remaining);
-                        break;
-                    case JpegConstants.Markers.DRI:
-                        if (configOnly)
-                        {
-                            this.Ignore(remaining);
-                        }
-                        else
-                        {
-                            this.ProcessDri(remaining);
-                        }
-
-                        break;
-                    case JpegConstants.Markers.APP0:
-                        this.ProcessApp0Marker(remaining);
-                        break;
-                    case JpegConstants.Markers.APP1:
-                        this.ProcessApp1Marker(remaining, image);
-                        break;
-                    case JpegConstants.Markers.APP14:
-                        this.ProcessApp14Marker(remaining);
-                        break;
-                    default:
-                        if (JpegConstants.Markers.APP0 <= marker && marker <= JpegConstants.Markers.APP15 || marker == JpegConstants.Markers.COM)
-                        {
-                            this.Ignore(remaining);
-                        }
-                        else if (marker < JpegConstants.Markers.SOF0)
-                        {
-                            // See Table B.1 "Marker code assignments".
-                            throw new ImageFormatException("Unknown marker");
-                        }
-                        else
-                        {
-                            throw new ImageFormatException("Unknown marker");
-                        }
-
-                        break;
-                }
-            }
-
-            if (this.grayImage != null)
-            {
-                this.ConvertFromGrayScale(this.widthG, this.heightG, image);
-            }
-            else if (this.ycbcrImage != null)
-            {
-                if (this.componentCount == 4)
-                {
-                    this.ConvertFromCmyk(this.widthG, this.heightG, image);
-                    return;
-                }
-
-                if (this.componentCount == 3)
-                {
-                    if (this.IsRGB())
-                    {
-                        this.ConvertFromRGB(this.widthG, this.heightG, image);
-                        return;
-                    }
-
-                    this.ConvertFromYCbCr(this.widthG, this.heightG, image);
-                    return;
-                }
-
-                throw new ImageFormatException("JpegDecoder only supports RGB, CMYK and Grayscale color spaces.");
-            }
-            else
-            {
-                throw new ImageFormatException("Missing SOS marker.");
+                this.Skip(n);
             }
         }
 
@@ -1228,17 +1229,16 @@ namespace ImageProcessorCore.Formats
             where TColor : IPackedVector<TPacked>
             where TPacked : struct
         {
-            if (!adobeTransformValid)
+            if (!this.adobeTransformValid)
             {
                 throw new ImageFormatException("Unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata");
             }
 
             // If the 4-component JPEG image isn't explicitly marked as "Unknown (RGB
-            // or CMYK)" as per
-            // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
-            if (adobeTransform != adobeTransformUnknown)
+            // or CMYK)" as per http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
+            if (this.adobeTransform != JpegConstants.Adobe.ColorTransformUnknown)
             {
-                int scale = componentArray[0].HorizontalFactor / componentArray[1].HorizontalFactor;
+                int scale = this.componentArray[0].HorizontalFactor / this.componentArray[1].HorizontalFactor;
 
                 TColor[] pixels = new TColor[width * height];
 
@@ -1251,20 +1251,20 @@ namespace ImageProcessorCore.Formats
                     height,
                     y =>
                     {
-                        int yo = ycbcrImage.GetRowYOffset(y);
-                        int co = ycbcrImage.GetRowCOffset(y);
+                        int yo = this.ycbcrImage.GetRowYOffset(y);
+                        int co = this.ycbcrImage.GetRowCOffset(y);
 
                         for (int x = 0; x < width; x++)
                         {
-                            byte yy = ycbcrImage.YChannel[yo + x];
-                            byte cb = ycbcrImage.CbChannel[co + (x / scale)];
-                            byte cr = ycbcrImage.CrChannel[co + (x / scale)];
+                            byte yy = this.ycbcrImage.YChannel[yo + x];
+                            byte cb = this.ycbcrImage.CbChannel[co + (x / scale)];
+                            byte cr = this.ycbcrImage.CrChannel[co + (x / scale)];
 
                             int index = (y * width) + x;
 
                             // Implicit casting FTW
                             Color color = new YCbCr(yy, cb, cr);
-                            int keyline = 255 - blackPixels[y * blackStride + x];
+                            int keyline = 255 - this.blackPixels[y * this.blackStride + x];
                             Color final = new Cmyk(color.R / 255F, color.G / 255F, color.B / 255F, keyline / 255F);
 
                             TColor packed = default(TColor);
@@ -1487,7 +1487,8 @@ namespace ImageProcessorCore.Formats
                     }
                 }
 
-                totalHV += this.componentArray[compIndex].HorizontalFactor * this.componentArray[compIndex].VerticalFactor;
+                totalHV += this.componentArray[compIndex].HorizontalFactor
+                           * this.componentArray[compIndex].VerticalFactor;
 
                 scan[i].DcTableSelector = (byte)(this.temp[2 + (2 * i)] >> 4);
                 if (scan[i].DcTableSelector > maxTh)
@@ -1554,8 +1555,8 @@ namespace ImageProcessorCore.Formats
             // mxx and myy are the number of MCUs (Minimum Coded Units) in the image.
             int h0 = this.componentArray[0].HorizontalFactor;
             int v0 = this.componentArray[0].VerticalFactor;
-            int mxx = (this.widthG + (8 * h0) - 1) / (8 * h0);
-            int myy = (this.heightG + (8 * v0) - 1) / (8 * v0);
+            int mxx = (this.imageWidth + (8 * h0) - 1) / (8 * h0);
+            int myy = (this.imageHeight + (8 * v0) - 1) / (8 * v0);
 
             if (this.grayImage == null && this.ycbcrImage == null)
             {
@@ -1569,8 +1570,7 @@ namespace ImageProcessorCore.Formats
                     int compIndex = scan[i].Index;
                     if (this.progCoeffs[compIndex] == null)
                     {
-                        this.progCoeffs[compIndex] =
-                            new Block[mxx * myy * this.componentArray[compIndex].HorizontalFactor * this.componentArray[compIndex].VerticalFactor];
+                        this.progCoeffs[compIndex] = new Block[mxx * myy * this.componentArray[compIndex].HorizontalFactor * this.componentArray[compIndex].VerticalFactor];
 
                         for (int j = 0; j < this.progCoeffs[compIndex].Length; j++)
                         {
@@ -1639,7 +1639,7 @@ namespace ImageProcessorCore.Formats
                                 bx = blockCount % q;
                                 by = blockCount / q;
                                 blockCount++;
-                                if (bx * 8 >= this.widthG || by * 8 >= this.heightG)
+                                if (bx * 8 >= this.imageWidth || by * 8 >= this.imageHeight)
                                 {
                                     continue;
                                 }
@@ -1782,7 +1782,7 @@ namespace ImageProcessorCore.Formats
 
                                         dst = this.blackPixels;
                                         stride = this.blackStride;
-                                        offset = 8 * (by * blackStride + bx);
+                                        offset = 8 * (by * this.blackStride + bx);
                                         break;
 
                                     default:
@@ -1816,10 +1816,11 @@ namespace ImageProcessorCore.Formats
                                 }
                             }
                         }
+
                         // for j
                     }
-                    // for i
 
+                    // for i
                     mcu++;
 
                     if (this.restartInterval > 0 && mcu % this.restartInterval == 0 && mcu < mxx * myy)
@@ -1848,8 +1849,10 @@ namespace ImageProcessorCore.Formats
                         this.eobRun = 0;
                     }
                 }
+
                 // for mx
             }
+
             // for my
         }
 
@@ -1981,7 +1984,7 @@ namespace ImageProcessorCore.Formats
             if (this.componentCount == 1)
             {
                 GrayImage m = new GrayImage(8 * mxx, 8 * myy);
-                this.grayImage = m.Subimage(0, 0, this.widthG, this.heightG);
+                this.grayImage = m.Subimage(0, 0, this.imageWidth, this.imageHeight);
             }
             else
             {
@@ -2014,7 +2017,7 @@ namespace ImageProcessorCore.Formats
                 }
 
                 YCbCrImage m = new YCbCrImage(8 * h0 * mxx, 8 * v0 * myy, ratio);
-                this.ycbcrImage = m.Subimage(0, 0, this.widthG, this.heightG);
+                this.ycbcrImage = m.Subimage(0, 0, this.imageWidth, this.imageHeight);
 
                 if (this.componentCount == 4)
                 {
@@ -2039,7 +2042,7 @@ namespace ImageProcessorCore.Formats
                 return false;
             }
 
-            if (this.adobeTransformValid && this.adobeTransform == adobeTransformUnknown)
+            if (this.adobeTransformValid && this.adobeTransform == JpegConstants.Adobe.ColorTransformUnknown)
             {
                 // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
                 // says that 0 means Unknown (and in practice RGB) and 1 means YCbCr.
