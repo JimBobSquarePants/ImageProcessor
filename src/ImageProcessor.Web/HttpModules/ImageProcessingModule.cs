@@ -449,12 +449,16 @@ namespace ImageProcessor.Web.HttpModules
                 return;
             }
 
-            IImageService currentService = this.GetImageServiceForRequest(request);
+            // ReSharper disable once AssignNullToNotNullAttribute
+            Uri decodedUri = new Uri(HttpUtility.UrlDecode(request.Unvalidated.RawUrl), UriKind.RelativeOrAbsolute);
+            IImageService currentService = this.GetImageServiceForRequest(request, decodedUri);
 
             if (currentService != null)
             {
                 bool isFileLocal = currentService.IsFileLocalService;
-                string url = request.Url.ToString();
+                string url = HttpUtility.UrlDecode(request.Url.ToString());
+
+                // ReSharper disable once AssignNullToNotNullAttribute
                 bool isLegacy = ProtocolRegex.Matches(url).Count > 1;
                 bool hasMultiParams = url.Count(f => f == '?') > 1;
                 string requestPath;
@@ -622,7 +626,7 @@ namespace ImageProcessor.Web.HttpModules
                                     // Process the image.
                                     bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
                                     bool gamma = fixGamma != null && fixGamma.Value;
-                                  
+
                                     using (ImageFactory imageFactory = new ImageFactory(exif, gamma) { AnimationProcessMode = mode })
                                     {
                                         imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
@@ -832,19 +836,18 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Gets the correct <see cref="IImageService"/> for the given request.
         /// </summary>
-        /// <param name="request">
-        /// The current image request.
-        /// </param>
+        /// <param name="request">The current image request.</param>
+        /// <param name="url">The url containing the full request path and query.</param>
         /// <returns>
         /// The <see cref="IImageService"/>.
         /// </returns>
-        private IImageService GetImageServiceForRequest(HttpRequest request)
+        private IImageService GetImageServiceForRequest(HttpRequest request, Uri url)
         {
             IList<IImageService> services = ImageProcessorConfiguration.Instance.ImageServices;
-
-            // Remove the Application Path from the Request.Path. 
-            // This allows applications running on localhost as sub application to work.
-            string path = request.Path.TrimStart(request.ApplicationPath).TrimStart('/');
+            
+            // Remove the Application Path from the Uri.Path. 
+            // This allows applications running on localhost as sub applications to work.
+            string path = HttpUtility.UrlDecode(url.IsAbsoluteUri ? url.AbsolutePath : url.ToString()).TrimStart(request.ApplicationPath).TrimStart('/');
             foreach (IImageService service in services)
             {
                 string key = service.Prefix;
