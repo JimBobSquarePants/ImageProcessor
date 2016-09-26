@@ -74,7 +74,7 @@ namespace ImageProcessor.Configuration
         /// </param>
         public void AddImageFormats(params ISupportedImageFormat[] format)
         {
-            this.SupportedImageFormats.ToList().AddRange(format);
+            ((List<ISupportedImageFormat>)this.SupportedImageFormats).AddRange(format);
         }
 
 #if NET45
