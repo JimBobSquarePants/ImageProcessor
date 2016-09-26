@@ -70,7 +70,7 @@ namespace ImageProcessor.Common.Helpers
                 "AzureDirectory,", "itextsharp,",
                 "UrlRewritingNet.", "HtmlAgilityPack,",
                 "MiniProfiler,", "Moq,", "nunit.", "TidyNet,",
-                "WebDriver,", "DevExpress.", "Telerik.", "Google."
+                "WebDriver,", "DevExpress.", "Telerik.", "Google.", "ImageProcessor,"
             };
 
         /// <summary>
