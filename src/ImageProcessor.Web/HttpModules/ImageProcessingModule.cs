@@ -75,7 +75,7 @@ namespace ImageProcessor.Web.HttpModules
         private static readonly AsyncDuplicateLock Locker = new AsyncDuplicateLock();
 
         /// <summary>
-        /// Whether to allow known cachebusters.
+        /// Whether to allow known cache busters.
         /// </summary>
         private static bool? allowCacheBuster;
 
@@ -185,8 +185,9 @@ namespace ImageProcessor.Web.HttpModules
 
             if (response.Headers["ImageProcessedBy"] == null)
             {
-                response.AddHeader("ImageProcessedBy",
-                    string.Format("ImageProcessor/{0} - ImageProcessor.Web/{1}", AssemblyVersion, WebAssemblyVersion));
+                response.AddHeader(
+                    "ImageProcessedBy",
+                    $"ImageProcessor/{AssemblyVersion} - ImageProcessor.Web/{WebAssemblyVersion}");
             }
 
             HttpCachePolicy cache = response.Cache;
@@ -442,78 +443,54 @@ namespace ImageProcessor.Web.HttpModules
         private async Task ProcessImageAsync(HttpContext context)
         {
             HttpRequest request = context.Request;
+            string rawUrl = request.Unvalidated.RawUrl;
 
             // Should we ignore this request?
-            if (request.Unvalidated.RawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
+            if (string.IsNullOrWhiteSpace(rawUrl) || rawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
             {
                 return;
             }
 
-            // ReSharper disable once AssignNullToNotNullAttribute
-            Uri decodedUri = new Uri(HttpUtility.UrlDecode(request.Unvalidated.RawUrl), UriKind.RelativeOrAbsolute);
-            IImageService currentService = this.GetImageServiceForRequest(request, decodedUri);
+            // Sometimes the request is url encoded so we have to decode.
+            // See https://github.com/JimBobSquarePants/ImageProcessor/issues/478
+            // This causes a bit of a nightmare as the incoming request is corrupted and cannot be used for splitting 
+            // out each url part. This becomes a manual job.
+            string url = this.DecodeUrlString(rawUrl);
+            string applicationPath = request.ApplicationPath;
+
+            IImageService currentService = this.GetImageServiceForRequest(url, applicationPath);
 
             if (currentService != null)
             {
-                bool isFileLocal = currentService.IsFileLocalService;
-                string url = HttpUtility.UrlDecode(request.Url.ToString());
-
-                // ReSharper disable once AssignNullToNotNullAttribute
-                bool isLegacy = ProtocolRegex.Matches(url).Count > 1;
-                bool hasMultiParams = url.Count(f => f == '?') > 1;
-                string requestPath;
-                string queryString = string.Empty;
-                string urlParameters = string.Empty;
-
-                // Legacy support. I'd like to remove this asap.
-                if (isLegacy && hasMultiParams)
+                // Remove any service identifier prefixes from the url.
+                string prefix = currentService.Prefix;
+                if (!string.IsNullOrWhiteSpace(prefix))
                 {
-                    // We need to split the querystring to get the actual values we want.
-                    string[] paths = url.Split('?');
-                    requestPath = paths[1];
-
-                    // Handle extension-less urls.
-                    if (paths.Length > 3)
-                    {
-                        queryString = paths[3];
-                        urlParameters = paths[2];
-                    }
-                    else if (paths.Length > 1)
-                    {
-                        queryString = paths[2];
-                    }
+                    url = url.Split(new[] { prefix }, StringSplitOptions.None)[1].TrimStart("?");
                 }
-                else
-                {
-                    if (string.IsNullOrWhiteSpace(currentService.Prefix))
-                    {
-                        requestPath = currentService.IsFileLocalService
-                            ? HostingEnvironment.MapPath(request.Path)
-                            : request.Path;
-                        queryString = request.QueryString.ToString();
-                    }
-                    else
-                    {
-                        // Parse any protocol values from settings.
-                        string protocol = currentService.Settings.ContainsKey("Protocol")
-                                              ? currentService.Settings["Protocol"] + "://"
-                                              : currentService.GetType() == typeof(RemoteImageService) ? request.Url.Scheme + "://" : string.Empty;
 
-                        // Handle requests that require parameters.
-                        if (hasMultiParams)
-                        {
-                            string[] paths = url.Split('?');
-                            requestPath = protocol
-                                          + request.Path.TrimStart(request.ApplicationPath).TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/')
-                                          + "?" + paths[1];
-                            queryString = paths[2];
-                        }
-                        else
-                        {
-                            requestPath = protocol + request.Path.TrimStart(request.ApplicationPath).TrimStart('/').Remove(0, currentService.Prefix.Length).TrimStart('/');
-                            queryString = request.QueryString.ToString();
-                        }
-                    }
+                // Identify each part of the incoming request.
+                int queryCount = url.Count(f => f == '?');
+                bool hasParams = queryCount > 0;
+                bool hasMultiParams = queryCount > 1;
+                string[] splitPath = url.Split('?');
+
+                // Ensure we include any relevent querystring parameters into our request path for third party requests.
+                string requestPath = hasMultiParams ? string.Join("?", splitPath.Take(splitPath.Length - 1)) : splitPath[0];
+                string queryString = hasParams ? splitPath[splitPath.Length - 1] : string.Empty;
+
+                // Map the request path if file local.
+                bool isFileLocal = currentService.IsFileLocalService;
+                if (currentService.IsFileLocalService)
+                {
+                    requestPath = HostingEnvironment.MapPath(requestPath);
+                }
+
+                // Parse any protocol values from settings if no protocol is present.
+                if (currentService.Settings.ContainsKey("Protocol") && ProtocolRegex.Matches(url).Count == 0)
+                {
+                    // ReSharper disable once PossibleNullReferenceException
+                    requestPath = currentService.Settings["Protocol"] + "://" + requestPath.TrimStart('/');
                 }
 
                 // Replace any presets in the querystring with the actual value.
@@ -524,7 +501,7 @@ namespace ImageProcessor.Web.HttpModules
                 // Execute the handler which can change the querystring 
                 //  LEGACY:
 #pragma warning disable 618
-                queryString = this.CheckQuerystringHandler(context, queryString, request.Unvalidated.RawUrl);
+                queryString = this.CheckQuerystringHandler(context, queryString, rawUrl);
 #pragma warning restore 618
 
                 // NEW WAY:
@@ -548,36 +525,18 @@ namespace ImageProcessor.Web.HttpModules
                     return;
                 }
 
-                string parts = !string.IsNullOrWhiteSpace(urlParameters) ? "?" + urlParameters : string.Empty;
-                string fullPath = string.Format("{0}{1}?{2}", requestPath, parts, queryString);
-                object resourcePath;
-
-                // More legacy support code.
-                if (hasMultiParams)
-                {
-                    resourcePath = string.IsNullOrWhiteSpace(urlParameters)
-                        ? new Uri(requestPath, UriKind.RelativeOrAbsolute)
-                        : new Uri(requestPath + "?" + urlParameters, UriKind.RelativeOrAbsolute);
-                }
-                else
-                {
-                    resourcePath = requestPath;
-                }
-
                 // Check whether the path is valid for other requests.
                 // We've already checked the unprefixed requests in GetImageServiceForRequest().
-                if (!string.IsNullOrWhiteSpace(currentService.Prefix) && !currentService.IsValidRequest(resourcePath.ToString()))
+                if (!string.IsNullOrWhiteSpace(prefix) && !currentService.IsValidRequest(requestPath))
                 {
                     return;
                 }
 
-                string combined = requestPath + fullPath;
-
-                using (await Locker.LockAsync(combined))
+                using (await Locker.LockAsync(rawUrl))
                 {
                     // Create a new cache to help process and cache the request.
                     this.imageCache = (IImageCache)ImageProcessorConfiguration.Instance
-                        .ImageCache.GetInstance(requestPath, fullPath, queryString);
+                        .ImageCache.GetInstance(requestPath, url, queryString);
 
                     // Is the file new or updated?
                     bool isNewOrUpdated = await this.imageCache.IsNewOrUpdatedAsync();
@@ -591,7 +550,7 @@ namespace ImageProcessor.Web.HttpModules
 
                         try
                         {
-                            imageBuffer = await currentService.GetImage(resourcePath);
+                            imageBuffer = await currentService.GetImage(requestPath);
                         }
                         catch (HttpException ex)
                         {
@@ -837,17 +796,16 @@ namespace ImageProcessor.Web.HttpModules
         /// Gets the correct <see cref="IImageService"/> for the given request.
         /// </summary>
         /// <param name="request">The current image request.</param>
-        /// <param name="url">The url containing the full request path and query.</param>
         /// <returns>
         /// The <see cref="IImageService"/>.
         /// </returns>
-        private IImageService GetImageServiceForRequest(HttpRequest request, Uri url)
+        private IImageService GetImageServiceForRequest(string url, string applicationPath)
         {
             IList<IImageService> services = ImageProcessorConfiguration.Instance.ImageServices;
-            
-            // Remove the Application Path from the Uri.Path. 
+
+            // Remove the Application Path from the Request.Path. 
             // This allows applications running on localhost as sub applications to work.
-            string path = HttpUtility.UrlDecode(url.IsAbsoluteUri ? url.AbsolutePath : url.ToString()).TrimStart(request.ApplicationPath).TrimStart('/');
+            string path = url.Split('?')[0].TrimStart(applicationPath).TrimStart('/');
             foreach (IImageService service in services)
             {
                 string key = service.Prefix;
@@ -871,5 +829,25 @@ namespace ImageProcessor.Web.HttpModules
             return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path) && s.GetType() != typeof(LocalFileImageService));
         }
         #endregion
+
+        private string DecodeUrlString(string url)
+        {
+            string newUrl;
+            while ((newUrl = Uri.UnescapeDataString(url)) != url)
+            {
+                url = newUrl;
+            }
+            return newUrl;
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether a url has been encoded.
+        /// </summary>
+        /// <param name="url">The url to test.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        private bool IsUrlEncodedString(string url)
+        {
+            return Uri.UnescapeDataString(url) != url;
+        }
     }
 }
