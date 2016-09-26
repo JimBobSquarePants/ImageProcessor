@@ -602,9 +602,7 @@ namespace ImageProcessor.Web.HttpModules
                                 {
                                     // No match? Someone is either attacking the server or hasn't read the instructions. 
                                     // Either way throw an exception to prevent caching.
-                                    string message = string.Format(
-                                            "The request {0} could not be understood by the server due to malformed syntax.",
-                                            request.Unvalidated.RawUrl);
+                                    string message = $"The request {request.Unvalidated.RawUrl} could not be understood by the server due to malformed syntax.";
                                     ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(message);
                                     throw new HttpException((int)HttpStatusCode.BadRequest, message);
                                 }
@@ -678,7 +676,7 @@ namespace ImageProcessor.Web.HttpModules
         }
 
         /// <summary>
-        /// Return a value indicating whether common cachebuster variables are being passed through.
+        /// Return a value indicating whether common cache buster variables are being passed through.
         /// </summary>
         /// <param name="queryString">The query string to search.</param>
         /// <returns>
@@ -795,7 +793,8 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Gets the correct <see cref="IImageService"/> for the given request.
         /// </summary>
-        /// <param name="request">The current image request.</param>
+        /// <param name="url">The current image request url.</param>
+        /// <param name="applicationPath">The application path.</param>
         /// <returns>
         /// The <see cref="IImageService"/>.
         /// </returns>
@@ -830,6 +829,13 @@ namespace ImageProcessor.Web.HttpModules
         }
         #endregion
 
+        /// <summary>
+        /// Decodes a url string.
+        /// </summary>
+        /// <param name="url">The url.</param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
         private string DecodeUrlString(string url)
         {
             string newUrl;
@@ -837,17 +843,8 @@ namespace ImageProcessor.Web.HttpModules
             {
                 url = newUrl;
             }
-            return newUrl;
-        }
 
-        /// <summary>
-        /// Returns a value indicating whether a url has been encoded.
-        /// </summary>
-        /// <param name="url">The url to test.</param>
-        /// <returns>The <see cref="bool"/></returns>
-        private bool IsUrlEncodedString(string url)
-        {
-            return Uri.UnescapeDataString(url) != url;
+            return newUrl;
         }
     }
 }
