@@ -18,13 +18,6 @@ sublinks:
    data-ga-action="Plugin Links" 
    data-ga-label="PostProcessor Plugin Nuget Link"><i class="fa fa-download"></i>Plugins.PostProcessor</a>
 
-<div class="alert" role="alert">
-
-This plugin was deprecated in version [4.4.0](https://www.nuget.org/packages/ImageProcessor.Web/4.4.0) with the 
-functionality enhanced and merged into the core.
-
-</div>
-
 The PostProcessor plugin is an extension to the processing pipeline that applies various optimisation
 techniques using third party plugins once an image has been cached. These optimisations can reduce images by up to 
 60% in certain circumstances.
