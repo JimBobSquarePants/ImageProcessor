@@ -2,6 +2,7 @@
 // Copyright (c) James Jackson-South and contributors.
 // Licensed under the Apache License, Version 2.0.
 // </copyright>
+
 namespace ImageProcessorCore.Formats
 {
     using System;
@@ -1451,7 +1452,7 @@ namespace ImageProcessorCore.Formats
             }
 
             Scan[] scan = new Scan[MaxComponents];
-            int totalHV = 0;
+            int totalHv = 0;
 
             for (int i = 0; i < lnComp; i++)
             {
@@ -1487,7 +1488,7 @@ namespace ImageProcessorCore.Formats
                     }
                 }
 
-                totalHV += this.componentArray[compIndex].HorizontalFactor
+                totalHv += this.componentArray[compIndex].HorizontalFactor
                            * this.componentArray[compIndex].VerticalFactor;
 
                 scan[i].DcTableSelector = (byte)(this.temp[2 + (2 * i)] >> 4);
@@ -1505,7 +1506,7 @@ namespace ImageProcessorCore.Formats
 
             // Section B.2.3 states that if there is more than one component then the
             // total H*V values in a scan must be <= 10.
-            if (this.componentCount > 1 && totalHV > 10)
+            if (this.componentCount > 1 && totalHv > 10)
             {
                 throw new ImageFormatException("Total sampling factors too large.");
             }
@@ -1586,7 +1587,7 @@ namespace ImageProcessorCore.Formats
             byte expectedRst = JpegConstants.Markers.RST0;
 
             // b is the decoded coefficients, in natural (not zig-zag) order.
-            Block b = new Block();
+            Block b;
             int[] dc = new int[MaxComponents];
 
             // bx and by are the location of the current block, in units of 8x8
@@ -1630,8 +1631,8 @@ namespace ImageProcessorCore.Formats
                             // 3 4 5
                             if (lnComp != 1)
                             {
-                                bx = hi * mx + j % hi;
-                                by = vi * my + j / hi;
+                                bx = (hi * mx) + (j % hi);
+                                by = (vi * my) + (j / hi);
                             }
                             else
                             {
@@ -1646,14 +1647,7 @@ namespace ImageProcessorCore.Formats
                             }
 
                             // Load the previous partially decoded coefficients, if applicable.
-                            if (this.isProgressive)
-                            {
-                                b = this.progCoeffs[compIndex][by * mxx * hi + bx];
-                            }
-                            else
-                            {
-                                b = new Block();
-                            }
+                            b = this.isProgressive ? this.progCoeffs[compIndex][((@by * mxx) * hi) + bx] : new Block();
 
                             if (ah != 0)
                             {
@@ -1727,7 +1721,7 @@ namespace ImageProcessorCore.Formats
                                 if (zigEnd != Block.BlockSize - 1 || al != 0)
                                 {
                                     // We haven't completely decoded this 8x8 block. Save the coefficients.
-                                    this.progCoeffs[compIndex][by * mxx * hi + bx] = b;
+                                    this.progCoeffs[compIndex][((by * mxx) * hi) + bx] = b;
 
                                     // At this point, we could execute the rest of the loop body to dequantize and
                                     // perform the inverse DCT, to save early stages of a progressive image to the
@@ -1754,7 +1748,7 @@ namespace ImageProcessorCore.Formats
                             {
                                 dst = this.grayImage.Pixels;
                                 stride = this.grayImage.Stride;
-                                offset = this.grayImage.Offset + 8 * (by * this.grayImage.Stride + bx);
+                                offset = this.grayImage.Offset + (8 * ((by * this.grayImage.Stride) + bx));
                             }
                             else
                             {
@@ -1763,26 +1757,26 @@ namespace ImageProcessorCore.Formats
                                     case 0:
                                         dst = this.ycbcrImage.YChannel;
                                         stride = this.ycbcrImage.YStride;
-                                        offset = this.ycbcrImage.YOffset + 8 * (by * this.ycbcrImage.YStride + bx);
+                                        offset = this.ycbcrImage.YOffset + (8 * ((by * this.ycbcrImage.YStride) + bx));
                                         break;
 
                                     case 1:
                                         dst = this.ycbcrImage.CbChannel;
                                         stride = this.ycbcrImage.CStride;
-                                        offset = this.ycbcrImage.COffset + 8 * (by * this.ycbcrImage.CStride + bx);
+                                        offset = this.ycbcrImage.COffset + (8 * ((by * this.ycbcrImage.CStride) + bx));
                                         break;
 
                                     case 2:
                                         dst = this.ycbcrImage.CrChannel;
                                         stride = this.ycbcrImage.CStride;
-                                        offset = this.ycbcrImage.COffset + 8 * (by * this.ycbcrImage.CStride + bx);
+                                        offset = this.ycbcrImage.COffset + (8 * ((by * this.ycbcrImage.CStride) + bx));
                                         break;
 
                                     case 3:
 
                                         dst = this.blackPixels;
                                         stride = this.blackStride;
-                                        offset = 8 * (by * this.blackStride + bx);
+                                        offset = 8 * ((by * this.blackStride) + bx);
                                         break;
 
                                     default:
@@ -1924,7 +1918,10 @@ namespace ImageProcessorCore.Formats
                             throw new ImageFormatException("Unexpected Huffman code");
                     }
 
-                    if (done) break;
+                    if (done)
+                    {
+                        break;
+                    }
 
                     zig = this.RefineNonZeroes(b, zig, zigEnd, val0, delta);
                     if (zig > zigEnd)
@@ -1955,7 +1952,11 @@ namespace ImageProcessorCore.Formats
                 int u = Unzig[zig];
                 if (b[u] == 0)
                 {
-                    if (nz == 0) break;
+                    if (nz == 0)
+                    {
+                        break;
+                    }
+
                     nz--;
                     continue;
                 }
@@ -1979,6 +1980,11 @@ namespace ImageProcessorCore.Formats
             return zig;
         }
 
+        /// <summary>
+        /// Makes the image from the buffer.
+        /// </summary>
+        /// <param name="mxx"></param>
+        /// <param name="myy"></param>
         private void MakeImage(int mxx, int myy)
         {
             if (this.componentCount == 1)
@@ -2073,10 +2079,16 @@ namespace ImageProcessorCore.Formats
             public byte AcTableSelector { get; set; }
         }
 
+        /// <summary>
+        /// The missing ff00 exception.
+        /// </summary>
         private class MissingFF00Exception : Exception
         {
         }
 
+        /// <summary>
+        /// The short huffman data exception.
+        /// </summary>
         private class ShortHuffmanDataException : Exception
         {
         }
