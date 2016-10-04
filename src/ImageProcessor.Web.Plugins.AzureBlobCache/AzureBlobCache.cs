@@ -417,113 +417,102 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
                 // Write the blob storage directly to the stream
                 request.Method = "GET";
+                request.Timeout = this.timeout;
 
-                Retry(
-                    3,
-                    () =>
-                        {
-                            HttpWebResponse response = null;
-                            try
-                            {
-                                response = (HttpWebResponse)request.GetResponse();
-                            }
-                            catch (WebException ex)
-                            {
-                                // A 304 is not an error
-                                if (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
-                                {
-                                    response = (HttpWebResponse)ex.Response;
-                                }
-                                else
-                                {
-                                    response?.Dispose();
-                                    throw;
-                                }
-                            }
+                HttpWebResponse response = null;
+                try
+                {
+                    response = (HttpWebResponse)request.GetResponse();
+                }
+                catch (WebException ex)
+                {
+                    // A 304 is not an error
+                    if (ex.Response != null && ((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
+                    {
+                        response = (HttpWebResponse)ex.Response;
+                    }
+                    else
+                    {
+                        response?.Dispose();
+                        ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
+                        return;
+                    }
+                }
 
-                            Stream cachedStream = response.GetResponseStream();
+                Stream cachedStream = response.GetResponseStream();
 
-                            if (cachedStream != null)
-                            {
-                                HttpResponse contextResponse = context.Response;
+                if (cachedStream != null)
+                {
+                    HttpResponse contextResponse = context.Response;
 
-                                // If streaming but not using a CDN the headers will be null.
-                                // See https://github.com/JimBobSquarePants/ImageProcessor/pull/466
-                                string etagHeader = response.Headers["ETag"];
-                                if (!string.IsNullOrWhiteSpace(etagHeader))
-                                {
-                                    contextResponse.Headers.Add("ETag", etagHeader);
-                                }
+                    // If streaming but not using a CDN the headers will be null.
+                    // See https://github.com/JimBobSquarePants/ImageProcessor/pull/466
+                    string etagHeader = response.Headers["ETag"];
+                    if (!string.IsNullOrWhiteSpace(etagHeader))
+                    {
+                        contextResponse.Headers.Add("ETag", etagHeader);
+                    }
 
-                                string lastModifiedHeader = response.Headers["Last-Modified"];
-                                if (!string.IsNullOrWhiteSpace(lastModifiedHeader))
-                                {
-                                    contextResponse.Headers.Add("Last-Modified", lastModifiedHeader);
-                                }
+                    string lastModifiedHeader = response.Headers["Last-Modified"];
+                    if (!string.IsNullOrWhiteSpace(lastModifiedHeader))
+                    {
+                        contextResponse.Headers.Add("Last-Modified", lastModifiedHeader);
+                    }
 
-                                cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
-                                ImageProcessingModule.SetHeaders(
-                                    context,
-                                    response.StatusCode == HttpStatusCode.NotModified ? null : response.ContentType,
-                                    null,
-                                    this.BrowserMaxDays,
-                                    response.StatusCode);
-                            }
+                    cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
+                    ImageProcessingModule.SetHeaders(
+                        context,
+                        response.StatusCode == HttpStatusCode.NotModified ? null : response.ContentType,
+                        null,
+                        this.BrowserMaxDays,
+                        response.StatusCode);
+                }
 
-                            response.Dispose();
-                        },
-                    () =>
-                        {
-                            ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
-                        });
+                cachedStream?.Dispose();
+                response.Dispose();
             }
             else
             {
                 // Redirect the request to the blob URL
                 request.Method = "HEAD";
                 request.Timeout = this.timeout;
-                Retry(
-                    3,
-                    () =>
-                        {
-                            HttpWebResponse response = null;
-                            try
-                            {
-                                response = (HttpWebResponse)request.GetResponse();
-                            }
-                            catch (WebException ex)
-                            {
-                                response = (HttpWebResponse)ex.Response;
-                                HttpStatusCode responseCode = response.StatusCode;
 
-                                // A 304 is not an error
-                                if (responseCode == HttpStatusCode.NotModified)
-                                {
-                                    response.Dispose();
-                                    ImageProcessingModule.AddCorsRequestHeaders(context);
-                                    context.Response.Redirect(this.cachedRewritePath, false);
-                                }
-                                else if (response.StatusCode == HttpStatusCode.NotFound)
-                                {
-                                    response.Dispose();
-                                    ImageProcessingModule.AddCorsRequestHeaders(context);
-                                    context.Response.Redirect(this.CachedPath, false);
-                                }
-                                else
-                                {
-                                    response?.Dispose();
-                                    throw;
-                                }
-                            }
-                            finally
-                            {
-                                response?.Dispose();
-                            }
-                        },
-                () =>
+                HttpWebResponse response;
+                try
                 {
-                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
-                });
+                    response = (HttpWebResponse)request.GetResponse();
+                    response.Dispose();
+                    ImageProcessingModule.AddCorsRequestHeaders(context);
+                    context.Response.Redirect(this.cachedRewritePath, false);
+                }
+                catch (WebException ex)
+                {
+                    response = (HttpWebResponse)ex.Response;
+
+                    if (response != null)
+                    {
+                        HttpStatusCode responseCode = response.StatusCode;
+
+                        // A 304 is not an error
+                        if (responseCode == HttpStatusCode.NotModified)
+                        {
+                            response.Dispose();
+                            ImageProcessingModule.AddCorsRequestHeaders(context);
+                            context.Response.Redirect(this.cachedRewritePath, false);
+                        }
+                        else
+                        {
+                            response.Dispose();
+                            ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
+                        }
+                    }
+                    else
+                    {
+                        // It's a 404, we should redirect to the cached path we have just saved to.
+                        ImageProcessingModule.AddCorsRequestHeaders(context);
+                        context.Response.Redirect(this.CachedPath, false);
+                    }
+                }
             }
         }
 
@@ -545,32 +534,6 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             }
 
             return container;
-        }
-
-        /// <summary>
-        /// Tries to execute a delegate action the given number of times.
-        /// </summary>
-        /// <param name="max">The maximum number of times to retry.</param>
-        /// <param name="delegateAction">The delegate to be executed</param>
-        /// <param name="exceptionAction">The delegate to throw on error.</param>
-        private static void Retry(int max, Action delegateAction, Action exceptionAction)
-        {
-            for (int retry = 0; retry < max; retry++)
-            {
-                try
-                {
-                    delegateAction();
-                    break;
-                }
-                catch (Exception)
-                {
-                    if (retry == max - 1)
-                    {
-                        exceptionAction();
-                        throw;
-                    }
-                }
-            }
         }
     }
 }

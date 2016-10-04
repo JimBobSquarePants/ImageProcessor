@@ -139,6 +139,10 @@
       <Project>{2cf69699-959a-44dc-a281-4e2596c25043}</Project>
       <Name>ImageProcessor.Plugins.WebP</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\ImageProcessor.Web.Plugins.AzureBlobCache\ImageProcessor.Web.Plugins.AzureBlobCache.csproj">
+      <Project>{3c805e4c-d679-43f8-8c43-8909cdb4d4d7}</Project>
+      <Name>ImageProcessor.Web.Plugins.AzureBlobCache</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\ImageProcessor.Web.Plugins.PostProcessor\ImageProcessor.Web.Plugins.PostProcessor.csproj">
       <Project>{6284f578-6b2a-4dbc-b738-441249c45cb2}</Project>
       <Name>ImageProcessor.Web.Plugins.PostProcessor</Name>
