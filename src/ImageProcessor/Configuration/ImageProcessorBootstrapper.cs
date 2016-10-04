@@ -74,7 +74,7 @@ namespace ImageProcessor.Configuration
         /// </param>
         public void AddImageFormats(params ISupportedImageFormat[] format)
         {
-            this.SupportedImageFormats.ToList().AddRange(format);
+            ((List<ISupportedImageFormat>)this.SupportedImageFormats).AddRange(format);
         }
 
 #if NET45
@@ -94,6 +94,15 @@ namespace ImageProcessor.Configuration
         /// </summary>
         private void LoadSupportedImageFormats()
         {
+            List<ISupportedImageFormat> formats = new List<ISupportedImageFormat>
+            {
+                new BitmapFormat(),
+                new GifFormat(),
+                new JpegFormat(),
+                new PngFormat(),
+                new TiffFormat()
+            };
+
             Type type = typeof(ISupportedImageFormat);
             if (this.SupportedImageFormats == null)
             {
@@ -103,9 +112,9 @@ namespace ImageProcessor.Configuration
                         .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
                         .ToList();
 
-                this.SupportedImageFormats =
-                    availableTypes.Select(f => (Activator.CreateInstance(f) as ISupportedImageFormat))
-                    .ToList();
+                formats.AddRange(availableTypes.Select(f => Activator.CreateInstance(f) as ISupportedImageFormat).ToList());
+
+                this.SupportedImageFormats = formats;
             }
         }
 
