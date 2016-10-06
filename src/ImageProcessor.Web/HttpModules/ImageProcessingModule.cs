@@ -487,7 +487,7 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 // Parse any protocol values from settings if no protocol is present.
-                if (currentService.Settings.ContainsKey("Protocol") && ProtocolRegex.Matches(url).Count == 0)
+                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(url).Count == 0 || ProtocolRegex.Matches(url)[0].Index > 0))
                 {
                     // ReSharper disable once PossibleNullReferenceException
                     requestPath = currentService.Settings["Protocol"] + "://" + requestPath.TrimStart('/');
