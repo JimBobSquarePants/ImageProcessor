@@ -210,7 +210,7 @@ namespace ImageProcessorCore.Formats
         /// Cannot be null (Nothing in Visual Basic).</param>
         /// <param name="configOnly">Whether to decode metadata only.</param>
         public void Decode<TColor, TPacked>(Image<TColor, TPacked> image, Stream stream, bool configOnly)
-            where TColor : IPackedPixel<TPacked>
+            where TColor : struct, IPackedPixel<TPacked>
             where TPacked : struct
         {
             this.inputStream = stream;
@@ -1168,7 +1168,7 @@ namespace ImageProcessorCore.Formats
         /// <param name="n">The position in the stream.</param>
         /// <param name="image">The image.</param>
         private void ProcessApp1Marker<TColor, TPacked>(int n, Image<TColor, TPacked> image)
-            where TColor : IPackedPixel<TPacked>
+            where TColor : struct, IPackedPixel<TPacked>
             where TPacked : struct
         {
             if (n < 6)
@@ -1227,7 +1227,7 @@ namespace ImageProcessorCore.Formats
         /// <param name="height">The image height.</param>
         /// <param name="image">The image.</param>
         private void ConvertFromCmyk<TColor, TPacked>(int width, int height, Image<TColor, TPacked> image)
-            where TColor : IPackedPixel<TPacked>
+            where TColor : struct, IPackedPixel<TPacked>
             where TPacked : struct
         {
             if (!this.adobeTransformValid)
@@ -1287,7 +1287,7 @@ namespace ImageProcessorCore.Formats
         /// <param name="height">The image height.</param>
         /// <param name="image">The image.</param>
         private void ConvertFromGrayScale<TColor, TPacked>(int width, int height, Image<TColor, TPacked> image)
-            where TColor : IPackedPixel<TPacked>
+            where TColor : struct, IPackedPixel<TPacked>
             where TPacked : struct
         {
             TColor[] pixels = new TColor[width * height];
@@ -1323,7 +1323,7 @@ namespace ImageProcessorCore.Formats
         /// <param name="height">The image height.</param>
         /// <param name="image">The image.</param>
         private void ConvertFromYCbCr<TColor, TPacked>(int width, int height, Image<TColor, TPacked> image)
-            where TColor : IPackedPixel<TPacked>
+            where TColor : struct, IPackedPixel<TPacked>
             where TPacked : struct
         {
             int scale = this.componentArray[0].HorizontalFactor / this.componentArray[1].HorizontalFactor;
@@ -1368,7 +1368,7 @@ namespace ImageProcessorCore.Formats
         /// <param name="height">The height.</param>
         /// <param name="image">The image.</param>
         private void ConvertFromRGB<TColor, TPacked>(int width, int height, Image<TColor, TPacked> image)
-            where TColor : IPackedPixel<TPacked>
+            where TColor : struct, IPackedPixel<TPacked>
             where TPacked : struct
         {
             int scale = this.componentArray[0].HorizontalFactor / this.componentArray[1].HorizontalFactor;
@@ -1408,7 +1408,7 @@ namespace ImageProcessorCore.Formats
         /// <typeparam name="TPacked">The packed format. <example>uint, long, float.</example></typeparam>
         /// <param name="image">The image to assign the resolution to.</param>
         private void AssignResolution<TColor, TPacked>(Image<TColor, TPacked> image)
-            where TColor : IPackedPixel<TPacked>
+            where TColor : struct, IPackedPixel<TPacked>
             where TPacked : struct
         {
             if (this.isJfif && this.horizontalResolution > 0 && this.verticalResolution > 0)
