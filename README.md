@@ -6,6 +6,8 @@ It's fast, extensible, easy to use, comes bundled with some great features and i
 
 For full documentation please see [http://imageprocessor.org/](http://imageprocessor.org/)
 
+**If you are looking for the new cross-platform imaging library it has moved to it's own repository [ImageSharp](https://github.com/JimBobSquarePants/ImageSharp).**
+
 ### Build Status
 
 [![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr/branch/Framework?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor/branch/Framework)
