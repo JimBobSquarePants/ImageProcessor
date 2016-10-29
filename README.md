@@ -1,6 +1,4 @@
-# ImageProcessor
-
-<img src="https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/Core/build/icons/imageprocessor-logo-512.png" width="128" height="128"/>
+# <img src="https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/develop/build/icons/imageprocessor-logo-64.png" width="32" height="32"/> ImageProcessor
 
 **Imageprocessor** is a lightweight, extensible library written in C# that allows you to manipulate images on-the-fly using .NET 4.5+
 
@@ -46,3 +44,15 @@ ImageProcessor's documentation, included in this repo in the gh-pages branch, is
 2. From the root `/ImageProcessor` directory, run `jekyll serve` in the command line.
 3. Open <http://localhost:4000> in your browser to navigate to your site.
 Learn more about using Jekyll by reading its [documentation](http://jekyllrb.com/docs/home/).
+
+### The ImageProcessor Team
+
+Grand High Eternal Dictator
+- [James Jackson-South](https://github.com/jimbobsquarepants)
+
+Core Team
+- [Jeavon Leopold](https://github.com/jeavon)
+- [Dirk Lemstra](https://github.com/dlemstra)
+- [Yufeih Huang](https://github.com/yufeih)
+- [Thomas Broust](https://github.com/cosmo0)
+- [Christopher Bauer](https://github.com/christopherbauer)
