@@ -116,7 +116,8 @@ namespace ImageProcessor.Web.Services
             RemoteFile remoteFile = new RemoteFile(uri)
             {
                 MaxDownloadSize = int.Parse(this.Settings["MaxBytes"]),
-                TimeoutLength = int.Parse(this.Settings["Timeout"])
+                TimeoutLength = int.Parse(this.Settings["Timeout"]),
+                UserAgent = this.Settings["Useragent"]
             };
 
             byte[] buffer;
