@@ -451,7 +451,7 @@ namespace ImageProcessor.Web.HttpModules
                 return;
             }
 
-            // Sometimes the request is url encoded so we have to decode.
+            // Sometimes the request is url encoded
             // See https://github.com/JimBobSquarePants/ImageProcessor/issues/478
             // This causes a bit of a nightmare as the incoming request is corrupted and cannot be used for splitting 
             // out each url part. This becomes a manual job.
@@ -467,6 +467,15 @@ namespace ImageProcessor.Web.HttpModules
                 if (!string.IsNullOrWhiteSpace(prefix))
                 {
                     url = url.Split(new[] { prefix }, StringSplitOptions.None)[1].TrimStart("?");
+                }
+
+                //Workaround for handling entirely encoded path for https://github.com/JimBobSquarePants/ImageProcessor/issues/478
+                //If url does not contain a query delimiter but does contain an encoded questionmark, 
+                //treat the last encoded questionmark as the query delimiter
+                if (url.IndexOf('?') == -1 && url.IndexOf("%3F") > 0)
+                {
+                    int idx = url.LastIndexOf("%3F");
+                    url = url.Remove(idx, 3).Insert(idx, "?");
                 }
 
                 // Identify each part of the incoming request.
