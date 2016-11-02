@@ -455,7 +455,7 @@ namespace ImageProcessor.Web.HttpModules
             // See https://github.com/JimBobSquarePants/ImageProcessor/issues/478
             // This causes a bit of a nightmare as the incoming request is corrupted and cannot be used for splitting 
             // out each url part. This becomes a manual job.
-            string url = this.DecodeUrlString(rawUrl);
+            string url = rawUrl;
             string applicationPath = request.ApplicationPath;
 
             IImageService currentService = this.GetImageServiceForRequest(url, applicationPath);
@@ -479,6 +479,9 @@ namespace ImageProcessor.Web.HttpModules
                 string requestPath = hasMultiParams ? string.Join("?", splitPath.Take(splitPath.Length - 1)) : splitPath[0];
                 string queryString = hasParams ? splitPath[splitPath.Length - 1] : string.Empty;
 
+                //Url decode passed request path #506
+                requestPath = UrlDecoder.Instance.DecodeUrl(requestPath);
+
                 // Map the request path if file local.
                 bool isFileLocal = currentService.IsFileLocalService;
                 if (currentService.IsFileLocalService)
@@ -487,7 +490,7 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 // Parse any protocol values from settings if no protocol is present.
-                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(url).Count == 0 || ProtocolRegex.Matches(url)[0].Index > 0))
+                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(requestPath).Count == 0 || ProtocolRegex.Matches(requestPath)[0].Index > 0))
                 {
                     // ReSharper disable once PossibleNullReferenceException
                     requestPath = currentService.Settings["Protocol"] + "://" + requestPath.TrimStart('/');
