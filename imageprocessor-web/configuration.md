@@ -230,7 +230,7 @@ the web implementaion in the configuration file you can add your own image proce
     <plugin name="BackgroundColor" type="ImageProcessor.Web.Processors.BackgroundColor, ImageProcessor.Web" enabled="true"/>
     <plugin name="Brightness" type="ImageProcessor.Web.Processors.Brightness, ImageProcessor.Web"/>
     <plugin name="Contrast" type="ImageProcessor.Web.Processors.Contrast, ImageProcessor.Web"/>
-    <plugin name="Crop" type="ImageProcessor.Web.Processors.Crop, ImageProcessor.Web" enabled="true" enabled="true"/>
+    <plugin name="Crop" type="ImageProcessor.Web.Processors.Crop, ImageProcessor.Web" enabled="true"/>
     <plugin name="DetectEdges" type="ImageProcessor.Web.Processors.DetectEdges, ImageProcessor.Web"/>
     <plugin name="EntropyCrop" type="ImageProcessor.Web.Processors.EntropyCrop, ImageProcessor.Web"/>
     <plugin name="Filter" type="ImageProcessor.Web.Processors.Filter, ImageProcessor.Web"/>
