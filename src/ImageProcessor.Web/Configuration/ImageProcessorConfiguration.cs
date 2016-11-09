@@ -325,7 +325,8 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
-        /// Returns the <see cref="SettingElementCollection"/> for the given plugin.
+        /// Returns the <see cref="SettingElementCollection"/> for the given plugin. 
+        /// Web.config appSettings can override settings in config section using the following format "ImageProcessor.&lt;PluginName&gt;.&lt;settingKey&gt; e.g. ImageProcessor.CloudImageService.Host. The key must exist in the config section for the appsetting to apply"
         /// </summary>
         /// <param name="name">
         /// The name of the plugin to get the settings for.
@@ -347,6 +348,16 @@ namespace ImageProcessor.Web.Configuration
                 settings = serviceElement.Settings
                     .Cast<SettingElement>()
                     .ToDictionary(setting => setting.Key, setting => setting.Value);
+
+                //override the settings discovered in the config sections with settings stored in appsettings of web.config if available
+                //This will allow the settings be controlled per deployment slot within Microsoft Azure and similar services, that only allow appsettings to be configured
+                Dictionary<string, string> copyOfSettingsForEnumeration = new Dictionary<string, string>(settings);
+                foreach (var setting in copyOfSettingsForEnumeration) {
+                    string appSettingKeyName = "ImageProcessor." + name + "." + setting.Key;
+                    if (!String.IsNullOrEmpty(System.Configuration.ConfigurationManager.AppSettings[appSettingKeyName])) {
+                        settings[setting.Key] = System.Configuration.ConfigurationManager.AppSettings[appSettingKeyName];
+                    }
+                }
             }
             else
             {
