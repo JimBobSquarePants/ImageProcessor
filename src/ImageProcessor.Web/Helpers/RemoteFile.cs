@@ -57,6 +57,11 @@ namespace ImageProcessor.Web.Helpers
         /// The <see cref="T:System.Net.WebResponse">WebResponse</see> object used internally for this RemoteFile instance.
         /// </summary>
         private WebRequest webRequest;
+
+        /// <summary>
+        /// Useragent header to be passed when requesting the remote file
+        /// </summary>
+        private string userAgent;
         #endregion
 
         #region Constructors
@@ -141,6 +146,21 @@ namespace ImageProcessor.Web.Helpers
                 }
 
                 this.maxDownloadSize = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the useragent header to be passed when requesting the remote file
+        /// </summary>
+        public string UserAgent
+        {
+            get
+            {
+                return this.userAgent;
+            }
+            set
+            {
+                this.userAgent = value;
             }
         }
         #endregion
@@ -233,6 +253,10 @@ namespace ImageProcessor.Web.Helpers
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.Uri);
                 request.Headers["Accept-Encoding"] = "gzip";
                 request.Headers["Accept-Language"] = "en-us";
+                if (!String.IsNullOrEmpty(UserAgent))
+                {
+                    request.UserAgent = UserAgent;
+                }
                 request.Credentials = CredentialCache.DefaultNetworkCredentials;
                 request.AutomaticDecompression = DecompressionMethods.GZip;
 
