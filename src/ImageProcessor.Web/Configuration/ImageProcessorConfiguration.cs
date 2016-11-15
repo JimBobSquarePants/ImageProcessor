@@ -352,9 +352,12 @@ namespace ImageProcessor.Web.Configuration
                 //override the settings discovered in the config sections with settings stored in appsettings of web.config if available
                 //This will allow the settings be controlled per deployment slot within Microsoft Azure and similar services, that only allow appsettings to be configured
                 Dictionary<string, string> copyOfSettingsForEnumeration = new Dictionary<string, string>(settings);
+                //for each setting found in the config file
                 foreach (var setting in copyOfSettingsForEnumeration) {
+                    //check the app settings for a key in the sepcified format
                     string appSettingKeyName = "ImageProcessor." + name + "." + setting.Key;
                     if (!String.IsNullOrEmpty(System.Configuration.ConfigurationManager.AppSettings[appSettingKeyName])) {
+                        //if the key is found in app settings use the app settings value rather than the value in the config section
                         settings[setting.Key] = System.Configuration.ConfigurationManager.AppSettings[appSettingKeyName];
                     }
                 }
