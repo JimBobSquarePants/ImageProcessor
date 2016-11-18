@@ -815,23 +815,5 @@ namespace ImageProcessor.Web.HttpModules
             return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path) && s.GetType() != typeof(LocalFileImageService));
         }
         #endregion
-
-        /// <summary>
-        /// Decodes a url string.
-        /// </summary>
-        /// <param name="url">The url.</param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        private string DecodeUrlString(string url)
-        {
-            string newUrl;
-            while ((newUrl = Uri.UnescapeDataString(url)) != url)
-            {
-                url = newUrl;
-            }
-
-            return newUrl;
-        }
     }
 }
