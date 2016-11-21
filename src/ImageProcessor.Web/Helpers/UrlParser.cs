@@ -1,11 +1,31 @@
-﻿namespace ImageProcessor.Web.Helpers
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="UrlParser.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   A helper class for decoding and parsing request urls.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace ImageProcessor.Web.Helpers
 {
     using System;
     using System.Linq;
     using ImageProcessor.Web.Extensions;
 
+    /// <summary>
+    /// A helper class for decoding and parsing request URLs.
+    /// </summary>
     public class UrlParser
     {
+        /// <summary>
+        /// Parses the given URL adjusting the request path to a value that can then be interpreted by an  image service.
+        /// </summary>
+        /// <param name="url">The url.</param>
+        /// <param name="servicePrefix">The service prefix.</param>
+        /// <param name="requestPath">The request path.</param>
+        /// <param name="queryString">The query string.</param>
         public static void ParseUrl(string url, string servicePrefix, out string requestPath, out string queryString)
         {
             // Remove any service identifier prefixes from the url.
@@ -14,12 +34,12 @@
                 url = url.Split(new[] { servicePrefix }, StringSplitOptions.None)[1].TrimStart("?");
             }
 
-            //Workaround for handling entirely encoded path for https://github.com/JimBobSquarePants/ImageProcessor/issues/478
-            //If url does not contain a query delimiter but does contain an encoded questionmark, 
-            //treat the last encoded questionmark as the query delimiter
-            if (url.IndexOf('?') == -1 && url.IndexOf("%3F") > 0)
+            // Workaround for handling entirely encoded path for https://github.com/JimBobSquarePants/ImageProcessor/issues/478
+            // If url does not contain a query delimiter but does contain an encoded questionmark, 
+            // treat the last encoded questionmark as the query delimiter
+            if (url.IndexOf('?') == -1 && url.IndexOf("%3F", StringComparison.Ordinal) > 0)
             {
-                int idx = url.LastIndexOf("%3F");
+                int idx = url.LastIndexOf("%3F", StringComparison.Ordinal);
                 url = url.Remove(idx, 3).Insert(idx, "?");
             }
 
@@ -33,8 +53,8 @@
             requestPath = hasMultiParams ? string.Join("?", splitPath.Take(splitPath.Length - 1)) : splitPath[0];
             queryString = hasParams ? splitPath[splitPath.Length - 1] : string.Empty;
 
-            //Url decode passed request path #506
-            //Use Uri.UnescapeDataString instead of HttpUtility.UrlDecode to maintain plus-characters (+)
+            // Url decode passed request path #506
+            // Use Uri.UnescapeDataString instead of HttpUtility.UrlDecode to maintain plus-characters (+)
             requestPath = Uri.UnescapeDataString(requestPath);
         }
     }

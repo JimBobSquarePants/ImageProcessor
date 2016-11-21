@@ -462,7 +462,7 @@ namespace ImageProcessor.Web.HttpModules
 
             if (currentService != null)
             {
-                //Parse url
+                // Parse url
                 string requestPath, queryString;
                 UrlParser.ParseUrl(url, currentService.Prefix, out requestPath, out queryString);
 
@@ -471,6 +471,11 @@ namespace ImageProcessor.Web.HttpModules
                 if (currentService.IsFileLocalService)
                 {
                     requestPath = HostingEnvironment.MapPath(requestPath);
+                }
+
+                if (string.IsNullOrWhiteSpace(requestPath))
+                {
+                    return;
                 }
 
                 // Parse any protocol values from settings if no protocol is present.
