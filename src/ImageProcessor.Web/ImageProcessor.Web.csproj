@@ -68,6 +68,7 @@
     <Compile Include="Helpers\QuerystringParser\QueryParamParser.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\GenericArrayTypeConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\GenericListTypeConverter.cs" />
+    <Compile Include="Helpers\UrlParser.cs" />
     <Compile Include="Helpers\ValidatingRequestEventArgs.cs" />
     <Compile Include="Processors\DetectEdges.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />

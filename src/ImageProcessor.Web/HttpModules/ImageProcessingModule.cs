@@ -451,33 +451,20 @@ namespace ImageProcessor.Web.HttpModules
                 return;
             }
 
-            // Sometimes the request is url encoded so we have to decode.
+            // Sometimes the request is url encoded
             // See https://github.com/JimBobSquarePants/ImageProcessor/issues/478
             // This causes a bit of a nightmare as the incoming request is corrupted and cannot be used for splitting 
             // out each url part. This becomes a manual job.
-            string url = this.DecodeUrlString(rawUrl);
+            string url = rawUrl;
             string applicationPath = request.ApplicationPath;
 
             IImageService currentService = this.GetImageServiceForRequest(url, applicationPath);
 
             if (currentService != null)
             {
-                // Remove any service identifier prefixes from the url.
-                string prefix = currentService.Prefix;
-                if (!string.IsNullOrWhiteSpace(prefix))
-                {
-                    url = url.Split(new[] { prefix }, StringSplitOptions.None)[1].TrimStart("?");
-                }
-
-                // Identify each part of the incoming request.
-                int queryCount = url.Count(f => f == '?');
-                bool hasParams = queryCount > 0;
-                bool hasMultiParams = queryCount > 1;
-                string[] splitPath = url.Split('?');
-
-                // Ensure we include any relevent querystring parameters into our request path for third party requests.
-                string requestPath = hasMultiParams ? string.Join("?", splitPath.Take(splitPath.Length - 1)) : splitPath[0];
-                string queryString = hasParams ? splitPath[splitPath.Length - 1] : string.Empty;
+                //Parse url
+                string requestPath, queryString;
+                UrlParser.ParseUrl(url, currentService.Prefix, out requestPath, out queryString);
 
                 // Map the request path if file local.
                 bool isFileLocal = currentService.IsFileLocalService;
@@ -487,7 +474,7 @@ namespace ImageProcessor.Web.HttpModules
                 }
 
                 // Parse any protocol values from settings if no protocol is present.
-                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(url).Count == 0 || ProtocolRegex.Matches(url)[0].Index > 0))
+                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(requestPath).Count == 0 || ProtocolRegex.Matches(requestPath)[0].Index > 0))
                 {
                     // ReSharper disable once PossibleNullReferenceException
                     requestPath = currentService.Settings["Protocol"] + "://" + requestPath.TrimStart('/');
@@ -527,7 +514,7 @@ namespace ImageProcessor.Web.HttpModules
 
                 // Check whether the path is valid for other requests.
                 // We've already checked the unprefixed requests in GetImageServiceForRequest().
-                if (!string.IsNullOrWhiteSpace(prefix) && !currentService.IsValidRequest(requestPath))
+                if (!string.IsNullOrWhiteSpace(currentService.Prefix) && !currentService.IsValidRequest(requestPath))
                 {
                     return;
                 }
@@ -828,23 +815,5 @@ namespace ImageProcessor.Web.HttpModules
             return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path) && s.GetType() != typeof(LocalFileImageService));
         }
         #endregion
-
-        /// <summary>
-        /// Decodes a url string.
-        /// </summary>
-        /// <param name="url">The url.</param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        private string DecodeUrlString(string url)
-        {
-            string newUrl;
-            while ((newUrl = Uri.UnescapeDataString(url)) != url)
-            {
-                url = newUrl;
-            }
-
-            return newUrl;
-        }
     }
 }
