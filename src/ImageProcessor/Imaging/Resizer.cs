@@ -241,8 +241,31 @@ namespace ImageProcessor.Imaging
 
                         if (anchorPoint.HasValue)
                         {
-                            destinationY = anchorPoint.Value.Y;
-                            destinationX = anchorPoint.Value.X;
+                            if (anchorPoint.Value.Y < 0)
+                            {
+                                destinationY = 0;
+                            }
+                            else if (anchorPoint.Value.Y + sourceHeight > boxPadHeight)
+                            {
+                                destinationY = boxPadHeight - sourceHeight;
+                            }
+                            else
+                            {
+                                destinationY = anchorPoint.Value.Y;
+                            }
+
+                            if (anchorPoint.Value.X < 0)
+                            {
+                                destinationX = 0;
+                            }
+                            else if (anchorPoint.Value.X + sourceWidth > boxPadWidth)
+                            {
+                                destinationX = boxPadWidth - sourceWidth;
+                            }
+                            else
+                            {
+                                destinationX = anchorPoint.Value.X;
+                            }
                         }
                         else
                         {
