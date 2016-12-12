@@ -9,6 +9,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Threading;
+
 namespace ImageProcessor.Web.Caching
 {
     using System.Collections.Generic;
@@ -55,6 +58,119 @@ namespace ImageProcessor.Web.Caching
         /// </summary>
         private string virtualCachedFilePath;
 
+        private static object cachePathValidatorLock = new object();
+        private static bool cachePathValidatorCheck;
+
+        /// <summary>
+        /// Stores the resulting validated absolute cache folder path
+        /// </summary>
+        private static string validatedAbsolutePath;
+
+        /// <summary>
+        /// Indicates if the cache path is within the web root
+        /// </summary>
+        private static bool isCachePathInWebRoot;
+
+        /// <summary>
+        /// Indicates if the cache path is an absolute path
+        /// </summary>
+        private static bool isCachePathAbsolute;
+
+        /// <summary>
+        /// This will get the validated absolute path which is based on the configured value one time
+        /// </summary>
+        /// <param name="originalPath"></param>
+        /// <param name="virtualPath">
+        /// The resulting virtual path if the path is within the webroot
+        /// </param>
+        /// <returns></returns>
+        /// <remarks>
+        /// We are performing this statically in order to avoid any overhead used when performing the validation since
+        /// this occurs for each image when it only needs to be done once
+        /// </remarks>
+        private static string GetValidatedAbsolutePath(string originalPath, out string virtualPath)
+        {
+            var absoluteCachePath = LazyInitializer.EnsureInitialized(
+                ref validatedAbsolutePath, 
+                ref cachePathValidatorCheck,
+                ref cachePathValidatorLock,
+                () =>
+                {
+                    bool isInWebRoot;
+                    bool isAbsolute;
+                    var result = GetValidatedAbsolutePathImpl(originalPath, HostingEnvironment.MapPath, out isInWebRoot, out isAbsolute);
+                    isCachePathInWebRoot = isInWebRoot;
+                    isCachePathAbsolute = isAbsolute;
+                    return result;
+                });
+
+            if (!isCachePathAbsolute)
+            {
+                //Set the virtual cache path to the original one specified, it's just a normal virtual path like ~/App_Data/Blah
+                virtualPath = originalPath;
+            }
+            else if (isCachePathInWebRoot)
+            {
+                //If this absolute path is within the web root, we need to convert it to a virtual path
+                // so that the default RewritePath mechanism works as expected. This does a reverse map path:
+                virtualPath = originalPath.Replace(HttpRuntime.AppDomainAppPath, "~/").Replace(@"\", "/");
+            }
+            else
+            {
+                //It's outside of the web root and is an absolute path, we'll need to just have the virtualPath set
+                // to the absolute path but deal with it accordingly based on the isCachePathInWebRoot flag
+                virtualPath = absoluteCachePath;
+            }
+
+            return absoluteCachePath;
+        }
+
+        /// <summary>
+        /// The internal method that performs the actual validation which can be unit tested
+        /// </summary>
+        /// <param name="originalPath">
+        /// The original path to validate which could be an absolute or a virtual path
+        /// </param>
+        /// <param name="mapPath"></param>
+        /// <param name="isInWebRoot"></param>
+        /// <param name="isAbsolute"></param>
+        /// <returns>
+        /// The absolute path to the cache folder
+        /// </returns>
+        internal static string GetValidatedAbsolutePathImpl(string originalPath, Func<string, string> mapPath, out bool isInWebRoot, out bool isAbsolute)
+        {
+            if (originalPath.IsValidVirtualPathName())
+            {
+                var path =  mapPath(originalPath);
+                isInWebRoot = true;
+                isAbsolute = false;
+                return path;
+            }
+
+            //Determine if this is an absolute path
+            if (Path.IsPathRooted(originalPath) && originalPath.IndexOfAny(Path.GetInvalidPathChars()) == -1)
+            {
+                //in this case this should be a real path, it's the best check we can do without a try/catch, but if this
+                // does throw, we'll let it throw anyways.
+
+                //create a DirectoryInfo object to truly validate which will throw if it's not correct
+                var dirInfo = new DirectoryInfo(originalPath);
+                if (!dirInfo.Exists)
+                {
+                    throw new ConfigurationErrorsException("The absolute cache folder " + originalPath + " does not exist");
+                }
+
+                var webRoot = mapPath("~/");
+                isInWebRoot = dirInfo.FullName.TrimEnd('/').StartsWith(webRoot.TrimEnd('/'));                
+                isAbsolute = true;
+                return dirInfo.FullName;
+            }
+
+            var message = "'VirtualCachePath' is not a valid virtual path. " + originalPath;
+            ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>(message);
+            throw new ConfigurationErrorsException("DiskCache: " + message);
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DiskCache"/> class.
         /// </summary>
@@ -70,18 +186,11 @@ namespace ImageProcessor.Web.Caching
         public DiskCache(string requestPath, string fullPath, string querystring)
             : base(requestPath, fullPath, querystring)
         {
-            string virtualPath = this.Settings["VirtualCachePath"];
+            string configuredPath = this.Settings["VirtualCachePath"];
 
-            if (!virtualPath.IsValidVirtualPathName())
-            {
-                string message = "'VirtualCachePath' is not a valid virtual path. " + virtualPath;
-                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>(message);
-                throw new ConfigurationErrorsException("DiskCache: " + message);
-            }
-
-            this.virtualCachePath = virtualPath;
-
-            this.absoluteCachePath = HostingEnvironment.MapPath(this.virtualCachePath);
+            string virtualPath;
+            this.absoluteCachePath = GetValidatedAbsolutePath(configuredPath, out virtualPath);
+            this.virtualCachePath = virtualPath;            
         }
 
         /// <summary>
@@ -92,6 +201,10 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public override async Task<bool> IsNewOrUpdatedAsync()
         {
+            //TODO: Before this check is performed it should be throttled. For example, only perform this check 
+            // if the last time it was checked is greater than 5 seconds. This would be much better for perf 
+            // if there is a high throughput of image requests.
+
             string cachedFileName = await this.CreateCachedFileNameAsync();
 
             // Collision rate of about 1 in 10000 for the folder structure.
@@ -229,8 +342,42 @@ namespace ImageProcessor.Web.Caching
         /// </param>
         public override void RewritePath(HttpContext context)
         {
-            // The cached file is valid so just rewrite the path.
-            context.RewritePath(this.virtualCachedFilePath, false);
+            if (isCachePathInWebRoot)
+            {
+                // The cached file is valid so just rewrite the path.
+                context.RewritePath(this.virtualCachedFilePath, false);
+            }
+            else
+            {
+                // The file is outside of the web root so we cannot just rewrite the path since that won't work.
+                // We basically have a few options:
+
+                // 1. Create a custom VirtualPathProvider - this would work but we don't get all of the goodness that comes with
+                //      ASP.NET StaticFileHandler such as sending the correct cache headers, etc... you can see what I mean by 
+                //      looking at the source: https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,492 
+                // 2. HttpResponse.TransmitFile - this actually uses the IIS/Windows kernel to do the transfer so it is very fast,
+                //      I've tested the header results and they are identical to the response headers set when using the StaticFileHandler
+                // 3. Set cache headers, etc... manually with regards to how the StaticFileHandler does it: 
+                        https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,505
+                              // 4. Use reflection to invoke the StaticFileHandler somehow
+                              // 5. Use a custom StataicFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki 
+
+                // I've opted to go with the simplest solution and use TransmitFile, I've looked into the source of this and it uses the
+                // Windows Kernel, I'm not sure where in the source the headers get written but if you analyze the request/response headers when
+                // this is used, they are exactly the same as if the StaticFileHandler (i.e. RewritePath) is used, so this seems perfect and easy!                
+                context.Response.TransmitFile(CachedPath);
+
+                //This is quite important expecially if the request is a when an `IImageService` handles the request
+                // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
+                // and because we are not rewriting any paths, the request will continue to try to execute this handler
+                // and errors will occur. It should be fine that we are ending the request pipeline since
+                // all we really want to do here is send the file above. There's some arguments about using 
+                // `ApplicationInstance.CompleteRequest();` instead of Response.End() but in this case I believe it is 
+                // correct to use Response.End(), a good write-up of why this is can be found here:
+                // see: http://stackoverflow.com/a/36968241/694494
+                context.Response.End();
+            }
+
         }
     }
 }

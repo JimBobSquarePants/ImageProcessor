@@ -118,6 +118,10 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </returns>
         public override async Task<bool> IsNewOrUpdatedAsync()
         {
+            //TODO: Before this check is performed it should be throttled. For example, only perform this check 
+            // if the last time it was checked is greater than 5 seconds. This would be much better for perf 
+            // if there is a high throughput of image requests.
+
             string cachedFileName = await this.CreateCachedFileNameAsync();
 
             // Collision rate of about 1 in 10000 for the folder structure.
