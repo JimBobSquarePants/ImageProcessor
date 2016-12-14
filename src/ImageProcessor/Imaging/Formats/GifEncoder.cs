@@ -139,6 +139,11 @@ namespace ImageProcessor.Imaging.Formats
         /// The width.
         /// </summary>
         private int? width;
+
+        /// <summary>
+        /// Whether the gif has has the last terminated byte written.
+        /// </summary>
+        private bool terminated;
         #endregion
 
         #region Constructors
@@ -199,8 +204,12 @@ namespace ImageProcessor.Imaging.Formats
         /// <returns>The completed animated gif.</returns>
         public Image Save()
         {
-            // Complete File
-            this.WriteByte(FileTrailer);
+            if (!this.terminated)
+            {
+                // Complete File
+                this.WriteByte(FileTrailer);
+                this.terminated = true;
+            }
 
             // Push the data
             this.imageStream.Flush();
@@ -208,6 +217,33 @@ namespace ImageProcessor.Imaging.Formats
             this.ImageBytes = this.imageStream.ToArray();
             this.imageStream.Dispose();
             return (Image)Converter.ConvertFrom(this.ImageBytes);
+        }
+
+        /// <summary>
+        /// Saves the completed gif to an <see cref="Stream"/>
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        public void Save(Stream stream)
+        {
+            if (!this.terminated)
+            {
+                // Complete File
+                this.WriteByte(FileTrailer);
+                this.terminated = true;
+            }
+
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
+
+            // Push the data
+            this.imageStream.Flush();
+            this.imageStream.Position = 0;
+
+            this.imageStream.CopyTo(stream);
+
+            this.imageStream.Position = 0;
         }
         #endregion
 

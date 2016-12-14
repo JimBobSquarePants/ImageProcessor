@@ -12,7 +12,7 @@
 namespace ImageProcessor.Imaging.Quantizers
 {
     using System;
-    using System.Collections;
+    using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
 
@@ -38,7 +38,7 @@ namespace ImageProcessor.Imaging.Quantizers
         /// <summary>
         /// The transparency threshold.
         /// </summary>
-        private byte threshold = 128;
+        private byte threshold = 64;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OctreeQuantizer"/> class.
@@ -88,7 +88,7 @@ namespace ImageProcessor.Imaging.Quantizers
         }
 
         /// <summary>
-        /// Gets or sets the transparency threshold (0- 255)
+        /// Gets or sets the transparency threshold (0 - 255)
         /// </summary>
         public byte Threshold
         {
@@ -96,6 +96,7 @@ namespace ImageProcessor.Imaging.Quantizers
             {
                 return this.threshold;
             }
+
             set
             {
                 this.threshold = value;
@@ -159,12 +160,12 @@ namespace ImageProcessor.Imaging.Quantizers
             }
 
             // First off convert the Octree to maxColors colors
-            ArrayList palette = this.octree.Palletize(Math.Max(this.maxColors - 1, 1));
+            List<Color> palette = this.octree.Palletize(Math.Max(this.maxColors - 1, 1));
 
             // Then convert the palette based on those colors
             for (int index = 0; index < palette.Count; index++)
             {
-                original.Entries[index] = (Color)palette[index];
+                original.Entries[index] = palette[index];
             }
 
             // Add the transparent color
@@ -256,7 +257,7 @@ namespace ImageProcessor.Imaging.Quantizers
                 {
                     // If so, check if I have a previous node setup. This will only occur if the first color in the image
                     // happens to be black, with an alpha component of zero.
-                    if (null == this.previousNode)
+                    if (this.previousNode == null)
                     {
                         this.previousColor = pixel->Argb;
                         this.root.AddColor(pixel, this.maxColorBits, 0, this);
@@ -281,9 +282,9 @@ namespace ImageProcessor.Imaging.Quantizers
             /// The maximum number of colors
             /// </param>
             /// <returns>
-            /// An <see cref="ArrayList"/> with the palletized colors
+            /// An <see cref="List{Color}"/> with the palletized colors
             /// </returns>
-            public ArrayList Palletize(int colorCount)
+            public List<Color> Palletize(int colorCount)
             {
                 while (this.Leaves > colorCount)
                 {
@@ -291,7 +292,7 @@ namespace ImageProcessor.Imaging.Quantizers
                 }
 
                 // Now palletize the nodes
-                ArrayList palette = new ArrayList(this.Leaves);
+                List<Color> palette = new List<Color>(this.Leaves);
                 int paletteIndex = 0;
                 this.root.ConstructPalette(palette, ref paletteIndex);
 
@@ -331,7 +332,7 @@ namespace ImageProcessor.Imaging.Quantizers
             {
                 // Find the deepest level containing at least one reducible node
                 int index = this.maxColorBits - 1;
-                while ((index > 0) && (null == this.reducibleNodes[index]))
+                while ((index > 0) && (this.reducibleNodes[index] == null))
                 {
                     index--;
                 }
@@ -464,7 +465,7 @@ namespace ImageProcessor.Imaging.Quantizers
 
                         OctreeNode child = this.children[index];
 
-                        if (null == child)
+                        if (child == null)
                         {
                             // Create a new child node & store in the array
                             child = new OctreeNode(level + 1, colorBits, octree);
@@ -488,7 +489,7 @@ namespace ImageProcessor.Imaging.Quantizers
                     // Loop through all children and add their information to this node
                     for (int index = 0; index < 8; index++)
                     {
-                        if (null != this.children[index])
+                        if (this.children[index] != null)
                         {
                             this.red += this.children[index].red;
                             this.green += this.children[index].green;
@@ -515,7 +516,7 @@ namespace ImageProcessor.Imaging.Quantizers
                 /// <param name="index">
                 /// The current palette index
                 /// </param>
-                public void ConstructPalette(ArrayList palette, ref int index)
+                public void ConstructPalette(List<Color> palette, ref int index)
                 {
                     if (this.leaf)
                     {
@@ -534,7 +535,7 @@ namespace ImageProcessor.Imaging.Quantizers
                         // Loop through children looking for leaves
                         for (int i = 0; i < 8; i++)
                         {
-                            if (null != this.children[i])
+                            if (this.children[i] != null)
                             {
                                 this.children[i].ConstructPalette(palette, ref index);
                             }
@@ -565,7 +566,7 @@ namespace ImageProcessor.Imaging.Quantizers
                                     ((pixel->G & Mask[level]) >> (shift - 1)) |
                                     ((pixel->B & Mask[level]) >> shift);
 
-                        if (null != this.children[pixelIndex])
+                        if (this.children[pixelIndex] != null)
                         {
                             index = this.children[pixelIndex].GetPaletteIndex(pixel, level + 1);
                         }
