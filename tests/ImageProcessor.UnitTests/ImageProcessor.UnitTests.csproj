@@ -60,6 +60,7 @@
     <Compile Include="Configuration\ImageProcessorBootstrapperTests.cs" />
     <Compile Include="Extensions\EnumerableExtensionsUnitTests.cs" />
     <Compile Include="Extensions\FloatExtensionsUnitTests.cs" />
+    <Compile Include="ImageCache\DiskCacheTests.cs" />
     <Compile Include="ImageFactoryUnitTests.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -185,6 +186,10 @@
     <ProjectReference Include="..\..\src\ImageProcessor.Plugins.WebP\ImageProcessor.Plugins.WebP.csproj">
       <Project>{2cf69699-959a-44dc-a281-4e2596c25043}</Project>
       <Name>ImageProcessor.Plugins.WebP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ImageProcessor.Web\ImageProcessor.Web.csproj">
+      <Project>{d011a778-59c8-4bfa-a770-c350216bf161}</Project>
+      <Name>ImageProcessor.Web</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ImageProcessor\ImageProcessor.csproj">
       <Project>{3b5dd734-fb7a-487d-8ce6-55e7af9aea7e}</Project>

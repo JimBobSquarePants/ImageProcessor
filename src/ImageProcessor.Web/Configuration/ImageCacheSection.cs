@@ -124,6 +124,25 @@ namespace ImageProcessor.Web.Configuration
             }
 
             /// <summary>
+            /// Gets or sets whether the disk cache will apply file change monitors that can be used to invalidate the cache
+            /// </summary>
+            /// <value>True or False to enable or disable this setting</value>
+            /// <remarks>
+            /// Defaults to false, if this is set to true a file change monitor will be created for each cached file that Image Processor creates. 
+            /// This could be useful if you want to be able to delete the cached image files in order to trigger the server cache invalidation, however
+            /// if this setting is enabled and there are a lot of Image Processor cache files, this could end up causing some issues:
+            /// * Performance penalties if hosting on a UNC share
+            /// * ASP.Net app domain restarts if using FCNMode="Single" since the FCN buffer can overflow
+            /// </remarks>
+            [ConfigurationProperty("useFileChangeMonitors", DefaultValue = false, IsRequired = false)]            
+            public bool UseFileChangeMonitors
+            {
+                get { return (bool)this["useFileChangeMonitors"]; }
+
+                set { this["useFileChangeMonitors"] = value; }
+            }
+
+            /// <summary>
             /// Gets or sets the maximum number of days to store an image in the browser cache.
             /// </summary>
             /// <value>The maximum number of days to store an image in the browser cache.</value>

@@ -94,6 +94,11 @@ namespace ImageProcessor.Web.Configuration
         public int ImageCacheMaxDays { get; private set; }
 
         /// <summary>
+        /// Gets the value indicating if the disk cache will apply file change monitors that can be used to invalidate the cache
+        /// </summary>
+        public bool UseFileChangeMonitors { get; private set; }
+
+        /// <summary>
         /// Gets the browser cache max days.
         /// </summary>
         public int BrowserCacheMaxDays { get; private set; }
@@ -409,6 +414,7 @@ namespace ImageProcessor.Web.Configuration
 
                         this.ImageCache = type;
                         this.ImageCacheMaxDays = cache.MaxDays;
+                        this.UseFileChangeMonitors = cache.UseFileChangeMonitors;
                         this.BrowserCacheMaxDays = cache.BrowserMaxDays;
                         this.ImageCacheSettings = cache.Settings
                                                        .Cast<SettingElement>()
