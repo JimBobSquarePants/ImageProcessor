@@ -98,10 +98,10 @@ namespace ImageProcessor.Web.Services
             string relativeResourceUrl = id.ToString();
             if (!string.IsNullOrEmpty(container))
             {
-                container = container.TrimEnd('/') + "/";
-                if (!relativeResourceUrl.StartsWith(container + "/"))
+                container = $"{container.TrimEnd('/')}/";
+                if (!relativeResourceUrl.StartsWith($"{container}/"))
                 {
-                    relativeResourceUrl = container + relativeResourceUrl;
+                    relativeResourceUrl = $"{container}{relativeResourceUrl}";
                 }
             }
 
