@@ -623,9 +623,6 @@ namespace ImageProcessor.Web.HttpModules
 
                             // Cleanup
                             outStream.Dispose();
-
-                            // Trim the cache.
-                            await this.imageCache.TrimCacheAsync();
                         }
 
                         // Store the response type and cache dependency in the context for later retrieval.
@@ -662,6 +659,9 @@ namespace ImageProcessor.Web.HttpModules
                     {
                         context.ApplicationInstance.CompleteRequest();
                     }
+
+                    // Trim the cache.
+                    await this.imageCache.TrimCacheAsync();
                 }
             }
         }
