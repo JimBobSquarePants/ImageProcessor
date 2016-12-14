@@ -20,6 +20,7 @@ namespace ImageProcessor
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Common.Extensions;
+    using ImageProcessor.Configuration;
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Filters.EdgeDetection;
 
@@ -377,6 +378,61 @@ namespace ImageProcessor
 
             this.Image.Dispose();
             this.Image = formatted;
+
+            this.ShouldProcess = true;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Loads the image to process from an array of bytes. Always call this method first.
+        /// </summary>
+        /// <param name="image">
+        /// The <see cref="T:System.Drawing.Image"/> to load. 
+        /// The original image is untouched during manipulation as a copy is made. Disposal of the input image is the responsibility of the user.
+        /// </param>
+        /// <returns>
+        /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
+        /// </returns>
+        public ImageFactory Load(Image image)
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            image.Save(memoryStream, image.RawFormat);
+
+            // Default to BMP to keep in line with the default in System.Drawing if no format found.
+            ISupportedImageFormat format = ImageProcessorBootstrapper.Instance.SupportedImageFormats.FirstOrDefault(f => f.ImageFormat.Equals(image.RawFormat))
+                                           ?? new BitmapFormat();
+
+            IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
+            if (imageFormat != null)
+            {
+                imageFormat.AnimationProcessMode = this.AnimationProcessMode;
+            }
+
+            // Ensure the image is in the most efficient format.
+            Image formatted = this.Image.Copy(this.AnimationProcessMode);
+
+            // Set our image.
+            this.Image = formatted;
+
+            // Save the bit depth
+            this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
+
+            // Store the stream so we can dispose of it later.
+            this.InputStream = memoryStream;
+
+            // Set the other properties.
+            format.Quality = DefaultQuality;
+            format.IsIndexed = FormatUtilities.IsIndexed(this.Image);
+
+            this.backupFormat = format;
+            this.CurrentImageFormat = format;
+
+            // Always load the data.
+            foreach (int id in this.Image.PropertyIdList)
+            {
+                this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
+            }
 
             this.ShouldProcess = true;
 
