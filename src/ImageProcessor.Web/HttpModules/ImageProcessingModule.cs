@@ -317,9 +317,7 @@ namespace ImageProcessor.Web.HttpModules
             application.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
             application.PostReleaseRequestState += this.PostReleaseRequestState;
-
-            EventHandlerTaskAsyncHelper onEndRquestsHelper = new EventHandlerTaskAsyncHelper(this.OnEndRequest);
-            application.AddOnEndRequestAsync(onEndRquestsHelper.BeginEventHandler, onEndRquestsHelper.EndEventHandler);
+            application.EndRequest += this.OnEndRequest;
         }
 
         /// <summary>
@@ -389,19 +387,10 @@ namespace ImageProcessor.Web.HttpModules
         /// <param name="e">
         /// An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.
         /// </param>
-        /// <returns>
-        /// The <see cref="T:System.Threading.Tasks.Task"/>.
-        /// </returns>
-        private async Task OnEndRequest(object sender, EventArgs e)
+        private void OnEndRequest(object sender, EventArgs e)
         {
-            if (this.imageCache != null)
-            {
-                // Trim the cache.
-                await this.imageCache.TrimCacheAsync();
-
-                // Reset the cache.
-                this.imageCache = null;
-            }
+            // Reset the cache.
+            this.imageCache = null;
         }
 
         /// <summary>
@@ -634,6 +623,9 @@ namespace ImageProcessor.Web.HttpModules
 
                             // Cleanup
                             outStream.Dispose();
+
+                            // Trim the cache.
+                            await this.imageCache.TrimCacheAsync();
                         }
 
                         // Store the response type and cache dependency in the context for later retrieval.

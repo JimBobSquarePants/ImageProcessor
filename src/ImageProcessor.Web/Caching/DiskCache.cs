@@ -199,41 +199,38 @@ namespace ImageProcessor.Web.Caching
 
             if (directory != null)
             {
-                DirectoryInfo directoryInfo = new DirectoryInfo(directory);
-                DirectoryInfo parentDirectoryInfo = directoryInfo.Parent;
+                // Jump up to the parent branch to clean through 1/36th of the cache.
+                DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, Path.GetFileName(this.CachedPath).Substring(0, 1)));
 
-                if (parentDirectoryInfo != null)
+                // UNC folders can throw exceptions if the file doesn't exist.
+                foreach (DirectoryInfo enumerateDirectory in await rootDirectoryInfo.SafeEnumerateDirectoriesAsync())
                 {
-                    // UNC folders can throw exceptions if the file doesn't exist.
-                    foreach (DirectoryInfo enumerateDirectory in await parentDirectoryInfo.SafeEnumerateDirectoriesAsync())
+                    IEnumerable<FileInfo> files = enumerateDirectory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
+                    int count = files.Count();
+
+                    foreach (FileInfo fileInfo in files)
                     {
-                        IEnumerable<FileInfo> files = enumerateDirectory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
-                        int count = files.Count();
-
-                        foreach (FileInfo fileInfo in files)
+                        try
                         {
-                            try
+                            // If the group count is equal to the max count minus 1 then we know we
+                            // have reduced the number of items below the maximum allowed.
+                            // We'll cleanup any orphaned expired files though.
+                            if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
                             {
-                                // If the group count is equal to the max count minus 1 then we know we
-                                // have reduced the number of items below the maximum allowed.
-                                // We'll cleanup any orphaned expired files though.
-                                if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
-                                {
-                                    break;
-                                }
-
-                                // Remove from the cache and delete each CachedImage.
-                                CacheIndexer.Remove(fileInfo.Name);
-                                fileInfo.Delete();
-                                count -= 1;
+                                break;
                             }
 
-                            // ReSharper disable once EmptyGeneralCatchClause
-                            catch
-                            {
-                                // Log it but skip to the next file.
-                                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}");
-                            }
+                            // Remove from the cache and delete each CachedImage.
+                            CacheIndexer.Remove(fileInfo.Name);
+                            fileInfo.Delete();
+                            count -= 1;
+                        }
+
+                        // ReSharper disable once EmptyGeneralCatchClause
+                        catch
+                        {
+                            // Log it but skip to the next file.
+                            ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}");
                         }
                     }
                 }

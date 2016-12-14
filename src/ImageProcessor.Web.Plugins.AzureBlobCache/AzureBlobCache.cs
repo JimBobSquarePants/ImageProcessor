@@ -279,8 +279,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         {
             Uri uri = new Uri(this.CachedPath);
             string path = uri.GetLeftPart(UriPartial.Path).Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
-            string directory = path.Substring(0, path.LastIndexOf('/'));
-            string parent = directory.Substring(0, directory.LastIndexOf('/'));
+            string parent = path.Substring(0, path.LastIndexOf('/') - 9);
 
             BlobContinuationToken continuationToken = null;
             List<IListBlobItem> results = new List<IListBlobItem>();
@@ -298,8 +297,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             foreach (
                 CloudBlockBlob blob in
                 results.Where((blobItem, type) => blobItem is CloudBlockBlob)
-                    .Cast<CloudBlockBlob>()
-                    .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
+                       .Cast<CloudBlockBlob>()
+                       .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
             {
                 if (blob.Properties.LastModified.HasValue && !this.IsExpired(blob.Properties.LastModified.Value.UtcDateTime))
                 {
