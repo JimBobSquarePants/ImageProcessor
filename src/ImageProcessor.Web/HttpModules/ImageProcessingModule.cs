@@ -38,7 +38,7 @@ namespace ImageProcessor.Web.HttpModules
     /// <summary>
     /// Processes any image requests within the web application.
     /// </summary>
-    public sealed class ImageProcessingModule : IHttpModule
+    public class ImageProcessingModule : IHttpModule
     {
         #region Fields
         /// <summary>
@@ -336,6 +336,36 @@ namespace ImageProcessor.Web.HttpModules
         }
 
         /// <summary>
+        /// Occurs when the user for the current request has been authorized.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Threading.Tasks.Task"/>.
+        /// </returns>
+        protected virtual Task PostAuthorizeRequest(object sender, EventArgs e)
+        {
+            HttpContext context = ((HttpApplication)sender).Context;
+            return this.ProcessImageAsync(context);
+        }
+
+        /// <summary>
+        /// Gets url for the current request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        protected virtual string GetRequestUrl(HttpRequest request)
+        {
+            return request.Unvalidated.RawUrl;
+        }
+
+        /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.
         /// </summary>
         /// <param name="disposing">
@@ -359,24 +389,6 @@ namespace ImageProcessor.Web.HttpModules
             this.isDisposed = true;
         }
         #endregion
-
-        /// <summary>
-        /// Occurs when the user for the current request has been authorized.
-        /// </summary>
-        /// <param name="sender">
-        /// The source of the event.
-        /// </param>
-        /// <param name="e">
-        /// An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.
-        /// </param>
-        /// <returns>
-        /// The <see cref="T:System.Threading.Tasks.Task"/>.
-        /// </returns>
-        private Task PostAuthorizeRequest(object sender, EventArgs e)
-        {
-            HttpContext context = ((HttpApplication)sender).Context;
-            return this.ProcessImageAsync(context);
-        }
 
         /// <summary>
         /// Occurs when the ASP.NET event handler finishes execution.
@@ -434,7 +446,7 @@ namespace ImageProcessor.Web.HttpModules
         private async Task ProcessImageAsync(HttpContext context)
         {
             HttpRequest request = context.Request;
-            string rawUrl = request.Unvalidated.RawUrl;
+            string rawUrl = this.GetRequestUrl(request);
 
             // Should we ignore this request?
             if (string.IsNullOrWhiteSpace(rawUrl) || rawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
