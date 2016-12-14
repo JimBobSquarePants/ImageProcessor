@@ -33,6 +33,8 @@ namespace ImageProcessor.Web.HttpModules
     using ImageProcessor.Web.Processors;
     using ImageProcessor.Web.Services;
 
+    using Microsoft.IO;
+
     /// <summary>
     /// Processes any image requests within the web application.
     /// </summary>
@@ -559,10 +561,15 @@ namespace ImageProcessor.Web.HttpModules
                             return;
                         }
 
-                        using (MemoryStream inStream = new MemoryStream(imageBuffer))
+                        // Using recyclable streams here should dramatically reduce the overhead required
+                        using (MemoryStream inStream = new RecyclableMemoryStream(MemoryStreamPool.Shared))
                         {
-                            // Process the Image
-                            MemoryStream outStream = new MemoryStream();
+                            inStream.Write(imageBuffer, 0, imageBuffer.Length);
+                            inStream.Flush();
+                            inStream.Position = 0;
+
+                            // Process the Image. Use a recyclable stream here to reduce the allocations
+                            MemoryStream outStream = new RecyclableMemoryStream(MemoryStreamPool.Shared);
 
                             if (!string.IsNullOrWhiteSpace(queryString))
                             {

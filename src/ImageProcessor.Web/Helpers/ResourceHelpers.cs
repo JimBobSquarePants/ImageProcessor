@@ -14,6 +14,10 @@ namespace ImageProcessor.Web.Helpers
     using System.Reflection;
     using System.Text;
 
+    using ImageProcessor.Web.Caching;
+
+    using Microsoft.IO;
+
     /// <summary>
     /// Provides helper methods for working with resources.
     /// </summary>
@@ -33,7 +37,7 @@ namespace ImageProcessor.Web.Helpers
             assembly = assembly ?? Assembly.GetExecutingAssembly();
             encoding = encoding ?? Encoding.UTF8;
 
-            using (MemoryStream ms = new MemoryStream())
+            using (RecyclableMemoryStream ms = new RecyclableMemoryStream(MemoryStreamPool.Shared))
             {
                 using (Stream manifestResourceStream = assembly.GetManifestResourceStream(resource))
                 {
