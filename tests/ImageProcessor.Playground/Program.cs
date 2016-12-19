@@ -45,41 +45,42 @@ namespace ImageProcessor.PlayGround
             string outPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(root), OutputImages));
 
             DirectoryInfo di = new DirectoryInfo(inPath);
-            //IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".png", ".tif");
-            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".gif");
-            //IEnumerable<FileInfo> files = GetFilesByName(di, "trans.gif");
+            IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".png", ".tif");
 
-            foreach (FileInfo fileInfo in files)
+            for (int i = 0; i < 10; i++)
             {
-                // Start timing.
-                byte[] photoBytes = File.ReadAllBytes(fileInfo.FullName);
-                Console.WriteLine("Processing: " + fileInfo.Name);
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                using (MemoryStream inStream = new MemoryStream(photoBytes))
-                using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
+                foreach (FileInfo fileInfo in files)
                 {
-                    try
+                    // Start timing.
+                    byte[] photoBytes = File.ReadAllBytes(fileInfo.FullName);
+                    Console.WriteLine("Processing: " + fileInfo.Name);
+
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
+
+                    using (MemoryStream inStream = new MemoryStream(photoBytes))
+                    using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
                     {
-                        imageFactory.Load(inStream)
-                            .Resize(new Size(imageFactory.Image.Width / 2, imageFactory.Image.Height / 2))
-                            .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
+                        try
+                        {
+                            imageFactory.Load(inStream)
+                                        .Crop(new Rectangle(0, 0, imageFactory.Image.Width / 2, imageFactory.Image.Height / 2))
+                                        .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+
+                        stopwatch.Stop();
                     }
 
-                    stopwatch.Stop();
+                    // Report back.
+                    long peakWorkingSet64 = Process.GetCurrentProcess().PeakWorkingSet64;
+                    float mB = peakWorkingSet64 / (float)1024 / 1024;
+
+                    Console.WriteLine(@"Completed {0} in {1:s\.fff} secs {2}Peak memory usage was {3:#,#} bytes or {4} Mb.", fileInfo.Name, stopwatch.Elapsed, Environment.NewLine, peakWorkingSet64, mB);
                 }
-
-                // Report back.
-                long peakWorkingSet64 = Process.GetCurrentProcess().PeakWorkingSet64;
-                float mB = peakWorkingSet64 / (float)1024 / 1024;
-
-                Console.WriteLine(@"Completed {0} in {1:s\.fff} secs {2}Peak memory usage was {3} bytes or {4} Mb.", fileInfo.Name, stopwatch.Elapsed, Environment.NewLine, peakWorkingSet64.ToString("#,#"), mB);
             }
 
             Console.ReadLine();
