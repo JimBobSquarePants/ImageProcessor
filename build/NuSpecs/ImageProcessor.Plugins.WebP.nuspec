@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>ImageProcessor.Plugins.WebP</id>
-    <version>1.0.5.0</version>
+    <version>$version$</version>
     <title>ImageProcessor.Plugins.WebP</title>
     <authors>James Jackson-South</authors>
     <owners>James Jackson-South</owners>

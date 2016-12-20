@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>ImageProcessor.Plugins.Cair</id>
-    <version>1.0.2.0</version>
+    <version>$version$</version>
     <title>ImageProcessor.Plugins.Cair</title>
     <authors>James Jackson-South</authors>
     <owners>James Jackson-South</owners>
