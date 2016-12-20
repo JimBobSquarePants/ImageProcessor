@@ -548,8 +548,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 }
                 else
                 {
-                    ImageProcessorBootstrapper.Instance.Logger.Log<string>("Unable to parse date " +
-                                                                      context.Request.Headers["If-Modified-Since"]);
+                    ImageProcessorBootstrapper.Instance.Logger.Log<string>("Unable to parse date " + context.Request.Headers["If-Modified-Since"] + " for " + context.Request.Url, "ImageProcessor.Web.Plugins.AzureBlobCache.AzureBlobCache");
                 }                
             }
         }
