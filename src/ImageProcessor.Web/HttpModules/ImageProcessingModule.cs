@@ -220,7 +220,7 @@ namespace ImageProcessor.Web.HttpModules
         }
 
         /// <summary>
-        /// Adds response headers allowing Cross Origin Requests if the current origin request 
+        /// Adds response headers allowing Cross Origin Requests if the current origin request
         /// passes sanitizing rules.
         /// </summary>
         /// <param name="context">
@@ -406,7 +406,7 @@ namespace ImageProcessor.Web.HttpModules
         }
 
         /// <summary>
-        /// Occurs when ASP.NET has completed executing all request event handlers and the request 
+        /// Occurs when ASP.NET has completed executing all request event handlers and the request
         /// state data has been stored.
         /// </summary>
         /// <param name="sender">
@@ -456,7 +456,7 @@ namespace ImageProcessor.Web.HttpModules
 
             // Sometimes the request is url encoded
             // See https://github.com/JimBobSquarePants/ImageProcessor/issues/478
-            // This causes a bit of a nightmare as the incoming request is corrupted and cannot be used for splitting 
+            // This causes a bit of a nightmare as the incoming request is corrupted and cannot be used for splitting
             // out each url part. This becomes a manual job.
             string url = rawUrl;
             string applicationPath = request.ApplicationPath;
@@ -493,7 +493,7 @@ namespace ImageProcessor.Web.HttpModules
 
                 HttpContextWrapper httpContextBase = new HttpContextWrapper(context);
 
-                // Execute the handler which can change the querystring 
+                // Execute the handler which can change the querystring
                 //  LEGACY:
 #pragma warning disable 618
                 queryString = this.CheckQuerystringHandler(context, queryString, rawUrl);
@@ -563,14 +563,10 @@ namespace ImageProcessor.Web.HttpModules
                         }
 
                         // Using recyclable streams here should dramatically reduce the overhead required
-                        using (MemoryStream inStream = new RecyclableMemoryStream(MemoryStreamPool.Shared))
+                        using (MemoryStream inStream = MemoryStreamPool.Shared.GetStream("inStream", imageBuffer, 0, imageBuffer.Length))
                         {
-                            inStream.Write(imageBuffer, 0, imageBuffer.Length);
-                            inStream.Flush();
-                            inStream.Position = 0;
-
                             // Process the Image. Use a recyclable stream here to reduce the allocations
-                            MemoryStream outStream = new RecyclableMemoryStream(MemoryStreamPool.Shared);
+                            MemoryStream outStream = MemoryStreamPool.Shared.GetStream();
 
                             if (!string.IsNullOrWhiteSpace(queryString))
                             {
@@ -600,7 +596,7 @@ namespace ImageProcessor.Web.HttpModules
                                 }
                                 else
                                 {
-                                    // No match? Someone is either attacking the server or hasn't read the instructions. 
+                                    // No match? Someone is either attacking the server or hasn't read the instructions.
                                     // Either way throw an exception to prevent caching.
                                     string message = $"The request {request.Unvalidated.RawUrl} could not be understood by the server due to malformed syntax.";
                                     ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(message);
@@ -703,7 +699,7 @@ namespace ImageProcessor.Web.HttpModules
         /// </summary>
         /// <param name="queryString">The query string to search.</param>
         /// <param name="process">
-        /// Whether to process the request. True if <see cref="AnimationProcessMode.First"/> 
+        /// Whether to process the request. True if <see cref="AnimationProcessMode.First"/>
         /// has been explicitly requested.
         /// </param>
         /// <returns>
@@ -805,7 +801,7 @@ namespace ImageProcessor.Web.HttpModules
         {
             IList<IImageService> services = ImageProcessorConfiguration.Instance.ImageServices;
 
-            // Remove the Application Path from the Request.Path. 
+            // Remove the Application Path from the Request.Path.
             // This allows applications running on localhost as sub applications to work.
             string path = url.Split('?')[0].TrimStart(applicationPath).TrimStart('/');
             foreach (IImageService service in services)

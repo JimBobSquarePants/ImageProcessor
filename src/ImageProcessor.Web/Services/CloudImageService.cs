@@ -24,7 +24,7 @@ namespace ImageProcessor.Web.Services
     using Microsoft.IO;
 
     /// <summary>
-    /// A generic cloud image service for retrieving images where the remote location has been rewritten as a 
+    /// A generic cloud image service for retrieving images where the remote location has been rewritten as a
     /// a virtual path. Commonly seen in content management systems like Umbraco.
     /// </summary>
     public class CloudImageService : IImageService
@@ -62,7 +62,7 @@ namespace ImageProcessor.Web.Services
         public Dictionary<string, string> Settings { get; set; }
 
         /// <summary>
-        /// Gets or sets the white list of <see cref="System.Uri"/>. 
+        /// Gets or sets the white list of <see cref="System.Uri"/>.
         /// </summary>
         public Uri[] WhiteList { get; set; }
 
@@ -117,7 +117,7 @@ namespace ImageProcessor.Web.Services
             // Prevent response blocking.
             WebResponse webResponse = await remoteFile.GetWebResponseAsync().ConfigureAwait(false);
 
-            using (RecyclableMemoryStream memoryStream = new RecyclableMemoryStream(MemoryStreamPool.Shared))
+            using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
             {
                 using (WebResponse response = webResponse)
                 {

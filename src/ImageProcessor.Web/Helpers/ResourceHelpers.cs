@@ -37,7 +37,7 @@ namespace ImageProcessor.Web.Helpers
             assembly = assembly ?? Assembly.GetExecutingAssembly();
             encoding = encoding ?? Encoding.UTF8;
 
-            using (RecyclableMemoryStream ms = new RecyclableMemoryStream(MemoryStreamPool.Shared))
+            using (MemoryStream ms = MemoryStreamPool.Shared.GetStream())
             {
                 using (Stream manifestResourceStream = assembly.GetManifestResourceStream(resource))
                 {
