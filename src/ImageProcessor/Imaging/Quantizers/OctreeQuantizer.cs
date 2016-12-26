@@ -26,14 +26,19 @@ namespace ImageProcessor.Imaging.Quantizers
     public unsafe class OctreeQuantizer : Quantizer
     {
         /// <summary>
-        /// Stores the tree
-        /// </summary>
-        private readonly Octree octree;
-
-        /// <summary>
         /// Maximum allowed color depth
         /// </summary>
         private readonly int maxColors;
+
+        /// <summary>
+        /// Maximum allowed color bit depth
+        /// </summary>
+        private readonly int maxColorBits;
+
+        /// <summary>
+        /// Stores the tree
+        /// </summary>
+        private Octree octree;
 
         /// <summary>
         /// The transparency threshold.
@@ -56,7 +61,7 @@ namespace ImageProcessor.Imaging.Quantizers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OctreeQuantizer"/> class. 
+        /// Initializes a new instance of the <see cref="OctreeQuantizer"/> class.
         /// </summary>
         /// <remarks>
         /// The Octree quantizer is a two pass algorithm. The initial pass sets up the Octree,
@@ -81,10 +86,8 @@ namespace ImageProcessor.Imaging.Quantizers
                 throw new ArgumentOutOfRangeException(nameof(maxColorBits), maxColorBits, "This should be between 1 and 8");
             }
 
-            // Construct the Octree
-            this.octree = new Octree(maxColorBits);
-
             this.maxColors = maxColors;
+            this.maxColorBits = maxColorBits;
         }
 
         /// <summary>
@@ -101,6 +104,20 @@ namespace ImageProcessor.Imaging.Quantizers
             {
                 this.threshold = value;
             }
+        }
+
+        /// <summary>
+        /// Execute the first pass through the pixels in the image
+        /// </summary>
+        /// <param name="sourceData">The source data</param>
+        /// <param name="width">The width in pixels of the image</param>
+        /// <param name="height">The height in pixels of the image</param>
+        protected override void FirstPass(BitmapData sourceData, int width, int height)
+        {
+            // Construct the Octree
+            this.octree = new Octree(this.maxColorBits);
+
+            base.FirstPass(sourceData, width, height);
         }
 
         /// <summary>
@@ -215,7 +232,7 @@ namespace ImageProcessor.Imaging.Quantizers
             private int previousColor;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="Octree"/> class. 
+            /// Initializes a new instance of the <see cref="Octree"/> class.
             /// </summary>
             /// <param name="maxColorBits">
             /// The maximum number of significant bits in the image
@@ -390,7 +407,7 @@ namespace ImageProcessor.Imaging.Quantizers
                 private int paletteIndex;
 
                 /// <summary>
-                /// Initializes a new instance of the <see cref="OctreeNode"/> class. 
+                /// Initializes a new instance of the <see cref="OctreeNode"/> class.
                 /// </summary>
                 /// <param name="level">
                 /// The level in the tree = 0 - 7
