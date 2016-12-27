@@ -32,10 +32,10 @@ namespace ImageProcessor.Web.Helpers
     /// For example, the ImageProcessingModule accepts off-server addresses as a path. An attacker could, for instance, pass the url
     /// to a file that's a few gigs in size, causing the server to get out-of-memory exceptions or some other errors. An attacker
     /// could also use this same method to use one application instance to hammer another site by, again, passing an off-server
-    /// address of the victims site to the ImageProcessingModule. 
+    /// address of the victims site to the ImageProcessingModule.
     /// This class will not throw an exception if the Uri supplied points to a resource local to the running application instance.
     /// <para>
-    /// There shouldn't be any security issues there, as the internal WebRequest instance is still calling it remotely. 
+    /// There shouldn't be any security issues there, as the internal WebRequest instance is still calling it remotely.
     /// Any local files that shouldn't be accessed by this won't be allowed by the remote call.
     /// </para>
     /// Adapted from <see href="http://blogengine.codeplex.com">BlogEngine.Net</see>
@@ -58,15 +58,11 @@ namespace ImageProcessor.Web.Helpers
         /// </summary>
         private WebRequest webRequest;
 
-        /// <summary>
-        /// Useragent header to be passed when requesting the remote file
-        /// </summary>
-        private string userAgent;
         #endregion
 
         #region Constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:ImageProcessor.Web.Helpers.RemoteFile">RemoteFile</see> class. 
+        /// Initializes a new instance of the <see cref="T:ImageProcessor.Web.Helpers.RemoteFile">RemoteFile</see> class.
         /// </summary>
         /// <param name="filePath">The url of the file to be downloaded.</param>
         internal RemoteFile(Uri filePath)
@@ -87,12 +83,12 @@ namespace ImageProcessor.Web.Helpers
         public Uri Uri { get; }
 
         /// <summary>
-        /// Gets or sets the length of time, in milliseconds, that a remote file download attempt can 
+        /// Gets or sets the length of time, in milliseconds, that a remote file download attempt can
         /// last before timing out.
         /// <remarks>
         /// <para>
         /// This value can only be set if the instance is supposed to ignore the remote download settings set
-        /// in the current application instance. 
+        /// in the current application instance.
         /// </para>
         /// <para>
         /// Set this value to 0 if there should be no timeout.
@@ -123,7 +119,7 @@ namespace ImageProcessor.Web.Helpers
         /// <remarks>
         /// <para>
         /// This value can only be set if the instance is supposed to ignore the remote download settings set
-        /// in the current application instance. 
+        /// in the current application instance.
         /// </para>
         /// <para>
         /// Set this value to 0 if there should be no max bytes.
@@ -150,19 +146,10 @@ namespace ImageProcessor.Web.Helpers
         }
 
         /// <summary>
-        /// Gets or sets the useragent header to be passed when requesting the remote file
+        /// Gets or sets the UserAgent header to be passed when requesting the remote file
         /// </summary>
-        public string UserAgent
-        {
-            get
-            {
-                return this.userAgent;
-            }
-            set
-            {
-                this.userAgent = value;
-            }
-        }
+        public string UserAgent { get; set; }
+
         #endregion
 
         #region Methods
@@ -182,7 +169,7 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         internal async Task<WebResponse> GetWebResponseAsync()
         {
-            WebResponse response = null;
+            WebResponse response;
             try
             {
                 response = await this.GetWebRequest().GetResponseAsync();
@@ -253,10 +240,12 @@ namespace ImageProcessor.Web.Helpers
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.Uri);
                 request.Headers["Accept-Encoding"] = "gzip";
                 request.Headers["Accept-Language"] = "en-us";
-                if (!String.IsNullOrEmpty(UserAgent))
+
+                if (!string.IsNullOrEmpty(this.UserAgent))
                 {
-                    request.UserAgent = UserAgent;
+                    request.UserAgent = this.UserAgent;
                 }
+
                 request.Credentials = CredentialCache.DefaultNetworkCredentials;
                 request.AutomaticDecompression = DecompressionMethods.GZip;
 
