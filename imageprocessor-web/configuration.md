@@ -114,6 +114,10 @@ configuration file you can add your own image sources.
         <setting key="Timeout" value="3000"/>
         <!-- Added version 4.2.0. -->
         <setting key="Protocol" value="http"/>
+        <!-- Added version 4.7.0. Optional -->
+        <!-- Sets a useragent value for the request. Useful for social networks.
+             See http://www.useragentstring.com/ for available values. -->
+        <setting key="Useragent" value=""/>
       </settings>
       <!-- Sets allowable domains to process images from. -->
       <whitelist>
