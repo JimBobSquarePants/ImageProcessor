@@ -97,11 +97,11 @@ namespace ImageProcessor
 
         #region Destructors
         /// <summary>
-        /// Finalizes an instance of the <see cref="T:ImageProcessor.ImageFactory">ImageFactory</see> class. 
+        /// Finalizes an instance of the <see cref="T:ImageProcessor.ImageFactory">ImageFactory</see> class.
         /// </summary>
         /// <remarks>
         /// Use C# destructor syntax for finalization code.
-        /// This destructor will run only if the Dispose method 
+        /// This destructor will run only if the Dispose method
         /// does not get called.
         /// It gives your base class the opportunity to finalize.
         /// Do not provide destructors in types derived from this class.
@@ -188,7 +188,7 @@ namespace ImageProcessor
         {
             MemoryStream memoryStream = new MemoryStream();
 
-            // Copy the stream. Disposal of the input stream is the responsibility  
+            // Copy the stream. Disposal of the input stream is the responsibility
             // of the user.
             stream.CopyTo(memoryStream);
 
@@ -388,7 +388,7 @@ namespace ImageProcessor
         /// Loads the image to process from an array of bytes. Always call this method first.
         /// </summary>
         /// <param name="image">
-        /// The <see cref="T:System.Drawing.Image"/> to load. 
+        /// The <see cref="T:System.Drawing.Image"/> to load.
         /// The original image is untouched during manipulation as a copy is made. Disposal of the input image is the responsibility of the user.
         /// </param>
         /// <returns>
@@ -396,24 +396,31 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(Image image)
         {
+            // Try saving with the raw format. This might not be possible if the image was created
+            // in-memory so we fall back to BMP to keep in line with the default in System.Drawing
+            // if no format found.
             MemoryStream memoryStream = new MemoryStream();
-            image.Save(memoryStream, image.RawFormat);
+            ISupportedImageFormat format = new BitmapFormat();
+            try
+            {
+                image.Save(memoryStream, image.RawFormat);
+                format = ImageProcessorBootstrapper.Instance.SupportedImageFormats
+                        .First(f => f.ImageFormat.Equals(image.RawFormat));
+            }
+            catch
+            {
+                image.Save(memoryStream, ImageFormat.Bmp);
+            }
 
-            // Default to BMP to keep in line with the default in System.Drawing if no format found.
-            ISupportedImageFormat format = ImageProcessorBootstrapper.Instance.SupportedImageFormats.FirstOrDefault(f => f.ImageFormat.Equals(image.RawFormat))
-                                           ?? new BitmapFormat();
-
-            IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
+            IAnimatedImageFormat imageFormat = format as IAnimatedImageFormat;
             if (imageFormat != null)
             {
                 imageFormat.AnimationProcessMode = this.AnimationProcessMode;
             }
 
             // Ensure the image is in the most efficient format.
-            Image formatted = this.Image.Copy(this.AnimationProcessMode);
-
             // Set our image.
-            this.Image = formatted;
+            this.Image = image.Copy(this.AnimationProcessMode);
 
             // Save the bit depth
             this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
@@ -504,7 +511,7 @@ namespace ImageProcessor
         }
 
         /// <summary>
-        /// Performs auto-rotation to ensure that EXIF defined rotation is reflected in 
+        /// Performs auto-rotation to ensure that EXIF defined rotation is reflected in
         /// the final image.
         /// </summary>
         /// <returns>
@@ -524,7 +531,7 @@ namespace ImageProcessor
         /// <summary>
         /// Alters the bit depth of the current image.
         /// <remarks>
-        /// This can only be used to change the bit depth of images that can be saved 
+        /// This can only be used to change the bit depth of images that can be saved
         /// by <see cref="System.Drawing"/> with different bit depths such as TIFF.
         /// </remarks>
         /// </summary>
@@ -709,7 +716,7 @@ namespace ImageProcessor
         /// <param name="horizontal">The horizontal resolution.</param>
         /// <param name="vertical">The vertical resolution.</param>
         /// <param name="unit">
-        /// The unit of measure for the horizontal resolution and the vertical resolution. 
+        /// The unit of measure for the horizontal resolution and the vertical resolution.
         /// Defaults to inches
         /// </param>
         /// <returns>
@@ -766,7 +773,7 @@ namespace ImageProcessor
         }
 
         /// <summary>
-        /// Applies a filter to the current image. Use the <see cref="MatrixFilters"/> class to 
+        /// Applies a filter to the current image. Use the <see cref="MatrixFilters"/> class to
         /// assign the correct filter.
         /// </summary>
         /// <param name="matrixFilter">
@@ -872,7 +879,7 @@ namespace ImageProcessor
         /// Uses a Gaussian kernel to blur the current image.
         /// <remarks>
         /// <para>
-        /// The sigma and threshold values applied to the kernel are 
+        /// The sigma and threshold values applied to the kernel are
         /// 1.4 and 0 respectively.
         /// </para>
         /// </remarks>
@@ -898,7 +905,7 @@ namespace ImageProcessor
         /// Uses a Gaussian kernel to blur the current image.
         /// </summary>
         /// <param name="gaussianLayer">
-        /// The <see cref="T:ImageProcessor.Imaging.GaussianLayer"/> for applying sharpening and 
+        /// The <see cref="T:ImageProcessor.Imaging.GaussianLayer"/> for applying sharpening and
         /// blurring methods to an image.
         /// </param>
         /// <returns>
@@ -919,7 +926,7 @@ namespace ImageProcessor
         /// Uses a Gaussian kernel to sharpen the current image.
         /// <remarks>
         /// <para>
-        /// The sigma and threshold values applied to the kernel are 
+        /// The sigma and threshold values applied to the kernel are
         /// 1.4 and 0 respectively.
         /// </para>
         /// </remarks>
@@ -945,7 +952,7 @@ namespace ImageProcessor
         /// Uses a Gaussian kernel to sharpen the current image.
         /// </summary>
         /// <param name="gaussianLayer">
-        /// The <see cref="T:ImageProcessor.Imaging.GaussianLayer"/> for applying sharpening and 
+        /// The <see cref="T:ImageProcessor.Imaging.GaussianLayer"/> for applying sharpening and
         /// blurring methods to an image.
         /// </param>
         /// <returns>
@@ -1040,7 +1047,7 @@ namespace ImageProcessor
         /// Adds a image overlay to the current image.
         /// </summary>
         /// <param name="imageLayer">
-        /// The <see cref="T:ImageProcessor.Imaging.ImageLayer"/> containing the properties necessary to add 
+        /// The <see cref="T:ImageProcessor.Imaging.ImageLayer"/> containing the properties necessary to add
         /// the image overlay to the image.
         /// </param>
         /// <returns>
@@ -1361,7 +1368,7 @@ namespace ImageProcessor
         /// Adds a text based watermark to the current image.
         /// </summary>
         /// <param name="textLayer">
-        /// The <see cref="T:ImageProcessor.Imaging.TextLayer"/> containing the properties necessary to add 
+        /// The <see cref="T:ImageProcessor.Imaging.TextLayer"/> containing the properties necessary to add
         /// the text based watermark to the image.
         /// </param>
         /// <returns>
@@ -1380,8 +1387,8 @@ namespace ImageProcessor
         #endregion
 
         /// <summary>
-        /// Saves the current image to the specified file path. If the extension does not 
-        /// match the correct extension for the current format it will be replaced by the 
+        /// Saves the current image to the specified file path. If the extension does not
+        /// match the correct extension for the current format it will be replaced by the
         /// correct default value.
         /// </summary>
         /// <param name="filePath">The path to save the image to.</param>
@@ -1470,7 +1477,7 @@ namespace ImageProcessor
 
             // This object will be cleaned up by the Dispose method.
             // Therefore, you should call GC.SuppressFinalize to
-            // take this object off the finalization queue 
+            // take this object off the finalization queue
             // and prevent finalization code for this object
             // from executing a second time.
             GC.SuppressFinalize(this);

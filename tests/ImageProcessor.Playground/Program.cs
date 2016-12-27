@@ -47,7 +47,15 @@ namespace ImageProcessor.PlayGround
             DirectoryInfo di = new DirectoryInfo(inPath);
             IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".png", ".tif");
 
-            for (int i = 0; i < 10; i++)
+            using (Image image = new Bitmap(200, 200))
+            {
+                using (ImageFactory factory = new ImageFactory())
+                {
+                    factory.Load(image).BackgroundColor(Color.HotPink).Save(Path.GetFullPath(Path.Combine(outPath, "test.bmp")));
+                }
+            }
+
+            for (int i = 0; i < 1; i++)
             {
                 foreach (FileInfo fileInfo in files)
                 {
