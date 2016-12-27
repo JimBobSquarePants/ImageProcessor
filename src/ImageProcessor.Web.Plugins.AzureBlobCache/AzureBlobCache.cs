@@ -139,7 +139,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             }
 
             // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
-            // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site. 
+            // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site.
             // See: https://github.com/JimBobSquarePants/ImageProcessor/issues/161
             this.streamCachedImage = this.Settings.ContainsKey("StreamCachedImage") && this.Settings["StreamCachedImage"].ToLower() == "true";
         }
@@ -152,8 +152,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </returns>
         public override async Task<bool> IsNewOrUpdatedAsync()
         {
-            // TODO: Before this check is performed it should be throttled. For example, only perform this check 
-            // if the last time it was checked is greater than 5 seconds. This would be much better for perf 
+            // TODO: Before this check is performed it should be throttled. For example, only perform this check
+            // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
             string cachedFileName = await this.CreateCachedFileNameAsync();
 
@@ -519,12 +519,12 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         }
 
         /// <summary>
-        /// Tries to set IfModifiedSince howver this crashes when context.Request.Headers["If-Modified-Since"] exists, 
-        /// but is not parsable.It's not parsable when it comes from Google Bot as UTC eg Sun, 27 Nov 2016 20:01:45 UTC
+        /// Tries to set IfModifiedSince header however this crashes when context.Request.Headers["If-Modified-Since"] exists,
+        /// but cannot be parsed. It cannot be parsed when it comes from Google Bot as UTC <example>Sun, 27 Nov 2016 20:01:45 UTC</example>
         /// so DateTime.TryParse. If it returns false, then log the error.
         /// </summary>
-        /// <param name="context"></param>
-        /// <param name="request"></param>
+        /// <param name="context">The current context</param>
+        /// <param name="request">The current request</param>
         private static void TrySetIfModifiedSinceDate(HttpContext context, HttpWebRequest request)
         {
             DateTime ifModifiedDate;
@@ -548,8 +548,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 }
                 else
                 {
-                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to parse date " + context.Request.Headers["If-Modified-Since"] + " for " + context.Request.Url);
-                }                
+                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>($"Unable to parse date {context.Request.Headers["If-Modified-Since"]} for {context.Request.Url}");
+                }
             }
         }
 
