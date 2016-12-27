@@ -15,8 +15,6 @@ namespace ImageProcessor.Web.Configuration
     using System.Linq;
 
     using ImageProcessor.Configuration;
-    using ImageProcessor.Processors;
-    using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Processors;
     using ImageProcessor.Web.Services;
 
@@ -92,6 +90,11 @@ namespace ImageProcessor.Web.Configuration
         /// Gets the image cache max days.
         /// </summary>
         public int ImageCacheMaxDays { get; private set; }
+
+        /// <summary>
+        /// Gets the value indicating if the disk cache will apply file change monitors that can be used to invalidate the cache
+        /// </summary>
+        public bool UseFileChangeMonitors { get; private set; }
 
         /// <summary>
         /// Gets the browser cache max days.
@@ -270,7 +273,7 @@ namespace ImageProcessor.Web.Configuration
         /// Loads image services from configuration.
         /// </summary>
         /// <exception cref="TypeLoadException">
-        /// Thrown when an <see cref="IGraphicsProcessor"/> cannot be loaded.
+        /// Thrown when an <see cref="IImageService"/> cannot be loaded.
         /// </exception>
         private void LoadImageServices()
         {
@@ -282,7 +285,7 @@ namespace ImageProcessor.Web.Configuration
 
                 if (type == null)
                 {
-                    string message = "Couldn't load IImageService: " + config.Type;
+                    string message = $"Couldn\'t load IImageService: {config.Type}";
                     ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
                     throw new TypeLoadException(message);
                 }
@@ -375,8 +378,9 @@ namespace ImageProcessor.Web.Configuration
             Uri[] whitelist = { };
             if (serviceElement != null)
             {
-                whitelist = serviceElement.WhiteList.Cast<ImageSecuritySection.SafeUrl>()
-                                          .Select(s => s.Url).ToArray();
+                whitelist = serviceElement.WhiteList
+                    .Cast<ImageSecuritySection.SafeUrl>()
+                    .Select(s => s.Url).ToArray();
             }
 
             return whitelist;
@@ -409,6 +413,7 @@ namespace ImageProcessor.Web.Configuration
 
                         this.ImageCache = type;
                         this.ImageCacheMaxDays = cache.MaxDays;
+                        this.UseFileChangeMonitors = cache.UseFileChangeMonitors;
                         this.BrowserCacheMaxDays = cache.BrowserMaxDays;
                         this.ImageCacheSettings = cache.Settings
                                                        .Cast<SettingElement>()

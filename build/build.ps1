@@ -70,7 +70,7 @@ task Set-VersionNumber {
 	if ($BuildNumber -eq $null -or $BuildNumber -eq "") {
 		return
 	}
-	
+
 	$PROJECTS.projects.project | % {
 		if ($_.version -match "([\d+\.]*)[\d+|\*]") { # get numbers of current version except last one
 			$_.version = "$($Matches[1])$BuildNumber"
@@ -93,7 +93,7 @@ task Build-Solution -depends Cleanup-Binaries, Set-VersionNumber {
 		}
 
 		$projectPath = Resolve-Path $project.folder
-		Write-Host "Building project $($project.name) at version $($project.version)"
+		Write-Host "Building project $($project.name) at version $($project.version)$($project.prerelease)"
 
 		# it would be possible to update more infos from the xml (description etc), so as to have all infos in one place
 		Update-AssemblyInfo -file (Join-Path $projectPath "Properties\AssemblyInfo.cs") -version $project.version
@@ -204,19 +204,19 @@ task Generate-Nuget -depends Set-VersionNumber, Build-Solution {
 	# Package the nuget
 	$PROJECTS.projects.project | % {
 		$nuspec_local_path = (Join-Path $NUSPECS_PATH $_.nuspec)
-		Write-Host "Building Nuget package from $nuspec_local_path"
 		
-		# change the version values
-		[xml]$nuspec_contents = Get-Content $nuspec_local_path
-		$nuspec_contents.package.metadata.version = $_.version
-		$nuspec_contents.Save($nuspec_local_path)
+		if ($_.version -match "(\d+\.\d+\.\d+)") { # get semantic version, only first 3 numbers
+			$_.version = "$($Matches[1])"
+		}
+
+		Write-Host "Building Nuget package from $nuspec_local_path, version:$($_.version)$($_.prerelease)"
 		
 		if ((-not (Test-Path $nuspec_local_path)) -or (-not (Test-Path $NUGET_OUTPUT))) {
 			throw New-Object [System.IO.FileNotFoundException] "The file $nuspec_local_path or $NUGET_OUTPUT could not be found"
 		}
-		
+
 		# pack the nuget
-		& $NUGET_EXE Pack $nuspec_local_path -OutputDirectory $NUGET_OUTPUT
+		& $NUGET_EXE Pack $nuspec_local_path -OutputDirectory $NUGET_OUTPUT -Version "$($_.version)$($_.prerelease)"
 	}
 }
 

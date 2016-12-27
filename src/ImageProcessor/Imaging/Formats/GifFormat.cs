@@ -13,6 +13,7 @@ namespace ImageProcessor.Imaging.Formats
     using System;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.IO;
     using System.Text;
 
     using ImageProcessor.Imaging.Quantizers;
@@ -73,6 +74,45 @@ namespace ImageProcessor.Imaging.Formats
 
             factoryImage.Dispose();
             factory.Image = encoder.Save();
+        }
+
+        /// <inheritdoc />
+        public override Image Save(Stream stream, Image image, long bitDepth)
+        {
+            // Never use default save for gifs. It's terrible.
+            GifDecoder decoder = new GifDecoder(image, AnimationProcessMode.All);
+            GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
+
+            for (int i = 0; i < decoder.FrameCount; i++)
+            {
+                GifFrame frame = decoder.GetFrame(image, i);
+                frame.Image = this.Quantizer.Quantize(frame.Image);
+                encoder.AddFrame(frame);
+            }
+
+            encoder.Save(stream);
+            return encoder.Save();
+        }
+
+        /// <inheritdoc />
+        public override Image Save(string path, Image image, long bitDepth)
+        {
+            // Never use default save for gifs. It's terrible.
+            using (FileStream fs = File.OpenWrite(path))
+            {
+                GifDecoder decoder = new GifDecoder(image, AnimationProcessMode.All);
+                GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
+
+                for (int i = 0; i < decoder.FrameCount; i++)
+                {
+                    GifFrame frame = decoder.GetFrame(image, i);
+                    frame.Image = this.Quantizer.Quantize(frame.Image);
+                    encoder.AddFrame(frame);
+                }
+
+                encoder.Save(fs);
+                return encoder.Save();
+            }
         }
     }
 }

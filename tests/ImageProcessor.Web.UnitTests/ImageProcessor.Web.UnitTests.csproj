@@ -53,6 +53,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryParamParserUnitTests.cs" />
     <Compile Include="RegularExpressionUnitTests.cs" />
+    <Compile Include="UrlParserUnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ImageProcessor.Plugins.WebP\ImageProcessor.Plugins.WebP.csproj">

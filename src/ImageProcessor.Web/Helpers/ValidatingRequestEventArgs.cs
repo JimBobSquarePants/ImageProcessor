@@ -17,13 +17,13 @@ namespace ImageProcessor.Web.Helpers
     /// The validating request event args
     /// </summary>
     /// <remarks>
-    /// This can be used by event subscribers to cancel image processing based on the information contained in the 
+    /// This can be used by event subscribers to cancel image processing based on the information contained in the
     /// request, or can be used to directly manipulate the querystring parameter that will be used to process the image.
     /// </remarks>
     public class ValidatingRequestEventArgs : CancelEventArgs
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValidatingRequestEventArgs"/> class. 
+        /// Initializes a new instance of the <see cref="ValidatingRequestEventArgs"/> class.
         /// </summary>
         /// <param name="context">The current http context.</param>
         /// <param name="queryString">The query string.</param>

@@ -33,10 +33,12 @@ namespace ImageProcessor.Web.HttpModules
     using ImageProcessor.Web.Processors;
     using ImageProcessor.Web.Services;
 
+    using Microsoft.IO;
+
     /// <summary>
     /// Processes any image requests within the web application.
     /// </summary>
-    public sealed class ImageProcessingModule : IHttpModule
+    public class ImageProcessingModule : IHttpModule
     {
         #region Fields
         /// <summary>
@@ -218,7 +220,7 @@ namespace ImageProcessor.Web.HttpModules
         }
 
         /// <summary>
-        /// Adds response headers allowing Cross Origin Requests if the current origin request 
+        /// Adds response headers allowing Cross Origin Requests if the current origin request
         /// passes sanitizing rules.
         /// </summary>
         /// <param name="context">
@@ -315,9 +317,7 @@ namespace ImageProcessor.Web.HttpModules
             application.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
             application.PostReleaseRequestState += this.PostReleaseRequestState;
-
-            EventHandlerTaskAsyncHelper onEndRquestsHelper = new EventHandlerTaskAsyncHelper(this.OnEndRequest);
-            application.AddOnEndRequestAsync(onEndRquestsHelper.BeginEventHandler, onEndRquestsHelper.EndEventHandler);
+            application.EndRequest += this.OnEndRequest;
         }
 
         /// <summary>
@@ -333,6 +333,36 @@ namespace ImageProcessor.Web.HttpModules
             // and prevent finalization code for this object
             // from executing a second time.
             GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Occurs when the user for the current request has been authorized.
+        /// </summary>
+        /// <param name="sender">
+        /// The source of the event.
+        /// </param>
+        /// <param name="e">
+        /// An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Threading.Tasks.Task"/>.
+        /// </returns>
+        protected virtual Task PostAuthorizeRequest(object sender, EventArgs e)
+        {
+            HttpContext context = ((HttpApplication)sender).Context;
+            return this.ProcessImageAsync(context);
+        }
+
+        /// <summary>
+        /// Gets url for the current request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        protected virtual string GetRequestUrl(HttpRequest request)
+        {
+            return request.Unvalidated.RawUrl;
         }
 
         /// <summary>
@@ -361,24 +391,6 @@ namespace ImageProcessor.Web.HttpModules
         #endregion
 
         /// <summary>
-        /// Occurs when the user for the current request has been authorized.
-        /// </summary>
-        /// <param name="sender">
-        /// The source of the event.
-        /// </param>
-        /// <param name="e">
-        /// An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.
-        /// </param>
-        /// <returns>
-        /// The <see cref="T:System.Threading.Tasks.Task"/>.
-        /// </returns>
-        private Task PostAuthorizeRequest(object sender, EventArgs e)
-        {
-            HttpContext context = ((HttpApplication)sender).Context;
-            return this.ProcessImageAsync(context);
-        }
-
-        /// <summary>
         /// Occurs when the ASP.NET event handler finishes execution.
         /// </summary>
         /// <param name="sender">
@@ -387,23 +399,14 @@ namespace ImageProcessor.Web.HttpModules
         /// <param name="e">
         /// An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.
         /// </param>
-        /// <returns>
-        /// The <see cref="T:System.Threading.Tasks.Task"/>.
-        /// </returns>
-        private async Task OnEndRequest(object sender, EventArgs e)
+        private void OnEndRequest(object sender, EventArgs e)
         {
-            if (this.imageCache != null)
-            {
-                // Trim the cache.
-                await this.imageCache.TrimCacheAsync();
-
-                // Reset the cache.
-                this.imageCache = null;
-            }
+            // Reset the cache.
+            this.imageCache = null;
         }
 
         /// <summary>
-        /// Occurs when ASP.NET has completed executing all request event handlers and the request 
+        /// Occurs when ASP.NET has completed executing all request event handlers and the request
         /// state data has been stored.
         /// </summary>
         /// <param name="sender">
@@ -443,7 +446,7 @@ namespace ImageProcessor.Web.HttpModules
         private async Task ProcessImageAsync(HttpContext context)
         {
             HttpRequest request = context.Request;
-            string rawUrl = request.Unvalidated.RawUrl;
+            string rawUrl = this.GetRequestUrl(request);
 
             // Should we ignore this request?
             if (string.IsNullOrWhiteSpace(rawUrl) || rawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
@@ -451,33 +454,20 @@ namespace ImageProcessor.Web.HttpModules
                 return;
             }
 
-            // Sometimes the request is url encoded so we have to decode.
+            // Sometimes the request is url encoded
             // See https://github.com/JimBobSquarePants/ImageProcessor/issues/478
-            // This causes a bit of a nightmare as the incoming request is corrupted and cannot be used for splitting 
+            // This causes a bit of a nightmare as the incoming request is corrupted and cannot be used for splitting
             // out each url part. This becomes a manual job.
-            string url = this.DecodeUrlString(rawUrl);
+            string url = rawUrl;
             string applicationPath = request.ApplicationPath;
 
             IImageService currentService = this.GetImageServiceForRequest(url, applicationPath);
 
             if (currentService != null)
             {
-                // Remove any service identifier prefixes from the url.
-                string prefix = currentService.Prefix;
-                if (!string.IsNullOrWhiteSpace(prefix))
-                {
-                    url = url.Split(new[] { prefix }, StringSplitOptions.None)[1].TrimStart("?");
-                }
-
-                // Identify each part of the incoming request.
-                int queryCount = url.Count(f => f == '?');
-                bool hasParams = queryCount > 0;
-                bool hasMultiParams = queryCount > 1;
-                string[] splitPath = url.Split('?');
-
-                // Ensure we include any relevent querystring parameters into our request path for third party requests.
-                string requestPath = hasMultiParams ? string.Join("?", splitPath.Take(splitPath.Length - 1)) : splitPath[0];
-                string queryString = hasParams ? splitPath[splitPath.Length - 1] : string.Empty;
+                // Parse url
+                string requestPath, queryString;
+                UrlParser.ParseUrl(url, currentService.Prefix, out requestPath, out queryString);
 
                 // Map the request path if file local.
                 bool isFileLocal = currentService.IsFileLocalService;
@@ -486,8 +476,13 @@ namespace ImageProcessor.Web.HttpModules
                     requestPath = HostingEnvironment.MapPath(requestPath);
                 }
 
+                if (string.IsNullOrWhiteSpace(requestPath))
+                {
+                    return;
+                }
+
                 // Parse any protocol values from settings if no protocol is present.
-                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(url).Count == 0 || ProtocolRegex.Matches(url)[0].Index > 0))
+                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(requestPath).Count == 0 || ProtocolRegex.Matches(requestPath)[0].Index > 0))
                 {
                     // ReSharper disable once PossibleNullReferenceException
                     requestPath = currentService.Settings["Protocol"] + "://" + requestPath.TrimStart('/');
@@ -498,7 +493,7 @@ namespace ImageProcessor.Web.HttpModules
 
                 HttpContextWrapper httpContextBase = new HttpContextWrapper(context);
 
-                // Execute the handler which can change the querystring 
+                // Execute the handler which can change the querystring
                 //  LEGACY:
 #pragma warning disable 618
                 queryString = this.CheckQuerystringHandler(context, queryString, rawUrl);
@@ -527,7 +522,7 @@ namespace ImageProcessor.Web.HttpModules
 
                 // Check whether the path is valid for other requests.
                 // We've already checked the unprefixed requests in GetImageServiceForRequest().
-                if (!string.IsNullOrWhiteSpace(prefix) && !currentService.IsValidRequest(requestPath))
+                if (!string.IsNullOrWhiteSpace(currentService.Prefix) && !currentService.IsValidRequest(requestPath))
                 {
                     return;
                 }
@@ -567,10 +562,11 @@ namespace ImageProcessor.Web.HttpModules
                             return;
                         }
 
-                        using (MemoryStream inStream = new MemoryStream(imageBuffer))
+                        // Using recyclable streams here should dramatically reduce the overhead required
+                        using (MemoryStream inStream = MemoryStreamPool.Shared.GetStream("inStream", imageBuffer, 0, imageBuffer.Length))
                         {
-                            // Process the Image
-                            MemoryStream outStream = new MemoryStream();
+                            // Process the Image. Use a recyclable stream here to reduce the allocations
+                            MemoryStream outStream = MemoryStreamPool.Shared.GetStream();
 
                             if (!string.IsNullOrWhiteSpace(queryString))
                             {
@@ -600,7 +596,7 @@ namespace ImageProcessor.Web.HttpModules
                                 }
                                 else
                                 {
-                                    // No match? Someone is either attacking the server or hasn't read the instructions. 
+                                    // No match? Someone is either attacking the server or hasn't read the instructions.
                                     // Either way throw an exception to prevent caching.
                                     string message = $"The request {request.Unvalidated.RawUrl} could not be understood by the server due to malformed syntax.";
                                     ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(message);
@@ -671,6 +667,9 @@ namespace ImageProcessor.Web.HttpModules
                     {
                         context.ApplicationInstance.CompleteRequest();
                     }
+
+                    // Trim the cache.
+                    await this.imageCache.TrimCacheAsync();
                 }
             }
         }
@@ -700,7 +699,7 @@ namespace ImageProcessor.Web.HttpModules
         /// </summary>
         /// <param name="queryString">The query string to search.</param>
         /// <param name="process">
-        /// Whether to process the request. True if <see cref="AnimationProcessMode.First"/> 
+        /// Whether to process the request. True if <see cref="AnimationProcessMode.First"/>
         /// has been explicitly requested.
         /// </param>
         /// <returns>
@@ -802,7 +801,7 @@ namespace ImageProcessor.Web.HttpModules
         {
             IList<IImageService> services = ImageProcessorConfiguration.Instance.ImageServices;
 
-            // Remove the Application Path from the Request.Path. 
+            // Remove the Application Path from the Request.Path.
             // This allows applications running on localhost as sub applications to work.
             string path = url.Split('?')[0].TrimStart(applicationPath).TrimStart('/');
             foreach (IImageService service in services)
@@ -828,23 +827,5 @@ namespace ImageProcessor.Web.HttpModules
             return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path) && s.GetType() != typeof(LocalFileImageService));
         }
         #endregion
-
-        /// <summary>
-        /// Decodes a url string.
-        /// </summary>
-        /// <param name="url">The url.</param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        private string DecodeUrlString(string url)
-        {
-            string newUrl;
-            while ((newUrl = Uri.UnescapeDataString(url)) != url)
-            {
-                url = newUrl;
-            }
-
-            return newUrl;
-        }
     }
 }

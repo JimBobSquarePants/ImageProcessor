@@ -32,6 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.0\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -45,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caching\MemoryStreamPool.cs" />
     <Compile Include="Caching\CachedImage.cs" />
     <Compile Include="Caching\DiskCache.cs" />
     <Compile Include="Caching\IImageCache.cs" />
@@ -68,6 +73,7 @@
     <Compile Include="Helpers\QuerystringParser\QueryParamParser.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\GenericArrayTypeConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\GenericListTypeConverter.cs" />
+    <Compile Include="Helpers\UrlParser.cs" />
     <Compile Include="Helpers\ValidatingRequestEventArgs.cs" />
     <Compile Include="Processors\DetectEdges.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />
@@ -135,6 +141,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Configuration\Resources\security.config.transform" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

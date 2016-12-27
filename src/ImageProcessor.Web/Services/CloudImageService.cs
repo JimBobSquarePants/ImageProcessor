@@ -18,10 +18,13 @@ namespace ImageProcessor.Web.Services
     using System.Threading.Tasks;
     using System.Web;
 
+    using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Helpers;
 
+    using Microsoft.IO;
+
     /// <summary>
-    /// A generic cloud image service for retrieving images where the remote location has been rewritten as a 
+    /// A generic cloud image service for retrieving images where the remote location has been rewritten as a
     /// a virtual path. Commonly seen in content management systems like Umbraco.
     /// </summary>
     public class CloudImageService : IImageService
@@ -33,7 +36,7 @@ namespace ImageProcessor.Web.Services
         {
             this.Settings = new Dictionary<string, string>
             {
-                { "MaxBytes", "4194304" }, 
+                { "MaxBytes", "4194304" },
                 { "Timeout", "30000" },
                 { "Host", string.Empty }
             };
@@ -59,7 +62,7 @@ namespace ImageProcessor.Web.Services
         public Dictionary<string, string> Settings { get; set; }
 
         /// <summary>
-        /// Gets or sets the white list of <see cref="System.Uri"/>. 
+        /// Gets or sets the white list of <see cref="System.Uri"/>.
         /// </summary>
         public Uri[] WhiteList { get; set; }
 
@@ -95,10 +98,10 @@ namespace ImageProcessor.Web.Services
             string relativeResourceUrl = id.ToString();
             if (!string.IsNullOrEmpty(container))
             {
-                container = container.TrimEnd('/') + "/";
-                if (!relativeResourceUrl.StartsWith(container + "/"))
+                container = $"{container.TrimEnd('/')}/";
+                if (!relativeResourceUrl.StartsWith($"{container}/"))
                 {
-                    relativeResourceUrl = container + relativeResourceUrl;
+                    relativeResourceUrl = $"{container}{relativeResourceUrl}";
                 }
             }
 
@@ -114,7 +117,7 @@ namespace ImageProcessor.Web.Services
             // Prevent response blocking.
             WebResponse webResponse = await remoteFile.GetWebResponseAsync().ConfigureAwait(false);
 
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
             {
                 using (WebResponse response = webResponse)
                 {
@@ -127,11 +130,11 @@ namespace ImageProcessor.Web.Services
                             // Reset the position of the stream to ensure we're reading the correct part.
                             memoryStream.Position = 0;
 
-                            buffer = memoryStream.ToArray();
+                            buffer = memoryStream.GetBuffer();
                         }
                         else
                         {
-                            throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + uri);
+                            throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {uri}");
                         }
                     }
                 }
