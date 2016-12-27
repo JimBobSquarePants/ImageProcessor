@@ -174,9 +174,13 @@ configuration file you can add your own image cache.
       <!-- The virtual path to the disk cache location. -->      
       <settings>
         <setting key="VirtualCachePath" value="~/app_data/cache"/>
+      <!-- Added 4.7.0. Cache can now be hosted outside the application. -->  
+      <!-- Both of these are valid for storing cache files outside the web root -->
+      <!-- <setting key="VirtualCachePath" value="~/../OUTSIDE"/> -->
+      <!-- <setting key="VirtualCachePath" value="X:\Projects\YOUR_WEBSITE\OUTSIDE"/> -->
       </settings>
     </cache>
-    <!-- Add other cache implemtations here. -->
+    <!-- Add other cache implementations here. -->
   </caches>
 </caching>
 {% endhighlight %}
