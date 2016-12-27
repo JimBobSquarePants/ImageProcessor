@@ -7,7 +7,7 @@
     <authors>James Jackson-South</authors>
     <owners>James Jackson-South</owners>
     <projectUrl>http://imageprocessor.org</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/Core/build/icons/imageprocessor-logo-128.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/develop/build/icons/imageprocessor-logo-128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An extension for ImageProcessor.Web that applies various image compression tools to further optimize cached .png, .gif, and .jpg images.
 
