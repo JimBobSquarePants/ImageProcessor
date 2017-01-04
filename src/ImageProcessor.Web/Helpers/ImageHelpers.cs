@@ -37,7 +37,7 @@ namespace ImageProcessor.Web.Helpers
         private readonly Format formatProcessor;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageHelpers"/> class. 
+        /// Initializes a new instance of the <see cref="ImageHelpers"/> class.
         /// </summary>
         public ImageHelpers()
         {
@@ -145,20 +145,25 @@ namespace ImageProcessor.Web.Helpers
         /// <param name="extension">
         /// Can be prefixed with '.' or not (i.e. ".jpg"  or "jpg")
         /// </param>
-        /// <returns></returns>
+        /// <returns>The <see cref="string"/></returns>
         internal string GetContentTypeForExtension(string extension)
         {
-            if (string.IsNullOrWhiteSpace(extension)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(extension));
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(extension));
+            }
 
             extension = extension.TrimStart('.');
 
-            var found = ImageProcessorBootstrapper.Instance.SupportedImageFormats
+            ISupportedImageFormat found = ImageProcessorBootstrapper.Instance.SupportedImageFormats
                 .FirstOrDefault(x => x.FileExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase));
 
             if (found != null)
+            {
                 return found.MimeType;
+            }
 
-            //default
+            // default
             return new JpegFormat().MimeType;
         }
 

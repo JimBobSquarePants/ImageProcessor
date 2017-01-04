@@ -107,8 +107,8 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public override async Task<bool> IsNewOrUpdatedAsync()
         {
-            // TODO: Before this check is performed it should be throttled. For example, only perform this check 
-            // if the last time it was checked is greater than 5 seconds. This would be much better for perf 
+            // TODO: Before this check is performed it should be throttled. For example, only perform this check
+            // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
             string cachedFileName = await this.CreateCachedFileNameAsync();
 
@@ -256,25 +256,25 @@ namespace ImageProcessor.Web.Caching
                 // We basically have a few options:
 
                 // 1. Create a custom VirtualPathProvider - this would work but we don't get all of the goodness that comes with
-                // ASP.NET StaticFileHandler such as sending the correct cache headers, etc... you can see what I mean by 
-                // looking at the source: https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,492 
+                // ASP.NET StaticFileHandler such as sending the correct cache headers, etc... you can see what I mean by
+                // looking at the source: https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,492
                 // 2. HttpResponse.TransmitFile - this actually uses the IIS/Windows kernel to do the transfer so it is very fast,
                 // I've tested the header results and they are identical to the response headers set when using the StaticFileHandler
-                // 3. Set cache headers, etc... manually with regards to how the StaticFileHandler does it: 
+                // 3. Set cache headers, etc... manually with regards to how the StaticFileHandler does it:
                 // https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,505
 
                 // 4. Use reflection to invoke the StaticFileHandler somehow
-                // 5. Use a custom StataicFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki 
+                // 5. Use a custom StataicFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki
 
                 // I've opted to go with the simplest solution and use TransmitFile, I've looked into the source of this and it uses the
                 // Windows Kernel, I'm not sure where in the source the headers get written but if you analyze the request/response headers when
-                // this is used, they are exactly the same as if the StaticFileHandler (i.e. RewritePath) is used, so this seems perfect and easy!                
+                // this is used, they are exactly the same as if the StaticFileHandler (i.e. RewritePath) is used, so this seems perfect and easy!
 
-                //We need to manually write out the Content Type header here, the TransmitFile does not do this for you
+                // We need to manually write out the Content Type header here, the TransmitFile does not do this for you
                 // whereas the RewritePath actually does.
                 // https://github.com/JimBobSquarePants/ImageProcessor/issues/529
-                var extension = Helpers.ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
-                var mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
+                string extension = Helpers.ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
+                string mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
                 context.Response.ContentType = mimeType;
 
                 context.Response.TransmitFile(this.CachedPath);
@@ -283,8 +283,8 @@ namespace ImageProcessor.Web.Caching
                 // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
                 // and because we are not rewriting any paths, the request will continue to try to execute this handler
                 // and errors will occur. It should be fine that we are ending the request pipeline since
-                // all we really want to do here is send the file above. There's some arguments about using 
-                // `ApplicationInstance.CompleteRequest();` instead of Response.End() but in this case I believe it is 
+                // all we really want to do here is send the file above. There's some arguments about using
+                // `ApplicationInstance.CompleteRequest();` instead of Response.End() but in this case I believe it is
                 // correct to use Response.End(), a good write-up of why this is can be found here:
                 // see: http://stackoverflow.com/a/36968241/694494
                 context.Response.End();
@@ -326,7 +326,7 @@ namespace ImageProcessor.Web.Caching
             {
                 // Determine if this is an absolute path
                 // in this case this should be a real path, it's the best check we can do without a try/catch, but if this
-                // does throw, we'll let it throw anyways.                    
+                // does throw, we'll let it throw anyways.
                 absPath = originalPath;
             }
 
