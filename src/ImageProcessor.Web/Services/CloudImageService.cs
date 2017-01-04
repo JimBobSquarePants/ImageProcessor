@@ -101,7 +101,7 @@ namespace ImageProcessor.Web.Services
                 container = $"{container.TrimEnd('/')}/";
                 if (!relativeResourceUrl.StartsWith($"{container}/"))
                 {
-                    relativeResourceUrl = $"{container}{relativeResourceUrl}";
+                    relativeResourceUrl = $"{container}{relativeResourceUrl.TrimStart('/')}";
                 }
             }
 
