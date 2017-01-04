@@ -140,6 +140,29 @@ namespace ImageProcessor.Web.Helpers
         }
 
         /// <summary>
+        /// Returns the content-type/mime-type for a given image type based on it's file extension
+        /// </summary>
+        /// <param name="extension">
+        /// Can be prefixed with '.' or not (i.e. ".jpg"  or "jpg")
+        /// </param>
+        /// <returns></returns>
+        internal string GetContentTypeForExtension(string extension)
+        {
+            if (string.IsNullOrWhiteSpace(extension)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(extension));
+
+            extension = extension.TrimStart('.');
+
+            var found = ImageProcessorBootstrapper.Instance.SupportedImageFormats
+                .FirstOrDefault(x => x.FileExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase));
+
+            if (found != null)
+                return found.MimeType;
+
+            //default
+            return new JpegFormat().MimeType;
+        }
+
+        /// <summary>
         /// Builds a regular expression from the <see cref="T:ImageProcessor.Imaging.Formats.ISupportedImageFormat"/> type, this allows extensibility.
         /// </summary>
         /// <returns>

@@ -269,6 +269,14 @@ namespace ImageProcessor.Web.Caching
                 // I've opted to go with the simplest solution and use TransmitFile, I've looked into the source of this and it uses the
                 // Windows Kernel, I'm not sure where in the source the headers get written but if you analyze the request/response headers when
                 // this is used, they are exactly the same as if the StaticFileHandler (i.e. RewritePath) is used, so this seems perfect and easy!                
+
+                //We need to manually write out the Content Type header here, the TransmitFile does not do this for you
+                // whereas the RewritePath actually does.
+                // https://github.com/JimBobSquarePants/ImageProcessor/issues/529
+                var extension = Helpers.ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
+                var mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
+                context.Response.ContentType = mimeType;
+
                 context.Response.TransmitFile(this.CachedPath);
 
                 // This is quite important expecially if the request is a when an `IImageService` handles the request
