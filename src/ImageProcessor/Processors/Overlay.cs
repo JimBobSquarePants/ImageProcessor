@@ -19,7 +19,7 @@ namespace ImageProcessor.Processors
     using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
-    /// Adds an image overlay to the current image. 
+    /// Adds an image overlay to the current image.
     /// If the overlay is larger than the image it will be scaled to match the image.
     /// </summary>
     public class Overlay : IGraphicsProcessor
