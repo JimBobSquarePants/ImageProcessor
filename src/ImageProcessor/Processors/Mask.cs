@@ -13,15 +13,15 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Colors;
     using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
-    /// Applies a mask to the given image. If the mask is not the same size as the image 
+    /// Applies a mask to the given image. If the mask is not the same size as the image
     /// it will be centered against the image.
     /// </summary>
     public class Mask : IGraphicsProcessor
@@ -74,10 +74,10 @@ namespace ImageProcessor.Processors
             {
                 int width = image.Width;
                 int height = image.Height;
-                Tuple<Image, Point?> parameters = this.DynamicParameter;
-                mask = new Bitmap(parameters.Item1);
+                ImageLayer parameters = this.DynamicParameter;
+                mask = new Bitmap(parameters.Image);
                 mask.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-                Point? position = parameters.Item2;
+                Point? position = parameters.Position;
 
                 if (mask.Size != image.Size)
                 {
