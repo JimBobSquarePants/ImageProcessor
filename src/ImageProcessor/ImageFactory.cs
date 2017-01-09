@@ -1022,21 +1022,22 @@ namespace ImageProcessor
         /// <summary>
         /// Applies the given image mask to the current image.
         /// </summary>
-        /// <param name="imageMask">
-        /// The image containing the mask to apply.
-        /// </param>
-        /// <param name="point">
-        /// The <see cref="Point"/> to place the mask if it not the same dimensions as the original image.
+        /// <param name="imageLayer">
+        /// The <see cref="T:ImageProcessor.Imaging.ImageLayer"/> containing the <see cref="Image"/>
+        /// and <see cref="Point"/> properties necessary to mask the image.
+        /// <para>
+        /// The point property is used to place the image mask if it not the same dimensions as the original image.
         /// If no position is set, the mask will be centered within the image.
+        /// </para>
         /// </param>
         /// <returns>
         /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
         /// </returns>
-        public ImageFactory Mask(Image imageMask, Point? point = null)
+        public ImageFactory Mask(ImageLayer imageLayer)
         {
             if (this.ShouldProcess)
             {
-                Mask mask = new Mask { DynamicParameter = new Tuple<Image, Point?>(imageMask, point) };
+                Mask mask = new Mask { DynamicParameter = imageLayer };
                 this.backupFormat.ApplyProcessor(mask.ProcessImage, this);
             }
 
