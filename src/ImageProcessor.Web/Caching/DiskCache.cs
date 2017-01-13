@@ -78,6 +78,11 @@ namespace ImageProcessor.Web.Caching
         private string virtualCachedFilePath;
 
         /// <summary>
+        /// The create time of the cached image
+        /// </summary>
+        private DateTime cachedImageCreationTimeUtc;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DiskCache"/> class.
         /// </summary>
         /// <param name="requestPath">
@@ -130,14 +135,14 @@ namespace ImageProcessor.Web.Caching
                 {
                     // Pull the latest info.
                     fileInfo.Refresh();
-
+                    
                     cachedImage = new CachedImage
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
                         CreationTimeUtc = fileInfo.CreationTimeUtc
                     };
-
+                    
                     CacheIndexer.Add(cachedImage);
                 }
             }
@@ -156,6 +161,9 @@ namespace ImageProcessor.Web.Caching
                     isUpdated = true;
                 }
             }
+
+            // set cachedImageCreationTimeUtc so we can sender Last-Modified or ETag header when using Response.TransmitFile()
+            this.cachedImageCreationTimeUtc = cachedImage.CreationTimeUtc;
 
             return isUpdated;
         }
@@ -252,43 +260,88 @@ namespace ImageProcessor.Web.Caching
             }
             else
             {
-                // The file is outside of the web root so we cannot just rewrite the path since that won't work.
-                // We basically have a few options:
+                // check if the ETag matches (doing this here because context.RewritePath seems to handle it automatically
+                string eTagFromHeader = context.Request.Headers["If-None-Match"];
+                string eTag = GetETag(context);
+                if (!string.IsNullOrEmpty(eTagFromHeader) && !string.IsNullOrEmpty(eTag) && eTagFromHeader == eTag)
+                {
+                    context.Response.StatusCode = 304;
+                    context.Response.StatusDescription = "Not Modified";
+                    context.Response.End();
+                }
+                else
+                {
+                    // The file is outside of the web root so we cannot just rewrite the path since that won't work.
+                    // We basically have a few options:
 
-                // 1. Create a custom VirtualPathProvider - this would work but we don't get all of the goodness that comes with
-                // ASP.NET StaticFileHandler such as sending the correct cache headers, etc... you can see what I mean by
-                // looking at the source: https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,492
-                // 2. HttpResponse.TransmitFile - this actually uses the IIS/Windows kernel to do the transfer so it is very fast,
-                // I've tested the header results and they are identical to the response headers set when using the StaticFileHandler
-                // 3. Set cache headers, etc... manually with regards to how the StaticFileHandler does it:
-                // https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,505
+                    // 1. Create a custom VirtualPathProvider - this would work but we don't get all of the goodness that comes with
+                    // ASP.NET StaticFileHandler such as sending the correct cache headers, etc... you can see what I mean by
+                    // looking at the source: https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,492
+                    // 2. HttpResponse.TransmitFile - this actually uses the IIS/Windows kernel to do the transfer so it is very fast,
+                    // I've tested the header results and they are identical to the response headers set when using the StaticFileHandler
+                    // 3. Set cache headers, etc... manually with regards to how the StaticFileHandler does it:
+                    // https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,505
 
-                // 4. Use reflection to invoke the StaticFileHandler somehow
-                // 5. Use a custom StataicFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki
+                    // 4. Use reflection to invoke the StaticFileHandler somehow
+                    // 5. Use a custom StataicFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki
 
-                // I've opted to go with the simplest solution and use TransmitFile, I've looked into the source of this and it uses the
-                // Windows Kernel, I'm not sure where in the source the headers get written but if you analyze the request/response headers when
-                // this is used, they are exactly the same as if the StaticFileHandler (i.e. RewritePath) is used, so this seems perfect and easy!
+                    // I've opted to go with the simplest solution and use TransmitFile, I've looked into the source of this and it uses the
+                    // Windows Kernel, I'm not sure where in the source the headers get written but if you analyze the request/response headers when
+                    // this is used, they are exactly the same as if the StaticFileHandler (i.e. RewritePath) is used, so this seems perfect and easy!
 
-                // We need to manually write out the Content Type header here, the TransmitFile does not do this for you
-                // whereas the RewritePath actually does.
-                // https://github.com/JimBobSquarePants/ImageProcessor/issues/529
-                string extension = Helpers.ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
-                string mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
-                context.Response.ContentType = mimeType;
+                    // We need to manually write out the Content Type header here, the TransmitFile does not do this for you
+                    // whereas the RewritePath actually does.
+                    // https://github.com/JimBobSquarePants/ImageProcessor/issues/529
+                    string extension = Helpers.ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
+                    string mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
+                    context.Response.ContentType = mimeType;
 
-                context.Response.TransmitFile(this.CachedPath);
+                    context.Response.TransmitFile(this.CachedPath);
 
-                // This is quite important expecially if the request is a when an `IImageService` handles the request
-                // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
-                // and because we are not rewriting any paths, the request will continue to try to execute this handler
-                // and errors will occur. It should be fine that we are ending the request pipeline since
-                // all we really want to do here is send the file above. There's some arguments about using
-                // `ApplicationInstance.CompleteRequest();` instead of Response.End() but in this case I believe it is
-                // correct to use Response.End(), a good write-up of why this is can be found here:
-                // see: http://stackoverflow.com/a/36968241/694494
-                context.Response.End();
+                    // Since we are going to call Response.End(), we need to go ahead and set the headers
+                    HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
+                    SetETagHeader(context);
+
+                    // This is quite important expecially if the request is a when an `IImageService` handles the request
+                    // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
+                    // and because we are not rewriting any paths, the request will continue to try to execute this handler
+                    // and errors will occur. It should be fine that we are ending the request pipeline since
+                    // all we really want to do here is send the file above. There's some arguments about using
+                    // `ApplicationInstance.CompleteRequest();` instead of Response.End() but in this case I believe it is
+                    // correct to use Response.End(), a good write-up of why this is can be found here:
+                    // see: http://stackoverflow.com/a/36968241/694494
+                    context.Response.End();
+                }
             }
+        }
+
+        private void SetETagHeader(HttpContext context)
+        {
+            string eTag = GetETag(context);
+            if (!String.IsNullOrEmpty(eTag))
+            {
+                context.Response.Cache.SetETag(eTag);
+            }
+        }
+
+        private string GetETag(HttpContext context)
+        {
+            if (this.cachedImageCreationTimeUtc != null)
+            {
+                long lastModFileTime = cachedImageCreationTimeUtc.ToFileTime();
+                DateTime utcNow = DateTime.UtcNow;
+                long nowFileTime = utcNow.ToFileTime();
+                string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
+                if ((nowFileTime - lastModFileTime) <= 30000000)
+                {
+                    return "W/\"" + hexFileTime + "\"";
+                }
+                else
+                {
+                    return "\"" + hexFileTime + "\"";
+                }
+            }
+            return null;
         }
 
         /// <summary>
