@@ -187,9 +187,7 @@ namespace ImageProcessor.Web.HttpModules
 
             if (response.Headers["ImageProcessedBy"] == null)
             {
-                response.AddHeader(
-                    "ImageProcessedBy",
-                    $"ImageProcessor/{AssemblyVersion} - ImageProcessor.Web/{WebAssemblyVersion}");
+                response.AddHeader("ImageProcessedBy", $"ImageProcessor/{AssemblyVersion} - ImageProcessor.Web/{WebAssemblyVersion}");
             }
 
             HttpCachePolicy cache = response.Cache;
@@ -214,14 +212,12 @@ namespace ImageProcessor.Web.HttpModules
 
             cache.SetExpires(DateTime.Now.ToUniversalTime().AddDays(maxDays));
             cache.SetMaxAge(new TimeSpan(maxDays, 0, 0, 0));
-            //cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
 
             AddCorsRequestHeaders(context);
         }
 
         /// <summary>
-        /// This will make the browser and server keep the output
-        /// in its cache and thereby improve performance.
+        /// This will make the browser and server keep the output in its cache and thereby improve performance.
         /// </summary>
         /// <param name="context">
         /// the <see cref="T:System.Web.HttpContext">HttpContext</see> object that provides

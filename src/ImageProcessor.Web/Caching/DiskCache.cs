@@ -9,6 +9,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Net;
+
 namespace ImageProcessor.Web.Caching
 {
     using System;
@@ -80,7 +82,7 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// The create time of the cached image
         /// </summary>
-        private DateTime cachedImageCreationTimeUtc;
+        private DateTime cachedImageCreationTimeUtc = DateTime.MinValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DiskCache"/> class.
@@ -160,10 +162,12 @@ namespace ImageProcessor.Web.Caching
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
                 }
+                else
+                {
+                    // Set cachedImageCreationTimeUtc so we can sender Last-Modified or ETag header when using Response.TransmitFile()
+                    this.cachedImageCreationTimeUtc = cachedImage.CreationTimeUtc;
+                }
             }
-
-            // set cachedImageCreationTimeUtc so we can sender Last-Modified or ETag header when using Response.TransmitFile()
-            this.cachedImageCreationTimeUtc = cachedImage.CreationTimeUtc;
 
             return isUpdated;
         }
@@ -260,13 +264,14 @@ namespace ImageProcessor.Web.Caching
             }
             else
             {
-                // check if the ETag matches (doing this here because context.RewritePath seems to handle it automatically
+                // Check if the ETag matches (doing this here because context.RewritePath seems to handle it automatically
                 string eTagFromHeader = context.Request.Headers["If-None-Match"];
-                string eTag = GetETag(context);
+                string eTag = GetETag();
                 if (!string.IsNullOrEmpty(eTagFromHeader) && !string.IsNullOrEmpty(eTag) && eTagFromHeader == eTag)
                 {
-                    context.Response.StatusCode = 304;
+                    context.Response.StatusCode = (int)HttpStatusCode.NotModified;
                     context.Response.StatusDescription = "Not Modified";
+                    HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
                     context.Response.End();
                 }
                 else
@@ -313,35 +318,6 @@ namespace ImageProcessor.Web.Caching
                     context.Response.End();
                 }
             }
-        }
-
-        private void SetETagHeader(HttpContext context)
-        {
-            string eTag = GetETag(context);
-            if (!String.IsNullOrEmpty(eTag))
-            {
-                context.Response.Cache.SetETag(eTag);
-            }
-        }
-
-        private string GetETag(HttpContext context)
-        {
-            if (this.cachedImageCreationTimeUtc != null)
-            {
-                long lastModFileTime = cachedImageCreationTimeUtc.ToFileTime();
-                DateTime utcNow = DateTime.UtcNow;
-                long nowFileTime = utcNow.ToFileTime();
-                string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
-                if ((nowFileTime - lastModFileTime) <= 30000000)
-                {
-                    return "W/\"" + hexFileTime + "\"";
-                }
-                else
-                {
-                    return "\"" + hexFileTime + "\"";
-                }
-            }
-            return null;
         }
 
         /// <summary>
@@ -478,6 +454,41 @@ namespace ImageProcessor.Web.Caching
             }
 
             return absoluteCachePath;
+        }
+
+        /// <summary>
+        /// Sets the ETag Header
+        /// </summary>
+        /// <param name="context"></param>
+        private void SetETagHeader(HttpContext context)
+        {
+            string eTag = GetETag();
+            if (!string.IsNullOrEmpty(eTag))
+            {
+                context.Response.Cache.SetETag(eTag);
+            }
+        }
+
+        /// <summary>
+        /// Creates an ETag value from the current creation time.
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        private string GetETag()
+        {
+            if (this.cachedImageCreationTimeUtc != DateTime.MinValue)
+            {
+                long lastModFileTime = cachedImageCreationTimeUtc.ToFileTime();
+                DateTime utcNow = DateTime.UtcNow;
+                long nowFileTime = utcNow.ToFileTime();
+                string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
+                if ((nowFileTime - lastModFileTime) <= 30000000)
+                {
+                    return "W/\"" + hexFileTime + "\"";
+                }
+
+                return "\"" + hexFileTime + "\"";
+            }
+            return null;
         }
     }
 }
