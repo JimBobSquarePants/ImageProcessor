@@ -9,8 +9,6 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Net;
-
 namespace ImageProcessor.Web.Caching
 {
     using System;
@@ -18,6 +16,7 @@ namespace ImageProcessor.Web.Caching
     using System.Configuration;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
@@ -119,12 +118,9 @@ namespace ImageProcessor.Web.Caching
             // if there is a high throughput of image requests.
             string cachedFileName = await this.CreateCachedFileNameAsync();
 
-            // Collision rate of about 1 in 10000 for the folder structure.
-            // That gives us massive scope to store millions of files.
-            string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
-            string virtualPathFromKey = pathFromKey.Replace(@"\", "/");
-            this.CachedPath = Path.Combine(this.absoluteCachePath, pathFromKey, cachedFileName);
-            this.virtualCachedFilePath = Path.Combine(this.virtualCachePath, virtualPathFromKey, cachedFileName).Replace(@"\", "/");
+            // TODO: Make depth configurable.
+            this.CachedPath = CachedImageHelper.GetCachedPath(this.absoluteCachePath, cachedFileName, false, 6);
+            this.virtualCachedFilePath = CachedImageHelper.GetCachedPath(this.virtualCachePath, cachedFileName, true, 6);
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
@@ -137,14 +133,14 @@ namespace ImageProcessor.Web.Caching
                 {
                     // Pull the latest info.
                     fileInfo.Refresh();
-                    
+
                     cachedImage = new CachedImage
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
                         CreationTimeUtc = fileInfo.CreationTimeUtc
                     };
-                    
+
                     CacheIndexer.Add(cachedImage);
                 }
             }
@@ -162,6 +158,12 @@ namespace ImageProcessor.Web.Caching
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
                 }
+                else if (await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
+                {
+                    // A new file with the same name has replaced our current image
+                    CacheIndexer.Remove(this.CachedPath);
+                    isUpdated = true;
+                }
                 else
                 {
                     // Set cachedImageCreationTimeUtc so we can sender Last-Modified or ETag header when using Response.TransmitFile()
@@ -175,12 +177,8 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Adds the image to the cache in an asynchronous manner.
         /// </summary>
-        /// <param name="stream">
-        /// The stream containing the image data.
-        /// </param>
-        /// <param name="contentType">
-        /// The content type of the image.
-        /// </param>
+        /// <param name="stream">The stream containing the image data.</param>
+        /// <param name="contentType">The content type of the image.</param>
         /// <returns>
         /// The <see cref="Task"/> representing an asynchronous operation.
         /// </returns>
@@ -454,6 +452,49 @@ namespace ImageProcessor.Web.Caching
             }
 
             return absoluteCachePath;
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the requested image has been updated.
+        /// </summary>
+        /// <param name="creationDate">The creation date.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        private async Task<bool> IsUpdatedAsync(DateTime creationDate)
+        {
+            bool isUpdated = false;
+
+            try
+            {
+                if (new Uri(this.RequestPath).IsFile)
+                {
+                    FileInfo imageFileInfo = new FileInfo(this.RequestPath);
+                    if (imageFileInfo.Exists)
+                    {
+                        // Pull the latest info.
+                        imageFileInfo.Refresh();
+
+                        // If it's newer than the cached file then it must be an update.
+                        isUpdated = imageFileInfo.LastWriteTimeUtc > creationDate;
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync()))
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+            }
+            catch
+            {
+                isUpdated = false;
+            }
+
+            return isUpdated;
         }
 
         /// <summary>

@@ -13,15 +13,11 @@ namespace ImageProcessor.Web.Caching
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.IO;
-    using System.Net;
     using System.Threading.Tasks;
     using System.Web;
 
     using ImageProcessor.Web.Configuration;
-    using ImageProcessor.Web.Extensions;
-    using ImageProcessor.Web.Helpers;
 
     /// <summary>
     /// The image cache base provides methods for implementing the <see cref="IImageCache"/> interface.
@@ -124,54 +120,7 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public virtual async Task<string> CreateCachedFileNameAsync()
         {
-            string streamHash = string.Empty;
-
-            try
-            {
-                if (new Uri(this.RequestPath).IsFile)
-                {
-                    // Get the hash for the filestream. That way we can ensure that if the image is
-                    // updated but has the same name we will know.
-                    FileInfo imageFileInfo = new FileInfo(this.RequestPath);
-                    if (imageFileInfo.Exists)
-                    {
-                        // Pull the latest info.
-                        imageFileInfo.Refresh();
-
-                        // Checking the stream itself is far too processor intensive so we make a best guess.
-                        string creation = imageFileInfo.CreationTimeUtc.ToString(CultureInfo.InvariantCulture);
-                        string length = imageFileInfo.Length.ToString(CultureInfo.InvariantCulture);
-                        streamHash = $"{creation}{length}";
-                    }
-                }
-                else
-                {
-                    // Try and get the headers for the file, this should allow cache busting for remote files.
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
-                    request.Method = "HEAD";
-
-                    using (HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync()))
-                    {
-                        string lastModified = response.LastModified.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
-                        string length = response.ContentLength.ToString(CultureInfo.InvariantCulture);
-                        streamHash = $"{lastModified}{length}";
-                    }
-                }
-            }
-            catch
-            {
-                streamHash = string.Empty;
-            }
-
-            // Use an sha1 hash of the full path including the querystring to create the image name.
-            // That name can also be used as a key for the cached image and we should be able to use
-            // The characters of that hash as sub-folders.
-            string parsedExtension = ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
-            string encryptedName = (streamHash + this.FullPath).ToSHA1Fingerprint();
-
-            string cachedFileName = $"{encryptedName}.{(!string.IsNullOrWhiteSpace(parsedExtension) ? parsedExtension.Replace(".", string.Empty) : "jpg")}";
-
-            return await Task.FromResult(cachedFileName);
+            return await Task.FromResult(CachedImageHelper.GetCachedImageFileName(this.FullPath, this.Querystring));
         }
 
         /// <summary>
@@ -186,9 +135,7 @@ namespace ImageProcessor.Web.Caching
         /// Gets a value indicating whether the given images creation date is out with
         /// the prescribed limit.
         /// </summary>
-        /// <param name="creationDate">
-        /// The creation date.
-        /// </param>
+        /// <param name="creationDate">The creation date.</param>
         /// <returns>
         /// The true if the date is out with the limit, otherwise; false.
         /// </returns>
