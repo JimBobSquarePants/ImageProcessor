@@ -212,6 +212,7 @@ namespace ImageProcessor.Web.HttpModules
 
             cache.SetExpires(DateTime.Now.ToUniversalTime().AddDays(maxDays));
             cache.SetMaxAge(new TimeSpan(maxDays, 0, 0, 0));
+            cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
 
             AddCorsRequestHeaders(context);
         }
