@@ -152,15 +152,10 @@ namespace ImageProcessor.Web.Caching
             }
             else
             {
-                // Check to see if the cached image is set to expire.
-                if (this.IsExpired(cachedImage.CreationTimeUtc))
+                // Check to see if the cached image is set to expire
+                // or a new file with the same name has replaced our current image
+                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
                 {
-                    CacheIndexer.Remove(this.CachedPath);
-                    isUpdated = true;
-                }
-                else if (await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
-                {
-                    // A new file with the same name has replaced our current image
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
                 }
@@ -483,7 +478,7 @@ namespace ImageProcessor.Web.Caching
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
                     request.Method = "HEAD";
 
-                    using (HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync()))
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
                     {
                         isUpdated = response.LastModified.ToUniversalTime() > creationDate;
                     }
