@@ -67,9 +67,12 @@ namespace ImageProcessor.Web.Configuration
             }
 
             string section = ResourceHelpers.ResourceAsString("ImageProcessor.Web.Configuration.Resources.cache.config.transform");
-            XmlReader reader = new XmlTextReader(new StringReader(section));
-            imageCacheSection = new ImageCacheSection();
-            imageCacheSection.DeserializeSection(reader);
+
+            using (XmlReader reader = new XmlTextReader(new StringReader(section)))
+            {
+                imageCacheSection = new ImageCacheSection();
+                imageCacheSection.DeserializeSection(reader);
+            }
 
             return imageCacheSection;
         }
