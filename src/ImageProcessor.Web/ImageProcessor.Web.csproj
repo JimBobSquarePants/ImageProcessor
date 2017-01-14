@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caching\CachedImageHelper.cs" />
     <Compile Include="Caching\MemoryStreamPool.cs" />
     <Compile Include="Caching\CachedImage.cs" />
     <Compile Include="Caching\DiskCache.cs" />
