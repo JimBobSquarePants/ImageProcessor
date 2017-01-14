@@ -26,6 +26,16 @@ namespace ImageProcessor.Web.Caching
     public abstract class ImageCacheBase : IImageCache
     {
         /// <summary>
+        /// The object to lock against.
+        /// </summary>
+        private static readonly object Locker = new object();
+
+        /// <summary>
+        /// Whether the current cache is currently being trimmed.
+        /// </summary>
+        private static bool isTrimming;
+
+        /// <summary>
         /// The request path for the image.
         /// </summary>
         protected readonly string RequestPath;
@@ -64,6 +74,28 @@ namespace ImageProcessor.Web.Caching
             this.BrowserMaxDays = config.BrowserCacheMaxDays;
             this.TrimCache = config.TrimCache;
             this.FolderDepth = config.FolderDepth;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whther wthe current cache is currently being trimmed.
+        /// </summary>
+        public static bool IsTrimming
+        {
+            get
+            {
+                lock (Locker)
+                {
+                    return isTrimming;
+                }
+            }
+
+            set
+            {
+                lock (Locker)
+                {
+                    isTrimming = value;
+                }
+            }
         }
 
         /// <summary>

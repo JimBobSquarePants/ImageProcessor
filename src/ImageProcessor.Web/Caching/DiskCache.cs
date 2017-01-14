@@ -205,47 +205,55 @@ namespace ImageProcessor.Web.Caching
                 return;
             }
 
-            string directory = Path.GetDirectoryName(this.CachedPath);
-
-            if (directory != null)
+            // Only perform one trimming operation at a time.
+            if (!IsTrimming)
             {
-                // Jump up to the parent branch to clean through the cache.
-                // ReSharper disable once PossibleNullReferenceException
-                string parent = this.FolderDepth > 0 ? Path.GetFileName(this.CachedPath).Substring(0, 1) : string.Empty;
-                DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, parent));
+                IsTrimming = true;
 
-                // UNC folders can throw exceptions if the file doesn't exist.
-                foreach (DirectoryInfo enumerateDirectory in await rootDirectoryInfo.SafeEnumerateDirectoriesAsync())
+                string directory = Path.GetDirectoryName(this.CachedPath);
+
+                if (directory != null)
                 {
-                    IEnumerable<FileInfo> files = enumerateDirectory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
-                    int count = files.Count();
+                    // Jump up to the parent branch to clean through the cache.
+                    // ReSharper disable once PossibleNullReferenceException
+                    string parent = this.FolderDepth > 0 ? Path.GetFileName(this.CachedPath).Substring(0, 1) : string.Empty;
+                    DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, parent));
 
-                    foreach (FileInfo fileInfo in files)
+                    // UNC folders can throw exceptions if the file doesn't exist.
+                    foreach (DirectoryInfo enumerateDirectory in await rootDirectoryInfo.SafeEnumerateDirectoriesAsync())
                     {
-                        try
+                        IEnumerable<FileInfo> files = enumerateDirectory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
+                        int count = files.Count();
+
+                        foreach (FileInfo fileInfo in files)
                         {
-                            // If the group count is equal to the max count minus 1 then we know we
-                            // have reduced the number of items below the maximum allowed.
-                            // We'll cleanup any orphaned expired files though.
-                            if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
+                            try
                             {
-                                break;
+                                // If the group count is equal to the max count minus 1 then we know we
+                                // have reduced the number of items below the maximum allowed.
+                                // We'll cleanup any orphaned expired files though.
+                                if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
+                                {
+                                    break;
+                                }
+
+                                // Remove from the cache and delete each CachedImage.
+                                CacheIndexer.Remove(fileInfo.Name);
+                                fileInfo.Delete();
+                                count -= 1;
                             }
 
-                            // Remove from the cache and delete each CachedImage.
-                            CacheIndexer.Remove(fileInfo.Name);
-                            fileInfo.Delete();
-                            count -= 1;
-                        }
-
-                        // ReSharper disable once EmptyGeneralCatchClause
-                        catch
-                        {
-                            // Log it but skip to the next file.
-                            ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}");
+                            // ReSharper disable once EmptyGeneralCatchClause
+                            catch
+                            {
+                                // Log it but skip to the next file.
+                                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}");
+                            }
                         }
                     }
                 }
+
+                IsTrimming = false;
             }
         }
 

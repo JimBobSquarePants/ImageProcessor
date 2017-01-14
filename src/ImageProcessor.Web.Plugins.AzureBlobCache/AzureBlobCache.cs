@@ -268,43 +268,51 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 return;
             }
 
-            // Jump up to the parent branch to clean through the cache.
-            string parent = string.Empty;
-
-            if (this.FolderDepth > 0)
+            // Only perform one trimming operation at a time.
+            if (!IsTrimming)
             {
-                Uri uri = new Uri(this.CachedPath);
-                string path = uri.GetLeftPart(UriPartial.Path).Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
-                parent = path.Substring(0, 2);
-            }
+                IsTrimming = true;
 
-            BlobContinuationToken continuationToken = null;
-            List<IListBlobItem> results = new List<IListBlobItem>();
+                // Jump up to the parent branch to clean through the cache.
+                string parent = string.Empty;
 
-            // Loop through the all the files in a non blocking fashion.
-            do
-            {
-                BlobResultSegment response = await cloudCachedBlobContainer.ListBlobsSegmentedAsync(parent, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null);
-                continuationToken = response.ContinuationToken;
-                results.AddRange(response.Results);
-            }
-            while (continuationToken != null);
-
-            // Now leap through and delete.
-            foreach (
-                CloudBlockBlob blob in
-                results.Where((blobItem, type) => blobItem is CloudBlockBlob)
-                       .Cast<CloudBlockBlob>()
-                       .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
-            {
-                if (blob.Properties.LastModified.HasValue && !this.IsExpired(blob.Properties.LastModified.Value.UtcDateTime))
+                if (this.FolderDepth > 0)
                 {
-                    break;
+                    Uri uri = new Uri(this.CachedPath);
+                    string path = uri.GetLeftPart(UriPartial.Path).Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
+                    parent = path.Substring(0, 2);
                 }
 
-                // Remove from the cache and delete each CachedImage.
-                CacheIndexer.Remove(blob.Name);
-                await blob.DeleteAsync();
+                BlobContinuationToken continuationToken = null;
+                List<IListBlobItem> results = new List<IListBlobItem>();
+
+                // Loop through the all the files in a non blocking fashion.
+                do
+                {
+                    BlobResultSegment response = await cloudCachedBlobContainer.ListBlobsSegmentedAsync(parent, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null);
+                    continuationToken = response.ContinuationToken;
+                    results.AddRange(response.Results);
+                }
+                while (continuationToken != null);
+
+                // Now leap through and delete.
+                foreach (
+                    CloudBlockBlob blob in
+                    results.Where((blobItem, type) => blobItem is CloudBlockBlob)
+                           .Cast<CloudBlockBlob>()
+                           .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
+                {
+                    if (blob.Properties.LastModified.HasValue && !this.IsExpired(blob.Properties.LastModified.Value.UtcDateTime))
+                    {
+                        break;
+                    }
+
+                    // Remove from the cache and delete each CachedImage.
+                    CacheIndexer.Remove(blob.Name);
+                    await blob.DeleteAsync();
+                }
+
+                IsTrimming = false;
             }
         }
 
