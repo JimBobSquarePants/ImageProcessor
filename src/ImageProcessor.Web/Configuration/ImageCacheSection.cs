@@ -127,7 +127,7 @@ namespace ImageProcessor.Web.Configuration
             }
 
             /// <summary>
-            /// Gets or sets whether the disk cache will apply file change monitors that can be used to invalidate the cache
+            /// Gets or sets a value indicating whether the cache will apply file change monitors that can be used to invalidate the cache
             /// </summary>
             /// <value>True or False to enable or disable this setting</value>
             /// <remarks>
@@ -168,6 +168,39 @@ namespace ImageProcessor.Web.Configuration
                 set
                 {
                     this["browserMaxDays"] = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether to periodically trim the cache.
+            /// </summary>
+            /// <remarks>
+            /// Defaults to true.
+            /// </remarks>
+            [ConfigurationProperty("trimCache", DefaultValue = true, IsRequired = false)]
+            public bool TrimCache
+            {
+                get { return (bool)this["trimCache"]; }
+
+                set { this["trimCache"] = value; }
+            }
+
+            /// <summary>
+            /// Gets or sets the maximum number folder levels to nest the cached images.
+            /// </summary>
+            /// <remarks>Defaults to 6 if not set.</remarks>
+            [ConfigurationProperty("folderDepth", DefaultValue = "6", IsRequired = false)]
+            [IntegerValidator(ExcludeRange = false, MinValue = 0)]
+            public int FolderDepth
+            {
+                get
+                {
+                    return (int)this["folderDepth"];
+                }
+
+                set
+                {
+                    this["folderDepth"] = value;
                 }
             }
 

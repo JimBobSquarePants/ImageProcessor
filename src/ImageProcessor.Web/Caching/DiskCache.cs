@@ -119,8 +119,8 @@ namespace ImageProcessor.Web.Caching
             string cachedFileName = await this.CreateCachedFileNameAsync();
 
             // TODO: Make depth configurable.
-            this.CachedPath = CachedImageHelper.GetCachedPath(this.absoluteCachePath, cachedFileName, false, 6);
-            this.virtualCachedFilePath = CachedImageHelper.GetCachedPath(this.virtualCachePath, cachedFileName, true, 6);
+            this.CachedPath = CachedImageHelper.GetCachedPath(this.absoluteCachePath, cachedFileName, false, this.FolderDepth);
+            this.virtualCachedFilePath = CachedImageHelper.GetCachedPath(this.virtualCachePath, cachedFileName, true, this.FolderDepth);
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
@@ -200,12 +200,19 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public override async Task TrimCacheAsync()
         {
+            if (!this.TrimCache)
+            {
+                return;
+            }
+
             string directory = Path.GetDirectoryName(this.CachedPath);
 
             if (directory != null)
             {
-                // Jump up to the parent branch to clean through 1/36th of the cache.
-                DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, Path.GetFileName(this.CachedPath).Substring(0, 1)));
+                // Jump up to the parent branch to clean through the cache.
+                // ReSharper disable once PossibleNullReferenceException
+                string parent = this.FolderDepth > 0 ? Path.GetFileName(this.CachedPath).Substring(0, 1) : string.Empty;
+                DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, parent));
 
                 // UNC folders can throw exceptions if the file doesn't exist.
                 foreach (DirectoryInfo enumerateDirectory in await rootDirectoryInfo.SafeEnumerateDirectoriesAsync())

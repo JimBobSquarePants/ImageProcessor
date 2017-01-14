@@ -41,6 +41,16 @@ namespace ImageProcessor.Web.Caching
         int BrowserMaxDays { get; set; }
 
         /// <summary>
+        /// Gets or sets the maximum number folder levels to nest the cached images.
+        /// </summary>
+        int FolderDepth { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to periodically trim the cache.
+        /// </summary>
+        bool TrimCache { get; set; }
+
+        /// <summary>
         /// Gets a value indicating whether the image is new or updated in an asynchronous manner.
         /// </summary>
         /// <returns>

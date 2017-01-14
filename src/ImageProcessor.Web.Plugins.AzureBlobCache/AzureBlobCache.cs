@@ -155,12 +155,12 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             string cachedFileName = await this.CreateCachedFileNameAsync();
 
             // TODO: Make this configurable
-            this.CachedPath = CachedImageHelper.GetCachedPath(cloudCachedBlobContainer.Uri.ToString(), cachedFileName, true, 6);
+            this.CachedPath = CachedImageHelper.GetCachedPath(cloudCachedBlobContainer.Uri.ToString(), cachedFileName, true, this.FolderDepth);
 
             // Do we insert the cache container? This seems to break some setups.
             bool useCachedContainerInUrl = this.Settings.ContainsKey("UseCachedContainerInUrl") && this.Settings["UseCachedContainerInUrl"].ToLower() != "false";
 
-            this.cachedRewritePath = CachedImageHelper.GetCachedPath(useCachedContainerInUrl ? Path.Combine(this.cachedCdnRoot, cloudCachedBlobContainer.Name) : this.cachedCdnRoot, cachedFileName, true, 0);
+            this.cachedRewritePath = CachedImageHelper.GetCachedPath(useCachedContainerInUrl ? Path.Combine(this.cachedCdnRoot, cloudCachedBlobContainer.Name) : this.cachedCdnRoot, cachedFileName, true, this.FolderDepth);
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
@@ -168,7 +168,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             if (new Uri(this.CachedPath).IsFile)
             {
                 FileInfo fileInfo = new FileInfo(this.CachedPath);
-            6
+
                 if (fileInfo.Exists)
                 {
                     // Pull the latest info.
@@ -263,13 +263,28 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </returns>
         public override async Task TrimCacheAsync()
         {
+            if (!this.TrimCache)
+            {
+                return;
+            }
+
+            // Jump up to the parent branch to clean through the cache.
+            string parent = string.Empty;
+
+            if (this.FolderDepth > 0)
+            {
+                Uri uri = new Uri(this.CachedPath);
+                string path = uri.GetLeftPart(UriPartial.Path).Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
+                parent = path.Substring(0, 2);
+            }
+
             BlobContinuationToken continuationToken = null;
             List<IListBlobItem> results = new List<IListBlobItem>();
 
             // Loop through the all the files in a non blocking fashion.
             do
             {
-                BlobResultSegment response = await cloudCachedBlobContainer.ListBlobsSegmentedAsync(string.Empty, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null);
+                BlobResultSegment response = await cloudCachedBlobContainer.ListBlobsSegmentedAsync(parent, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null);
                 continuationToken = response.ContinuationToken;
                 results.AddRange(response.Results);
             }
