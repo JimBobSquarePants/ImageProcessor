@@ -677,8 +677,11 @@ namespace ImageProcessor.Web.HttpModules
                         context.ApplicationInstance.CompleteRequest();
                     }
 
-                    // Trim the cache.
-                    await this.imageCache.TrimCacheAsync();
+                    if (isNewOrUpdated)
+                    {
+                        // Trim the cache.
+                        await this.imageCache.TrimCacheAsync();
+                    }
                 }
             }
         }
