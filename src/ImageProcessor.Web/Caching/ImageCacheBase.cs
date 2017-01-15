@@ -14,6 +14,7 @@ namespace ImageProcessor.Web.Caching
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
 
@@ -26,14 +27,14 @@ namespace ImageProcessor.Web.Caching
     public abstract class ImageCacheBase : IImageCache
     {
         /// <summary>
-        /// The object to lock against.
+        /// The semaphore to lock against.
         /// </summary>
-        private static readonly object Locker = new object();
+        private static readonly SemaphoreSlim Locker = new SemaphoreSlim(1, 1);
 
         /// <summary>
-        /// Whether the current cache is currently being trimmed.
+        /// Whether to trim the current cache.
         /// </summary>
-        private static bool isTrimming;
+        private static bool trim = true;
 
         /// <summary>
         /// The request path for the image.
@@ -74,28 +75,6 @@ namespace ImageProcessor.Web.Caching
             this.BrowserMaxDays = config.BrowserCacheMaxDays;
             this.TrimCache = config.TrimCache;
             this.FolderDepth = config.FolderDepth;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whther wthe current cache is currently being trimmed.
-        /// </summary>
-        public static bool IsTrimming
-        {
-            get
-            {
-                lock (Locker)
-                {
-                    return isTrimming;
-                }
-            }
-
-            set
-            {
-                lock (Locker)
-                {
-                    isTrimming = value;
-                }
-            }
         }
 
         /// <summary>
@@ -151,7 +130,8 @@ namespace ImageProcessor.Web.Caching
         public abstract Task AddImageToCacheAsync(Stream stream, string contentType);
 
         /// <summary>
-        /// Trims the cache of any expired items in an asynchronous manner.
+        /// Trims the cache of any expired items in an asynchronous manner. 
+        /// Call <see cref="M:DebounceTrimmerAsync"/> within your implementation to correctly debounce cache cleanup.
         /// </summary>
         /// <returns>
         /// The asynchronous <see cref="Task"/> representing an asynchronous operation.
@@ -198,6 +178,31 @@ namespace ImageProcessor.Web.Caching
         /// <param name="settings">The current settings.</param>
         protected virtual void AugmentSettings(Dictionary<string, string> settings)
         {
+        }
+
+        /// <summary>
+        /// Debounces any trimming events to ensure that only one cleanup operation is running at any one time.
+        /// All caches inheriting from this class should use this method.
+        /// </summary>
+        /// <param name="trimmer">The cache trimming method.</param>
+        protected virtual async Task DebounceTrimmerAsync(Func<Task> trimmer)
+        {
+            if (!trim)
+            {
+                return;
+            }
+
+            await Locker.WaitAsync().ConfigureAwait(false);
+            trim = false;
+            try
+            {
+                await trimmer();
+            }
+            finally
+            {
+                trim = true;
+                Locker.Release();
+            }
         }
 
         /// <summary>

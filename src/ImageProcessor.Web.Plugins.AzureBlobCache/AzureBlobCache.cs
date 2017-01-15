@@ -268,11 +268,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 return;
             }
 
-            // Only perform one trimming operation at a time.
-            if (!IsTrimming)
+            await this.DebounceTrimmerAsync(async () =>
             {
-                IsTrimming = true;
-
                 // Jump up to the parent branch to clean through the cache.
                 string parent = string.Empty;
 
@@ -311,9 +308,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                     CacheIndexer.Remove(blob.Name);
                     await blob.DeleteAsync();
                 }
-
-                IsTrimming = false;
-            }
+            });
         }
 
         /// <summary>
