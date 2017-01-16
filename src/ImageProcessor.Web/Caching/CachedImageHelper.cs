@@ -62,9 +62,9 @@ namespace ImageProcessor.Web.Caching
             // That name can also be used as a key for the cached image and we should be able to use
             // The characters of that hash as sub-folders.
             string parsedExtension = ImageHelpers.Instance.GetExtension(path, querystring);
-            string encryptedName = (path).ToSHA1Fingerprint();
+            string hashedName = (path).ToSHA1Fingerprint();
 
-            return $"{encryptedName}.{(!string.IsNullOrWhiteSpace(parsedExtension) ? parsedExtension.Replace(".", string.Empty) : "jpg")}";
+            return $"{hashedName}.{parsedExtension.Replace(".", string.Empty)}";
         }
 
         /// <summary>
