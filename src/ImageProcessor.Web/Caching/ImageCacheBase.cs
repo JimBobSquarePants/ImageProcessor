@@ -21,10 +21,10 @@ namespace ImageProcessor.Web.Caching
     using ImageProcessor.Web.Configuration;
 
     /// <summary>
-    /// The image cache base provides methods for implementing the <see cref="IImageCache"/> interface.
+    /// The image cache base provides methods for implementing the <see cref="IImageCacheExtended"/> interface.
     /// It is recommended that any implementations inherit from this class.
     /// </summary>
-    public abstract class ImageCacheBase : IImageCache
+    public abstract class ImageCacheBase : IImageCacheExtended
     {
         /// <summary>
         /// The semaphore to lock against.
@@ -130,7 +130,7 @@ namespace ImageProcessor.Web.Caching
         public abstract Task AddImageToCacheAsync(Stream stream, string contentType);
 
         /// <summary>
-        /// Trims the cache of any expired items in an asynchronous manner. 
+        /// Trims the cache of any expired items in an asynchronous manner.
         /// Call <see cref="M:DebounceTrimmerAsync"/> within your implementation to correctly debounce cache cleanup.
         /// </summary>
         /// <returns>
@@ -171,7 +171,7 @@ namespace ImageProcessor.Web.Caching
         }
 
         /// <summary>
-        /// Provides a means to augment the cache settings taken from the configuration in derived classes. 
+        /// Provides a means to augment the cache settings taken from the configuration in derived classes.
         /// This allows for configuration of cache objects outside the normal configuration files, for example
         /// by using app settings in the Azure platform.
         /// </summary>

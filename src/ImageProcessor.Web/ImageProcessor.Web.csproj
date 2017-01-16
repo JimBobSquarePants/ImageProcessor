@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\CachedImageHelper.cs" />
+    <Compile Include="Caching\IImageCacheExtended.cs" />
     <Compile Include="Caching\MemoryStreamPool.cs" />
     <Compile Include="Caching\CachedImage.cs" />
     <Compile Include="Caching\DiskCache.cs" />
