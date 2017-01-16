@@ -29,6 +29,11 @@ namespace ImageProcessor.Web.Caching
         /// <returns>The <see cref="string"/></returns>
         public static string GetCachedImageFileName(string path)
         {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
             int index = path.LastIndexOf("?", StringComparison.Ordinal);
 
             // Prevent overflow if path ends with a "?"
