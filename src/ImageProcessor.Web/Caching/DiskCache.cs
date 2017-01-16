@@ -241,19 +241,15 @@ namespace ImageProcessor.Web.Caching
                                  count -= 1;
                              }
 
-                             // ReSharper disable once EmptyGeneralCatchClause
-                             catch
+                             catch (Exception ex)
                              {
                                  // Log it but skip to the next file.
-                                 ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}");
+                                 ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}, {ex.Message}");
                              }
                          }
 
-                         // If the directory is empty delete it to remove the FCN.
-                         if (!directory.GetFiles().Any() && !directory.GetDirectories().Any())
-                         {
-                             directory.Delete();
-                         }
+                         // If the directory is empty of files delete it to remove the FCN.
+                         RecursivelyDeleteEmptyDirectories(directory, rootDirectoryInfo);
                      }
                  }
              });
@@ -503,6 +499,33 @@ namespace ImageProcessor.Web.Caching
             }
 
             return isUpdated;
+        }
+
+        /// <summary>
+        /// Recursively delete the directories in the folder.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="root"></param>
+        private void RecursivelyDeleteEmptyDirectories(DirectoryInfo directory, DirectoryInfo root)
+        {
+            try
+            {
+                if (directory.FullName == root.FullName) { return; }
+
+                // If the directory is empty of files delete it to remove the FCN.
+                if (!directory.GetFiles("*", SearchOption.AllDirectories).Any())
+                {
+                    directory.Delete();
+                }
+
+                RecursivelyDeleteEmptyDirectories(directory.Parent, root);
+            }
+            catch (Exception ex)
+            {
+                // Log it but skip to the next directory.
+                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory.FullName}, {ex.Message}");
+
+            }
         }
 
         /// <summary>
