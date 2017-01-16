@@ -324,14 +324,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             {
                 if (new Uri(this.RequestPath).IsFile)
                 {
-                    FileInfo imageFileInfo = new FileInfo(this.RequestPath);
-                    if (imageFileInfo.Exists)
+                    if (File.Exists(this.RequestPath))
                     {
-                        // Pull the latest info.
-                        imageFileInfo.Refresh();
-
                         // If it's newer than the cached file then it must be an update.
-                        isUpdated = imageFileInfo.LastWriteTimeUtc > creationDate;
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
                     }
                 }
                 else if (cloudSourceBlobContainer != null)

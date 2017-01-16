@@ -207,19 +207,20 @@ namespace ImageProcessor.Web.Caching
 
             await this.DebounceTrimmerAsync(async () =>
              {
-                 string directory = Path.GetDirectoryName(this.CachedPath);
+                 string rootDirectory = Path.GetDirectoryName(this.CachedPath);
 
-                 if (directory != null)
+                 if (rootDirectory != null)
                  {
                      // Jump up to the parent branch to clean through the cache.
                      // ReSharper disable once PossibleNullReferenceException
                      string parent = this.FolderDepth > 0 ? Path.GetFileName(this.CachedPath).Substring(0, 1) : string.Empty;
                      DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, parent));
+                     IEnumerable<DirectoryInfo> directories = await rootDirectoryInfo.SafeEnumerateDirectoriesAsync();
 
                      // UNC folders can throw exceptions if the file doesn't exist.
-                     foreach (DirectoryInfo enumerateDirectory in await rootDirectoryInfo.SafeEnumerateDirectoriesAsync())
+                     foreach (DirectoryInfo directory in directories)
                      {
-                         IEnumerable<FileInfo> files = enumerateDirectory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
+                         IEnumerable<FileInfo> files = directory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
                          int count = files.Count();
 
                          foreach (FileInfo fileInfo in files)
@@ -246,6 +247,12 @@ namespace ImageProcessor.Web.Caching
                                  // Log it but skip to the next file.
                                  ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}");
                              }
+                         }
+
+                         // If the directory is empty delete it to remove the FCN.
+                         if (!directory.GetFiles().Any() && !directory.GetDirectories().Any())
+                         {
+                             directory.Delete();
                          }
                      }
                  }
@@ -472,14 +479,10 @@ namespace ImageProcessor.Web.Caching
             {
                 if (new Uri(this.RequestPath).IsFile)
                 {
-                    FileInfo imageFileInfo = new FileInfo(this.RequestPath);
-                    if (imageFileInfo.Exists)
+                    if (File.Exists(this.RequestPath))
                     {
-                        // Pull the latest info.
-                        imageFileInfo.Refresh();
-
                         // If it's newer than the cached file then it must be an update.
-                        isUpdated = imageFileInfo.LastWriteTimeUtc > creationDate;
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
                     }
                 }
                 else
