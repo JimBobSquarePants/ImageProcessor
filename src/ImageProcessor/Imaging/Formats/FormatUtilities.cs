@@ -46,7 +46,9 @@ namespace ImageProcessor.Imaging.Formats
             IEnumerable<ISupportedImageFormat> supportedImageFormats =
                 ImageProcessorBootstrapper.Instance.SupportedImageFormats;
 
-            byte[] buffer = new byte[4];
+            var numberOfBytesToRead = supportedImageFormats.Max(f => f.FileHeaders.Max(h=>h.Length));
+
+            byte[] buffer = new byte[numberOfBytesToRead];
             stream.Read(buffer, 0, buffer.Length);
 
             foreach (ISupportedImageFormat supportedImageFormat in supportedImageFormats)
