@@ -48,6 +48,16 @@ namespace ImageProcessor.Web.Caching
         /// <returns>The <see cref="string"/></returns>
         public static string GetCachedImageFileName(string path, string querystring)
         {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (string.IsNullOrWhiteSpace(querystring))
+            {
+                throw new ArgumentNullException(nameof(querystring));
+            }
+
             // Use an sha1 hash of the full path including the querystring to create the image name.
             // That name can also be used as a key for the cached image and we should be able to use
             // The characters of that hash as sub-folders.
@@ -67,6 +77,16 @@ namespace ImageProcessor.Web.Caching
         /// <returns>The <see cref="string"/></returns>
         public static string GetCachedPath(string cachedFolderPath, string cachedFileName, bool makeVirtual, int depth = 6)
         {
+            if (string.IsNullOrWhiteSpace(cachedFolderPath))
+            {
+                throw new ArgumentNullException(nameof(cachedFolderPath));
+            }
+
+            if (string.IsNullOrWhiteSpace(cachedFileName))
+            {
+                throw new ArgumentNullException(nameof(cachedFileName));
+            }
+
             if (depth < 0)
             {
                 depth = 0;
