@@ -7,16 +7,29 @@
 //   Encapsulates the properties required to add an image layer to an image.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace ImageProcessor.Imaging
 {
+    using System;
     using System.Drawing;
 
     /// <summary>
     /// Encapsulates the properties required to add an image layer to an image.
     /// </summary>
-    public class ImageLayer
+    public class ImageLayer : IDisposable
     {
+        /// <summary>
+        /// A value indicating whether this instance of the given entity has been disposed.
+        /// </summary>
+        /// <value><see langword="true"/> if this instance has been disposed; otherwise, <see langword="false"/>.</value>
+        /// <remarks>
+        /// If the entity is disposed, it must not be disposed a second
+        /// time. The isDisposed field is set the first time the entity
+        /// is disposed. If the isDisposed field is true, then the Dispose()
+        /// method will not dispose again. This help not to prolong the entity's
+        /// life in the Garbage Collector.
+        /// </remarks>
+        private bool isDisposed = false;
+
         /// <summary>
         /// Gets or sets the image.
         /// </summary>
@@ -38,15 +51,15 @@ namespace ImageProcessor.Imaging
         public Point? Position { get; set; }
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="ImageLayer"/> object that is equivalent to 
+        /// Returns a value that indicates whether the specified object is an
+        /// <see cref="ImageLayer"/> object that is equivalent to
         /// this <see cref="ImageLayer"/> object.
         /// </summary>
         /// <param name="obj">
         /// The object to test.
         /// </param>
         /// <returns>
-        /// True if the given object  is an <see cref="ImageLayer"/> object that is equivalent to 
+        /// True if the given object  is an <see cref="ImageLayer"/> object that is equivalent to
         /// this <see cref="ImageLayer"/> object; otherwise, false.
         /// </returns>
         public override bool Equals(object obj)
@@ -79,6 +92,31 @@ namespace ImageProcessor.Imaging
                 hashCode = (hashCode * 397) ^ this.Opacity;
                 hashCode = (hashCode * 397) ^ this.Position.GetHashCode();
                 return hashCode;
+            }
+        }
+
+        /// <summary>
+        /// Disposes the object and frees resources for the Garbage Collector.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+        }
+
+        /// <summary>
+        /// Disposes the object and frees resources for the Garbage Collector.
+        /// </summary>
+        /// <param name="disposing">If true, the object gets disposed.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.isDisposed)
+            {
+                if (disposing)
+                {
+                    this.Image?.Dispose();
+                }
+
+                this.isDisposed = true;
             }
         }
     }

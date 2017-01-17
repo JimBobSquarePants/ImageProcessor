@@ -60,7 +60,7 @@ namespace ImageProcessor.Web.Helpers
         /// The <see cref="String"/> value to parse.
         /// </param>
         /// <param name="culture">
-        /// The <see cref="CultureInfo"/> to use as the current culture. 
+        /// The <see cref="CultureInfo"/> to use as the current culture.
         /// <remarks>If not set will parse using <see cref="CultureInfo.InvariantCulture"/></remarks>
         /// </param>
         /// <typeparam name="T">
@@ -84,7 +84,7 @@ namespace ImageProcessor.Web.Helpers
         /// The <see cref="string"/> value to parse.
         /// </param>
         /// <param name="culture">
-        /// The <see cref="CultureInfo"/> to use as the current culture. 
+        /// The <see cref="CultureInfo"/> to use as the current culture.
         /// <remarks>If not set will parse using <see cref="CultureInfo.InvariantCulture"/></remarks>
         /// </param>
         /// <returns>

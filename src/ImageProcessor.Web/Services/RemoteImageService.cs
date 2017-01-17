@@ -17,7 +17,10 @@ namespace ImageProcessor.Web.Services
     using System.Threading.Tasks;
     using System.Web;
 
+    using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Helpers;
+
+    using Microsoft.IO;
 
     /// <summary>
     /// The remote image service.
@@ -31,9 +34,10 @@ namespace ImageProcessor.Web.Services
         {
             this.Settings = new Dictionary<string, string>
             {
-                { "MaxBytes", "4194304" }, 
+                { "MaxBytes", "4194304" },
                 { "Timeout", "30000" },
-                { "Protocol", "http" }
+                { "Protocol", "http" },
+                { "UserAgent", string.Empty }
             };
 
             this.WhiteList = new Uri[] { };
@@ -59,7 +63,7 @@ namespace ImageProcessor.Web.Services
         public Dictionary<string, string> Settings { get; set; }
 
         /// <summary>
-        /// Gets or sets the white list of <see cref="System.Uri"/>. 
+        /// Gets or sets the white list of <see cref="System.Uri"/>.
         /// </summary>
         public Uri[] WhiteList { get; set; }
 
@@ -116,16 +120,24 @@ namespace ImageProcessor.Web.Services
             RemoteFile remoteFile = new RemoteFile(uri)
             {
                 MaxDownloadSize = int.Parse(this.Settings["MaxBytes"]),
-                TimeoutLength = int.Parse(this.Settings["Timeout"]),
-                UserAgent = this.Settings["Useragent"]
+                TimeoutLength = int.Parse(this.Settings["Timeout"])
             };
+
+            // Check for optional user agesnt.
+            if (this.Settings.ContainsKey("Useragent"))
+            {
+                if (!string.IsNullOrWhiteSpace(this.Settings["Useragent"]))
+                {
+                    remoteFile.UserAgent = this.Settings["Useragent"];
+                }
+            }
 
             byte[] buffer;
 
             // Prevent response blocking.
             WebResponse webResponse = await remoteFile.GetWebResponseAsync().ConfigureAwait(false);
 
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (RecyclableMemoryStream memoryStream = new RecyclableMemoryStream(MemoryStreamPool.Shared))
             {
                 using (WebResponse response = webResponse)
                 {
@@ -138,11 +150,11 @@ namespace ImageProcessor.Web.Services
                             // Reset the position of the stream to ensure we're reading the correct part.
                             memoryStream.Position = 0;
 
-                            buffer = memoryStream.ToArray();
+                            buffer = memoryStream.GetBuffer();
                         }
                         else
                         {
-                            throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + uri);
+                            throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {uri}");
                         }
                     }
                 }

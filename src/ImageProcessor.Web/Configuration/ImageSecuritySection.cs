@@ -171,7 +171,7 @@ namespace ImageProcessor.Web.Configuration
             {
                 get
                 {
-                    return (ServiceElement)BaseGet(index);
+                    return (ServiceElement)this.BaseGet(index);
                 }
 
                 set

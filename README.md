@@ -34,7 +34,7 @@ Things I would :heart: people to help me out with:
 **Just remember to StyleCop all things! :oncoming_police_car:**
 
 ## RoadMap
-Focus for the ImageProcessor libraries has switched to the new library **ImageProcessorCore**. As such no new features will be added to this library. Bug fixes an enhancements will continue to be developed though. 
+Focus for the ImageProcessor libraries has switched to the new library [**ImageSharp**](https://github.com/JimBobSquarePants/ImageSharp). As such very few new features will be added to this library. Bug fixes and enhancements will continue to be developed though. 
 
 ## Documentation
 

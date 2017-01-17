@@ -19,7 +19,7 @@ namespace ImageProcessor.Web.Extensions
     using System.Reflection;
 
     /// <summary>
-    /// Extensions methods for <see cref="T:System.Type"/> for creating instances of types faster than 
+    /// Extensions methods for <see cref="T:System.Type"/> for creating instances of types faster than
     /// using reflection. Modified from the original class at.
     /// <see href="http://geekswithblogs.net/mrsteve/archive/2012/02/19/a-fast-c-sharp-extension-method-using-expression-trees-create-instance-from-type-again.aspx"/>
     /// </summary>
@@ -132,7 +132,7 @@ namespace ImageProcessor.Web.Extensions
 
                 Type[] argumentTypes = { typeof(TArg1), typeof(TArg2), typeof(TArg3) };
 
-                // Get a collection of the constructor argument Types we've been given; ignore any 
+                // Get a collection of the constructor argument Types we've been given; ignore any
                 // arguments which are of the 'ignore this' Type:
                 Type[] constructorArgumentTypes = argumentTypes.Where(t => t != typeof(TypeToIgnore)).ToArray();
 
@@ -170,7 +170,7 @@ namespace ImageProcessor.Web.Extensions
         }
 
         /// <summary>
-        /// To allow for overloads with differing numbers of arguments, we flag arguments which should be 
+        /// To allow for overloads with differing numbers of arguments, we flag arguments which should be
         /// ignored by using this Type:
         /// </summary>
         private class TypeToIgnore

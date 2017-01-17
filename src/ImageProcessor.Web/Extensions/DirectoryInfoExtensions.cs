@@ -41,7 +41,7 @@ namespace ImageProcessor.Web.Extensions
         public static Task<IEnumerable<DirectoryInfo>> SafeEnumerateDirectoriesAsync(
             this DirectoryInfo directoryInfo,
             string searchPattern = "*",
-            SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            SearchOption searchOption = SearchOption.AllDirectories)
         {
             return Task.Run(() => SafeEnumerateDirectories(directoryInfo, searchPattern, searchOption));
         }
@@ -67,7 +67,7 @@ namespace ImageProcessor.Web.Extensions
         public static IEnumerable<DirectoryInfo> SafeEnumerateDirectories(
             this DirectoryInfo directoryInfo,
             string searchPattern = "*",
-            SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            SearchOption searchOption = SearchOption.AllDirectories)
         {
             IEnumerable<DirectoryInfo> directories;
 

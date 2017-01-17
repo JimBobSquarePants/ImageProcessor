@@ -141,7 +141,7 @@ namespace ImageProcessor.Web.Caching
                         // Checking the stream itself is far too processor intensive so we make a best guess.
                         string creation = imageFileInfo.CreationTimeUtc.ToString(CultureInfo.InvariantCulture);
                         string length = imageFileInfo.Length.ToString(CultureInfo.InvariantCulture);
-                        streamHash = string.Format("{0}{1}", creation, length);
+                        streamHash = $"{creation}{length}";
                     }
                 }
                 else
@@ -154,7 +154,7 @@ namespace ImageProcessor.Web.Caching
                     {
                         string lastModified = response.LastModified.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
                         string length = response.ContentLength.ToString(CultureInfo.InvariantCulture);
-                        streamHash = string.Format("{0}{1}", lastModified, length);
+                        streamHash = $"{lastModified}{length}";
                     }
                 }
             }
@@ -169,10 +169,7 @@ namespace ImageProcessor.Web.Caching
             string parsedExtension = ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
             string encryptedName = (streamHash + this.FullPath).ToSHA1Fingerprint();
 
-            string cachedFileName = string.Format(
-                 "{0}.{1}",
-                 encryptedName,
-                 !string.IsNullOrWhiteSpace(parsedExtension) ? parsedExtension.Replace(".", string.Empty) : "jpg");
+            string cachedFileName = $"{encryptedName}.{(!string.IsNullOrWhiteSpace(parsedExtension) ? parsedExtension.Replace(".", string.Empty) : "jpg")}";
 
             return await Task.FromResult(cachedFileName);
         }

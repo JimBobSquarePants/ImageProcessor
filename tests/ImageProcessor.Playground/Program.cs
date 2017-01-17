@@ -46,76 +46,49 @@ namespace ImageProcessor.PlayGround
 
             DirectoryInfo di = new DirectoryInfo(inPath);
             IEnumerable<FileInfo> files = GetFilesByExtensions(di, ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".png", ".tif");
-            //IEnumerable<FileInfo> files = GetFilesByName(di, "Test.jpg");
 
-            foreach (FileInfo fileInfo in files)
+            using (Image image = new Bitmap(200, 200))
             {
-                // Start timing.
-                byte[] photoBytes = File.ReadAllBytes(fileInfo.FullName);
-                Console.WriteLine("Processing: " + fileInfo.Name);
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                using (MemoryStream inStream = new MemoryStream(photoBytes))
-                using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
+                using (ImageFactory factory = new ImageFactory())
                 {
-                    try
-                    {
-                        imageFactory.Load(inStream)
-                            //.Watermark(new TextLayer
-                            //{
-                            //    Text = "Vertical",
-                            //    Vertical = true,
-                            //    FontColor = Color.Black,
-                            //    Opacity = 35,
-                            //    FontSize = imageFactory.Image.Height / 20,
-                            //    DropShadow = true,
-                            //    Position = new Point(30, 30)
-                            //})
-                            .Resize(new Size(imageFactory.Image.Width / 2, imageFactory.Image.Height / 2))
-                            .Save(Path.GetFullPath(Path.Combine(outPath, "Vertical" + fileInfo.Name)));
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-
-                    // stopwatch.Stop();
+                    factory.Load(image).BackgroundColor(Color.HotPink).Save(Path.GetFullPath(Path.Combine(outPath, "test.bmp")));
                 }
+            }
 
-                using (MemoryStream inStream = new MemoryStream(photoBytes))
-                using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
+            for (int i = 0; i < 1; i++)
+            {
+                foreach (FileInfo fileInfo in files)
                 {
-                    try
+                    // Start timing.
+                    byte[] photoBytes = File.ReadAllBytes(fileInfo.FullName);
+                    Console.WriteLine("Processing: " + fileInfo.Name);
+
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
+
+                    using (MemoryStream inStream = new MemoryStream(photoBytes))
+                    using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
                     {
-                        imageFactory.Load(inStream)
-                            .Watermark(
-                                new TextLayer
-                                    {
-                                        Text = "NoVertical",
-                                        Vertical = false,
-                                        FontColor = Color.Black,
-                                        Opacity = 35,
-                                        FontSize = imageFactory.Image.Height / 20,
-                                        DropShadow = true,
-                                        Position = new Point(30, 30)
-                                    })
-                            .Save(Path.GetFullPath(Path.Combine(outPath, "NoVertical" + fileInfo.Name)));
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
+                        try
+                        {
+                            imageFactory.Load(inStream)
+                                        .Crop(new Rectangle(0, 0, imageFactory.Image.Width / 2, imageFactory.Image.Height / 2))
+                                        .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+
+                        stopwatch.Stop();
                     }
 
-                    stopwatch.Stop();
+                    // Report back.
+                    long peakWorkingSet64 = Process.GetCurrentProcess().PeakWorkingSet64;
+                    float mB = peakWorkingSet64 / (float)1024 / 1024;
+
+                    Console.WriteLine(@"Completed {0} in {1:s\.fff} secs {2}Peak memory usage was {3:#,#} bytes or {4} Mb.", fileInfo.Name, stopwatch.Elapsed, Environment.NewLine, peakWorkingSet64, mB);
                 }
-
-                // Report back.
-                long peakWorkingSet64 = Process.GetCurrentProcess().PeakWorkingSet64;
-                float mB = peakWorkingSet64 / (float)1024 / 1024;
-
-                Console.WriteLine(@"Completed {0} in {1:s\.fff} secs {2}Peak memory usage was {3} bytes or {4} Mb.", fileInfo.Name, stopwatch.Elapsed, Environment.NewLine, peakWorkingSet64.ToString("#,#"), mB);
             }
 
             Console.ReadLine();

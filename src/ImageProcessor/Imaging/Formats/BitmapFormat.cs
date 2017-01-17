@@ -21,15 +21,21 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the file headers.
         /// </summary>
-        public override byte[][] FileHeaders => new[] { Encoding.ASCII.GetBytes("BM") };
+        public override byte[][] FileHeaders => new[]
+        {
+            Encoding.ASCII.GetBytes("BM")
+        };
 
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions => new[] { "bmp" };
+        public override string[] FileExtensions => new[]
+        {
+            "bmp"
+        };
 
         /// <summary>
-        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
+        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains.
         /// </summary>
         public override string MimeType => "image/bmp";
 

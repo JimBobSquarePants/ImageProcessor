@@ -139,7 +139,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             }
 
             // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
-            // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site. 
+            // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site.
             // See: https://github.com/JimBobSquarePants/ImageProcessor/issues/161
             this.streamCachedImage = this.Settings.ContainsKey("StreamCachedImage") && this.Settings["StreamCachedImage"].ToLower() == "true";
         }
@@ -152,6 +152,9 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </returns>
         public override async Task<bool> IsNewOrUpdatedAsync()
         {
+            // TODO: Before this check is performed it should be throttled. For example, only perform this check
+            // if the last time it was checked is greater than 5 seconds. This would be much better for perf
+            // if there is a high throughput of image requests.
             string cachedFileName = await this.CreateCachedFileNameAsync();
 
             // Collision rate of about 1 in 10000 for the folder structure.
@@ -276,8 +279,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         {
             Uri uri = new Uri(this.CachedPath);
             string path = uri.GetLeftPart(UriPartial.Path).Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
-            string directory = path.Substring(0, path.LastIndexOf('/'));
-            string parent = directory.Substring(0, directory.LastIndexOf('/'));
+            string parent = path.Substring(0, path.LastIndexOf('/') - 9);
 
             BlobContinuationToken continuationToken = null;
             List<IListBlobItem> results = new List<IListBlobItem>();
@@ -295,8 +297,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             foreach (
                 CloudBlockBlob blob in
                 results.Where((blobItem, type) => blobItem is CloudBlockBlob)
-                    .Cast<CloudBlockBlob>()
-                    .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
+                       .Cast<CloudBlockBlob>()
+                       .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
             {
                 if (blob.Properties.LastModified.HasValue && !this.IsExpired(blob.Properties.LastModified.Value.UtcDateTime))
                 {
@@ -403,7 +405,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 // Map headers to enable 304s to pass through
                 if (context.Request.Headers["If-Modified-Since"] != null)
                 {
-                    request.IfModifiedSince = DateTime.Parse(context.Request.Headers["If-Modified-Since"]);
+                    TrySetIfModifiedSinceDate(context, request);
                 }
 
                 string[] mapRequestHeaders = { "Cache-Control", "If-None-Match" };
@@ -512,6 +514,41 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         ImageProcessingModule.AddCorsRequestHeaders(context);
                         context.Response.Redirect(this.CachedPath, false);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tries to set IfModifiedSince header however this crashes when context.Request.Headers["If-Modified-Since"] exists,
+        /// but cannot be parsed. It cannot be parsed when it comes from Google Bot as UTC <example>Sun, 27 Nov 2016 20:01:45 UTC</example>
+        /// so DateTime.TryParse. If it returns false, then log the error.
+        /// </summary>
+        /// <param name="context">The current context</param>
+        /// <param name="request">The current request</param>
+        private static void TrySetIfModifiedSinceDate(HttpContext context, HttpWebRequest request)
+        {
+            DateTime ifModifiedDate;
+
+            string ifModifiedFromRequest = context.Request.Headers["If-Modified-Since"];
+
+            if (DateTime.TryParse(ifModifiedFromRequest, out ifModifiedDate))
+            {
+                request.IfModifiedSince = ifModifiedDate;
+            }
+            else
+            {
+                if (ifModifiedFromRequest.ToLower().Contains("utc"))
+                {
+                    ifModifiedFromRequest = ifModifiedFromRequest.ToLower().Replace("utc", string.Empty);
+
+                    if (DateTime.TryParse(ifModifiedFromRequest, out ifModifiedDate))
+                    {
+                        request.IfModifiedSince = ifModifiedDate;
+                    }
+                }
+                else
+                {
+                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>($"Unable to parse date {context.Request.Headers["If-Modified-Since"]} for {context.Request.Url}");
                 }
             }
         }

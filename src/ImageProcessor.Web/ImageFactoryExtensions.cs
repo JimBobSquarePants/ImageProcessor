@@ -10,7 +10,9 @@
 
 namespace ImageProcessor.Web
 {
+    using System;
     using System.Linq;
+
     using ImageProcessor.Web.Configuration;
     using ImageProcessor.Web.Processors;
 
@@ -38,6 +40,10 @@ namespace ImageProcessor.Web
                 foreach (IWebGraphicsProcessor graphicsProcessor in graphicsProcessors)
                 {
                     factory.CurrentImageFormat.ApplyProcessor(graphicsProcessor.Processor.ProcessImage, factory);
+
+                    // Unwrap the dynamic parameter and dispose of any types that require it.
+                    IDisposable disposable = graphicsProcessor.Processor.DynamicParameter as IDisposable;
+                    disposable?.Dispose();
                 }
             }
 
