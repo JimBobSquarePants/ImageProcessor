@@ -187,9 +187,7 @@ namespace ImageProcessor.Web.HttpModules
 
             if (response.Headers["ImageProcessedBy"] == null)
             {
-                response.AddHeader(
-                    "ImageProcessedBy",
-                    $"ImageProcessor/{AssemblyVersion} - ImageProcessor.Web/{WebAssemblyVersion}");
+                response.AddHeader("ImageProcessedBy", $"ImageProcessor/{AssemblyVersion} - ImageProcessor.Web/{WebAssemblyVersion}");
             }
 
             HttpCachePolicy cache = response.Cache;
@@ -217,6 +215,25 @@ namespace ImageProcessor.Web.HttpModules
             cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
 
             AddCorsRequestHeaders(context);
+        }
+
+        /// <summary>
+        /// This will make the browser and server keep the output in its cache and thereby improve performance.
+        /// </summary>
+        /// <param name="context">
+        /// the <see cref="T:System.Web.HttpContext">HttpContext</see> object that provides
+        /// references to the intrinsic server objects
+        /// </param>
+        /// <param name="maxDays">The maximum number of days to store the image in the browser cache.</param>
+        public static void SetHeaders(HttpContext context, int maxDays)
+        {
+            object responseTypeObject = context.Items[CachedResponseTypeKey];
+            object dependencyFileObject = context.Items[CachedResponseFileDependency];
+
+            string responseType = responseTypeObject as string;
+            string[] dependencyFiles = dependencyFileObject as string[];
+
+            SetHeaders(context, responseType, dependencyFiles, maxDays);
         }
 
         /// <summary>
@@ -418,17 +435,10 @@ namespace ImageProcessor.Web.HttpModules
         private void PostReleaseRequestState(object sender, EventArgs e)
         {
             HttpContext context = ((HttpApplication)sender).Context;
-
-            object responseTypeObject = context.Items[CachedResponseTypeKey];
-            object dependencyFileObject = context.Items[CachedResponseFileDependency];
-
-            string responseType = responseTypeObject as string;
-            string[] dependencyFiles = dependencyFileObject as string[];
-
             // Set the headers
             if (this.imageCache != null)
             {
-                SetHeaders(context, responseType, dependencyFiles, this.imageCache.BrowserMaxDays);
+                SetHeaders(context, this.imageCache.BrowserMaxDays);
             }
         }
 
@@ -660,7 +670,7 @@ namespace ImageProcessor.Web.HttpModules
                     }
 
                     // The cached file is valid so just rewrite the path.
-                    this.imageCache.RewritePath(context);
+                    this.imageCache.RewritePath(context); // 
 
                     // Redirect if not a locally store file.
                     if (!new Uri(cachedPath).IsFile)
@@ -668,8 +678,11 @@ namespace ImageProcessor.Web.HttpModules
                         context.ApplicationInstance.CompleteRequest();
                     }
 
-                    // Trim the cache.
-                    await this.imageCache.TrimCacheAsync();
+                    if (isNewOrUpdated)
+                    {
+                        // Trim the cache.
+                        await this.imageCache.TrimCacheAsync();
+                    }
                 }
             }
         }

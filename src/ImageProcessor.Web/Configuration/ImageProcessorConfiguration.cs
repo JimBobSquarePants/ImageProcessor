@@ -7,6 +7,7 @@
 //   Encapsulates methods to allow the retrieval of ImageProcessor settings.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace ImageProcessor.Web.Configuration
 {
     using System;
@@ -100,6 +101,16 @@ namespace ImageProcessor.Web.Configuration
         /// Gets the browser cache max days.
         /// </summary>
         public int BrowserCacheMaxDays { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number folder levels to nest the cached images.
+        /// </summary>
+        public int FolderDepth { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to periodically trim the cache.
+        /// </summary>
+        public bool TrimCache { get; set; }
 
         /// <summary>
         /// Gets the image cache settings.
@@ -395,18 +406,18 @@ namespace ImageProcessor.Web.Configuration
         {
             if (this.ImageCache == null)
             {
-                string curentCache = GetImageCacheSection().CurrentCache;
+                string currentCache = GetImageCacheSection().CurrentCache;
                 ImageCacheSection.CacheElementCollection caches = imageCacheSection.ImageCaches;
 
                 foreach (ImageCacheSection.CacheElement cache in caches)
                 {
-                    if (cache.Name == curentCache)
+                    if (cache.Name == currentCache)
                     {
                         Type type = Type.GetType(cache.Type);
 
                         if (type == null)
                         {
-                            string message = "Couldn't load IImageCache: " + cache.Type;
+                            string message = $"Couldn\'t load IImageCache: {cache.Type}";
                             ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
                             throw new TypeLoadException(message);
                         }
@@ -415,6 +426,8 @@ namespace ImageProcessor.Web.Configuration
                         this.ImageCacheMaxDays = cache.MaxDays;
                         this.UseFileChangeMonitors = cache.UseFileChangeMonitors;
                         this.BrowserCacheMaxDays = cache.BrowserMaxDays;
+                        this.TrimCache = cache.TrimCache;
+                        this.FolderDepth = cache.FolderDepth;
                         this.ImageCacheSettings = cache.Settings
                                                        .Cast<SettingElement>()
                                                        .ToDictionary(setting => setting.Key, setting => setting.Value);

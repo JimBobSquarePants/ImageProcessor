@@ -16,6 +16,7 @@ namespace ImageProcessor.Web.Caching
     using System.Configuration;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
@@ -78,6 +79,11 @@ namespace ImageProcessor.Web.Caching
         private string virtualCachedFilePath;
 
         /// <summary>
+        /// The create time of the cached image
+        /// </summary>
+        private DateTime cachedImageCreationTimeUtc = DateTime.MinValue;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DiskCache"/> class.
         /// </summary>
         /// <param name="requestPath">
@@ -111,31 +117,21 @@ namespace ImageProcessor.Web.Caching
             // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
             string cachedFileName = await this.CreateCachedFileNameAsync();
-
-            // Collision rate of about 1 in 10000 for the folder structure.
-            // That gives us massive scope to store millions of files.
-            string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
-            string virtualPathFromKey = pathFromKey.Replace(@"\", "/");
-            this.CachedPath = Path.Combine(this.absoluteCachePath, pathFromKey, cachedFileName);
-            this.virtualCachedFilePath = Path.Combine(this.virtualCachePath, virtualPathFromKey, cachedFileName).Replace(@"\", "/");
+            this.CachedPath = CachedImageHelper.GetCachedPath(this.absoluteCachePath, cachedFileName, false, this.FolderDepth);
+            this.virtualCachedFilePath = CachedImageHelper.GetCachedPath(this.virtualCachePath, cachedFileName, true, this.FolderDepth);
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
 
             if (cachedImage == null)
             {
-                FileInfo fileInfo = new FileInfo(this.CachedPath);
-
-                if (fileInfo.Exists)
+                if (File.Exists(this.CachedPath))
                 {
-                    // Pull the latest info.
-                    fileInfo.Refresh();
-
                     cachedImage = new CachedImage
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
-                        CreationTimeUtc = fileInfo.CreationTimeUtc
+                        CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
                     };
 
                     CacheIndexer.Add(cachedImage);
@@ -149,11 +145,17 @@ namespace ImageProcessor.Web.Caching
             }
             else
             {
-                // Check to see if the cached image is set to expire.
-                if (this.IsExpired(cachedImage.CreationTimeUtc))
+                // Check to see if the cached image is set to expire
+                // or a new file with the same name has replaced our current image
+                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
                 {
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
+                }
+                else
+                {
+                    // Set cachedImageCreationTimeUtc so we can sender Last-Modified or ETag header when using Response.TransmitFile()
+                    this.cachedImageCreationTimeUtc = cachedImage.CreationTimeUtc;
                 }
             }
 
@@ -163,12 +165,8 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Adds the image to the cache in an asynchronous manner.
         /// </summary>
-        /// <param name="stream">
-        /// The stream containing the image data.
-        /// </param>
-        /// <param name="contentType">
-        /// The content type of the image.
-        /// </param>
+        /// <param name="stream">The stream containing the image data.</param>
+        /// <param name="contentType">The content type of the image.</param>
         /// <returns>
         /// The <see cref="Task"/> representing an asynchronous operation.
         /// </returns>
@@ -195,46 +193,59 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public override async Task TrimCacheAsync()
         {
-            string directory = Path.GetDirectoryName(this.CachedPath);
-
-            if (directory != null)
+            if (!this.TrimCache)
             {
-                // Jump up to the parent branch to clean through 1/36th of the cache.
-                DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, Path.GetFileName(this.CachedPath).Substring(0, 1)));
-
-                // UNC folders can throw exceptions if the file doesn't exist.
-                foreach (DirectoryInfo enumerateDirectory in await rootDirectoryInfo.SafeEnumerateDirectoriesAsync())
-                {
-                    IEnumerable<FileInfo> files = enumerateDirectory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
-                    int count = files.Count();
-
-                    foreach (FileInfo fileInfo in files)
-                    {
-                        try
-                        {
-                            // If the group count is equal to the max count minus 1 then we know we
-                            // have reduced the number of items below the maximum allowed.
-                            // We'll cleanup any orphaned expired files though.
-                            if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
-                            {
-                                break;
-                            }
-
-                            // Remove from the cache and delete each CachedImage.
-                            CacheIndexer.Remove(fileInfo.Name);
-                            fileInfo.Delete();
-                            count -= 1;
-                        }
-
-                        // ReSharper disable once EmptyGeneralCatchClause
-                        catch
-                        {
-                            // Log it but skip to the next file.
-                            ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}");
-                        }
-                    }
-                }
+                return;
             }
+
+            await this.DebounceTrimmerAsync(async () =>
+             {
+                 string rootDirectory = Path.GetDirectoryName(this.CachedPath);
+
+                 if (rootDirectory != null)
+                 {
+                     // Jump up to the parent branch to clean through the cache.
+                     // ReSharper disable once PossibleNullReferenceException
+                     string parent = this.FolderDepth > 0 ? Path.GetFileName(this.CachedPath).Substring(0, 1) : string.Empty;
+                     DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, parent));
+                     IEnumerable<DirectoryInfo> directories = await rootDirectoryInfo.SafeEnumerateDirectoriesAsync();
+
+                     // UNC folders can throw exceptions if the file doesn't exist.
+                     foreach (DirectoryInfo directory in directories)
+                     {
+                         IEnumerable<FileInfo> files = directory.EnumerateFiles().AsParallel().OrderBy(f => f.CreationTimeUtc);
+                         int count = files.Count();
+
+                         foreach (FileInfo fileInfo in files)
+                         {
+                             try
+                             {
+                                 // If the group count is equal to the max count minus 1 then we know we
+                                 // have reduced the number of items below the maximum allowed.
+                                 // We'll cleanup any orphaned expired files though.
+                                 if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
+                                 {
+                                     break;
+                                 }
+
+                                 // Remove from the cache and delete each CachedImage.
+                                 CacheIndexer.Remove(fileInfo.Name);
+                                 fileInfo.Delete();
+                                 count -= 1;
+                             }
+
+                             catch (Exception ex)
+                             {
+                                 // Log it but skip to the next file.
+                                 ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}, {ex.Message}");
+                             }
+                         }
+
+                         // If the directory is empty of files delete it to remove the FCN.
+                         RecursivelyDeleteEmptyDirectories(directory, rootDirectoryInfo);
+                     }
+                 }
+             });
         }
 
         /// <summary>
@@ -252,42 +263,59 @@ namespace ImageProcessor.Web.Caching
             }
             else
             {
-                // The file is outside of the web root so we cannot just rewrite the path since that won't work.
-                // We basically have a few options:
+                // Check if the ETag matches (doing this here because context.RewritePath seems to handle it automatically
+                string eTagFromHeader = context.Request.Headers["If-None-Match"];
+                string eTag = GetETag();
+                if (!string.IsNullOrEmpty(eTagFromHeader) && !string.IsNullOrEmpty(eTag) && eTagFromHeader == eTag)
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.NotModified;
+                    context.Response.StatusDescription = "Not Modified";
+                    HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
+                    context.Response.End();
+                }
+                else
+                {
+                    // The file is outside of the web root so we cannot just rewrite the path since that won't work.
+                    // We basically have a few options:
 
-                // 1. Create a custom VirtualPathProvider - this would work but we don't get all of the goodness that comes with
-                // ASP.NET StaticFileHandler such as sending the correct cache headers, etc... you can see what I mean by
-                // looking at the source: https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,492
-                // 2. HttpResponse.TransmitFile - this actually uses the IIS/Windows kernel to do the transfer so it is very fast,
-                // I've tested the header results and they are identical to the response headers set when using the StaticFileHandler
-                // 3. Set cache headers, etc... manually with regards to how the StaticFileHandler does it:
-                // https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,505
+                    // 1. Create a custom VirtualPathProvider - this would work but we don't get all of the goodness that comes with
+                    // ASP.NET StaticFileHandler such as sending the correct cache headers, etc... you can see what I mean by
+                    // looking at the source: https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,492
+                    // 2. HttpResponse.TransmitFile - this actually uses the IIS/Windows kernel to do the transfer so it is very fast,
+                    // I've tested the header results and they are identical to the response headers set when using the StaticFileHandler
+                    // 3. Set cache headers, etc... manually with regards to how the StaticFileHandler does it:
+                    // https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,505
 
-                // 4. Use reflection to invoke the StaticFileHandler somehow
-                // 5. Use a custom StataicFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki
+                    // 4. Use reflection to invoke the StaticFileHandler somehow
+                    // 5. Use a custom StataicFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki
 
-                // I've opted to go with the simplest solution and use TransmitFile, I've looked into the source of this and it uses the
-                // Windows Kernel, I'm not sure where in the source the headers get written but if you analyze the request/response headers when
-                // this is used, they are exactly the same as if the StaticFileHandler (i.e. RewritePath) is used, so this seems perfect and easy!
+                    // I've opted to go with the simplest solution and use TransmitFile, I've looked into the source of this and it uses the
+                    // Windows Kernel, I'm not sure where in the source the headers get written but if you analyze the request/response headers when
+                    // this is used, they are exactly the same as if the StaticFileHandler (i.e. RewritePath) is used, so this seems perfect and easy!
 
-                // We need to manually write out the Content Type header here, the TransmitFile does not do this for you
-                // whereas the RewritePath actually does.
-                // https://github.com/JimBobSquarePants/ImageProcessor/issues/529
-                string extension = Helpers.ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
-                string mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
-                context.Response.ContentType = mimeType;
+                    // We need to manually write out the Content Type header here, the TransmitFile does not do this for you
+                    // whereas the RewritePath actually does.
+                    // https://github.com/JimBobSquarePants/ImageProcessor/issues/529
+                    string extension = Helpers.ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
+                    string mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
+                    context.Response.ContentType = mimeType;
 
-                context.Response.TransmitFile(this.CachedPath);
+                    context.Response.TransmitFile(this.CachedPath);
 
-                // This is quite important expecially if the request is a when an `IImageService` handles the request
-                // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
-                // and because we are not rewriting any paths, the request will continue to try to execute this handler
-                // and errors will occur. It should be fine that we are ending the request pipeline since
-                // all we really want to do here is send the file above. There's some arguments about using
-                // `ApplicationInstance.CompleteRequest();` instead of Response.End() but in this case I believe it is
-                // correct to use Response.End(), a good write-up of why this is can be found here:
-                // see: http://stackoverflow.com/a/36968241/694494
-                context.Response.End();
+                    // Since we are going to call Response.End(), we need to go ahead and set the headers
+                    HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
+                    SetETagHeader(context);
+
+                    // This is quite important expecially if the request is a when an `IImageService` handles the request
+                    // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
+                    // and because we are not rewriting any paths, the request will continue to try to execute this handler
+                    // and errors will occur. It should be fine that we are ending the request pipeline since
+                    // all we really want to do here is send the file above. There's some arguments about using
+                    // `ApplicationInstance.CompleteRequest();` instead of Response.End() but in this case I believe it is
+                    // correct to use Response.End(), a good write-up of why this is can be found here:
+                    // see: http://stackoverflow.com/a/36968241/694494
+                    context.Response.End();
+                }
             }
         }
 
@@ -425,6 +453,107 @@ namespace ImageProcessor.Web.Caching
             }
 
             return absoluteCachePath;
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the requested image has been updated.
+        /// </summary>
+        /// <param name="creationDate">The creation date.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        private async Task<bool> IsUpdatedAsync(DateTime creationDate)
+        {
+            bool isUpdated = false;
+
+            try
+            {
+                if (new Uri(this.RequestPath).IsFile)
+                {
+                    if (File.Exists(this.RequestPath))
+                    {
+                        // If it's newer than the cached file then it must be an update.
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+            }
+            catch
+            {
+                isUpdated = false;
+            }
+
+            return isUpdated;
+        }
+
+        /// <summary>
+        /// Recursively delete the directories in the folder.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="root"></param>
+        private void RecursivelyDeleteEmptyDirectories(DirectoryInfo directory, DirectoryInfo root)
+        {
+            try
+            {
+                if (directory.FullName == root.FullName) { return; }
+
+                // If the directory is empty of files delete it to remove the FCN.
+                if (!directory.GetFiles("*", SearchOption.AllDirectories).Any())
+                {
+                    directory.Delete();
+                }
+
+                RecursivelyDeleteEmptyDirectories(directory.Parent, root);
+            }
+            catch (Exception ex)
+            {
+                // Log it but skip to the next directory.
+                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory.FullName}, {ex.Message}");
+
+            }
+        }
+
+        /// <summary>
+        /// Sets the ETag Header
+        /// </summary>
+        /// <param name="context"></param>
+        private void SetETagHeader(HttpContext context)
+        {
+            string eTag = GetETag();
+            if (!string.IsNullOrEmpty(eTag))
+            {
+                context.Response.Cache.SetETag(eTag);
+            }
+        }
+
+        /// <summary>
+        /// Creates an ETag value from the current creation time.
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        private string GetETag()
+        {
+            if (this.cachedImageCreationTimeUtc != DateTime.MinValue)
+            {
+                long lastModFileTime = cachedImageCreationTimeUtc.ToFileTime();
+                DateTime utcNow = DateTime.UtcNow;
+                long nowFileTime = utcNow.ToFileTime();
+                string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
+                if ((nowFileTime - lastModFileTime) <= 30000000)
+                {
+                    return "W/\"" + hexFileTime + "\"";
+                }
+
+                return "\"" + hexFileTime + "\"";
+            }
+            return null;
         }
     }
 }
