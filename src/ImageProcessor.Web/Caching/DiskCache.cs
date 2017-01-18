@@ -117,8 +117,6 @@ namespace ImageProcessor.Web.Caching
             // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
             string cachedFileName = await this.CreateCachedFileNameAsync();
-
-            // TODO: Make depth configurable.
             this.CachedPath = CachedImageHelper.GetCachedPath(this.absoluteCachePath, cachedFileName, false, this.FolderDepth);
             this.virtualCachedFilePath = CachedImageHelper.GetCachedPath(this.virtualCachePath, cachedFileName, true, this.FolderDepth);
 
@@ -127,18 +125,13 @@ namespace ImageProcessor.Web.Caching
 
             if (cachedImage == null)
             {
-                FileInfo fileInfo = new FileInfo(this.CachedPath);
-
-                if (fileInfo.Exists)
+                if (File.Exists(this.CachedPath))
                 {
-                    // Pull the latest info.
-                    fileInfo.Refresh();
-
                     cachedImage = new CachedImage
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
-                        CreationTimeUtc = fileInfo.CreationTimeUtc
+                        CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
                     };
 
                     CacheIndexer.Add(cachedImage);

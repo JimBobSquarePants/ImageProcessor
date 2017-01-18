@@ -153,8 +153,6 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
             string cachedFileName = await this.CreateCachedFileNameAsync();
-
-            // TODO: Make this configurable
             this.CachedPath = CachedImageHelper.GetCachedPath(cloudCachedBlobContainer.Uri.ToString(), cachedFileName, true, this.FolderDepth);
 
             // Do we insert the cache container? This seems to break some setups.
@@ -167,18 +165,13 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
             if (new Uri(this.CachedPath).IsFile)
             {
-                FileInfo fileInfo = new FileInfo(this.CachedPath);
-
-                if (fileInfo.Exists)
+                if (File.Exists(this.CachedPath))
                 {
-                    // Pull the latest info.
-                    fileInfo.Refresh();
-
                     cachedImage = new CachedImage
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
-                        CreationTimeUtc = fileInfo.CreationTimeUtc
+                        CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
                     };
 
                     CacheIndexer.Add(cachedImage);
