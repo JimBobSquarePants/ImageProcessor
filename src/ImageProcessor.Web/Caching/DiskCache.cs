@@ -300,11 +300,13 @@ namespace ImageProcessor.Web.Caching
                     string mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
                     context.Response.ContentType = mimeType;
 
-                    context.Response.TransmitFile(this.CachedPath);
-
                     // Since we are going to call Response.End(), we need to go ahead and set the headers
                     HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
                     SetETagHeader(context);
+                    context.Response.AddHeader("Content-Length", new FileInfo(this.CachedPath).Length.ToString());
+
+                    context.Response.TransmitFile(this.CachedPath);
+
 
                     // This is quite important expecially if the request is a when an `IImageService` handles the request
                     // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
