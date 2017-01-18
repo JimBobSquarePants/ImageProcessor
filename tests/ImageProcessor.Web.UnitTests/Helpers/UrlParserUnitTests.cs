@@ -8,7 +8,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace ImageProcessor.Web.UnitTests
+namespace ImageProcessor.Web.UnitTests.Helpers
 {
     using NUnit.Framework;
 
@@ -25,7 +25,7 @@ namespace ImageProcessor.Web.UnitTests
         public void TestLocalUrl(string url, string query)
         {
             string requestPath, queryString;
-            Helpers.UrlParser.ParseUrl(url + "?" + query, "", out requestPath, out queryString);
+            Web.Helpers.UrlParser.ParseUrl(url + "?" + query, "", out requestPath, out queryString);
             Assert.True(requestPath.Equals(url));
             Assert.True(queryString.Equals(query));
         }
@@ -42,14 +42,14 @@ namespace ImageProcessor.Web.UnitTests
 
             //Test url
             string url = baseUrl + "/" + prefix + "?" + path + "?" + query;
-            Helpers.UrlParser.ParseUrl(url, prefix, out requestPath, out queryString);
+            Web.Helpers.UrlParser.ParseUrl(url, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
             Assert.True(requestPath.Equals(path));
 
             //Test non legacy url
             path = path.Substring(7);
             string nonLegacyUrl = baseUrl + "/" + prefix + "/" + path + "?" + query;
-            Helpers.UrlParser.ParseUrl(nonLegacyUrl, prefix, out requestPath, out queryString);
+            Web.Helpers.UrlParser.ParseUrl(nonLegacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
             Assert.True(requestPath.TrimStart('/').Equals(path));
         }
@@ -63,13 +63,13 @@ namespace ImageProcessor.Web.UnitTests
 
             //Test legacy url
             string legacyUrl = baseUrl + "/" + prefix + "?" + path + "?" + query;
-            Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
+            Web.Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
             Assert.False(requestPath.Equals(path));
 
             //Test non legacy url
             string nonLegacyUrl = baseUrl + "/" + prefix + "/" + path.Substring(7) + "?" + query;
-            Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
+            Web.Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
             Assert.False(requestPath.TrimStart('/').Equals(path));
         }
@@ -83,7 +83,7 @@ namespace ImageProcessor.Web.UnitTests
 
             //Test legacy url
             string legacyUrl = baseUrl + "/" + prefix + "?" + path + "?" + query;
-            Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
+            Web.Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
             Assert.True(requestPath.Equals(expectedPath));
 
@@ -99,7 +99,7 @@ namespace ImageProcessor.Web.UnitTests
 
             //Test legacy url
             string legacyUrl = baseUrl + "/" + prefix + "?" + path + "?" + query;
-            Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
+            Web.Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
             Assert.True(requestPath.Equals(expectedPath));
 
@@ -114,7 +114,7 @@ namespace ImageProcessor.Web.UnitTests
 
             //Test legacy url
             string legacyUrl = baseUrl + "/" + prefix + "?" + path;
-            Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
+            Web.Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(expectedQuery));
             Assert.True(requestPath.Equals(expectedPath));
 

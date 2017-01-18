@@ -13,22 +13,29 @@ namespace ImageProcessor.Web.Caching
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.IO;
-    using System.Net;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
 
     using ImageProcessor.Web.Configuration;
-    using ImageProcessor.Web.Extensions;
-    using ImageProcessor.Web.Helpers;
 
     /// <summary>
-    /// The image cache base provides methods for implementing the <see cref="IImageCache"/> interface.
+    /// The image cache base provides methods for implementing the <see cref="IImageCacheExtended"/> interface.
     /// It is recommended that any implementations inherit from this class.
     /// </summary>
-    public abstract class ImageCacheBase : IImageCache
+    public abstract class ImageCacheBase : IImageCacheExtended
     {
+        /// <summary>
+        /// The semaphore to lock against.
+        /// </summary>
+        private static readonly SemaphoreSlim Locker = new SemaphoreSlim(1, 1);
+
+        /// <summary>
+        /// Whether to trim the current cache.
+        /// </summary>
+        private static bool trim = true;
+
         /// <summary>
         /// The request path for the image.
         /// </summary>
@@ -61,9 +68,13 @@ namespace ImageProcessor.Web.Caching
             this.RequestPath = requestPath;
             this.FullPath = fullPath;
             this.Querystring = querystring;
-            this.Settings = this.AugmentSettingsCore(ImageProcessorConfiguration.Instance.ImageCacheSettings);
-            this.MaxDays = ImageProcessorConfiguration.Instance.ImageCacheMaxDays;
-            this.BrowserMaxDays = ImageProcessorConfiguration.Instance.BrowserCacheMaxDays;
+
+            ImageProcessorConfiguration config = ImageProcessorConfiguration.Instance;
+            this.Settings = this.AugmentSettingsCore(config.ImageCacheSettings);
+            this.MaxDays = config.ImageCacheMaxDays;
+            this.BrowserMaxDays = config.BrowserCacheMaxDays;
+            this.TrimCache = config.TrimCache;
+            this.FolderDepth = config.FolderDepth;
         }
 
         /// <summary>
@@ -85,6 +96,16 @@ namespace ImageProcessor.Web.Caching
         /// Gets or sets the maximum number of days to cache the image in the browser.
         /// </summary>
         public int BrowserMaxDays { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number folder levels to nest the cached images.
+        /// </summary>
+        public int FolderDepth { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to periodically trim the cache.
+        /// </summary>
+        public bool TrimCache { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the image is new or updated in an asynchronous manner.
@@ -110,6 +131,7 @@ namespace ImageProcessor.Web.Caching
 
         /// <summary>
         /// Trims the cache of any expired items in an asynchronous manner.
+        /// Call <see cref="M:DebounceTrimmerAsync"/> within your implementation to correctly debounce cache cleanup.
         /// </summary>
         /// <returns>
         /// The asynchronous <see cref="Task"/> representing an asynchronous operation.
@@ -124,54 +146,7 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public virtual async Task<string> CreateCachedFileNameAsync()
         {
-            string streamHash = string.Empty;
-
-            try
-            {
-                if (new Uri(this.RequestPath).IsFile)
-                {
-                    // Get the hash for the filestream. That way we can ensure that if the image is
-                    // updated but has the same name we will know.
-                    FileInfo imageFileInfo = new FileInfo(this.RequestPath);
-                    if (imageFileInfo.Exists)
-                    {
-                        // Pull the latest info.
-                        imageFileInfo.Refresh();
-
-                        // Checking the stream itself is far too processor intensive so we make a best guess.
-                        string creation = imageFileInfo.CreationTimeUtc.ToString(CultureInfo.InvariantCulture);
-                        string length = imageFileInfo.Length.ToString(CultureInfo.InvariantCulture);
-                        streamHash = $"{creation}{length}";
-                    }
-                }
-                else
-                {
-                    // Try and get the headers for the file, this should allow cache busting for remote files.
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
-                    request.Method = "HEAD";
-
-                    using (HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync()))
-                    {
-                        string lastModified = response.LastModified.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
-                        string length = response.ContentLength.ToString(CultureInfo.InvariantCulture);
-                        streamHash = $"{lastModified}{length}";
-                    }
-                }
-            }
-            catch
-            {
-                streamHash = string.Empty;
-            }
-
-            // Use an sha1 hash of the full path including the querystring to create the image name.
-            // That name can also be used as a key for the cached image and we should be able to use
-            // The characters of that hash as sub-folders.
-            string parsedExtension = ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
-            string encryptedName = (streamHash + this.FullPath).ToSHA1Fingerprint();
-
-            string cachedFileName = $"{encryptedName}.{(!string.IsNullOrWhiteSpace(parsedExtension) ? parsedExtension.Replace(".", string.Empty) : "jpg")}";
-
-            return await Task.FromResult(cachedFileName);
+            return await Task.FromResult(CachedImageHelper.GetCachedImageFileName(this.FullPath, this.Querystring));
         }
 
         /// <summary>
@@ -186,9 +161,7 @@ namespace ImageProcessor.Web.Caching
         /// Gets a value indicating whether the given images creation date is out with
         /// the prescribed limit.
         /// </summary>
-        /// <param name="creationDate">
-        /// The creation date.
-        /// </param>
+        /// <param name="creationDate">The creation date.</param>
         /// <returns>
         /// The true if the date is out with the limit, otherwise; false.
         /// </returns>
@@ -198,13 +171,38 @@ namespace ImageProcessor.Web.Caching
         }
 
         /// <summary>
-        /// Provides a means to augment the cache settings taken from the configuration in derived classes. 
+        /// Provides a means to augment the cache settings taken from the configuration in derived classes.
         /// This allows for configuration of cache objects outside the normal configuration files, for example
         /// by using app settings in the Azure platform.
         /// </summary>
         /// <param name="settings">The current settings.</param>
         protected virtual void AugmentSettings(Dictionary<string, string> settings)
         {
+        }
+
+        /// <summary>
+        /// Debounces any trimming events to ensure that only one cleanup operation is running at any one time.
+        /// All caches inheriting from this class should use this method.
+        /// </summary>
+        /// <param name="trimmer">The cache trimming method.</param>
+        protected virtual async Task DebounceTrimmerAsync(Func<Task> trimmer)
+        {
+            if (!trim)
+            {
+                return;
+            }
+
+            await Locker.WaitAsync().ConfigureAwait(false);
+            trim = false;
+            try
+            {
+                await trimmer();
+            }
+            finally
+            {
+                trim = true;
+                Locker.Release();
+            }
         }
 
         /// <summary>

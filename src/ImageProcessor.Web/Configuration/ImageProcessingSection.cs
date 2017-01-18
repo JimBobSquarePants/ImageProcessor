@@ -98,9 +98,13 @@ namespace ImageProcessor.Web.Configuration
             }
 
             string section = ResourceHelpers.ResourceAsString("ImageProcessor.Web.Configuration.Resources.processing.config.transform");
-            XmlReader reader = new XmlTextReader(new StringReader(section));
-            imageProcessingSection = new ImageProcessingSection();
-            imageProcessingSection.DeserializeSection(reader);
+
+            using (XmlReader reader = new XmlTextReader(new StringReader(section)))
+            {
+                imageProcessingSection = new ImageProcessingSection();
+                imageProcessingSection.DeserializeSection(reader);
+            }
+
             return imageProcessingSection;
         }
 

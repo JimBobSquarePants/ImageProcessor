@@ -212,6 +212,7 @@ namespace ImageProcessor.Web.HttpModules
 
             cache.SetExpires(DateTime.Now.ToUniversalTime().AddDays(maxDays));
             cache.SetMaxAge(new TimeSpan(maxDays, 0, 0, 0));
+            cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
 
             AddCorsRequestHeaders(context);
         }
@@ -677,8 +678,11 @@ namespace ImageProcessor.Web.HttpModules
                         context.ApplicationInstance.CompleteRequest();
                     }
 
-                    // Trim the cache.
-                    await this.imageCache.TrimCacheAsync();
+                    if (isNewOrUpdated)
+                    {
+                        // Trim the cache.
+                        await this.imageCache.TrimCacheAsync();
+                    }
                 }
             }
         }

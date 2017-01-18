@@ -9,8 +9,6 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Net;
-
 namespace ImageProcessor.Web.Caching
 {
     using System;
@@ -18,6 +16,7 @@ namespace ImageProcessor.Web.Caching
     using System.Configuration;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
@@ -118,33 +117,23 @@ namespace ImageProcessor.Web.Caching
             // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
             string cachedFileName = await this.CreateCachedFileNameAsync();
-
-            // Collision rate of about 1 in 10000 for the folder structure.
-            // That gives us massive scope to store millions of files.
-            string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
-            string virtualPathFromKey = pathFromKey.Replace(@"\", "/");
-            this.CachedPath = Path.Combine(this.absoluteCachePath, pathFromKey, cachedFileName);
-            this.virtualCachedFilePath = Path.Combine(this.virtualCachePath, virtualPathFromKey, cachedFileName).Replace(@"\", "/");
+            this.CachedPath = CachedImageHelper.GetCachedPath(this.absoluteCachePath, cachedFileName, false, this.FolderDepth);
+            this.virtualCachedFilePath = CachedImageHelper.GetCachedPath(this.virtualCachePath, cachedFileName, true, this.FolderDepth);
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
 
             if (cachedImage == null)
             {
-                FileInfo fileInfo = new FileInfo(this.CachedPath);
-
-                if (fileInfo.Exists)
+                if (File.Exists(this.CachedPath))
                 {
-                    // Pull the latest info.
-                    fileInfo.Refresh();
-                    
                     cachedImage = new CachedImage
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
-                        CreationTimeUtc = fileInfo.CreationTimeUtc
+                        CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
                     };
-                    
+
                     CacheIndexer.Add(cachedImage);
                 }
             }
@@ -156,8 +145,9 @@ namespace ImageProcessor.Web.Caching
             }
             else
             {
-                // Check to see if the cached image is set to expire.
-                if (this.IsExpired(cachedImage.CreationTimeUtc))
+                // Check to see if the cached image is set to expire
+                // or a new file with the same name has replaced our current image
+                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
                 {
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
@@ -175,12 +165,8 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Adds the image to the cache in an asynchronous manner.
         /// </summary>
-        /// <param name="stream">
-        /// The stream containing the image data.
-        /// </param>
-        /// <param name="contentType">
-        /// The content type of the image.
-        /// </param>
+        /// <param name="stream">The stream containing the image data.</param>
+        /// <param name="contentType">The content type of the image.</param>
         /// <returns>
         /// The <see cref="Task"/> representing an asynchronous operation.
         /// </returns>
@@ -207,46 +193,59 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public override async Task TrimCacheAsync()
         {
-            string directory = Path.GetDirectoryName(this.CachedPath);
-
-            if (directory != null)
+            if (!this.TrimCache)
             {
-                // Jump up to the parent branch to clean through 1/36th of the cache.
-                DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, Path.GetFileName(this.CachedPath).Substring(0, 1)));
-
-                // UNC folders can throw exceptions if the file doesn't exist.
-                foreach (DirectoryInfo enumerateDirectory in await rootDirectoryInfo.SafeEnumerateDirectoriesAsync())
-                {
-                    IEnumerable<FileInfo> files = enumerateDirectory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
-                    int count = files.Count();
-
-                    foreach (FileInfo fileInfo in files)
-                    {
-                        try
-                        {
-                            // If the group count is equal to the max count minus 1 then we know we
-                            // have reduced the number of items below the maximum allowed.
-                            // We'll cleanup any orphaned expired files though.
-                            if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
-                            {
-                                break;
-                            }
-
-                            // Remove from the cache and delete each CachedImage.
-                            CacheIndexer.Remove(fileInfo.Name);
-                            fileInfo.Delete();
-                            count -= 1;
-                        }
-
-                        // ReSharper disable once EmptyGeneralCatchClause
-                        catch
-                        {
-                            // Log it but skip to the next file.
-                            ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}");
-                        }
-                    }
-                }
+                return;
             }
+
+            await this.DebounceTrimmerAsync(async () =>
+             {
+                 string rootDirectory = Path.GetDirectoryName(this.CachedPath);
+
+                 if (rootDirectory != null)
+                 {
+                     // Jump up to the parent branch to clean through the cache.
+                     // ReSharper disable once PossibleNullReferenceException
+                     string parent = this.FolderDepth > 0 ? Path.GetFileName(this.CachedPath).Substring(0, 1) : string.Empty;
+                     DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, parent));
+                     IEnumerable<DirectoryInfo> directories = await rootDirectoryInfo.SafeEnumerateDirectoriesAsync();
+
+                     // UNC folders can throw exceptions if the file doesn't exist.
+                     foreach (DirectoryInfo directory in directories)
+                     {
+                         IEnumerable<FileInfo> files = directory.EnumerateFiles().AsParallel().OrderBy(f => f.CreationTimeUtc);
+                         int count = files.Count();
+
+                         foreach (FileInfo fileInfo in files)
+                         {
+                             try
+                             {
+                                 // If the group count is equal to the max count minus 1 then we know we
+                                 // have reduced the number of items below the maximum allowed.
+                                 // We'll cleanup any orphaned expired files though.
+                                 if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
+                                 {
+                                     break;
+                                 }
+
+                                 // Remove from the cache and delete each CachedImage.
+                                 CacheIndexer.Remove(fileInfo.Name);
+                                 fileInfo.Delete();
+                                 count -= 1;
+                             }
+
+                             catch (Exception ex)
+                             {
+                                 // Log it but skip to the next file.
+                                 ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}, {ex.Message}");
+                             }
+                         }
+
+                         // If the directory is empty of files delete it to remove the FCN.
+                         RecursivelyDeleteEmptyDirectories(directory, rootDirectoryInfo);
+                     }
+                 }
+             });
         }
 
         /// <summary>
@@ -454,6 +453,72 @@ namespace ImageProcessor.Web.Caching
             }
 
             return absoluteCachePath;
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the requested image has been updated.
+        /// </summary>
+        /// <param name="creationDate">The creation date.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        private async Task<bool> IsUpdatedAsync(DateTime creationDate)
+        {
+            bool isUpdated = false;
+
+            try
+            {
+                if (new Uri(this.RequestPath).IsFile)
+                {
+                    if (File.Exists(this.RequestPath))
+                    {
+                        // If it's newer than the cached file then it must be an update.
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+            }
+            catch
+            {
+                isUpdated = false;
+            }
+
+            return isUpdated;
+        }
+
+        /// <summary>
+        /// Recursively delete the directories in the folder.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="root"></param>
+        private void RecursivelyDeleteEmptyDirectories(DirectoryInfo directory, DirectoryInfo root)
+        {
+            try
+            {
+                if (directory.FullName == root.FullName) { return; }
+
+                // If the directory is empty of files delete it to remove the FCN.
+                if (!directory.GetFiles("*", SearchOption.AllDirectories).Any())
+                {
+                    directory.Delete();
+                }
+
+                RecursivelyDeleteEmptyDirectories(directory.Parent, root);
+            }
+            catch (Exception ex)
+            {
+                // Log it but skip to the next directory.
+                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory.FullName}, {ex.Message}");
+
+            }
         }
 
         /// <summary>

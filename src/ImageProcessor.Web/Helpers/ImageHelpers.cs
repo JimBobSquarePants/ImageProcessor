@@ -84,14 +84,13 @@ namespace ImageProcessor.Web.Helpers
         }
 
         /// <summary>
-        /// Returns the correct file extension for the given string input
+        /// Returns the correct file extension for the given string input.
+        /// <remarks>
+        /// Falls back to jpeg if no extension is matched.
+        /// </remarks>
         /// </summary>
-        /// <param name="fullPath">
-        /// The string to parse.
-        /// </param>
-        /// <param name="queryString">
-        /// The querystring containing instructions.
-        /// </param>
+        /// <param name="fullPath">The string to parse.</param>
+        /// <param name="queryString">The querystring containing instructions.</param>
         /// <returns>
         /// The correct file extension for the given string input if it can find one; otherwise an empty string.
         /// </returns>
@@ -136,7 +135,8 @@ namespace ImageProcessor.Web.Helpers
                 return value;
             }
 
-            return string.Empty;
+            // Fall back to jpg
+            return "jpg";
         }
 
         /// <summary>
