@@ -220,7 +220,7 @@ namespace ImageProcessor.Web.Caching
                      // UNC folders can throw exceptions if the file doesn't exist.
                      foreach (DirectoryInfo directory in directories)
                      {
-                         IEnumerable<FileInfo> files = directory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
+                         IEnumerable<FileInfo> files = directory.EnumerateFiles().AsParallel().OrderBy(f => f.CreationTimeUtc);
                          int count = files.Count();
 
                          foreach (FileInfo fileInfo in files)
