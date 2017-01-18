@@ -296,7 +296,7 @@ namespace ImageProcessor.Web.Caching
                     // We need to manually write out the Content Type header here, the TransmitFile does not do this for you
                     // whereas the RewritePath actually does.
                     // https://github.com/JimBobSquarePants/ImageProcessor/issues/529
-                    string extension = Helpers.ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
+                    string extension = Path.GetExtension(this.CachedPath);
                     string mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
                     context.Response.ContentType = mimeType;
 
