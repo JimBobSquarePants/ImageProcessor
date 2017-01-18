@@ -49,8 +49,17 @@ configuration files.
 {% highlight xml %}
 <caching currentCache="AzureBlobCache">
   <caches>
-    <!-- Disk cache configuration removed for brevity -->
-    <cache name="AzureBlobCache" type="ImageProcessor.Web.Plugins.AzureBlobCache.AzureBlobCache, ImageProcessor.Web.Plugins.AzureBlobCache" maxDays="365">
+  <!--
+      Disk cache configuration removed for brevity.
+
+      browserMaxDays (Added v1.2.0) separates the time to cache the image in the browser from the time to store
+      the image in the cache
+
+      folderDepth (Optional - Added v1.3.0) sets the maximum number folder levels to nest the cached images. Defaults to 6.
+      trimCache (Optional - Added v1.3.0) whether to perform a cleanup of the cache when a new file is created. Defaults to true.
+  -->
+    <cache name="AzureBlobCache" type="ImageProcessor.Web.Plugins.AzureBlobCache.AzureBlobCache, ImageProcessor.Web.Plugins.AzureBlobCache" 
+           maxDays="365" browserMaxDays="7" folderDepth="6" trimCache="true">
       <settings>
         <!-- The Account, Container and CDN details -->
         <setting key="CachedStorageAccount" value="DefaultEndpointsProtocol=https;AccountName=[CacheAccountName];AccountKey=[CacheAccountKey]"/>

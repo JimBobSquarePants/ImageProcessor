@@ -169,8 +169,12 @@ configuration file you can add your own image cache.
   <!--
       browserMaxDays (Added v4.6.0) separates the time to cache the image in the browser from the time to store
       the image in the cache
+
+      folderDepth (Optional - Added v4.8.0) sets the maximum number folder levels to nest the cached images. Defaults to 6.
+      trimCache (Optional - Added v4.8.0) whether to perform a cleanup of the cache when a new file is created. Defaults to true.
   -->
-    <cache name="DiskCache" type="ImageProcessor.Web.Caching.DiskCache, ImageProcessor.Web" maxDays="365" browserMaxDays="7">
+    <cache name="DiskCache" type="ImageProcessor.Web.Caching.DiskCache, ImageProcessor.Web" 
+           maxDays="365" browserMaxDays="7" folderDepth="6" trimCache="true">
       <!-- The virtual path to the disk cache location. -->      
       <settings>
         <setting key="VirtualCachePath" value="~/app_data/cache"/>
