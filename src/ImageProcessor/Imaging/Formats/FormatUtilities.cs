@@ -46,11 +46,14 @@ namespace ImageProcessor.Imaging.Formats
             IEnumerable<ISupportedImageFormat> supportedImageFormats =
                 ImageProcessorBootstrapper.Instance.SupportedImageFormats;
 
-            var numberOfBytesToRead = supportedImageFormats.Max(f => f.FileHeaders.Max(h=>h.Length));
+            // It's actually a list.
+            // ReSharper disable once PossibleMultipleEnumeration
+            int numberOfBytesToRead = supportedImageFormats.Max(f => f.FileHeaders.Max(h=>h.Length));
 
             byte[] buffer = new byte[numberOfBytesToRead];
             stream.Read(buffer, 0, buffer.Length);
 
+            // ReSharper disable once PossibleMultipleEnumeration
             foreach (ISupportedImageFormat supportedImageFormat in supportedImageFormats)
             {
                 byte[][] headers = supportedImageFormat.FileHeaders;
@@ -124,7 +127,7 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// Returns an instance of EncodingParameters for jpeg compression. 
+        /// Returns an instance of EncodingParameters for jpeg compression.
         /// </summary>
         /// <param name="quality">The quality to return the image at.</param>
         /// <returns>The encodingParameters for jpeg compression. </returns>
