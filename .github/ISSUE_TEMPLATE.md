@@ -1,7 +1,7 @@
 ### Prerequisites
 
 - [ ] I have written a descriptive issue title
-- [ ] I have verified that I am running the latest version of Nancy
+- [ ] I have verified that I am running the latest version of ImageProcessor
 - [ ] I have verified if the problem exist in both `DEBUG` and `RELEASE` mode
 - [ ] I have searched [open](https://github.com/JimBobSquarePants/ImageProcessor/issuess) and [closed](https://github.com/JimBobSquarePants/ImageProcessor/issues?q=is%3Aissue+is%3Aclosed) issues to ensure it has not already been reported
 
