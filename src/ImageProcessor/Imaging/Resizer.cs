@@ -229,7 +229,7 @@ namespace ImageProcessor.Imaging
                     int boxPadHeight = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
                     int boxPadWidth = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
 
-                    // Only calculate if upscaling. 
+                    // Only calculate if upscaling.
                     if (sourceWidth < boxPadWidth && sourceHeight < boxPadHeight)
                     {
                         destinationWidth = sourceWidth;
@@ -312,7 +312,7 @@ namespace ImageProcessor.Imaging
                     }
                     else
                     {
-                        // Switch to pad mode to downscale and calculate from there. 
+                        // Switch to pad mode to downscale and calculate from there.
                         resizeMode = ResizeMode.Pad;
                     }
                 }
@@ -508,6 +508,19 @@ namespace ImageProcessor.Imaging
                         destinationHeight = height;
                         destinationWidth = Convert.ToInt32(height / sourceRatio);
                         width = destinationWidth;
+                    }
+                    else if (widthDiff == heightDiff)
+                    {
+                        if (height > width)
+                        {
+                            destinationHeight = Convert.ToInt32(sourceHeight * percentWidth);
+                            height = destinationHeight;
+                        }
+                        else
+                        {
+                            destinationWidth = Convert.ToInt32(sourceWidth * percentHeight);
+                            width = destinationWidth;
+                        }
                     }
                     else
                     {
