@@ -8,7 +8,6 @@
 //   Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs"/>
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace ImageProcessor.Web.Plugins.PostProcessor
 {
     using System;
@@ -16,7 +15,6 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
     using System.Globalization;
     using System.IO;
     using System.Threading;
-    using System.Threading.Tasks;
 
     using ImageProcessor.Configuration;
 
@@ -61,7 +59,16 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
             }
 
             // Cleanup
-            File.Delete(sourceFile);
+            try
+            {
+                // Ensure file is not read only
+                File.SetAttributes(sourceFile, FileAttributes.Normal);
+                File.Delete(sourceFile);
+            }
+            catch
+            {
+                // No no, but logging will be excessive.
+            }
 
             stream.Position = 0;
 
@@ -74,7 +81,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// <param name="sourceFile">The source file.</param>
         /// <param name="length">The source file length in bytes.</param>
         /// <returns>
-        /// The <see cref="Task{TResult}"/> containing post-processing information.
+        /// The <see cref="System.Threading.Tasks.Task"/> containing post-processing information.
         /// </returns>
         private static PostProcessingResultEventArgs RunProcess(string sourceFile, long length)
         {
@@ -95,10 +102,10 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 
             int elapsedTime = 0;
             bool eventHandled = false;
-
+            Process process = null;
             try
             {
-                Process process = new Process
+                process = new Process
                 {
                     StartInfo = start,
                     EnableRaisingEvents = true
@@ -107,11 +114,24 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                 process.Exited += (sender, args) =>
                 {
                     result = new PostProcessingResultEventArgs(sourceFile, length);
-                    process.Dispose();
+                    process?.Dispose();
                     eventHandled = true;
                 };
 
                 process.Start();
+
+                // Wait for Exited event, but not more than 5 seconds.
+                const int sleepAmount = 100;
+                while (!eventHandled)
+                {
+                    elapsedTime += sleepAmount;
+                    if (elapsedTime > 5000)
+                    {
+                        break;
+                    }
+
+                    Thread.Sleep(sleepAmount);
+                }
             }
             catch (System.ComponentModel.Win32Exception ex)
             {
@@ -120,18 +140,10 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 
                 return null;
             }
-
-            // Wait for Exited event, but not more than 5 seconds.
-            const int SleepAmount = 100;
-            while (!eventHandled)
+            finally
             {
-                elapsedTime += SleepAmount;
-                if (elapsedTime > 5000)
-                {
-                    break;
-                }
-
-                Thread.Sleep(SleepAmount);
+                // Make sure we always dispose and release
+                process?.Dispose();
             }
 
             return result;
