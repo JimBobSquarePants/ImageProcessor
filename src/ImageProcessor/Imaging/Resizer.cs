@@ -509,23 +509,23 @@ namespace ImageProcessor.Imaging
                         destinationWidth = Convert.ToInt32(height / sourceRatio);
                         width = destinationWidth;
                     }
-                    else if (widthDiff == heightDiff)
+                    else
                     {
                         if (height > width)
                         {
                             destinationHeight = Convert.ToInt32(sourceHeight * percentWidth);
                             height = destinationHeight;
                         }
-                        else
+                        else if (width > height)
                         {
                             destinationWidth = Convert.ToInt32(sourceWidth * percentHeight);
                             width = destinationWidth;
                         }
-                    }
-                    else
-                    {
-                        destinationWidth = width;
-                        destinationHeight = height;
+                        else
+                        {
+                            destinationWidth = width;
+                            destinationHeight = height;
+                        }
                     }
                 }
 
