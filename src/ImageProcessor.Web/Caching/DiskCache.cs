@@ -205,16 +205,24 @@ namespace ImageProcessor.Web.Caching
                 if (rootDirectory != null)
                 {
                     // Jump up to the parent branch to clean through the cache.
-                    // ReSharper disable once PossibleNullReferenceException
-                    string parent = this.FolderDepth > 0 ? Path.GetFileName(this.CachedPath).Substring(0, 1) : string.Empty;
-                    DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, parent));
-                    IEnumerable<DirectoryInfo> directories = rootDirectoryInfo.SafeEnumerateDirectories();
+                    DirectoryInfo rootDirectoryInfo = new DirectoryInfo(validatedAbsoluteCachePath);
 
                     // UNC folders can throw exceptions if the file doesn't exist.
+                    IEnumerable<DirectoryInfo> directories = rootDirectoryInfo.SafeEnumerateDirectories().Reverse();
+
                     foreach (DirectoryInfo directory in directories)
                     {
+                        directory.Refresh();
+
+                        if (!directory.Exists)
+                        {
+                            continue;
+                        }
+
                         if (token.IsCancellationRequested)
+                        {
                             break;
+                        }
 
                         IEnumerable<FileInfo> files = directory.EnumerateFiles().AsParallel().OrderBy(f => f.CreationTimeUtc);
                         int count = files.Count();
@@ -222,7 +230,9 @@ namespace ImageProcessor.Web.Caching
                         foreach (FileInfo fileInfo in files)
                         {
                             if (token.IsCancellationRequested)
+                            {
                                 break;
+                            }
 
                             try
                             {
@@ -514,14 +524,21 @@ namespace ImageProcessor.Web.Caching
         private void RecursivelyDeleteEmptyDirectories(DirectoryInfo directory, DirectoryInfo root, CancellationToken token)
         {
             if (token.IsCancellationRequested)
+            {
                 return;
+            }
 
             try
             {
-                if (directory.FullName == root.FullName) { return; }
+                directory.Refresh();
+
+                if (directory.FullName == root.FullName)
+                {
+                    return;
+                }
 
                 // If the directory is empty of files delete it to remove the FCN.
-                if (!directory.GetFiles("*", SearchOption.TopDirectoryOnly).Any())
+                if (!directory.GetFiles("*", SearchOption.TopDirectoryOnly).Any() && !directory.GetDirectories("*", SearchOption.TopDirectoryOnly).Any())
                 {
                     directory.Delete();
                 }
