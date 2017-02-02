@@ -9,6 +9,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.ComponentModel;
+using System.Web.Hosting;
+
 namespace ImageProcessor.Web.Caching
 {
     using System;
@@ -26,16 +29,8 @@ namespace ImageProcessor.Web.Caching
     /// </summary>
     public abstract class ImageCacheBase : IImageCacheExtended
     {
-        /// <summary>
-        /// The semaphore to lock against.
-        /// </summary>
-        private static readonly SemaphoreSlim Locker = new SemaphoreSlim(1, 1);
-
-        /// <summary>
-        /// Whether to trim the current cache.
-        /// </summary>
-        private static bool trim = true;
-
+        private static readonly CacheTrimmer Trimmer = new CacheTrimmer();
+        
         /// <summary>
         /// The request path for the image.
         /// </summary>
@@ -180,29 +175,23 @@ namespace ImageProcessor.Web.Caching
         {
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use ScheduleCacheTrimmer instead")]
+        protected virtual Task DebounceTrimmerAsync(Func<Task> trimmer)
+        {
+            //wrap new method
+            ScheduleCacheTrimmer(token => trimmer());
+            return Task.FromResult(0);
+        }
+
         /// <summary>
-        /// Debounces any trimming events to ensure that only one cleanup operation is running at any one time.
-        /// All caches inheriting from this class should use this method.
+        /// Will schedule any cache trimming  to ensure that only one cleanup operation is running at any one time
+        /// and that it is a quiet time to do so.
         /// </summary>
         /// <param name="trimmer">The cache trimming method.</param>
-        protected virtual async Task DebounceTrimmerAsync(Func<Task> trimmer)
+        protected void ScheduleCacheTrimmer(Func<CancellationToken, Task> trimmer)
         {
-            if (!trim)
-            {
-                return;
-            }
-
-            await Locker.WaitAsync().ConfigureAwait(false);
-            trim = false;
-            try
-            {
-                await trimmer();
-            }
-            finally
-            {
-                trim = true;
-                Locker.Release();
-            }
+            Trimmer.ScheduleTrimCache(trimmer);
         }
 
         /// <summary>
@@ -215,5 +204,126 @@ namespace ImageProcessor.Web.Caching
             this.AugmentSettings(settings);
             return settings;
         }
+
+        /// <summary>
+        /// This ensures that any cache trimming operation is executed on a background thread and that only one operation can ever occur at one time.
+        /// The execution will occur on a sliding timeframe, so anytime ScheduleTrimCache is called, it will check if it's within the timeout, if not it
+        /// will delay the timeout again but only until the maximum wait time is reached.
+        /// </summary>
+        private class CacheTrimmer : IRegisteredObject
+        {
+            public CacheTrimmer()
+            {
+                HostingEnvironment.RegisterObject(this);
+            }
+            
+            private static bool trim = false;
+            private static readonly object locker = new object();
+            private static Task task;
+            private static readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            private DateTime timestamp;
+            private Timer timer;
+
+            /// <summary>
+            /// The sliding delay time
+            /// </summary>
+            private const int WaitMilliseconds = 120000; //(2 min)
+
+            /// <summary>
+            /// The maximum time period that will elapse until we must trim (30 mins)
+            /// </summary>
+            private const int MaxWaitMilliseconds = 1800000;
+
+            public void ScheduleTrimCache(Func<CancellationToken, Task> trimmer)
+            {
+                //don't continue if already trimming or canceled
+                if (trim || (task != null && !task.IsCompleted) || tokenSource.IsCancellationRequested) return;
+
+                lock (locker)
+                {
+                    if (timer == null)
+                    {
+                        //It's the initial call to this at the beginning or after successful commit
+                        timestamp = DateTime.Now;
+                        timer = new Timer(_ => TimerRelease(trimmer));
+                        timer.Change(WaitMilliseconds, 0);
+                    }
+                    else
+                    {
+                        //if we've been cancelled then be sure to cancel the timer
+                        if (tokenSource.IsCancellationRequested)
+                        {
+                            //Stop the timer
+                            timer.Change(Timeout.Infinite, Timeout.Infinite);
+                            timer.Dispose();
+                            timer = null;
+                        }
+                        else if (
+                            // must be less than the max
+                            DateTime.Now - timestamp < TimeSpan.FromMilliseconds(MaxWaitMilliseconds) &&
+                            // and less than the delay
+                            DateTime.Now - timestamp < TimeSpan.FromMilliseconds(WaitMilliseconds))
+                        {
+                            //Delay  
+                            timer.Change(WaitMilliseconds, 0);
+                        }
+                        else
+                        {
+                            //Cannot delay! the callback will execute on the pending timeout
+                        }
+                    }
+                }
+            }
+
+            private static async Task PerformTrim(Func<CancellationToken, Task> trimmer)
+            {
+                if (tokenSource.IsCancellationRequested) return;
+
+                trim = true;
+                await trimmer(tokenSource.Token);
+                trim = false;
+            }
+
+            private void TimerRelease(Func<CancellationToken, Task> trimmer)
+            {
+                lock (locker)
+                {
+                    //don't continue if already trimming or canceled
+                    if (trim || (task != null && !task.IsCompleted) || tokenSource.IsCancellationRequested) return;
+
+                    //if the timer is not null then a trim has been scheduled
+                    if (timer != null)
+                    {
+                        //Stop the timer
+                        timer.Change(Timeout.Infinite, Timeout.Infinite);
+                        timer.Dispose();
+                        timer = null;
+
+                        //trim!
+                        trim = true;
+                        //we are already on a background then so we will block here
+                        PerformTrim(trimmer).Wait();                        
+                    }
+                }
+            }
+
+            /// <summary>
+            /// When the web app shuts down cancel the token
+            /// </summary>
+            /// <param name="immediate"></param>
+            public void Stop(bool immediate)
+            {
+                //Stop the timer
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
+                timer.Dispose();
+                timer = null;
+
+                if (!tokenSource.IsCancellationRequested)
+                    tokenSource.Cancel();
+            }
+        }
+
     }
+
 }

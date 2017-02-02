@@ -8,6 +8,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.ComponentModel;
+
 namespace ImageProcessor.Web.Extensions
 {
     using System.Collections.Generic;
@@ -38,12 +41,14 @@ namespace ImageProcessor.Web.Extensions
         /// <returns>
         /// An enumerable collection of directories that matches searchPattern and searchOption.
         /// </returns>
+        [Obsolete("This method should not be used, it doesn't actually perform an async IO operation")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static Task<IEnumerable<DirectoryInfo>> SafeEnumerateDirectoriesAsync(
             this DirectoryInfo directoryInfo,
             string searchPattern = "*",
             SearchOption searchOption = SearchOption.AllDirectories)
         {
-            return Task.Run(() => SafeEnumerateDirectories(directoryInfo, searchPattern, searchOption));
+            return Task.FromResult(SafeEnumerateDirectories(directoryInfo, searchPattern, searchOption));
         }
 
         /// <summary>
