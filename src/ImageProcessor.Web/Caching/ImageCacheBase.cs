@@ -30,7 +30,7 @@ namespace ImageProcessor.Web.Caching
     public abstract class ImageCacheBase : IImageCacheExtended
     {
         private static readonly CacheTrimmer Trimmer = new CacheTrimmer();
-        
+
         /// <summary>
         /// The request path for the image.
         /// </summary>
@@ -212,18 +212,43 @@ namespace ImageProcessor.Web.Caching
         /// </summary>
         private class CacheTrimmer : IRegisteredObject
         {
+            /// <summary>
+            /// The object to lock against
+            /// </summary>
+            private static readonly object Locker = new object();
+
+            /// <summary>
+            /// Whether the trimming task is running
+            /// </summary>
+            private static bool trim;
+
+            /// <summary>
+            /// The asynchronous trimmer task
+            /// </summary>
+            private static Task task;
+
+            /// <summary>
+            /// The cancellation token source
+            /// </summary>
+            private static readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            /// <summary>
+            /// The timestamp
+            /// </summary>
+            private DateTime timestamp;
+
+            /// <summary>
+            /// The timer
+            /// </summary>
+            private Timer timer;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CacheTrimmer"/> class.
+            /// </summary>
             public CacheTrimmer()
             {
                 HostingEnvironment.RegisterObject(this);
             }
-            
-            private static bool trim = false;
-            private static readonly object locker = new object();
-            private static Task task;
-            private static readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
-
-            private DateTime timestamp;
-            private Timer timer;
 
             /// <summary>
             /// The sliding delay time
@@ -237,81 +262,96 @@ namespace ImageProcessor.Web.Caching
 
             public void ScheduleTrimCache(Func<CancellationToken, Task> trimmer)
             {
-                //don't continue if already trimming or canceled
-                if (trim || (task != null && !task.IsCompleted) || tokenSource.IsCancellationRequested) return;
+                // Don't continue if already trimming or canceled
+                if (trim || (task != null && !task.IsCompleted) || tokenSource.IsCancellationRequested)
+                {
+                    return;
+                }
 
-                lock (locker)
+                lock (Locker)
                 {
                     if (timer == null)
                     {
-                        //It's the initial call to this at the beginning or after successful commit
+                        // It's the initial call to this at the beginning or after successful commit
                         timestamp = DateTime.Now;
                         timer = new Timer(_ => TimerRelease(trimmer));
                         timer.Change(WaitMilliseconds, 0);
                     }
                     else
                     {
-                        //if we've been cancelled then be sure to cancel the timer
+                        // If we've been cancelled then be sure to cancel the timer
                         if (tokenSource.IsCancellationRequested)
                         {
-                            //Stop the timer
+                            // Stop the timer
                             timer.Change(Timeout.Infinite, Timeout.Infinite);
                             timer.Dispose();
                             timer = null;
                         }
                         else if (
-                            // must be less than the max
+                            // Must be less than the max and less than the delay
                             DateTime.Now - timestamp < TimeSpan.FromMilliseconds(MaxWaitMilliseconds) &&
-                            // and less than the delay
                             DateTime.Now - timestamp < TimeSpan.FromMilliseconds(WaitMilliseconds))
                         {
-                            //Delay  
+                            // Delay
                             timer.Change(WaitMilliseconds, 0);
                         }
                         else
                         {
-                            //Cannot delay! the callback will execute on the pending timeout
+                            // Cannot delay! the callback will execute on the pending timeout
                         }
                     }
                 }
             }
 
+            /// <summary>
+            /// Performs the trimming function.
+            /// </summary>
+            /// <param name="trimmer">The trimmer method.</param>
+            /// <returns></returns>
             private static async Task PerformTrim(Func<CancellationToken, Task> trimmer)
             {
-                if (tokenSource.IsCancellationRequested) return;
+                if (tokenSource.IsCancellationRequested)
+                {
+                    return;
+                }
 
                 trim = true;
                 await trimmer(tokenSource.Token);
                 trim = false;
             }
 
+            /// <summary>
+            /// Releases the timer operation, running the cache trimmer.
+            /// </summary>
+            /// <param name="trimmer">The trimmer method.</param>
             private void TimerRelease(Func<CancellationToken, Task> trimmer)
             {
-                lock (locker)
+                lock (Locker)
                 {
-                    //don't continue if already trimming or canceled
-                    if (trim || (task != null && !task.IsCompleted) || tokenSource.IsCancellationRequested) return;
+                    // Don't continue if already trimming or canceled
+                    if (trim || (task != null && !task.IsCompleted) || tokenSource.IsCancellationRequested)
+                    {
+                        return;
+                    }
 
-                    //if the timer is not null then a trim has been scheduled
+                    // If the timer is not null then a trim has been scheduled
                     if (timer != null)
                     {
-                        //Stop the timer
+                        // Stop the timer
                         timer.Change(Timeout.Infinite, Timeout.Infinite);
                         timer.Dispose();
                         timer = null;
 
-                        //trim!
+                        // Trim!
                         trim = true;
-                        //we are already on a background then so we will block here
-                        PerformTrim(trimmer).Wait();                        
+
+                        // We are already on a background then so we will block here
+                        PerformTrim(trimmer).Wait();
                     }
                 }
             }
 
-            /// <summary>
-            /// When the web app shuts down cancel the token
-            /// </summary>
-            /// <param name="immediate"></param>
+            /// <inheritdoc />
             public void Stop(bool immediate)
             {
                 //Stop the timer
@@ -320,10 +360,10 @@ namespace ImageProcessor.Web.Caching
                 timer = null;
 
                 if (!tokenSource.IsCancellationRequested)
+                {
                     tokenSource.Cancel();
+                }
             }
         }
-
     }
-
 }
