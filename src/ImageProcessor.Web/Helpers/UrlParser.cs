@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Text;
+
 namespace ImageProcessor.Web.Helpers
 {
     using System;
@@ -35,7 +37,7 @@ namespace ImageProcessor.Web.Helpers
             }
 
             // Workaround for handling entirely encoded path for https://github.com/JimBobSquarePants/ImageProcessor/issues/478
-            // If url does not contain a query delimiter but does contain an encoded questionmark, 
+            // If url does not contain a query delimiter but does contain an encoded questionmark,
             // treat the last encoded questionmark as the query delimiter
             if (url.IndexOf('?') == -1 && url.IndexOf("%3F", StringComparison.Ordinal) > 0)
             {
@@ -50,12 +52,22 @@ namespace ImageProcessor.Web.Helpers
             string[] splitPath = url.Split('?');
 
             // Ensure we include any relevent querystring parameters into our request path for third party requests.
-            requestPath = hasMultiParams ? string.Join("?", splitPath.Take(splitPath.Length - 1)) : splitPath[0];
-            queryString = hasParams ? splitPath[splitPath.Length - 1] : string.Empty;
-
             // Url decode passed request path #506
             // Use Uri.UnescapeDataString instead of HttpUtility.UrlDecode to maintain plus-characters (+)
-            requestPath = Uri.UnescapeDataString(requestPath);
+            requestPath = Uri.UnescapeDataString(splitPath[0]);
+            queryString = hasParams ? splitPath[splitPath.Length - 1] : string.Empty;
+
+            // Certain Facebook requests require ony the first part to be decoded.
+            if (hasMultiParams)
+            {
+                StringBuilder sb = new StringBuilder(requestPath);
+                for (int i = 1; i < splitPath.Length - 1; i++)
+                {
+                    sb.AppendFormat("?{0}", splitPath[i]);
+                }
+
+                requestPath = sb.ToString();
+            }
         }
     }
 }

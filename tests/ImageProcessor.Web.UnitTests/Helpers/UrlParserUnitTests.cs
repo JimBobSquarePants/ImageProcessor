@@ -61,33 +61,34 @@ namespace ImageProcessor.Web.UnitTests.Helpers
             //Requestpath should be urldecoded resulting in an invalid requestpath
             string requestPath, queryString;
 
-            //Test legacy url
+            // Test legacy url
             string legacyUrl = baseUrl + "/" + prefix + "?" + path + "?" + query;
             Web.Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
-            Assert.False(requestPath.Equals(path));
+            Assert.True(requestPath.Equals(path));
 
-            //Test non legacy url
-            string nonLegacyUrl = baseUrl + "/" + prefix + "/" + path.Substring(7) + "?" + query;
-            Web.Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
+            // Test non legacy url
+            path = path.Substring(7);
+            string nonLegacyUrl = baseUrl + "/" + prefix + "/" + path + "?" + query;
+            Web.Helpers.UrlParser.ParseUrl(nonLegacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
-            Assert.False(requestPath.TrimStart('/').Equals(path));
+            Assert.True(requestPath.TrimStart('/').Equals(path));
         }
 
         [Test]
         [TestCase("/", "remote.axd", "http%3A%2F%2Fwww.remotedomain.com%2Fsome%2Bpath%2F%3Fa%3Dqwerty%26b%3D123%26comment%3Dsome%2Bcomment%2Bwith%2Bspaces", "width=100&height=100", "http://www.remotedomain.com/some+path/?a=qwerty&b=123&comment=some+comment+with+spaces")]
         public void TestRemoteUrlEncodedWithQuerystring(string baseUrl, string prefix, string path, string query, string expectedPath)
         {
-            //Requestpath should be urldecoded resulting in an invalid requestpath
+            // Requestpath should be urldecoded resulting in an invalid requestpath
             string requestPath, queryString;
 
-            //Test legacy url
+            // Test legacy url
             string legacyUrl = baseUrl + "/" + prefix + "?" + path + "?" + query;
             Web.Helpers.UrlParser.ParseUrl(legacyUrl, prefix, out requestPath, out queryString);
             Assert.True(queryString.Equals(query));
             Assert.True(requestPath.Equals(expectedPath));
 
-            //This will not work with non legacy url since the protocol is encoded
+            // This will not work with non legacy url since the protocol is encoded
         }
 
         [Test]
