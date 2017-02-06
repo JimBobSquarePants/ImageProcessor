@@ -15,7 +15,7 @@
   <project>
     <name>ImageProcessor Web</name>
     <!--<prerelease>-beta</prerelease>-->
-    <version>4.8.1.0</version>
+    <version>4.8.2.0</version>
     <folder>..\src\ImageProcessor.Web</folder>
     <projfile>ImageProcessor.Web.csproj</projfile>
     <outputs>
