@@ -225,7 +225,7 @@ namespace ImageProcessor.Web.Caching
             /// <summary>
             /// The asynchronous trimmer task
             /// </summary>
-            private static Task task;
+            // private static Task task;
 
             /// <summary>
             /// The cancellation token source
@@ -263,7 +263,7 @@ namespace ImageProcessor.Web.Caching
             public void ScheduleTrimCache(Func<CancellationToken, Task> trimmer)
             {
                 // Don't continue if already trimming or canceled
-                if (trim || (task != null && !task.IsCompleted) || tokenSource.IsCancellationRequested)
+                if (trim || tokenSource.IsCancellationRequested)
                 {
                     return;
                 }
@@ -329,7 +329,7 @@ namespace ImageProcessor.Web.Caching
                 lock (Locker)
                 {
                     // Don't continue if already trimming or canceled
-                    if (trim || (task != null && !task.IsCompleted) || tokenSource.IsCancellationRequested)
+                    if (trim || tokenSource.IsCancellationRequested)
                     {
                         return;
                     }
