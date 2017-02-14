@@ -258,7 +258,7 @@ namespace ImageProcessor.Web.Caching
                         }
 
                         // If the directory is empty of files delete it to remove the FCN.
-                        RecursivelyDeleteEmptyDirectories(directory, rootDirectoryInfo, token);
+                        this.RecursivelyDeleteEmptyDirectories(directory, rootDirectoryInfo, token);
                     }
                 }
                 return Task.FromResult(0);
@@ -284,7 +284,7 @@ namespace ImageProcessor.Web.Caching
             {
                 // Check if the ETag matches (doing this here because context.RewritePath seems to handle it automatically
                 string eTagFromHeader = context.Request.Headers["If-None-Match"];
-                string eTag = GetETag();
+                string eTag = this.GetETag();
                 if (!string.IsNullOrEmpty(eTagFromHeader) && !string.IsNullOrEmpty(eTag) && eTagFromHeader == eTag)
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.NotModified;
@@ -321,7 +321,7 @@ namespace ImageProcessor.Web.Caching
 
                     // Since we are going to call Response.End(), we need to go ahead and set the headers
                     HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
-                    SetETagHeader(context);
+                    this.SetETagHeader(context);
                     context.Response.AddHeader("Content-Length", new FileInfo(this.CachedPath).Length.ToString());
 
                     context.Response.TransmitFile(this.CachedPath);
@@ -543,7 +543,7 @@ namespace ImageProcessor.Web.Caching
                     directory.Delete();
                 }
 
-                RecursivelyDeleteEmptyDirectories(directory.Parent, root, token);
+                this.RecursivelyDeleteEmptyDirectories(directory.Parent, root, token);
             }
             catch (Exception ex)
             {
@@ -559,7 +559,7 @@ namespace ImageProcessor.Web.Caching
         /// <param name="context"></param>
         private void SetETagHeader(HttpContext context)
         {
-            string eTag = GetETag();
+            string eTag = this.GetETag();
             if (!string.IsNullOrEmpty(eTag))
             {
                 context.Response.Cache.SetETag(eTag);
@@ -574,7 +574,7 @@ namespace ImageProcessor.Web.Caching
         {
             if (this.cachedImageCreationTimeUtc != DateTime.MinValue)
             {
-                long lastModFileTime = cachedImageCreationTimeUtc.ToFileTime();
+                long lastModFileTime = this.cachedImageCreationTimeUtc.ToFileTime();
                 DateTime utcNow = DateTime.UtcNow;
                 long nowFileTime = utcNow.ToFileTime();
                 string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
