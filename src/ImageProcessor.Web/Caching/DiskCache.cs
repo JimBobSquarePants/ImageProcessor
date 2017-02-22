@@ -224,7 +224,7 @@ namespace ImageProcessor.Web.Caching
                             break;
                         }
 
-                        IEnumerable<FileInfo> files = directory.EnumerateFiles().AsParallel().OrderBy(f => f.CreationTimeUtc);
+                        IEnumerable<FileInfo> files = directory.EnumerateFiles().OrderBy(f => f.CreationTimeUtc);
                         int count = files.Count();
 
                         foreach (FileInfo fileInfo in files)
