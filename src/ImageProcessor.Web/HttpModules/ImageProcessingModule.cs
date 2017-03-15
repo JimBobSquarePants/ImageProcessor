@@ -251,50 +251,58 @@ namespace ImageProcessor.Web.HttpModules
                 // Ensure origin is sanitized.
                 string origin = context.Server.UrlEncode(context.Request.Headers["Origin"]);
 
-                ImageSecuritySection.CORSOriginElement origins =
-                    ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
+                if (origin == null)
+                {
+                    return;
+                }
+
+                // Handle anonymous requests. See #566
+                if (origin.Equals("ANONYMOUS", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    context.Response.AddHeader("Access-Control-Allow-Origin", origin);
+                    return;
+                }
+
+                ImageSecuritySection.CORSOriginElement origins =ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
 
                 if (origins?.WhiteList == null)
                 {
                     return;
                 }
 
-                // Check the url is from a whitelisted location.
-                if (origin != null)
+                // Now we check to see if the the url is from a whitelisted location.
+                Uri url = new Uri(origin);
+                string upper = url.Host.ToUpperInvariant();
+
+                // Check for root or sub domain.
+                bool validUrl = false;
+                foreach (Uri uri in origins.WhiteList)
                 {
-                    Uri url = new Uri(origin);
-                    string upper = url.Host.ToUpperInvariant();
-
-                    // Check for root or sub domain.
-                    bool validUrl = false;
-                    foreach (Uri uri in origins.WhiteList)
+                    if (uri.ToString() == "*")
                     {
-                        if (uri.ToString() == "*")
-                        {
-                            validUrl = true;
-                            break;
-                        }
+                        validUrl = true;
+                        break;
+                    }
 
-                        if (!uri.IsAbsoluteUri)
-                        {
-                            Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
-                            validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
-                        }
-                        else
-                        {
-                            validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
-                        }
-
-                        if (validUrl)
-                        {
-                            break;
-                        }
+                    if (!uri.IsAbsoluteUri)
+                    {
+                        Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
+                        validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
+                    }
+                    else
+                    {
+                        validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
                     }
 
                     if (validUrl)
                     {
-                        context.Response.AddHeader("Access-Control-Allow-Origin", origin);
+                        break;
                     }
+                }
+
+                if (validUrl)
+                {
+                    context.Response.AddHeader("Access-Control-Allow-Origin", origin);
                 }
             }
         }
