@@ -23,7 +23,8 @@ namespace ImageProcessor.Imaging.Helpers
         /// </summary>
         /// <param name="graphics">The graphics.</param>
         /// <param name="blending">Whether the graphics object will be blending pixels.</param>
-        public static void SetGraphicsOptions(Graphics graphics, bool blending = false)
+        /// <param name="smoothing">Whether the graphics object will be smoothing pixels.</param>
+        public static void SetGraphicsOptions(Graphics graphics, bool blending = false, bool smoothing = false)
         {
             // Highest quality resampling algorithm.
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -31,7 +32,12 @@ namespace ImageProcessor.Imaging.Helpers
             // Ensure pixel offset is set.
             graphics.PixelOffsetMode = PixelOffsetMode.Half;
 
-            if (blending)
+            if (smoothing)
+            {
+                // We want smooth edges when drawing.
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            }
+            if (blending || smoothing)
             {
                 // Best combination for blending pixels.
                 graphics.CompositingMode = CompositingMode.SourceOver;

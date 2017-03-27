@@ -58,11 +58,6 @@ namespace ImageProcessor.Web.Caching
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if (string.IsNullOrWhiteSpace(querystring))
-            {
-                throw new ArgumentNullException(nameof(querystring));
-            }
-
             // Use an sha1 hash of the full path including the querystring to create the image name.
             // That name can also be used as a key for the cached image and we should be able to use
             // The characters of that hash as sub-folders.

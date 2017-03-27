@@ -9,17 +9,16 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.ComponentModel;
-using System.Web.Hosting;
-
 namespace ImageProcessor.Web.Caching
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
+    using System.Web.Hosting;
 
     using ImageProcessor.Web.Configuration;
 
@@ -179,8 +178,8 @@ namespace ImageProcessor.Web.Caching
         [Obsolete("Use ScheduleCacheTrimmer instead")]
         protected virtual Task DebounceTrimmerAsync(Func<Task> trimmer)
         {
-            //wrap new method
-            ScheduleCacheTrimmer(token => trimmer());
+            // Wrap new method
+            this.ScheduleCacheTrimmer(token => trimmer());
             return Task.FromResult(0);
         }
 
@@ -270,12 +269,12 @@ namespace ImageProcessor.Web.Caching
 
                 lock (Locker)
                 {
-                    if (timer == null)
+                    if (this.timer == null)
                     {
                         // It's the initial call to this at the beginning or after successful commit
-                        timestamp = DateTime.Now;
-                        timer = new Timer(_ => TimerRelease(trimmer));
-                        timer.Change(WaitMilliseconds, 0);
+                        this.timestamp = DateTime.Now;
+                        this.timer = new Timer(_ => this.TimerRelease(trimmer));
+                        this.timer.Change(WaitMilliseconds, 0);
                     }
                     else
                     {
@@ -283,17 +282,17 @@ namespace ImageProcessor.Web.Caching
                         if (tokenSource.IsCancellationRequested)
                         {
                             // Stop the timer
-                            timer.Change(Timeout.Infinite, Timeout.Infinite);
-                            timer.Dispose();
-                            timer = null;
+                            this.timer.Change(Timeout.Infinite, Timeout.Infinite);
+                            this.timer.Dispose();
+                            this.timer = null;
                         }
                         else if (
                             // Must be less than the max and less than the delay
-                            DateTime.Now - timestamp < TimeSpan.FromMilliseconds(MaxWaitMilliseconds) &&
-                            DateTime.Now - timestamp < TimeSpan.FromMilliseconds(WaitMilliseconds))
+                            DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(MaxWaitMilliseconds) &&
+                            DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(WaitMilliseconds))
                         {
                             // Delay
-                            timer.Change(WaitMilliseconds, 0);
+                            this.timer.Change(WaitMilliseconds, 0);
                         }
                         else
                         {
@@ -335,12 +334,12 @@ namespace ImageProcessor.Web.Caching
                     }
 
                     // If the timer is not null then a trim has been scheduled
-                    if (timer != null)
+                    if (this.timer != null)
                     {
                         // Stop the timer
-                        timer.Change(Timeout.Infinite, Timeout.Infinite);
-                        timer.Dispose();
-                        timer = null;
+                        this.timer.Change(Timeout.Infinite, Timeout.Infinite);
+                        this.timer.Dispose();
+                        this.timer = null;
 
                         // Trim!
                         trim = true;
@@ -354,10 +353,13 @@ namespace ImageProcessor.Web.Caching
             /// <inheritdoc />
             public void Stop(bool immediate)
             {
-                //Stop the timer
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
-                timer.Dispose();
-                timer = null;
+                // Stop the timer
+                if (this.timer != null)
+                {
+                    this.timer.Change(Timeout.Infinite, Timeout.Infinite);
+                    this.timer.Dispose();
+                    this.timer = null;
+                }
 
                 if (!tokenSource.IsCancellationRequested)
                 {

@@ -402,7 +402,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 catch (WebException ex)
                 {
                     // A 304 is not an error
-                    if (ex.Response != null && ((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
+                    // It appears that some CDN's on Azure (Akamai) do not work properly when making head requests.
+                    // They will return a response url and other headers but a 500 status code.
+                    if (ex.Response != null && (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified
+                        || ex.Response.ResponseUri.AbsoluteUri.Equals(this.cachedRewritePath, StringComparison.OrdinalIgnoreCase)))
                     {
                         response = (HttpWebResponse)ex.Response;
                     }
@@ -469,7 +472,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         HttpStatusCode responseCode = response.StatusCode;
 
                         // A 304 is not an error
-                        if (responseCode == HttpStatusCode.NotModified)
+                        // It appears that some CDN's on Azure (Akamai) do not work properly when making head requests.
+                        // They will return a response url and other headers but a 500 status code.
+                        if (responseCode == HttpStatusCode.NotModified
+                            || response.ResponseUri.AbsoluteUri.Equals(this.cachedRewritePath, StringComparison.OrdinalIgnoreCase))
                         {
                             response.Dispose();
                             ImageProcessingModule.AddCorsRequestHeaders(context);

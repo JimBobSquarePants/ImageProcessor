@@ -112,6 +112,15 @@ namespace ImageProcessor.Processors
                     newImage = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
                     newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
+                    int rotationValue = 0;
+                    const int orientation = (int)ExifPropertyTag.Orientation;
+                    bool rotate = factory.PreserveExifData && factory.ExifPropertyItems.ContainsKey(orientation);
+                    if (rotate)
+                    {
+                        rotationValue = factory.ExifPropertyItems[orientation].Value[0];
+                        this.ForwardRotateFlip(rotationValue, ref image);
+                    }
+
                     using (Graphics graphics = Graphics.FromImage(newImage))
                     {
                         GraphicsHelper.SetGraphicsOptions(graphics);
@@ -123,6 +132,7 @@ namespace ImageProcessor.Processors
                         using (ImageAttributes wrapMode = new ImageAttributes())
                         {
                             wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+
                             graphics.DrawImage(
                                 image,
                                 new Rectangle(0, 0, rectangle.Width, rectangle.Height),
@@ -138,6 +148,11 @@ namespace ImageProcessor.Processors
                     // Reassign the image.
                     image.Dispose();
                     image = newImage;
+
+                    if (rotate)
+                    {
+                        this.ReverseRotateFlip(rotationValue, ref image);
+                    }
 
                     if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
                     {
@@ -157,6 +172,78 @@ namespace ImageProcessor.Processors
             }
 
             return image;
+        }
+
+        /// <summary>
+        /// Performs a forward rotation of an image
+        /// </summary>
+        /// <param name="orientation">The EXIF orientation value.</param>
+        /// <param name="image">The image</param>
+        private void ForwardRotateFlip(int orientation, ref Image image)
+        {
+            switch (orientation)
+            {
+                case 8:
+                    // Rotated 90 right
+                    image.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                    break;
+
+                case 7: // Rotated 90 right, flip horizontally
+                    image.RotateFlip(RotateFlipType.Rotate270FlipX);
+                    break;
+
+                case 6: // Rotated 90 left
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    break;
+
+                case 5: // Rotated 90 left, flip horizontally
+                    image.RotateFlip(RotateFlipType.Rotate90FlipX);
+                    break;
+
+                case 3: // Rotate 180 left
+                    image.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                    break;
+
+                case 2: // Flip horizontally
+                    image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Performs an inverse rotation of an image 
+        /// </summary>
+        /// <param name="orientation">The EXIF orientation value.</param>
+        /// <param name="image">The image</param>
+        private void ReverseRotateFlip(int orientation, ref Image image)
+        {
+            switch (orientation)
+            {
+                case 8:
+                    // Rotated 90 right
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    break;
+
+                case 7: // Rotated 90 right, flip horizontally
+                    image.RotateFlip(RotateFlipType.Rotate90FlipX);
+                    break;
+
+                case 6: // Rotated 90 left
+                    image.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                    break;
+
+                case 5: // Rotated 90 left, flip horizontally
+                    image.RotateFlip(RotateFlipType.Rotate270FlipX);
+                    break;
+
+                case 3: // Rotate 180 left
+                    image.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                    break;
+
+                case 2: // Flip horizontally
+                    image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    break;
+            }
         }
     }
 }
