@@ -21,8 +21,6 @@ namespace ImageProcessor.Web.Services
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Helpers;
 
-    using Microsoft.IO;
-
     /// <summary>
     /// A generic cloud image service for retrieving images where the remote location has been rewritten as a
     /// a virtual path. Commonly seen in content management systems like Umbraco.
@@ -98,6 +96,7 @@ namespace ImageProcessor.Web.Services
             string relativeResourceUrl = id.ToString();
             if (!string.IsNullOrEmpty(container))
             {
+                // TODO: Check me.
                 container = $"{container.TrimEnd('/')}/";
                 if (!relativeResourceUrl.StartsWith($"{container}/"))
                 {

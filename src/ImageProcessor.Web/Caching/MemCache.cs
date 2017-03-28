@@ -68,7 +68,7 @@ namespace ImageProcessor.Web.Caching
             {
                 if (policy == null)
                 {
-                    // Create a new cache policy with the default values 
+                    // Create a new cache policy with the default values
                     policy = new CacheItemPolicy();
                 }
 
@@ -149,7 +149,7 @@ namespace ImageProcessor.Web.Caching
 
             if (policy == null)
             {
-                // Create a new cache policy with the default values 
+                // Create a new cache policy with the default values
                 policy = new CacheItemPolicy();
             }
 
@@ -209,9 +209,9 @@ namespace ImageProcessor.Web.Caching
 
             using (new WriteLock(Locker))
             {
-                // You can't remove items from a collection whilst you are iterating over it so you need to 
+                // You can't remove items from a collection whilst you are iterating over it so you need to
                 // create a collection to store the items to remove.
-                ConcurrentDictionary<string, string> tempDictionary = new ConcurrentDictionary<string, string>();
+                Dictionary<string, string> tempDictionary = new Dictionary<string, string>();
 
                 foreach (KeyValuePair<string, string> cacheItem in CacheItems)
                 {
@@ -224,7 +224,7 @@ namespace ImageProcessor.Web.Caching
                         {
                             string key = cacheItem.Key;
                             string value = cacheItem.Value;
-                            tempDictionary.AddOrUpdate(key, value, (oldkey, oldValue) => value);
+                            tempDictionary[key] = value;
                         }
                     }
                 }

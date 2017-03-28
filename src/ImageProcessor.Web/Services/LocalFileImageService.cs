@@ -44,7 +44,7 @@ namespace ImageProcessor.Web.Services
         public Dictionary<string, string> Settings { get; set; }
 
         /// <summary>
-        /// Gets or sets the white list of <see cref="System.Uri"/>. 
+        /// Gets or sets the white list of <see cref="System.Uri"/>.
         /// </summary>
         public Uri[] WhiteList { get; set; }
 
@@ -77,12 +77,9 @@ namespace ImageProcessor.Web.Services
             byte[] buffer;
 
             // Check to see if the file exists.
-            // ReSharper disable once AssignNullToNotNullAttribute
-            FileInfo fileInfo = new FileInfo(path);
-
-            if (!fileInfo.Exists)
+            if (!File.Exists(path))
             {
-                throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + path);
+                throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {path}");
             }
 
             using (FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))

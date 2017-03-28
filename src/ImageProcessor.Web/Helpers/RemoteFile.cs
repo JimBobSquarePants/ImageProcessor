@@ -11,7 +11,6 @@
 namespace ImageProcessor.Web.Helpers
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Net;
     using System.Security;
@@ -177,9 +176,9 @@ namespace ImageProcessor.Web.Helpers
             catch (WebException ex)
             {
                 HttpWebResponse errorResponse = (HttpWebResponse)ex.Response;
-                if (errorResponse?.StatusCode == HttpStatusCode.NotFound)
+                if (errorResponse?.StatusCode == HttpStatusCode.NotFound || ex.Status == WebExceptionStatus.NameResolutionFailure)
                 {
-                    throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + this.Uri);
+                    throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + this.Uri, ex);
                 }
 
                 if (errorResponse?.StatusCode == HttpStatusCode.NotModified)

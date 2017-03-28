@@ -246,56 +246,57 @@ namespace ImageProcessor.Web.HttpModules
         /// </param>
         public static void AddCorsRequestHeaders(HttpContext context)
         {
-            if (!string.IsNullOrEmpty(context.Request.Headers["Origin"]))
+            string origin = context.Request.Headers["Origin"];
+            if (string.IsNullOrEmpty(origin))
             {
-                // Ensure origin is sanitized.
-                string origin = context.Server.UrlEncode(context.Request.Headers["Origin"]);
+                return;
+            }
 
-                ImageSecuritySection.CORSOriginElement origins =
-                    ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
+            // Now we check to see if the the url is from a whitelisted location.
+            Uri url;
+            if (!Uri.TryCreate(origin, UriKind.RelativeOrAbsolute, out url))
+            {
+                return;
+            }
 
-                if (origins?.WhiteList == null)
+            ImageSecuritySection.CORSOriginElement origins = ImageProcessorConfiguration.Instance.GetImageSecuritySection().CORSOrigin;
+
+            if (origins?.WhiteList == null)
+            {
+                return;
+            }
+
+            string upper = url.Host.ToUpperInvariant();
+
+            // Check for root or sub domain.
+            bool validUrl = false;
+            foreach (Uri uri in origins.WhiteList)
+            {
+                if (uri.ToString() == "*")
                 {
-                    return;
+                    validUrl = true;
+                    break;
                 }
 
-                // Check the url is from a whitelisted location.
-                if (origin != null)
+                if (!uri.IsAbsoluteUri)
                 {
-                    Uri url = new Uri(origin);
-                    string upper = url.Host.ToUpperInvariant();
-
-                    // Check for root or sub domain.
-                    bool validUrl = false;
-                    foreach (Uri uri in origins.WhiteList)
-                    {
-                        if (uri.ToString() == "*")
-                        {
-                            validUrl = true;
-                            break;
-                        }
-
-                        if (!uri.IsAbsoluteUri)
-                        {
-                            Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
-                            validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
-                        }
-                        else
-                        {
-                            validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
-                        }
-
-                        if (validUrl)
-                        {
-                            break;
-                        }
-                    }
-
-                    if (validUrl)
-                    {
-                        context.Response.AddHeader("Access-Control-Allow-Origin", origin);
-                    }
+                    Uri rebaseUri = new Uri($"http://{uri.ToString().TrimStart('.', '/')}");
+                    validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
                 }
+                else
+                {
+                    validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
+                }
+
+                if (validUrl)
+                {
+                    break;
+                }
+            }
+
+            if (validUrl)
+            {
+                context.Response.AddHeader("Access-Control-Allow-Origin", origin);
             }
         }
 
@@ -435,6 +436,7 @@ namespace ImageProcessor.Web.HttpModules
         private void PostReleaseRequestState(object sender, EventArgs e)
         {
             HttpContext context = ((HttpApplication)sender).Context;
+
             // Set the headers
             if (this.imageCache != null)
             {

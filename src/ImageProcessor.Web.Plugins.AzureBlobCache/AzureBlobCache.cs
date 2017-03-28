@@ -254,14 +254,14 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <returns>
         /// The asynchronous <see cref="Task"/> representing an asynchronous operation.
         /// </returns>
-        public override async Task TrimCacheAsync()
+        public override Task TrimCacheAsync()
         {
             if (!this.TrimCache)
             {
-                return;
+                return Task.FromResult(0);
             }
 
-            await this.DebounceTrimmerAsync(async () =>
+            this.ScheduleCacheTrimmer(async token =>
             {
                 // Jump up to the parent branch to clean through the cache.
                 string parent = string.Empty;
@@ -279,11 +279,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 // Loop through the all the files in a non blocking fashion.
                 do
                 {
-                    BlobResultSegment response = await cloudCachedBlobContainer.ListBlobsSegmentedAsync(parent, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null);
+                    BlobResultSegment response = await cloudCachedBlobContainer.ListBlobsSegmentedAsync(parent, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null, token);
                     continuationToken = response.ContinuationToken;
                     results.AddRange(response.Results);
                 }
-                while (continuationToken != null);
+                while (token.IsCancellationRequested == false && continuationToken != null);
 
                 // Now leap through and delete.
                 foreach (
@@ -292,16 +292,18 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                            .Cast<CloudBlockBlob>()
                            .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
                 {
-                    if (blob.Properties.LastModified.HasValue && !this.IsExpired(blob.Properties.LastModified.Value.UtcDateTime))
+                    if (token.IsCancellationRequested || (blob.Properties.LastModified.HasValue && !this.IsExpired(blob.Properties.LastModified.Value.UtcDateTime)))
                     {
                         break;
                     }
 
                     // Remove from the cache and delete each CachedImage.
                     CacheIndexer.Remove(blob.Name);
-                    await blob.DeleteAsync();
+                    await blob.DeleteAsync(token);
                 }
             });
+
+            return Task.FromResult(0);
         }
 
         /// <summary>
@@ -400,7 +402,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 catch (WebException ex)
                 {
                     // A 304 is not an error
-                    if (ex.Response != null && ((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
+                    // It appears that some CDN's on Azure (Akamai) do not work properly when making head requests.
+                    // They will return a response url and other headers but a 500 status code.
+                    if (ex.Response != null && (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified
+                        || ex.Response.ResponseUri.AbsoluteUri.Equals(this.cachedRewritePath, StringComparison.OrdinalIgnoreCase)))
                     {
                         response = (HttpWebResponse)ex.Response;
                     }
@@ -467,7 +472,10 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         HttpStatusCode responseCode = response.StatusCode;
 
                         // A 304 is not an error
-                        if (responseCode == HttpStatusCode.NotModified)
+                        // It appears that some CDN's on Azure (Akamai) do not work properly when making head requests.
+                        // They will return a response url and other headers but a 500 status code.
+                        if (responseCode == HttpStatusCode.NotModified
+                            || response.ResponseUri.AbsoluteUri.Equals(this.cachedRewritePath, StringComparison.OrdinalIgnoreCase))
                         {
                             response.Dispose();
                             ImageProcessingModule.AddCorsRequestHeaders(context);

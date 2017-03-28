@@ -191,61 +191,78 @@ namespace ImageProcessor.Web.Caching
         /// <returns>
         /// The asynchronous <see cref="Task"/> representing an asynchronous operation.
         /// </returns>
-        public override async Task TrimCacheAsync()
+        public override Task TrimCacheAsync()
         {
             if (!this.TrimCache)
             {
-                return;
+                return Task.FromResult(0);
             }
 
-            await this.DebounceTrimmerAsync(async () =>
-             {
-                 string rootDirectory = Path.GetDirectoryName(this.CachedPath);
+            this.ScheduleCacheTrimmer(token =>
+            {
+                string rootDirectory = Path.GetDirectoryName(this.CachedPath);
 
-                 if (rootDirectory != null)
-                 {
-                     // Jump up to the parent branch to clean through the cache.
-                     // ReSharper disable once PossibleNullReferenceException
-                     string parent = this.FolderDepth > 0 ? Path.GetFileName(this.CachedPath).Substring(0, 1) : string.Empty;
-                     DirectoryInfo rootDirectoryInfo = new DirectoryInfo(Path.Combine(validatedAbsoluteCachePath, parent));
-                     IEnumerable<DirectoryInfo> directories = await rootDirectoryInfo.SafeEnumerateDirectoriesAsync();
+                if (rootDirectory != null)
+                {
+                    // Jump up to the parent branch to clean through the cache.
+                    // UNC folders can throw exceptions if the file doesn't exist.
+                    IEnumerable<string> directories = SafeEnumerateDirectories(validatedAbsoluteCachePath).Reverse();
 
-                     // UNC folders can throw exceptions if the file doesn't exist.
-                     foreach (DirectoryInfo directory in directories)
-                     {
-                         IEnumerable<FileInfo> files = directory.EnumerateFiles().AsParallel().OrderBy(f => f.CreationTimeUtc);
-                         int count = files.Count();
+                    foreach (string directory in directories)
+                    {
+                        if (!Directory.Exists(directory))
+                        {
+                            continue;
+                        }
 
-                         foreach (FileInfo fileInfo in files)
-                         {
-                             try
-                             {
-                                 // If the group count is equal to the max count minus 1 then we know we
-                                 // have reduced the number of items below the maximum allowed.
-                                 // We'll cleanup any orphaned expired files though.
-                                 if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
-                                 {
-                                     break;
-                                 }
+                        if (token.IsCancellationRequested)
+                        {
+                            break;
+                        }
 
-                                 // Remove from the cache and delete each CachedImage.
-                                 CacheIndexer.Remove(fileInfo.Name);
-                                 fileInfo.Delete();
-                                 count -= 1;
-                             }
+                        IEnumerable<FileInfo> files = Directory.EnumerateFiles(directory)
+                                                               .Select(f => new FileInfo(f))
+                                                               .OrderBy(f => f.CreationTimeUtc);
+                        int count = files.Count();
 
-                             catch (Exception ex)
-                             {
-                                 // Log it but skip to the next file.
-                                 ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}, {ex.Message}");
-                             }
-                         }
+                        foreach (FileInfo fileInfo in files)
+                        {
+                            if (token.IsCancellationRequested)
+                            {
+                                break;
+                            }
 
-                         // If the directory is empty of files delete it to remove the FCN.
-                         RecursivelyDeleteEmptyDirectories(directory, rootDirectoryInfo);
-                     }
-                 }
-             });
+                            try
+                            {
+                                // If the group count is equal to the max count minus 1 then we know we
+                                // have reduced the number of items below the maximum allowed.
+                                // We'll cleanup any orphaned expired files though.
+                                if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
+                                {
+                                    break;
+                                }
+
+                                // Remove from the cache and delete each CachedImage.
+                                CacheIndexer.Remove(fileInfo.Name);
+                                fileInfo.Delete();
+                                count -= 1;
+                            }
+
+                            catch (Exception ex)
+                            {
+                                // Log it but skip to the next file.
+                                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}, {ex.Message}");
+                            }
+                        }
+
+                        // If the directory is empty of files delete it to remove the FCN.
+                        this.RecursivelyDeleteEmptyDirectories(directory, validatedAbsoluteCachePath, token);
+                    }
+                }
+                return Task.FromResult(0);
+            });
+
+            return Task.FromResult(0);
         }
 
         /// <summary>
@@ -265,7 +282,7 @@ namespace ImageProcessor.Web.Caching
             {
                 // Check if the ETag matches (doing this here because context.RewritePath seems to handle it automatically
                 string eTagFromHeader = context.Request.Headers["If-None-Match"];
-                string eTag = GetETag();
+                string eTag = this.GetETag();
                 if (!string.IsNullOrEmpty(eTagFromHeader) && !string.IsNullOrEmpty(eTag) && eTagFromHeader == eTag)
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.NotModified;
@@ -300,11 +317,13 @@ namespace ImageProcessor.Web.Caching
                     string mimeType = Helpers.ImageHelpers.Instance.GetContentTypeForExtension(extension);
                     context.Response.ContentType = mimeType;
 
-                    context.Response.TransmitFile(this.CachedPath);
-
                     // Since we are going to call Response.End(), we need to go ahead and set the headers
                     HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
-                    SetETagHeader(context);
+                    this.SetETagHeader(context);
+                    context.Response.AddHeader("Content-Length", new FileInfo(this.CachedPath).Length.ToString());
+
+                    context.Response.TransmitFile(this.CachedPath);
+
 
                     // This is quite important expecially if the request is a when an `IImageService` handles the request
                     // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
@@ -456,6 +475,40 @@ namespace ImageProcessor.Web.Caching
         }
 
         /// <summary>
+        /// Returns an enumerable collection of directory paths that matches a specified search pattern and search subdirectory option.
+        /// Will return an empty enumerable on exception. Quick and dirty but does what I need just now.
+        /// </summary>
+        /// <param name="directoryPath">
+        /// The path to the directory to search within.
+        /// </param>
+        /// <param name="searchPattern">
+        /// The search string to match against the names of directories. This parameter can contain a combination of valid literal path 
+        /// and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions. The default pattern is "*", which returns all files.
+        /// </param>
+        /// <param name="searchOption">
+        /// One of the enumeration values that specifies whether the search operation should include only 
+        /// the current directory or all subdirectories. The default value is AllDirectories.
+        /// </param>
+        /// <returns>
+        /// An enumerable collection of directories that matches searchPattern and searchOption.
+        /// </returns>
+        private static IEnumerable<string> SafeEnumerateDirectories(string directoryPath, string searchPattern = "*", SearchOption searchOption = SearchOption.AllDirectories)
+        {
+            IEnumerable<string> directories;
+
+            try
+            {
+                directories = Directory.EnumerateDirectories(directoryPath, searchPattern, searchOption);
+            }
+            catch
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            return directories;
+        }
+
+        /// <summary>
         /// Returns a value indicating whether the requested image has been updated.
         /// </summary>
         /// <param name="creationDate">The creation date.</param>
@@ -497,26 +550,35 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Recursively delete the directories in the folder.
         /// </summary>
-        /// <param name="directory"></param>
-        /// <param name="root"></param>
-        private void RecursivelyDeleteEmptyDirectories(DirectoryInfo directory, DirectoryInfo root)
+        /// <param name="directory">The current directory.</param>
+        /// <param name="root">The root path.</param>
+        /// <param name="token">The cancellation token.</param>
+        private void RecursivelyDeleteEmptyDirectories(string directory, string root, CancellationToken token)
         {
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
             try
             {
-                if (directory.FullName == root.FullName) { return; }
-
-                // If the directory is empty of files delete it to remove the FCN.
-                if (!directory.GetFiles("*", SearchOption.AllDirectories).Any())
+                if (directory == root)
                 {
-                    directory.Delete();
+                    return;
                 }
 
-                RecursivelyDeleteEmptyDirectories(directory.Parent, root);
+                // If the directory is empty of files delete it to remove the FCN.
+                if (!Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly).Any() && !Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly).Any())
+                {
+                    Directory.Delete(directory);
+                }
+
+                this.RecursivelyDeleteEmptyDirectories(Directory.GetParent(directory).FullName, root, token);
             }
             catch (Exception ex)
             {
                 // Log it but skip to the next directory.
-                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory.FullName}, {ex.Message}");
+                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory}, {ex.Message}");
 
             }
         }
@@ -527,7 +589,7 @@ namespace ImageProcessor.Web.Caching
         /// <param name="context"></param>
         private void SetETagHeader(HttpContext context)
         {
-            string eTag = GetETag();
+            string eTag = this.GetETag();
             if (!string.IsNullOrEmpty(eTag))
             {
                 context.Response.Cache.SetETag(eTag);
@@ -542,7 +604,7 @@ namespace ImageProcessor.Web.Caching
         {
             if (this.cachedImageCreationTimeUtc != DateTime.MinValue)
             {
-                long lastModFileTime = cachedImageCreationTimeUtc.ToFileTime();
+                long lastModFileTime = this.cachedImageCreationTimeUtc.ToFileTime();
                 DateTime utcNow = DateTime.UtcNow;
                 long nowFileTime = utcNow.ToFileTime();
                 string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
