@@ -121,5 +121,14 @@ namespace ImageProcessor.Web.UnitTests.Helpers
 
             //This will not work with non legacy url since the protocol is encoded
         }
+
+        [Test]
+        [TestCase("http://www.mydomain.com/MyPrefix/image.jpg", "myprefix", "/image.jpg")]
+        public void TestParseUrlPrefixIsCaseInsensitive(string url, string prefix, string expectedPath)
+        {
+            string requestPath, queryString;
+            Web.Helpers.UrlParser.ParseUrl(url, prefix, out requestPath, out queryString);
+            Assert.True(requestPath.Equals(expectedPath));
+        }
     }
 }
