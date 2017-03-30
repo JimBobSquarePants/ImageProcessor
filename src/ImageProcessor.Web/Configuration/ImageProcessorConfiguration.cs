@@ -302,13 +302,18 @@ namespace ImageProcessor.Web.Configuration
                 }
 
                 IImageService imageService = Activator.CreateInstance(type) as IImageService;
-                if (!string.IsNullOrWhiteSpace(config.Prefix))
+                if (imageService != null)
                 {
-                    if (imageService != null)
+                    if (!string.IsNullOrWhiteSpace(config.Prefix))
                     {
                         imageService.Prefix = config.Prefix;
                     }
+                    if (!string.IsNullOrWhiteSpace(config.Name))
+                        imageService.Name = config.Name;
+                    else
+                        imageService.Name = type.Name;
                 }
+
 
                 this.ImageServices.Add(imageService);
             }
@@ -316,7 +321,7 @@ namespace ImageProcessor.Web.Configuration
             // Add the available settings.
             foreach (IImageService service in this.ImageServices)
             {
-                string name = service.GetType().Name;
+                string name = service.Name;
                 Dictionary<string, string> settings = this.GetServiceSettings(name);
                 if (settings.Any())
                 {

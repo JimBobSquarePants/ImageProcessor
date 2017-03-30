@@ -27,6 +27,8 @@ namespace ImageProcessor.Web.Services
         /// </summary>
         string Prefix { get; set; }
 
+        string Name { get; set; }
+
         /// <summary>
         /// Gets a value indicating whether the image service requests files from
         /// the locally based file system.
