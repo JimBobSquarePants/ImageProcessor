@@ -52,14 +52,6 @@ namespace ImageProcessor.Web.Services
         public string Prefix { get; set; } = "remote.axd";
 
         /// <summary>
-        /// Gets or sets the name for the given instance.
-        /// <remarks>
-        /// This value is used as an identifier for the service.
-        /// </remarks>
-        /// </summary>
-        public string Name { get; set; } = string.Empty;
-
-        /// <summary>
         /// Gets a value indicating whether the image service requests files from
         /// the locally based file system.
         /// </summary>

@@ -304,43 +304,16 @@ namespace ImageProcessor.Web.Configuration
                 IImageService imageService = Activator.CreateInstance(type) as IImageService;
                 if (imageService != null)
                 {
-                    if (!string.IsNullOrWhiteSpace(config.Prefix))
-                    {
-                        imageService.Prefix = config.Prefix;
-                    }
-                    if (!string.IsNullOrWhiteSpace(config.Name))
-                        imageService.Name = config.Name;
-                    else
-                        imageService.Name = type.Name;
+                    var name = config.Name ?? imageService.GetType().Name;
+                    imageService.Prefix = config.Prefix;
+                    imageService.Settings = GetServiceSettings(name);
+                    imageService.WhiteList = GetServiceWhitelist(name);
                 }
 
 
                 this.ImageServices.Add(imageService);
             }
 
-            // Add the available settings.
-            foreach (IImageService service in this.ImageServices)
-            {
-                string name = service.Name;
-                Dictionary<string, string> settings = this.GetServiceSettings(name);
-                if (settings.Any())
-                {
-                    service.Settings = settings;
-                }
-                else if (service.Settings == null)
-                {
-                    // I've noticed some developers are not initializing 
-                    // the settings in their implentations.
-                    service.Settings = new Dictionary<string, string>();
-                }
-
-                Uri[] whitelist = this.GetServiceWhitelist(name);
-
-                if (whitelist.Any())
-                {
-                    service.WhiteList = this.GetServiceWhitelist(name);
-                }
-            }
         }
 
         /// <summary>
