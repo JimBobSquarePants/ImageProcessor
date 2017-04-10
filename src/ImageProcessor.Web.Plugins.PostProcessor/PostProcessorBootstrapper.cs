@@ -91,7 +91,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
             {
                 { "gifsicle.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged." + folder + ".gifsicle.exe" },
                 { "jpegtran.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.jpegtran.exe" },
-                { "optipng.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngquant.exe" },
+                { "pngquant.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngquant.exe" },
                 { "pngout.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngout.exe" },
                 { "png.cmd", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.png.cmd" },
                 { "optipng.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.optipng.exe" }
