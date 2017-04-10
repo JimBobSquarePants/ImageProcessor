@@ -206,9 +206,10 @@ namespace ImageProcessor.Processors
         {
             try
             {
-                using (fontFamily)
+				var f = new FontFamily(fontFamily.Name);
+                using (f)
                 {
-                    return new Font(fontFamily, fontSize, fontStyle, GraphicsUnit.Pixel);
+                    return new Font(f, fontSize, fontStyle, GraphicsUnit.Pixel);
                 }
             }
             catch
