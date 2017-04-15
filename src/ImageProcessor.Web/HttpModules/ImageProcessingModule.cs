@@ -480,6 +480,7 @@ namespace ImageProcessor.Web.HttpModules
                 // Parse url
                 string requestPath, queryString;
                 UrlParser.ParseUrl(url, currentService.Prefix, out requestPath, out queryString);
+                string originalQueryString = queryString;
 
                 // Map the request path if file local.
                 bool isFileLocal = currentService.IsFileLocalService;
@@ -524,6 +525,7 @@ namespace ImageProcessor.Web.HttpModules
 
                 // Re-assign based on event handlers
                 queryString = validatingArgs.QueryString;
+                url = Regex.Replace(url, originalQueryString, queryString, RegexOptions.IgnoreCase);
 
                 // Break out if we don't meet critera.
                 bool interceptAll = interceptAllRequests != null && interceptAllRequests.Value;
