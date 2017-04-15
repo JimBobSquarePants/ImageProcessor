@@ -725,7 +725,9 @@ namespace ImageProcessor.Web.HttpModules
         private AnimationProcessMode ParseAnimationMode(string queryString, out bool process)
         {
             AnimationProcessMode mode = AnimationProcessMode.All;
-            NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
+
+            string decoded = !string.IsNullOrWhiteSpace(queryString) ? HttpUtility.HtmlDecode(queryString) : string.Empty;
+            NameValueCollection queryCollection = HttpUtility.ParseQueryString(decoded);
             process = false;
 
             if (queryCollection.AllKeys.Contains("animationprocessmode", StringComparer.InvariantCultureIgnoreCase))
