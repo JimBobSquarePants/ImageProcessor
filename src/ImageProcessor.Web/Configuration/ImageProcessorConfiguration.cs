@@ -302,12 +302,13 @@ namespace ImageProcessor.Web.Configuration
                 }
 
                 IImageService imageService = Activator.CreateInstance(type) as IImageService;
+
                 if (imageService != null)
                 {
-                    var name = config.Name ?? imageService.GetType().Name;
+                    string name = config.Name ?? imageService.GetType().Name;
                     imageService.Prefix = config.Prefix;
-                    imageService.Settings = GetServiceSettings(name);
-                    imageService.WhiteList = GetServiceWhitelist(name);
+                    imageService.Settings = this.GetServiceSettings(name);
+                    imageService.WhiteList = this.GetServiceWhitelist(name);
                 }
 
 
