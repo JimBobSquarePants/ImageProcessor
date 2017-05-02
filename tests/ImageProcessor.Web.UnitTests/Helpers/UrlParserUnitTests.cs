@@ -130,5 +130,17 @@ namespace ImageProcessor.Web.UnitTests.Helpers
             Web.Helpers.UrlParser.ParseUrl(url, prefix, out requestPath, out queryString);
             Assert.True(requestPath.Equals(expectedPath));
         }
+
+        [Test]
+        [TestCase("http://www.mydomain.com/MyPrefix/image.jpg", "myp[^/]*", "/image.jpg")]
+        [TestCase("http://www.mydomain.com/extramedia/image.jpg", "/.*?media", "/image.jpg")]
+        [TestCase("http://www.mydomain.com/SecondPrefix/image.jpg", "firstprefix|secondprefix|thirdprefix", "/image.jpg")]
+        [TestCase("http://www.mydomain.com/Multiple/Segments/2017/05/02/image.jpg", "/multiple/segments/[0-9]{4}/[0-9]{2}/[0-9]{2}", "/image.jpg")]
+        public void TestParseUrlPrefixIsRegex(string url, string prefix, string expectedPath)
+        {
+            string requestPath, queryString;
+            Web.Helpers.UrlParser.ParseUrl(url, prefix, out requestPath, out queryString);
+            Assert.True(requestPath.Equals(expectedPath));
+        }
     }
 }
