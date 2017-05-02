@@ -1416,7 +1416,16 @@ namespace ImageProcessor
                 {
                     foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
                     {
-                        this.Image.SetPropertyItem(propertItem.Value);
+                        // Nasty fix but should handle issue 
+                        // https://github.com/JimBobSquarePants/ImageProcessor/issues/571
+                        try
+                        {
+                            this.Image.SetPropertyItem(propertItem.Value);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
                     }
                 }
 
@@ -1454,7 +1463,16 @@ namespace ImageProcessor
                 {
                     foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
                     {
-                        this.Image.SetPropertyItem(propertItem.Value);
+                        // Nasty fix but should handle issue 
+                        // https://github.com/JimBobSquarePants/ImageProcessor/issues/571
+                        try
+                        {
+                            this.Image.SetPropertyItem(propertItem.Value);
+                        }
+                        catch 
+                        {
+                            continue;
+                        }
                     }
                 }
 
