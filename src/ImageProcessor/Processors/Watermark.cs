@@ -206,9 +206,11 @@ namespace ImageProcessor.Processors
         {
             try
             {
-                using (fontFamily)
+                // Clone the font family and use it. Disposing of the family in the TextLayer is 
+                // the responsibility of the user. 
+                using (FontFamily clone = new FontFamily(fontFamily.Name))
                 {
-                    return new Font(fontFamily, fontSize, fontStyle, GraphicsUnit.Pixel);
+                    return new Font(clone, fontSize, fontStyle, GraphicsUnit.Pixel);
                 }
             }
             catch

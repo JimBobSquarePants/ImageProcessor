@@ -100,50 +100,42 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                 return null;
             }
 
-            int elapsedTime = 0;
-            bool eventHandled = false;
-            Process process = null;
-            try
-            {
-                process = new Process
+            using (var processingFinished = new ManualResetEventSlim(false))
+            { 
+                Process process = null;
+                try
                 {
-                    StartInfo = start,
-                    EnableRaisingEvents = true
-                };
-
-                process.Exited += (sender, args) =>
-                {
-                    result = new PostProcessingResultEventArgs(sourceFile, length);
-                    process?.Dispose();
-                    eventHandled = true;
-                };
-
-                process.Start();
-
-                // Wait for Exited event, but not more than 5 seconds.
-                const int sleepAmount = 100;
-                while (!eventHandled)
-                {
-                    elapsedTime += sleepAmount;
-                    if (elapsedTime > 5000)
+                    process = new Process
                     {
-                        break;
-                    }
+                        StartInfo = start,
+                        EnableRaisingEvents = true
+                    };
 
-                    Thread.Sleep(sleepAmount);
+                    process.Exited += (sender, args) =>
+                    {
+                        result = new PostProcessingResultEventArgs(sourceFile, length);
+                        process?.Dispose();
+                        processingFinished.Set();
+                    };
+
+                    process.Start();
+
+                    // Wait for processing to finish, but not more than 5 seconds.
+                    const int MaxWaitTimeMs = 5000;
+                    processingFinished.Wait(MaxWaitTimeMs);
                 }
-            }
-            catch (System.ComponentModel.Win32Exception ex)
-            {
-                // Some security policies don't allow execution of programs in this way
-                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
+                catch (System.ComponentModel.Win32Exception ex)
+                {
+                    // Some security policies don't allow execution of programs in this way
+                    ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
 
-                return null;
-            }
-            finally
-            {
-                // Make sure we always dispose and release
-                process?.Dispose();
+                    return null;
+                }
+                finally
+                {
+                    // Make sure we always dispose and release
+                    process?.Dispose();
+                }
             }
 
             return result;

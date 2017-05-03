@@ -480,6 +480,7 @@ namespace ImageProcessor.Web.HttpModules
                 // Parse url
                 string requestPath, queryString;
                 UrlParser.ParseUrl(url, currentService.Prefix, out requestPath, out queryString);
+                string originalQueryString = queryString;
 
                 // Map the request path if file local.
                 bool isFileLocal = currentService.IsFileLocalService;
@@ -524,6 +525,7 @@ namespace ImageProcessor.Web.HttpModules
 
                 // Re-assign based on event handlers
                 queryString = validatingArgs.QueryString;
+                url = Regex.Replace(url, originalQueryString, queryString, RegexOptions.IgnoreCase);
 
                 // Break out if we don't meet critera.
                 bool interceptAll = interceptAllRequests != null && interceptAllRequests.Value;
@@ -723,7 +725,9 @@ namespace ImageProcessor.Web.HttpModules
         private AnimationProcessMode ParseAnimationMode(string queryString, out bool process)
         {
             AnimationProcessMode mode = AnimationProcessMode.All;
-            NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
+
+            string decoded = !string.IsNullOrWhiteSpace(queryString) ? HttpUtility.HtmlDecode(queryString) : string.Empty;
+            NameValueCollection queryCollection = HttpUtility.ParseQueryString(decoded);
             process = false;
 
             if (queryCollection.AllKeys.Contains("animationprocessmode", StringComparer.InvariantCultureIgnoreCase))
