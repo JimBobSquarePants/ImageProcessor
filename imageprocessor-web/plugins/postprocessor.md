@@ -25,9 +25,10 @@ techniques using third party plugins once an image has been cached. These optimi
 The various tools included in the plugin are:
 
  - gifsicle : http://www.lcdf.org/gifsicle/
- - optipng : http://optipng.sourceforge.net/
- - pngcrush : http://pmt.sourceforge.net/pngcrush/
+ - truepng : http://x128.ho.ua/pngutils.html
+ - pngquant : https://pngquant.org/
  - jpegtran : http://jpegclub.org/
+ - mozjpeg : https://github.com/mozilla/mozjpeg 
 
 Once installed, the plugin requires no further configuration.
 
