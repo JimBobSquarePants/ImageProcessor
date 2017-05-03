@@ -130,7 +130,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                     const int MaxWaitTimeMs = 5000;
                     processingFinished.Wait(MaxWaitTimeMs);
                 }
-                catch (System.ComponentModel.Win32Exception ex)
+                catch (Exception ex)
                 {
                     // Some security policies don't allow execution of programs in this way
                     ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
