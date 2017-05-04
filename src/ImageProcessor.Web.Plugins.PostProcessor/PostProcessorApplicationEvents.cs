@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ApplicationEvents.cs" company="James Jackson-South">
+// <copyright file="PostProcessorApplicationEvents.cs" company="James Jackson-South">
 //   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
 // </copyright>
@@ -10,11 +10,10 @@
 
 using System.Web;
 
-[assembly: PreApplicationStartMethod(typeof(ImageProcessor.Web.Plugins.PostProcessor.ApplicationEvents), "Start")]
+[assembly: PreApplicationStartMethod(typeof(ImageProcessor.Web.Plugins.PostProcessor.PostProcessorApplicationEvents), "Start")]
 
 namespace ImageProcessor.Web.Plugins.PostProcessor
 {
-    using System.IO;
 
     using ImageProcessor.Web.Helpers;
     using ImageProcessor.Web.HttpModules;
@@ -23,7 +22,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
     /// Binds the PostProcessor to process any image requests within the web application.
     /// Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs"/>
     /// </summary>
-    public static class ApplicationEvents
+    public static class PostProcessorApplicationEvents
     {
         /// <summary>
         /// The initial startup method.
@@ -31,6 +30,18 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         public static void Start()
         {
             ImageProcessingModule.OnPostProcessing += PostProcess;
+        }
+
+        /// <summary>
+        /// Sets the timeout limit in ms for the post processor. This defaults to 5000ms
+        /// </summary>
+        /// <param name="milliseconds"></param>
+        public static void SetPostProcessingTimeout(int milliseconds)
+        {
+            if (milliseconds > 0)
+            {
+                PostProcessorBootstrapper.Instance.Timout = milliseconds;
+            }
         }
 
         /// <summary>
@@ -44,7 +55,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// </param>
         private static void PostProcess(object sender, PostProcessingEventArgs e)
         {
-            e.ImageStream = PostProcessor.PostProcessImage(e.ImageStream, e.ImageExtension);
+            e.ImageStream = PostProcessor.PostProcessImage(e.Context, e.ImageStream, e.ImageExtension);
         }
     }
 }
