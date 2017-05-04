@@ -8,13 +8,14 @@
 //   Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs"/>
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace ImageProcessor.Web.Plugins.PostProcessor
 {
     using System;
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
-    using System.Threading;
+    using System.Web;
 
     using ImageProcessor.Configuration;
 
@@ -27,121 +28,140 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// <summary>
         /// Post processes the image.
         /// </summary>
+        /// <param name="context">The current context.</param>
         /// <param name="stream">The source image stream.</param>
         /// <param name="extension">The image extension.</param>
         /// <returns>
         /// The <see cref="MemoryStream"/>.
         /// </returns>
-        public static MemoryStream PostProcessImage(MemoryStream stream, string extension)
+        public static MemoryStream PostProcessImage(HttpContext context, MemoryStream stream, string extension)
         {
-            // Create temporary files with the correct extension.
+            if (!PostProcessorBootstrapper.Instance.IsInstalled)
+            {
+                return stream;
+            }
+
+            // Create a temporary source file with the correct extension.
             long length = stream.Length;
 
             string tempSourceFile = Path.GetTempFileName();
             string sourceFile = Path.ChangeExtension(tempSourceFile, extension);
             File.Move(tempSourceFile, sourceFile);
 
+            // Give our destination file a unique name.
             string destinationFile = sourceFile.Replace(extension, "-out" + extension);
 
-            // Save the input stream to a temp file for post processing.
+            // Save the input stream to our source temp file for post processing.
             using (FileStream fileStream = File.Create(sourceFile))
             {
                 stream.CopyTo(fileStream);
             }
 
-            PostProcessingResultEventArgs result = RunProcess(sourceFile, destinationFile, length);
+            PostProcessingResultEventArgs result = RunProcess(context.Request.Unvalidated.Url, sourceFile, destinationFile, length);
 
+            // If our result is good and a saving is made we replace our original stream contents with our new compressed file.
             if (result != null && result.ResultFileSize > 0 && result.Saving > 0)
             {
                 using (FileStream fileStream = File.OpenRead(destinationFile))
                 {
-                    // Replace stream contents.
                     stream.SetLength(0);
                     fileStream.CopyTo(stream);
                 }
             }
 
-            // Cleanup
+            // Cleanup the temp files.
             try
             {
-                // Ensure files are not read only
-                File.SetAttributes(sourceFile, FileAttributes.Normal);
-                File.SetAttributes(destinationFile, FileAttributes.Normal);
-                File.Delete(sourceFile);
-                File.Delete(destinationFile);
+                // Ensure files exist, are not read only, and delete
+                if (File.Exists(sourceFile))
+                {
+                    File.SetAttributes(sourceFile, FileAttributes.Normal);
+                    File.Delete(sourceFile);
+                }
+
+                if (File.Exists(destinationFile))
+                {
+                    File.SetAttributes(destinationFile, FileAttributes.Normal);
+                    File.Delete(destinationFile);
+                }
             }
             catch
             {
-                // No no, but logging will be excessive.
+                // Normally a No no, but logging would be excessive + temp files get cleaned up eventually.
             }
 
             stream.Position = 0;
-
             return stream;
         }
 
         /// <summary>
         /// Runs the process to optimize the images.
         /// </summary>
+        /// <param name="url">The current request url.</param>
         /// <param name="sourceFile">The source file.</param>
         /// <param name="destinationFile">The destination file.</param>
         /// <param name="length">The source file length in bytes.</param>
         /// <returns>
         /// The <see cref="System.Threading.Tasks.Task"/> containing post-processing information.
         /// </returns>
-        private static PostProcessingResultEventArgs RunProcess(string sourceFile, string destinationFile, long length)
+        private static PostProcessingResultEventArgs RunProcess(Uri url, string sourceFile, string destinationFile, long length)
         {
+            // Create a new, hidden process to run our postprocessor command.
+            // We allow no more than the set timeout (default 5 seconds) for the process to run before killing it to prevent blocking the app.
+            int timeout = PostProcessorBootstrapper.Instance.Timout;
             PostProcessingResultEventArgs result = null;
+            string arguments = GetArguments(sourceFile, destinationFile, length);
+
+            if (string.IsNullOrWhiteSpace(arguments))
+            {
+                // Not a file we can post process.
+                return null;
+            }
+
             ProcessStartInfo start = new ProcessStartInfo("cmd")
             {
                 WindowStyle = ProcessWindowStyle.Hidden,
                 WorkingDirectory = PostProcessorBootstrapper.Instance.WorkingPath,
-                Arguments = GetArguments(sourceFile, destinationFile, length),
+                Arguments = arguments,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
-            if (string.IsNullOrWhiteSpace(start.Arguments))
+            Process process = null;
+            try
             {
-                return null;
+                process = new Process
+                {
+                    StartInfo = start,
+                    EnableRaisingEvents = true
+                };
+
+                // Process has completed successfully within the time limit.
+                process.Exited += (sender, args) =>
+                {
+                    result = new PostProcessingResultEventArgs(destinationFile, length);
+                };
+
+                process.Start();
+
+                // Wait for processing to finish, but not more than our timeout.
+                if (!process.WaitForExit(timeout))
+                {
+                    process.Kill();
+                    ImageProcessorBootstrapper.Instance.Logger.Log(
+                        typeof(PostProcessor),
+                        $"Unable to post process image for request {url} within {timeout}ms. Original image returned.");
+                }
             }
-
-            using (ManualResetEventSlim processingFinished = new ManualResetEventSlim(false))
+            catch (Exception ex)
             {
-                Process process = null;
-                try
-                {
-                    process = new Process
-                    {
-                        StartInfo = start,
-                        EnableRaisingEvents = true
-                    };
-
-                    process.Exited += (sender, args) =>
-                    {
-                        result = new PostProcessingResultEventArgs(destinationFile, length);
-                        process?.Dispose();
-                        processingFinished.Set();
-                    };
-
-                    process.Start();
-
-                    // Wait for processing to finish, but not more than 5 seconds.
-                    const int MaxWaitTimeMs = 5000;
-                    processingFinished.Wait(MaxWaitTimeMs);
-                }
-                catch (Exception ex)
-                {
-                    // Some security policies don't allow execution of programs in this way
-                    ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
-
-                    return null;
-                }
-                finally
-                {
-                    // Make sure we always dispose and release
-                    process?.Dispose();
-                }
+                // Some security policies don't allow execution of programs in this way
+                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
+            }
+            finally
+            {
+                // Make sure we always dispose and release
+                process?.Dispose();
             }
 
             return result;

@@ -42,7 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplicationEvents.cs" />
+    <Compile Include="PostProcessorApplicationEvents.cs" />
     <Compile Include="PostProcessingResultEventArgs.cs" />
     <Compile Include="PostProcessor.cs" />
     <Compile Include="PostProcessorBootstrapper.cs" />

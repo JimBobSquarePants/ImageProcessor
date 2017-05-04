@@ -50,13 +50,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// <summary>
         /// Gets the current instance of the <see cref="PostProcessorBootstrapper"/> class.
         /// </summary>
-        public static PostProcessorBootstrapper Instance
-        {
-            get
-            {
-                return Lazy.Value;
-            }
-        }
+        public static PostProcessorBootstrapper Instance => Lazy.Value;
 
         /// <summary>
         /// Gets the working directory path.
@@ -64,27 +58,68 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         public string WorkingPath { get; private set; }
 
         /// <summary>
+        /// Gets or a value indicating whether the post processor has been installed.
+        /// </summary>
+        public bool IsInstalled { get; private set; }
+
+        /// <summary>
+        /// Gets the allowed time in milliseconds for postprocessing an image file.
+        /// </summary>
+        public int Timout { get; internal set; } = 5000;
+
+        /// <summary>
         /// Registers the embedded executables.
         /// </summary>
         public void RegisterExecutables()
         {
-            // None of the tools used here are called using dllimport so we don't go through the normal registration channel. 
+            // None of the tools used here are called using dllimport so we don't go through the normal registration channel.
             string folder = ImageProcessorBootstrapper.Instance.NativeBinaryFactory.Is64BitEnvironment ? "x64" : "x86";
             Assembly assembly = Assembly.GetExecutingAssembly();
-            this.WorkingPath = Path.GetFullPath(
-                Path.Combine(new Uri(assembly.Location).LocalPath, "..\\imageprocessor.postprocessor" + AssemblyVersion + "\\"));
 
-            // Create the folder for storing temporary images.
-            // ReSharper disable once AssignNullToNotNullAttribute
-            DirectoryInfo directoryInfo = new DirectoryInfo(Path.GetDirectoryName(this.WorkingPath));
-
-            // Prevent the files being copied over more than once.
-            if (directoryInfo.Exists)
+            if (assembly.Location == null)
             {
+                ImageProcessorBootstrapper.Instance.Logger.Log(
+                    typeof(PostProcessorBootstrapper),
+                    "Unable to install postprocessor - No images will be post-processed. Unable to map location for assembly.");
+
                 return;
             }
 
-            directoryInfo.Create();
+            this.WorkingPath = Path.GetFullPath(
+                Path.Combine(new Uri(assembly.Location).LocalPath,
+                    "..\\imageprocessor.postprocessor" + AssemblyVersion + "\\"));
+
+            string path = Path.GetDirectoryName(this.WorkingPath);
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                ImageProcessorBootstrapper.Instance.Logger.Log(
+                    typeof(PostProcessorBootstrapper),
+                    "Unable to install postprocessor - No images will be post-processed. Unable to map working path for processors.");
+
+                return;
+            }
+
+            // Create the folder for storing the executables.
+            // Delete any previous instances to make sure we copy over the new files.
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path);
+                }
+
+                Directory.CreateDirectory(path);
+            }
+            catch (Exception ex)
+            {
+                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessorBootstrapper), ex.Message);
+                ImageProcessorBootstrapper.Instance.Logger.Log(
+                    typeof(PostProcessorBootstrapper),
+                    "Unable to install postprocessor - No images will be post-processed. Unable to map working path for processors.");
+
+                return;
+            }
 
             // Get the resources and copy them across.
             Dictionary<string, string> resources = new Dictionary<string, string>
@@ -113,6 +148,8 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                     }
                 }
             }
+
+            this.IsInstalled = true;
         }
     }
 }

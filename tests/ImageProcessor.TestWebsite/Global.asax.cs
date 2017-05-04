@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using ImageProcessor.Web.HttpModules;
+using ImageProcessor.Web.Plugins.PostProcessor;
 
 namespace ImageProcessor.TestWebsite
 {
@@ -16,6 +17,7 @@ namespace ImageProcessor.TestWebsite
         {
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+            // PostProcessorApplicationEvents.SetPostProcessingTimeout(100);
 
             // Register the event handler here.
             //ImageProcessingModule.ValidatingRequest += (sender, args) =>
