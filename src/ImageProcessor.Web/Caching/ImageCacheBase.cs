@@ -65,6 +65,7 @@ namespace ImageProcessor.Web.Caching
 
             ImageProcessorConfiguration config = ImageProcessorConfiguration.Instance;
             this.Settings = this.AugmentSettingsCore(config.ImageCacheSettings);
+            this.CachedPathExpiry = config.ImageCacheRewritePathExpiry;
             this.MaxDays = config.ImageCacheMaxDays;
             this.BrowserMaxDays = config.BrowserCacheMaxDays;
             this.TrimCache = config.TrimCache;
@@ -80,6 +81,11 @@ namespace ImageProcessor.Web.Caching
         /// Gets or sets the path to the cached image.
         /// </summary>
         public string CachedPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the expiry of the cached path to the cached image.
+        /// </summary>
+        public int CachedPathExpiry { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of days to store the image.

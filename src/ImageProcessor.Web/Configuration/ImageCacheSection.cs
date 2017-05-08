@@ -172,6 +172,26 @@ namespace ImageProcessor.Web.Configuration
             }
 
             /// <summary>
+            /// Gets or sets the number of minutes to store the rewritten CDN path in the cache
+            /// </summary>
+            /// <value>The number of minutes to store the rewritten CDN path in the cache</value>
+            /// <remarks>Defaults to 1 if not set.</remarks>
+            [ConfigurationProperty("cachedRewritePathExpiry", DefaultValue = "1", IsRequired = false)]
+            [IntegerValidator(ExcludeRange = false, MinValue = 1, MaxValue = 20)]
+            public int CachedRewritePathExpiry
+            {
+                get
+                {
+                    return (int)this["cachedRewritePathExpiry"];
+                }
+
+                set
+                {
+                    this["cachedRewritePathExpiry"] = value;
+                }
+            }
+
+            /// <summary>
             /// Gets or sets a value indicating whether to periodically trim the cache.
             /// </summary>
             /// <remarks>

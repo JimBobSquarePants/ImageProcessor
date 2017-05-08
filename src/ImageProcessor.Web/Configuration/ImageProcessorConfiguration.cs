@@ -118,6 +118,11 @@ namespace ImageProcessor.Web.Configuration
         public Dictionary<string, string> ImageCacheSettings { get; private set; }
 
         /// <summary>
+        /// Gets the image cache rewrite path cache expiry.
+        /// </summary>
+        public int ImageCacheRewritePathExpiry { get; private set; }
+
+        /// <summary>
         /// Gets a value indicating whether to preserve exif meta data.
         /// </summary>
         public bool PreserveExifMetaData => GetImageProcessingSection().PreserveExifMetaData;
@@ -407,6 +412,7 @@ namespace ImageProcessor.Web.Configuration
                         this.BrowserCacheMaxDays = cache.BrowserMaxDays;
                         this.TrimCache = cache.TrimCache;
                         this.FolderDepth = cache.FolderDepth;
+                        this.ImageCacheRewritePathExpiry = cache.CachedRewritePathExpiry;
                         this.ImageCacheSettings = cache.Settings
                                                        .Cast<SettingElement>()
                                                        .ToDictionary(setting => setting.Key, setting => setting.Value);
