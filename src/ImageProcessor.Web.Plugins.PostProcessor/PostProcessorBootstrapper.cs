@@ -106,14 +106,14 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
             {
                 if (Directory.Exists(path))
                 {
-                    Directory.Delete(path);
+                    Directory.Delete(path,true);
                 }
 
                 Directory.CreateDirectory(path);
             }
             catch (Exception ex)
             {
-                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessorBootstrapper), ex.Message);
+                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessorBootstrapper), ex.Message + ", " + ex.StackTrace + ". Inner: " + ex.InnerException?.Message + ", " + ex.InnerException?.StackTrace);
                 ImageProcessorBootstrapper.Instance.Logger.Log(
                     typeof(PostProcessorBootstrapper),
                     "Unable to install postprocessor - No images will be post-processed. Unable to map working path for processors.");
