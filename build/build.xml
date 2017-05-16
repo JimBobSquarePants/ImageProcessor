@@ -65,7 +65,7 @@
 
    <project>
     <name>ImageProcessor Web PostProcessor Plugin</name>
-    <version>1.2.1.0</version>
+    <version>1.2.2.0</version>
     <folder>..\src\ImageProcessor.Web.Plugins.PostProcessor</folder>
     <projfile>ImageProcessor.Web.Plugins.PostProcessor.csproj</projfile>
     <outputs>
