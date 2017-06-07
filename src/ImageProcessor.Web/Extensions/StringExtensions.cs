@@ -149,7 +149,7 @@ namespace ImageProcessor.Web.Extensions
         public static string TrimStart(this string target, string trimString)
         {
             string result = target;
-            while (result.StartsWith(trimString))
+            while (result.StartsWith(trimString, StringComparison.InvariantCultureIgnoreCase))
             {
                 result = result.Substring(trimString.Length);
             }
