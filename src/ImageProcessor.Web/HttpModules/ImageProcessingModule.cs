@@ -33,8 +33,6 @@ namespace ImageProcessor.Web.HttpModules
     using ImageProcessor.Web.Processors;
     using ImageProcessor.Web.Services;
 
-    using Microsoft.IO;
-
     /// <summary>
     /// Processes any image requests within the web application.
     /// </summary>
@@ -544,6 +542,33 @@ namespace ImageProcessor.Web.HttpModules
 
                 using (await Locker.LockAsync(rawUrl))
                 {
+                    // Parse the url to see whether we should be doing any work. 
+                    // If we're not intercepting all requests and we don't have valid instructions we shoul break here.
+                    IWebGraphicsProcessor[] processors = null;
+                    AnimationProcessMode mode = AnimationProcessMode.First;
+                    bool processing = false;
+
+                    if (!string.IsNullOrWhiteSpace(queryString))
+                    {
+                        // Attempt to match querystring and processors.
+                        processors = ImageFactoryExtensions.GetMatchingProcessors(queryString);
+
+                        // Animation is not a processor but can be a specific request so we should allow it.
+                        bool processAnimation;
+                        mode = this.ParseAnimationMode(queryString, out processAnimation);
+
+                        // Are we processing or cache busting?
+                        processing = processors != null && (processors.Any() || processAnimation);
+                        bool cacheBusting = this.ParseCacheBuster(queryString);
+                        if (!processing && !cacheBusting)
+                        {
+                            // No? Someone is either attacking the server or hasn't read the instructions.
+                            string message = $"The request {request.Unvalidated.RawUrl} could not be understood by the server due to malformed syntax.";
+                            ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(message);
+                            return;
+                        }
+                    }
+
                     // Create a new cache to help process and cache the request.
                     this.imageCache = (IImageCache)ImageProcessorConfiguration.Instance
                         .ImageCache.GetInstance(requestPath, url, queryString);
@@ -555,33 +580,6 @@ namespace ImageProcessor.Web.HttpModules
                     // Only process if the file has been updated.
                     if (isNewOrUpdated)
                     {
-                        // Parse the url to see whether we should be doing any work. 
-                        // If we're not intercepting all requests and we don't have valid instructions we shoul break here.
-                        IWebGraphicsProcessor[] processors = null;
-                        AnimationProcessMode mode = AnimationProcessMode.First;
-                        bool processing = false;
-
-                        if (!string.IsNullOrWhiteSpace(queryString))
-                        {
-                            // Attempt to match querystring and processors.
-                            processors = ImageFactoryExtensions.GetMatchingProcessors(queryString);
-
-                            // Animation is not a processor but can be a specific request so we should allow it.
-                            bool processAnimation;
-                            mode = this.ParseAnimationMode(queryString, out processAnimation);
-
-                            // Are we processing or cache busting?
-                            processing = processors != null && (processors.Any() || processAnimation);
-                            bool cacheBusting = this.ParseCacheBuster(queryString);
-                            if (!processing && !cacheBusting)
-                            {
-                                // No? Someone is either attacking the server or hasn't read the instructions.
-                                string message = $"The request {request.Unvalidated.RawUrl} could not be understood by the server due to malformed syntax.";
-                                ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(message);
-                                return;
-                            }
-                        }
-
                         // Ok let's get the image
                         byte[] imageBuffer = null;
                         string mimeType;
