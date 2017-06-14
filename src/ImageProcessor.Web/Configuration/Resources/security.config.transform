@@ -8,6 +8,7 @@
         <setting key="MaxBytes" value="8194304"/>
         <setting key="Timeout" value="30000"/>
         <setting key="Host" value="http://yourhost.com/"/>
+        <setting key="AzureConnectionString" value="YourAccountConnectionString"/> This is only required if you are using Azure blob storage and their access level is set to private.
       </settings>
     </service>-->
     <service prefix="remote.axd" name="RemoteImageService" type="ImageProcessor.Web.Services.RemoteImageService, ImageProcessor.Web">

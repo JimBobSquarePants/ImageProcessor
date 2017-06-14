@@ -20,6 +20,8 @@ namespace ImageProcessor.Web.Services
 
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Helpers;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Blob;
 
     /// <summary>
     /// A generic cloud image service for retrieving images where the remote location has been rewritten as a
@@ -91,7 +93,7 @@ namespace ImageProcessor.Web.Services
         {
             string host = this.Settings["Host"];
             string container = this.Settings.ContainsKey("Container") ? this.Settings["Container"] : string.Empty;
-            Uri baseUri = new Uri(host);
+            string connectionString = this.Settings.ContainsKey("AzureConnectionString") ? this.Settings["ConnectionString"] : string.Empty;
 
             string relativeResourceUrl = id.ToString();
             if (!string.IsNullOrEmpty(container))
@@ -104,42 +106,72 @@ namespace ImageProcessor.Web.Services
                 }
             }
 
+            Uri baseUri = new Uri(host);
             Uri uri = new Uri(baseUri, relativeResourceUrl);
-            RemoteFile remoteFile = new RemoteFile(uri)
+
+            if (!string.IsNullOrEmpty(connectionString))
             {
-                MaxDownloadSize = int.Parse(this.Settings["MaxBytes"]),
-                TimeoutLength = int.Parse(this.Settings["Timeout"])
-            };
-
-            byte[] buffer;
-
-            // Prevent response blocking.
-            WebResponse webResponse = await remoteFile.GetWebResponseAsync().ConfigureAwait(false);
-
-            using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
-            {
-                using (WebResponse response = webResponse)
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
+                CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+                CloudBlobContainer blobContainer = blobClient.GetContainerReference(container);
+                CloudBlockBlob blockBlob = blobContainer.GetBlockBlobReference(id.ToString());
+                if (blockBlob.Exists())
                 {
-                    using (Stream responseStream = response.GetResponseStream())
+                    Stream fileStream = new MemoryStream();
+                    blockBlob.DownloadToStream(fileStream);
+                    byte[] buffer;
+                    using (MemoryStream memStream = new MemoryStream())
                     {
-                        if (responseStream != null)
-                        {
-                            responseStream.CopyTo(memoryStream);
+                        fileStream.Position = 0;
+                        fileStream.CopyTo(memStream);
+                        memStream.Position = 0;
+                        buffer = memStream.GetBuffer();
+                        return buffer;
+                    }
+                }
+                else
+                {
+                    throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {uri}");
+                }
+            }
+            else
+            {
+                RemoteFile remoteFile = new RemoteFile(uri)
+                {
+                    MaxDownloadSize = int.Parse(this.Settings["MaxBytes"]),
+                    TimeoutLength = int.Parse(this.Settings["Timeout"])
+                };
 
-                            // Reset the position of the stream to ensure we're reading the correct part.
-                            memoryStream.Position = 0;
+                byte[] buffer;
 
-                            buffer = memoryStream.GetBuffer();
-                        }
-                        else
+                // Prevent response blocking.
+                WebResponse webResponse = await remoteFile.GetWebResponseAsync().ConfigureAwait(false);
+
+                using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
+                {
+                    using (WebResponse response = webResponse)
+                    {
+                        using (Stream responseStream = response.GetResponseStream())
                         {
-                            throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {uri}");
+                            if (responseStream != null)
+                            {
+                                responseStream.CopyTo(memoryStream);
+
+                                // Reset the position of the stream to ensure we're reading the correct part.
+                                memoryStream.Position = 0;
+
+                                buffer = memoryStream.GetBuffer();
+                            }
+                            else
+                            {
+                                throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {uri}");
+                            }
                         }
                     }
                 }
-            }
 
-            return buffer;
+                return buffer;
+            }
         }
     }
 }
