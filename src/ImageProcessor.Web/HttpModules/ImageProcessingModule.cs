@@ -268,8 +268,10 @@ namespace ImageProcessor.Web.HttpModules
 
             // Check for root or sub domain.
             bool validUrl = false;
-            foreach (Uri uri in origins.WhiteList)
+            foreach (ImageSecuritySection.SafeUrl safeUrl in origins.WhiteList)
             {
+                var uri = safeUrl.Url;
+
                 if (uri.ToString() == "*")
                 {
                     validUrl = true;
