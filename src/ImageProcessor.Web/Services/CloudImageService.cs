@@ -38,7 +38,9 @@ namespace ImageProcessor.Web.Services
             {
                 { "MaxBytes", "4194304" },
                 { "Timeout", "30000" },
-                { "Host", string.Empty }
+                { "Host", string.Empty },
+                { "Container", string.Empty},
+                { "ConnectionString", string.Empty}
             };
         }
 
@@ -93,7 +95,7 @@ namespace ImageProcessor.Web.Services
         {
             string host = this.Settings["Host"];
             string container = this.Settings.ContainsKey("Container") ? this.Settings["Container"] : string.Empty;
-            string connectionString = this.Settings.ContainsKey("AzureConnectionString") ? this.Settings["ConnectionString"] : string.Empty;
+            string connectionString = this.Settings.ContainsKey("ConnectionString") ? this.Settings["ConnectionString"] : string.Empty;
 
             string relativeResourceUrl = id.ToString();
             if (!string.IsNullOrEmpty(container))

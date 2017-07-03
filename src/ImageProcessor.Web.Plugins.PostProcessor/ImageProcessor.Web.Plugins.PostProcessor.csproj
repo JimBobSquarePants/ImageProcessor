@@ -49,6 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Resources\Unmanaged\README.txt" />
     <EmbeddedResource Include="Resources\Unmanaged\x86\png.cmd" />
   </ItemGroup>
