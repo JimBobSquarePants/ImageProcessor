@@ -122,7 +122,7 @@ configuration file you can add your own image sources.
       <!-- Sets allowable domains to process images from. -->
       <whitelist>
         <add url="http://images.mymovies.net"/>
-        <add url="http://maps.googleapis.com" extensionLess="true" imageFormat=".png"/>
+        <add url="http://maps.googleapis.com"/>
       </whitelist>
     </service>
     <!-- Add other service implemtations here. -->
