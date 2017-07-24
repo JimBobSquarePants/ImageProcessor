@@ -129,7 +129,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                 { "jpegtran.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.jpegtran.exe" },
                 { "cjpeg.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.cjpeg.exe" },
                 { "libjpeg-62.dll", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.libjpeg-62.dll" },
-                { "optipng.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngquant.exe" },
+                { "pngquant.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngquant.exe" },
                 { "pngout.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngout.exe" },
                 { "TruePNG.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.TruePNG.exe" },
                 { "png.cmd", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.png.cmd" }
