@@ -15,7 +15,7 @@
   <project>
     <name>ImageProcessor Web</name>
     <!--<prerelease>-beta</prerelease>-->
-    <version>4.8.4.0</version>
+    <version>4.8.5.0</version>
     <folder>..\src\ImageProcessor.Web</folder>
     <projfile>ImageProcessor.Web.csproj</projfile>
     <outputs>
@@ -65,7 +65,7 @@
 
    <project>
     <name>ImageProcessor Web PostProcessor Plugin</name>
-    <version>1.2.2.0</version>
+    <version>1.2.3.0</version>
     <folder>..\src\ImageProcessor.Web.Plugins.PostProcessor</folder>
     <projfile>ImageProcessor.Web.Plugins.PostProcessor.csproj</projfile>
     <outputs>
