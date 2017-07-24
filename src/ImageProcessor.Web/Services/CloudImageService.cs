@@ -73,7 +73,7 @@ namespace ImageProcessor.Web.Services
         /// <returns>
         /// <c>True</c> if the request is valid; otherwise, <c>False</c>.
         /// </returns>
-        public bool IsValidRequest(string path)
+        public virtual bool IsValidRequest(string path)
         {
             return ImageHelpers.IsValidImageExtension(path);
         }
@@ -87,7 +87,7 @@ namespace ImageProcessor.Web.Services
         /// <returns>
         /// The <see cref="System.Byte"/> array containing the image data.
         /// </returns>
-        public async Task<byte[]> GetImage(object id)
+        public virtual async Task<byte[]> GetImage(object id)
         {
             string host = this.Settings["Host"];
             string container = this.Settings.ContainsKey("Container") ? this.Settings["Container"] : string.Empty;
