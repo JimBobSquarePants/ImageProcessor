@@ -7,6 +7,7 @@
 //   Encapsulates methods to allow the retrieval of ImageProcessor settings.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace ImageProcessor.Web.Configuration
 {
     using System;
@@ -15,8 +16,6 @@ namespace ImageProcessor.Web.Configuration
     using System.Linq;
 
     using ImageProcessor.Configuration;
-    using ImageProcessor.Processors;
-    using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Processors;
     using ImageProcessor.Web.Services;
 
@@ -94,9 +93,24 @@ namespace ImageProcessor.Web.Configuration
         public int ImageCacheMaxDays { get; private set; }
 
         /// <summary>
+        /// Gets the value indicating if the disk cache will apply file change monitors that can be used to invalidate the cache
+        /// </summary>
+        public bool UseFileChangeMonitors { get; private set; }
+
+        /// <summary>
         /// Gets the browser cache max days.
         /// </summary>
         public int BrowserCacheMaxDays { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number folder levels to nest the cached images.
+        /// </summary>
+        public int FolderDepth { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to periodically trim the cache.
+        /// </summary>
+        public bool TrimCache { get; set; }
 
         /// <summary>
         /// Gets the image cache settings.
@@ -270,7 +284,7 @@ namespace ImageProcessor.Web.Configuration
         /// Loads image services from configuration.
         /// </summary>
         /// <exception cref="TypeLoadException">
-        /// Thrown when an <see cref="IGraphicsProcessor"/> cannot be loaded.
+        /// Thrown when an <see cref="IImageService"/> cannot be loaded.
         /// </exception>
         private void LoadImageServices()
         {
@@ -282,46 +296,25 @@ namespace ImageProcessor.Web.Configuration
 
                 if (type == null)
                 {
-                    string message = "Couldn't load IImageService: " + config.Type;
+                    string message = $"Couldn\'t load IImageService: {config.Type}";
                     ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
                     throw new TypeLoadException(message);
                 }
 
                 IImageService imageService = Activator.CreateInstance(type) as IImageService;
-                if (!string.IsNullOrWhiteSpace(config.Prefix))
+
+                if (imageService != null)
                 {
-                    if (imageService != null)
-                    {
-                        imageService.Prefix = config.Prefix;
-                    }
+                    string name = config.Name ?? imageService.GetType().Name;
+                    imageService.Prefix = config.Prefix;
+                    imageService.Settings = this.GetServiceSettings(name);
+                    imageService.WhiteList = this.GetServiceWhitelist(name);
                 }
+
 
                 this.ImageServices.Add(imageService);
             }
 
-            // Add the available settings.
-            foreach (IImageService service in this.ImageServices)
-            {
-                string name = service.GetType().Name;
-                Dictionary<string, string> settings = this.GetServiceSettings(name);
-                if (settings.Any())
-                {
-                    service.Settings = settings;
-                }
-                else if (service.Settings == null)
-                {
-                    // I've noticed some developers are not initializing 
-                    // the settings in their implentations.
-                    service.Settings = new Dictionary<string, string>();
-                }
-
-                Uri[] whitelist = this.GetServiceWhitelist(name);
-
-                if (whitelist.Any())
-                {
-                    service.WhiteList = this.GetServiceWhitelist(name);
-                }
-            }
         }
 
         /// <summary>
@@ -389,8 +382,9 @@ namespace ImageProcessor.Web.Configuration
             Uri[] whitelist = { };
             if (serviceElement != null)
             {
-                whitelist = serviceElement.WhiteList.Cast<ImageSecuritySection.SafeUrl>()
-                                          .Select(s => s.Url).ToArray();
+                whitelist = serviceElement.WhiteList
+                    .Cast<ImageSecuritySection.SafeUrl>()
+                    .Select(s => s.Url).ToArray();
             }
 
             return whitelist;
@@ -405,25 +399,28 @@ namespace ImageProcessor.Web.Configuration
         {
             if (this.ImageCache == null)
             {
-                string curentCache = GetImageCacheSection().CurrentCache;
+                string currentCache = GetImageCacheSection().CurrentCache;
                 ImageCacheSection.CacheElementCollection caches = imageCacheSection.ImageCaches;
 
                 foreach (ImageCacheSection.CacheElement cache in caches)
                 {
-                    if (cache.Name == curentCache)
+                    if (cache.Name == currentCache)
                     {
                         Type type = Type.GetType(cache.Type);
 
                         if (type == null)
                         {
-                            string message = "Couldn't load IImageCache: " + cache.Type;
+                            string message = $"Couldn\'t load IImageCache: {cache.Type}";
                             ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
                             throw new TypeLoadException(message);
                         }
 
                         this.ImageCache = type;
                         this.ImageCacheMaxDays = cache.MaxDays;
+                        this.UseFileChangeMonitors = cache.UseFileChangeMonitors;
                         this.BrowserCacheMaxDays = cache.BrowserMaxDays;
+                        this.TrimCache = cache.TrimCache;
+                        this.FolderDepth = cache.FolderDepth;
                         this.ImageCacheSettings = cache.Settings
                                                        .Cast<SettingElement>()
                                                        .ToDictionary(setting => setting.Key, setting => setting.Value);

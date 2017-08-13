@@ -18,10 +18,11 @@ namespace ImageProcessor.Web.Services
     using System.Threading.Tasks;
     using System.Web;
 
+    using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.Helpers;
 
     /// <summary>
-    /// A generic cloud image service for retrieving images where the remote location has been rewritten as a 
+    /// A generic cloud image service for retrieving images where the remote location has been rewritten as a
     /// a virtual path. Commonly seen in content management systems like Umbraco.
     /// </summary>
     public class CloudImageService : IImageService
@@ -33,7 +34,7 @@ namespace ImageProcessor.Web.Services
         {
             this.Settings = new Dictionary<string, string>
             {
-                { "MaxBytes", "4194304" }, 
+                { "MaxBytes", "4194304" },
                 { "Timeout", "30000" },
                 { "Host", string.Empty }
             };
@@ -59,7 +60,7 @@ namespace ImageProcessor.Web.Services
         public Dictionary<string, string> Settings { get; set; }
 
         /// <summary>
-        /// Gets or sets the white list of <see cref="System.Uri"/>. 
+        /// Gets or sets the white list of <see cref="System.Uri"/>.
         /// </summary>
         public Uri[] WhiteList { get; set; }
 
@@ -72,7 +73,7 @@ namespace ImageProcessor.Web.Services
         /// <returns>
         /// <c>True</c> if the request is valid; otherwise, <c>False</c>.
         /// </returns>
-        public bool IsValidRequest(string path)
+        public virtual bool IsValidRequest(string path)
         {
             return ImageHelpers.IsValidImageExtension(path);
         }
@@ -86,7 +87,7 @@ namespace ImageProcessor.Web.Services
         /// <returns>
         /// The <see cref="System.Byte"/> array containing the image data.
         /// </returns>
-        public async Task<byte[]> GetImage(object id)
+        public virtual async Task<byte[]> GetImage(object id)
         {
             string host = this.Settings["Host"];
             string container = this.Settings.ContainsKey("Container") ? this.Settings["Container"] : string.Empty;
@@ -95,10 +96,11 @@ namespace ImageProcessor.Web.Services
             string relativeResourceUrl = id.ToString();
             if (!string.IsNullOrEmpty(container))
             {
-                container = container.TrimEnd('/') + "/";
-                if (!relativeResourceUrl.StartsWith(container + "/"))
+                // TODO: Check me.
+                container = $"{container.TrimEnd('/')}/";
+                if (!relativeResourceUrl.StartsWith($"{container}/"))
                 {
-                    relativeResourceUrl = container + relativeResourceUrl;
+                    relativeResourceUrl = $"{container}{relativeResourceUrl.TrimStart('/')}";
                 }
             }
 
@@ -114,7 +116,7 @@ namespace ImageProcessor.Web.Services
             // Prevent response blocking.
             WebResponse webResponse = await remoteFile.GetWebResponseAsync().ConfigureAwait(false);
 
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
             {
                 using (WebResponse response = webResponse)
                 {
@@ -127,11 +129,11 @@ namespace ImageProcessor.Web.Services
                             // Reset the position of the stream to ensure we're reading the correct part.
                             memoryStream.Position = 0;
 
-                            buffer = memoryStream.ToArray();
+                            buffer = memoryStream.GetBuffer();
                         }
                         else
                         {
-                            throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + uri);
+                            throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {uri}");
                         }
                     }
                 }

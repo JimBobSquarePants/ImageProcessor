@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+
 namespace ImageProcessor.Imaging
 {
     using System.Drawing;
@@ -16,13 +18,21 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to add a layer of text to an image.
     /// </summary>
-    public class TextLayer
+    public class TextLayer : IDisposable
     {
-        #region Fields
+        /// <summary>
+        /// A value indicating whether this instance of the given entity has been disposed.
+        /// </summary>
+        /// <value><see langword="true"/> if this instance has been disposed; otherwise, <see langword="false"/>.</value>
+        /// <remarks>
+        /// If the entity is disposed, it must not be disposed a second
+        /// time. The isDisposed field is set the first time the entity
+        /// is disposed. If the isDisposed field is true, then the Dispose()
+        /// method will not dispose again. This help not to prolong the entity's
+        /// life in the Garbage Collector.
+        /// </remarks>
+        private bool isDisposed = false;
 
-        #endregion
-
-        #region Properties
         /// <summary>
         /// Gets or sets Text.
         /// </summary>
@@ -84,7 +94,6 @@ namespace ImageProcessor.Imaging
         /// Gets or sets a value indicating whether the text should be rendered right to left.
         /// </summary>
         public bool RightToLeft { get; set; }
-        #endregion
 
         /// <summary>
         /// Returns a value that indicates whether the specified object is an 
@@ -140,6 +149,31 @@ namespace ImageProcessor.Imaging
                 hashCode = (hashCode * 397) ^ this.Vertical.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.RightToLeft.GetHashCode();
                 return hashCode;
+            }
+        }
+
+        /// <summary>
+        /// Disposes the object and frees resources for the Garbage Collector.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+        }
+
+        /// <summary>
+        /// Disposes the object and frees resources for the Garbage Collector.
+        /// </summary>
+        /// <param name="disposing">If true, the object gets disposed.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.isDisposed)
+            {
+                if (disposing)
+                {
+                    this.FontFamily?.Dispose();
+                }
+
+                this.isDisposed = true;
             }
         }
     }

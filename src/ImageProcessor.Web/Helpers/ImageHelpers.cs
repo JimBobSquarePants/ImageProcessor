@@ -37,7 +37,7 @@ namespace ImageProcessor.Web.Helpers
         private readonly Format formatProcessor;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageHelpers"/> class. 
+        /// Initializes a new instance of the <see cref="ImageHelpers"/> class.
         /// </summary>
         public ImageHelpers()
         {
@@ -84,14 +84,13 @@ namespace ImageProcessor.Web.Helpers
         }
 
         /// <summary>
-        /// Returns the correct file extension for the given string input
+        /// Returns the correct file extension for the given string input.
+        /// <remarks>
+        /// Falls back to jpeg if no extension is matched.
+        /// </remarks>
         /// </summary>
-        /// <param name="fullPath">
-        /// The string to parse.
-        /// </param>
-        /// <param name="queryString">
-        /// The querystring containing instructions.
-        /// </param>
+        /// <param name="fullPath">The string to parse.</param>
+        /// <param name="queryString">The querystring containing instructions.</param>
         /// <returns>
         /// The correct file extension for the given string input if it can find one; otherwise an empty string.
         /// </returns>
@@ -136,7 +135,36 @@ namespace ImageProcessor.Web.Helpers
                 return value;
             }
 
-            return string.Empty;
+            // Fall back to jpg
+            return "jpg";
+        }
+
+        /// <summary>
+        /// Returns the content-type/mime-type for a given image type based on it's file extension
+        /// </summary>
+        /// <param name="extension">
+        /// Can be prefixed with '.' or not (i.e. ".jpg"  or "jpg")
+        /// </param>
+        /// <returns>The <see cref="string"/></returns>
+        internal string GetContentTypeForExtension(string extension)
+        {
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(extension));
+            }
+
+            extension = extension.TrimStart('.');
+
+            ISupportedImageFormat found = ImageProcessorBootstrapper.Instance.SupportedImageFormats
+                .FirstOrDefault(x => x.FileExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase));
+
+            if (found != null)
+            {
+                return found.MimeType;
+            }
+
+            // default
+            return new JpegFormat().MimeType;
         }
 
         /// <summary>

@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>ImageProcessor.Web.PostProcessor</id>
-    <version>1.1.1.0</version>
+    <version>$version$</version>
     <title>ImageProcessor.Web.PostProcessor</title>
     <authors>James Jackson-South</authors>
     <owners>James Jackson-South</owners>
     <projectUrl>http://imageprocessor.org</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/Core/build/icons/imageprocessor-logo-128.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/develop/build/icons/imageprocessor-logo-128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An extension for ImageProcessor.Web that applies various image compression tools to further optimize cached .png, .gif, and .jpg images.
 
@@ -21,8 +21,8 @@ Feedback is always welcome</description>
     <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff ASP Cache EXIF</tags>
     <dependencies>
       <group targetFramework=".NETFramework4.5">
-        <dependency id="ImageProcessor" version="2.4.0.0" />
-        <dependency id="ImageProcessor.Web" version="4.6.0.0" />
+        <dependency id="ImageProcessor" version="2.5.4.0" />
+        <dependency id="ImageProcessor.Web" version="4.8.5.0" />
       </group>
     </dependencies>
   </metadata>

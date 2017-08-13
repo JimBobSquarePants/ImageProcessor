@@ -20,11 +20,12 @@ namespace ImageProcessor.Web.Processors
     using System.Web;
     using System.Web.Hosting;
 
+    using ImageProcessor.Imaging;
     using ImageProcessor.Processors;
     using ImageProcessor.Web.Helpers;
 
     /// <summary>
-    /// Applies a mask to the given image. If the mask is not the same size as the image 
+    /// Applies a mask to the given image. If the mask is not the same size as the image
     /// it will be centered against the image.
     /// </summary>
     public class Mask : IWebGraphicsProcessor
@@ -78,7 +79,7 @@ namespace ImageProcessor.Web.Processors
                                       ? QueryParamParser.Instance.ParseValue<Point>(queryCollection["mask.position"])
                                       : (Point?)null;
 
-                this.Processor.DynamicParameter = new Tuple<Image, Point?>(image, position);
+                this.Processor.DynamicParameter = new ImageLayer { Image = image, Position = position };
             }
 
             return this.SortOrder;
@@ -115,7 +116,7 @@ namespace ImageProcessor.Web.Processors
                             image = new Bitmap(factory.Image);
                         }
                     }
-                    catch 
+                    catch
                     {
                         throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + imagePath);
                     }

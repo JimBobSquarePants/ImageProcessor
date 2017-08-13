@@ -83,8 +83,9 @@ namespace ImageProcessor.Imaging
             int maxWidth = this.ResizeLayer.MaxSize?.Width ?? int.MaxValue;
             int maxHeight = this.ResizeLayer.MaxSize?.Height ?? int.MaxValue;
             List<Size> restrictedSizes = this.ResizeLayer.RestrictedSizes;
+            Point? anchorPoint = this.ResizeLayer.AnchorPoint;
 
-            return this.ResizeImage(source, width, height, maxWidth, maxHeight, restrictedSizes, mode, anchor, upscale, centerCoordinates, linear);
+            return this.ResizeImage(source, width, height, maxWidth, maxHeight, restrictedSizes, mode, anchor, upscale, centerCoordinates, linear, anchorPoint);
         }
 
         /// <summary>
@@ -182,6 +183,9 @@ namespace ImageProcessor.Imaging
         /// If the resize mode is crop, you can set a specific center coordinate, use as alternative to anchorPosition
         /// </param>
         /// <param name="linear">Whether to resize the image using the linear color space.</param>
+        /// <param name="anchorPoint">
+        /// If resize mode is box pad, you can set a specific anchor coordinate, use as alternative to anchorPosition.
+        /// </param>
         /// <returns>
         /// The resized <see cref="Image"/>.
         /// </returns>
@@ -196,7 +200,8 @@ namespace ImageProcessor.Imaging
             AnchorPosition anchorPosition = AnchorPosition.Center,
             bool upscale = true,
             float[] centerCoordinates = null,
-            bool linear = false)
+            bool linear = false,
+            Point? anchorPoint = null)
         {
             Bitmap newImage = null;
 
@@ -224,7 +229,7 @@ namespace ImageProcessor.Imaging
                     int boxPadHeight = height > 0 ? height : Convert.ToInt32(sourceHeight * percentWidth);
                     int boxPadWidth = width > 0 ? width : Convert.ToInt32(sourceWidth * percentHeight);
 
-                    // Only calculate if upscaling. 
+                    // Only calculate if upscaling.
                     if (sourceWidth < boxPadWidth && sourceHeight < boxPadHeight)
                     {
                         destinationWidth = sourceWidth;
@@ -234,49 +239,80 @@ namespace ImageProcessor.Imaging
 
                         upscale = true;
 
-                        switch (anchorPosition)
+                        if (anchorPoint.HasValue)
                         {
-                            case AnchorPosition.Left:
-                                destinationY = (height - sourceHeight) / 2;
-                                destinationX = 0;
-                                break;
-                            case AnchorPosition.Right:
-                                destinationY = (height - sourceHeight) / 2;
-                                destinationX = width - sourceWidth;
-                                break;
-                            case AnchorPosition.TopRight:
+                            if (anchorPoint.Value.Y < 0)
+                            {
                                 destinationY = 0;
-                                destinationX = width - sourceWidth;
-                                break;
-                            case AnchorPosition.Top:
-                                destinationY = 0;
-                                destinationX = (width - sourceWidth) / 2;
-                                break;
-                            case AnchorPosition.TopLeft:
-                                destinationY = 0;
+                            }
+                            else if (anchorPoint.Value.Y + sourceHeight > boxPadHeight)
+                            {
+                                destinationY = boxPadHeight - sourceHeight;
+                            }
+                            else
+                            {
+                                destinationY = anchorPoint.Value.Y;
+                            }
+
+                            if (anchorPoint.Value.X < 0)
+                            {
                                 destinationX = 0;
-                                break;
-                            case AnchorPosition.BottomRight:
-                                destinationY = height - sourceHeight;
-                                destinationX = width - sourceWidth;
-                                break;
-                            case AnchorPosition.Bottom:
-                                destinationY = height - sourceHeight;
-                                destinationX = (width - sourceWidth) / 2;
-                                break;
-                            case AnchorPosition.BottomLeft:
-                                destinationY = height - sourceHeight;
-                                destinationX = 0;
-                                break;
-                            default:
-                                destinationY = (height - sourceHeight) / 2;
-                                destinationX = (width - sourceWidth) / 2;
-                                break;
+                            }
+                            else if (anchorPoint.Value.X + sourceWidth > boxPadWidth)
+                            {
+                                destinationX = boxPadWidth - sourceWidth;
+                            }
+                            else
+                            {
+                                destinationX = anchorPoint.Value.X;
+                            }
+                        }
+                        else
+                        {
+                            switch (anchorPosition)
+                            {
+                                case AnchorPosition.Left:
+                                    destinationY = (height - sourceHeight) / 2;
+                                    destinationX = 0;
+                                    break;
+                                case AnchorPosition.Right:
+                                    destinationY = (height - sourceHeight) / 2;
+                                    destinationX = width - sourceWidth;
+                                    break;
+                                case AnchorPosition.TopRight:
+                                    destinationY = 0;
+                                    destinationX = width - sourceWidth;
+                                    break;
+                                case AnchorPosition.Top:
+                                    destinationY = 0;
+                                    destinationX = (width - sourceWidth) / 2;
+                                    break;
+                                case AnchorPosition.TopLeft:
+                                    destinationY = 0;
+                                    destinationX = 0;
+                                    break;
+                                case AnchorPosition.BottomRight:
+                                    destinationY = height - sourceHeight;
+                                    destinationX = width - sourceWidth;
+                                    break;
+                                case AnchorPosition.Bottom:
+                                    destinationY = height - sourceHeight;
+                                    destinationX = (width - sourceWidth) / 2;
+                                    break;
+                                case AnchorPosition.BottomLeft:
+                                    destinationY = height - sourceHeight;
+                                    destinationX = 0;
+                                    break;
+                                default:
+                                    destinationY = (height - sourceHeight) / 2;
+                                    destinationX = (width - sourceWidth) / 2;
+                                    break;
+                            }
                         }
                     }
                     else
                     {
-                        // Switch to pad mode to downscale and calculate from there. 
+                        // Switch to pad mode to downscale and calculate from there.
                         resizeMode = ResizeMode.Pad;
                     }
                 }
@@ -475,8 +511,21 @@ namespace ImageProcessor.Imaging
                     }
                     else
                     {
-                        destinationWidth = width;
-                        destinationHeight = height;
+                        if (height > width)
+                        {
+                            destinationHeight = Convert.ToInt32(sourceHeight * percentWidth);
+                            height = destinationHeight;
+                        }
+                        else if (width > height)
+                        {
+                            destinationWidth = Convert.ToInt32(sourceWidth * percentHeight);
+                            width = destinationWidth;
+                        }
+                        else
+                        {
+                            destinationWidth = width;
+                            destinationHeight = height;
+                        }
                     }
                 }
 

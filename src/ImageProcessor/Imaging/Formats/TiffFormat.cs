@@ -34,10 +34,14 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions => new[] { "tiff", "tif" };
+        public override string[] FileExtensions => new[]
+        {
+            "tiff",
+            "tif"
+        };
 
         /// <summary>
-        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
+        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains.
         /// </summary>
         public override string MimeType => "image/tiff";
 
@@ -83,7 +87,7 @@ namespace ImageProcessor.Imaging.Formats
         /// </returns>
         public override Image Save(Stream stream, Image image, long bitDepth)
         {
-            // Tiffs can be saved with different bit depths. 
+            // Tiffs can be saved with different bit depths.
             using (EncoderParameters encoderParameters = new EncoderParameters(2))
             {
                 encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, (long)(bitDepth == 1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW));
@@ -106,7 +110,7 @@ namespace ImageProcessor.Imaging.Formats
         /// Saves the current image to the specified file path.
         /// </summary>
         /// <param name="path">The path to save the image to.</param>
-        /// <param name="image"> 
+        /// <param name="image">
         /// The <see cref="T:System.Drawing.Image"/> to save.
         /// </param>
         /// <param name="bitDepth">
@@ -117,12 +121,12 @@ namespace ImageProcessor.Imaging.Formats
         /// </returns>
         public override Image Save(string path, Image image, long bitDepth)
         {
-            // Tiffs can be saved with different bit depths. 
+            // Tiffs can be saved with different bit depths.
             using (EncoderParameters encoderParameters = new EncoderParameters(2))
             {
                 encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, (long)(bitDepth == 1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW));
                 encoderParameters.Param[1] = new EncoderParameter(Encoder.ColorDepth, Math.Min(32, bitDepth));
-               
+
                 ImageCodecInfo imageCodecInfo =
                     ImageCodecInfo.GetImageEncoders()
                         .FirstOrDefault(ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));

@@ -19,7 +19,7 @@ namespace ImageProcessor.Processors
     using ImageProcessor.Imaging.Helpers;
 
     /// <summary>
-    /// Adds an image overlay to the current image. 
+    /// Adds an image overlay to the current image.
     /// If the overlay is larger than the image it will be scaled to match the image.
     /// </summary>
     public class Overlay : IGraphicsProcessor
@@ -64,10 +64,11 @@ namespace ImageProcessor.Processors
         {
             Image image = factory.Image;
 
+            Bitmap overlay = null;
             try
             {
                 ImageLayer imageLayer = this.DynamicParameter;
-                Bitmap overlay = new Bitmap(imageLayer.Image);
+                overlay = new Bitmap(imageLayer.Image);
 
                 // Set the resolution of the overlay and the image to match.
                 overlay.SetResolution(image.HorizontalResolution, image.VerticalResolution);
@@ -120,6 +121,10 @@ namespace ImageProcessor.Processors
             catch (Exception ex)
             {
                 throw new ImageProcessingException("Error processing image with " + this.GetType().Name, ex);
+            }
+            finally
+            {
+                overlay?.Dispose();
             }
 
             return image;

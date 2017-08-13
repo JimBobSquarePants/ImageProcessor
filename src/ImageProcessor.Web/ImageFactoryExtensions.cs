@@ -8,9 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Web;
+
 namespace ImageProcessor.Web
 {
+    using System;
     using System.Linq;
+
     using ImageProcessor.Web.Configuration;
     using ImageProcessor.Web.Processors;
 
@@ -38,6 +42,10 @@ namespace ImageProcessor.Web
                 foreach (IWebGraphicsProcessor graphicsProcessor in graphicsProcessors)
                 {
                     factory.CurrentImageFormat.ApplyProcessor(graphicsProcessor.Processor.ProcessImage, factory);
+
+                    // Unwrap the dynamic parameter and dispose of any types that require it.
+                    IDisposable disposable = graphicsProcessor.Processor.DynamicParameter as IDisposable;
+                    disposable?.Dispose();
                 }
             }
 
@@ -55,7 +63,7 @@ namespace ImageProcessor.Web
         {
             // Get a list of all graphics processors that have parsed and matched the query string.
             return ImageProcessorConfiguration.Instance.CreateWebGraphicsProcessors()
-                    .Where(x => x.MatchRegexIndex(querystring) != int.MaxValue)
+                    .Where(x => x.MatchRegexIndex(HttpUtility.HtmlDecode(querystring)) != int.MaxValue)
                     .OrderBy(y => y.SortOrder)
                     .ToArray();
         }

@@ -2,6 +2,7 @@
 @using System.Reflection;
 @using System.Web;
 @using System.Collections;
+@using System.Diagnostics
 
 @model dynamic
 @{
@@ -15,6 +16,10 @@
 
     var dirs = (Hashtable)fileChangesMonitor.GetType()
         .GetField("_dirs", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
+        .GetValue(fileChangesMonitor);
+
+    var aliases = (Hashtable)fileChangesMonitor.GetType()
+        .GetField("_aliases", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
         .GetValue(fileChangesMonitor);
 
     var dirMonAppPathInternal = fileChangesMonitor.GetType()
@@ -42,6 +47,18 @@
     var dirMonSubdirsDirMonCompletion = dirMonSubdirs == null ? null : dirMonSubdirs.GetType()
         .GetField("_dirMonCompletion", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase)
         .GetValue(dirMonSubdirs);
+
+
+    var t = typeof(HttpRuntime).Assembly.GetType("System.Web.DirMonCompletion");
+
+    var dirMonCount = (int)t.InvokeMember("_activeDirMonCompletions",
+                                           BindingFlags.NonPublic
+                                           | BindingFlags.Static
+                                           | BindingFlags.GetField,
+                                           null,
+                                           null,
+                                           null);
+    
 }
 <!DOCTYPE html>
 <html>
@@ -78,17 +95,26 @@
                 <li>@Html.ActionLink("External", "External")</li>
             </ul>
         </nav>
+        
+        <section>
+            @RenderBody()
+        </section>
+        
         <div>
             <h3>FCN Mode</h3>
             <ul>
                 <li>This is the detected FCN Mode: @fcnVal</li>
             </ul>
+            <h3>Total directory monitors active</h3>
+            <ul>
+                <li>@dirMonCount</li>
+            </ul>
             <h3>FileChangesMonitor directory monitor hash table</h3>
-            <table>
+            <table class="table-bordered">
                 <thead>
                     <tr>
-                        <td>Directory watched</td>
-                        <td>File monitor count</td>
+                        <th>Directory watched</th>
+                        <th>File monitor count</th>
                     </tr>
                 </thead>
                 @{
@@ -107,11 +133,35 @@
                 }
                 <tfoot>
                     <tr>
-                        <td>@dirs.Count</td>
-                        <td>@totalFileWatchers</td>
+                        <th>@dirs.Count</th>
+                        <th>@totalFileWatchers</th>
                     </tr>
                 </tfoot>
             </table>
+
+            <h3>FileChangesMonitor aliases hash table</h3>
+            <table class="table-bordered">
+                <thead>
+                    <tr>
+                        <th>Folder</th>
+                    </tr>
+                </thead>
+
+                @foreach (System.Collections.DictionaryEntry d in aliases)
+                {
+                    var key = d.Key.ToString();
+                    var virtualPath = key.StartsWith(HttpRuntime.AppDomainAppPath) ? key.Substring(HttpRuntime.AppDomainAppPath.Length - 1) : key;
+                    <tr>
+                        <td>@virtualPath</td>
+                    </tr>
+                }
+                <tfoot>
+                    <tr>
+                        <th>@aliases.Count</th>
+                    </tr>
+                </tfoot>
+            </table>
+
             <h3>FCN Mode 'Single' dir monitor properties</h3>
             <ul>
                 <li>FileChangesMonitor._dirMonAppPathInternal = @dirMonAppPathInternal</li>
@@ -126,10 +176,8 @@
                 <li>_dirMonSubdirs._isDirMonAppPathInternal = @dirMonSubdirsIsDirMonAppPathInternal</li>
                 <li>_dirMonSubdirs._dirMonCompletion = @dirMonSubdirsDirMonCompletion</li>
             </ul>
+            
         </div>
-        <section>
-            @RenderBody()
-        </section>
     </div>
 </body>
 </html>

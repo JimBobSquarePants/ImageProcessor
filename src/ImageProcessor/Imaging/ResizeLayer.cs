@@ -49,6 +49,9 @@ namespace ImageProcessor.Imaging
         /// The range of sizes to restrict resizing an image to. 
         /// Used to restrict resizing based on calculated resizing
         /// </param>
+        /// <param name="anchorPoint">
+        /// The anchor point (Default null)
+        /// </param>
         public ResizeLayer(
             Size size,
             ResizeMode resizeMode = ResizeMode.Pad,
@@ -56,7 +59,8 @@ namespace ImageProcessor.Imaging
             bool upscale = true,
             float[] centerCoordinates = null,
             Size? maxSize = null,
-            List<Size> restrictedSizes = null)
+            List<Size> restrictedSizes = null,
+            Point? anchorPoint = null)
         {
             this.Size = size;
             this.Upscale = upscale;
@@ -65,6 +69,7 @@ namespace ImageProcessor.Imaging
             this.CenterCoordinates = centerCoordinates ?? new float[] { };
             this.MaxSize = maxSize;
             this.RestrictedSizes = restrictedSizes ?? new List<Size>();
+            this.AnchorPoint = anchorPoint;
         }
 
         /// <summary>
@@ -104,6 +109,11 @@ namespace ImageProcessor.Imaging
         public float[] CenterCoordinates { get; set; }
 
         /// <summary>
+        /// Gets or sets the anchor point.
+        /// </summary>
+        public Point? AnchorPoint { get; set; }
+
+        /// <summary>
         /// Returns a value that indicates whether the specified object is an 
         /// <see cref="ResizeLayer"/> object that is equivalent to 
         /// this <see cref="ResizeLayer"/> object.
@@ -136,7 +146,8 @@ namespace ImageProcessor.Imaging
                 && ((this.RestrictedSizes != null
                     && resizeLayer.RestrictedSizes != null
                     && this.RestrictedSizes.SequenceEqual(resizeLayer.RestrictedSizes))
-                    || (this.RestrictedSizes == resizeLayer.RestrictedSizes));
+                    || (this.RestrictedSizes == resizeLayer.RestrictedSizes))
+                && this.AnchorPoint == resizeLayer.AnchorPoint;
         }
 
         /// <summary>
@@ -156,6 +167,7 @@ namespace ImageProcessor.Imaging
                 hashCode = (hashCode * 397) ^ (int)this.AnchorPosition;
                 hashCode = (hashCode * 397) ^ this.Upscale.GetHashCode();
                 hashCode = (hashCode * 397) ^ (this.CenterCoordinates?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ this.AnchorPoint.GetHashCode();
                 return hashCode;
             }
         }

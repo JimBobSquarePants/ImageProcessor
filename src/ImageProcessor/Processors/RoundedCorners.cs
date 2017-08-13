@@ -108,7 +108,7 @@ namespace ImageProcessor.Processors
             // Make a graphics object from the empty bitmap
             using (Graphics graphics = Graphics.FromImage(newImage))
             {
-                GraphicsHelper.SetGraphicsOptions(graphics);
+                GraphicsHelper.SetGraphicsOptions(graphics, true, true);
 
                 // Add rounded corners
                 using (GraphicsPath path = new GraphicsPath())

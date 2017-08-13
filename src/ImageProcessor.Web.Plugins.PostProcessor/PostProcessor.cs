@@ -15,8 +15,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
-    using System.Threading;
-    using System.Threading.Tasks;
+    using System.Web;
 
     using ImageProcessor.Configuration;
 
@@ -29,109 +28,140 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// <summary>
         /// Post processes the image.
         /// </summary>
+        /// <param name="context">The current context.</param>
         /// <param name="stream">The source image stream.</param>
         /// <param name="extension">The image extension.</param>
         /// <returns>
         /// The <see cref="MemoryStream"/>.
         /// </returns>
-        public static MemoryStream PostProcessImage(MemoryStream stream, string extension)
+        public static MemoryStream PostProcessImage(HttpContext context, MemoryStream stream, string extension)
         {
-            // Create a source temporary file with the correct extension.
-            long length = stream.Length;
-            string tempFile = Path.GetTempFileName();
-            string sourceFile = Path.ChangeExtension(tempFile, extension);
-            File.Move(tempFile, sourceFile);
+            if (!PostProcessorBootstrapper.Instance.IsInstalled)
+            {
+                return stream;
+            }
 
-            // Save the input stream to a temp file for post processing.
+            // Create a temporary source file with the correct extension.
+            long length = stream.Length;
+
+            string tempSourceFile = Path.GetTempFileName();
+            string sourceFile = Path.ChangeExtension(tempSourceFile, extension);
+            File.Move(tempSourceFile, sourceFile);
+
+            // Give our destination file a unique name.
+            string destinationFile = sourceFile.Replace(extension, "-out" + extension);
+
+            // Save the input stream to our source temp file for post processing.
             using (FileStream fileStream = File.Create(sourceFile))
             {
                 stream.CopyTo(fileStream);
             }
 
-            PostProcessingResultEventArgs result = RunProcess(sourceFile, length);
+            PostProcessingResultEventArgs result = RunProcess(context.Request.Unvalidated.Url, sourceFile, destinationFile, length);
 
-            if (result != null && result.Saving > 0)
+            // If our result is good and a saving is made we replace our original stream contents with our new compressed file.
+            if (result != null && result.ResultFileSize > 0 && result.Saving > 0)
             {
-                using (FileStream fileStream = File.OpenRead(sourceFile))
+                using (FileStream fileStream = File.OpenRead(destinationFile))
                 {
-                    // Replace stream contents.
                     stream.SetLength(0);
                     fileStream.CopyTo(stream);
                 }
             }
 
-            // Cleanup
-            File.Delete(sourceFile);
+            // Cleanup the temp files.
+            try
+            {
+                // Ensure files exist, are not read only, and delete
+                if (File.Exists(sourceFile))
+                {
+                    File.SetAttributes(sourceFile, FileAttributes.Normal);
+                    File.Delete(sourceFile);
+                }
+
+                if (File.Exists(destinationFile))
+                {
+                    File.SetAttributes(destinationFile, FileAttributes.Normal);
+                    File.Delete(destinationFile);
+                }
+            }
+            catch
+            {
+                // Normally a No no, but logging would be excessive + temp files get cleaned up eventually.
+            }
 
             stream.Position = 0;
-
             return stream;
         }
 
         /// <summary>
         /// Runs the process to optimize the images.
         /// </summary>
+        /// <param name="url">The current request url.</param>
         /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         /// <param name="length">The source file length in bytes.</param>
         /// <returns>
-        /// The <see cref="Task{TResult}"/> containing post-processing information.
+        /// The <see cref="System.Threading.Tasks.Task"/> containing post-processing information.
         /// </returns>
-        private static PostProcessingResultEventArgs RunProcess(string sourceFile, long length)
+        private static PostProcessingResultEventArgs RunProcess(Uri url, string sourceFile, string destinationFile, long length)
         {
+            // Create a new, hidden process to run our postprocessor command.
+            // We allow no more than the set timeout (default 5 seconds) for the process to run before killing it to prevent blocking the app.
+            int timeout = PostProcessorBootstrapper.Instance.Timout;
             PostProcessingResultEventArgs result = null;
+            string arguments = GetArguments(sourceFile, destinationFile, length);
+
+            if (string.IsNullOrWhiteSpace(arguments))
+            {
+                // Not a file we can post process.
+                return null;
+            }
+
             ProcessStartInfo start = new ProcessStartInfo("cmd")
             {
                 WindowStyle = ProcessWindowStyle.Hidden,
                 WorkingDirectory = PostProcessorBootstrapper.Instance.WorkingPath,
-                Arguments = GetArguments(sourceFile, length),
+                Arguments = arguments,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
-            if (string.IsNullOrWhiteSpace(start.Arguments))
-            {
-                return null;
-            }
-
-            int elapsedTime = 0;
-            bool eventHandled = false;
-
+            Process process = null;
             try
             {
-                Process process = new Process
+                process = new Process
                 {
                     StartInfo = start,
                     EnableRaisingEvents = true
                 };
 
+                // Process has completed successfully within the time limit.
                 process.Exited += (sender, args) =>
                 {
-                    result = new PostProcessingResultEventArgs(sourceFile, length);
-                    process.Dispose();
-                    eventHandled = true;
+                    result = new PostProcessingResultEventArgs(destinationFile, length);
                 };
 
                 process.Start();
+
+                // Wait for processing to finish, but not more than our timeout.
+                if (!process.WaitForExit(timeout))
+                {
+                    process.Kill();
+                    ImageProcessorBootstrapper.Instance.Logger.Log(
+                        typeof(PostProcessor),
+                        $"Unable to post process image for request {url} within {timeout}ms. Original image returned.");
+                }
             }
-            catch (System.ComponentModel.Win32Exception ex)
+            catch (Exception ex)
             {
                 // Some security policies don't allow execution of programs in this way
                 ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
-
-                return null;
             }
-
-            // Wait for Exited event, but not more than 5 seconds.
-            const int SleepAmount = 100;
-            while (!eventHandled)
+            finally
             {
-                elapsedTime += SleepAmount;
-                if (elapsedTime > 5000)
-                {
-                    break;
-                }
-
-                Thread.Sleep(SleepAmount);
+                // Make sure we always dispose and release
+                process?.Dispose();
             }
 
             return result;
@@ -141,11 +171,12 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// Gets the correct arguments to pass to the post-processor.
         /// </summary>
         /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The source file.</param>
         /// <param name="length">The source file length in bytes.</param>
         /// <returns>
         /// The <see cref="string"/> containing the correct command arguments.
         /// </returns>
-        private static string GetArguments(string sourceFile, long length)
+        private static string GetArguments(string sourceFile, string destinationFile, long length)
         {
             if (!Uri.IsWellFormedUriString(sourceFile, UriKind.RelativeOrAbsolute) && !File.Exists(sourceFile))
             {
@@ -167,7 +198,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
             switch (ext)
             {
                 case ".png":
-                    return string.Format(CultureInfo.CurrentCulture, "/c png.cmd \"{0}\"", sourceFile);
+                    return string.Format(CultureInfo.CurrentCulture, "/c png.cmd \"{0}\" \"{1}\"", sourceFile, destinationFile);
 
                 case ".jpg":
                 case ".jpeg":
@@ -176,13 +207,13 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                     // http://yuiblog.com/blog/2008/12/05/imageopt-4/
                     if (length > 10000)
                     {
-                        return string.Format(CultureInfo.CurrentCulture, "/c jpegtran -copy all -optimize -progressive \"{0}\" \"{0}\"", sourceFile);
+                        return string.Format(CultureInfo.CurrentCulture, "/c cjpeg -quality 80,60 -smooth 5 -outfile \"{1}\" \"{0}\"", sourceFile, destinationFile);
                     }
 
-                    return string.Format(CultureInfo.CurrentCulture, "/c jpegtran -copy all -optimize \"{0}\" \"{0}\"", sourceFile);
+                    return string.Format(CultureInfo.CurrentCulture, "/c jpegtran -copy all -optimize -outfile \"{1}\" \"{0}\"", sourceFile, destinationFile);
 
                 case ".gif":
-                    return string.Format(CultureInfo.CurrentCulture, "/c gifsicle --no-comments --no-extensions --no-names --optimize=3 --batch \"{0}\" --output=\"{0}\"", sourceFile);
+                    return string.Format(CultureInfo.CurrentCulture, "/c gifsicle --optimize=3 \"{0}\" --output=\"{1}\"", sourceFile, destinationFile);
             }
 
             return null;

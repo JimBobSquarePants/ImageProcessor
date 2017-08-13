@@ -67,9 +67,12 @@ namespace ImageProcessor.Web.Configuration
             }
 
             string section = ResourceHelpers.ResourceAsString("ImageProcessor.Web.Configuration.Resources.cache.config.transform");
-            XmlReader reader = new XmlTextReader(new StringReader(section));
-            imageCacheSection = new ImageCacheSection();
-            imageCacheSection.DeserializeSection(reader);
+
+            using (XmlReader reader = new XmlTextReader(new StringReader(section)))
+            {
+                imageCacheSection = new ImageCacheSection();
+                imageCacheSection.DeserializeSection(reader);
+            }
 
             return imageCacheSection;
         }
@@ -124,6 +127,25 @@ namespace ImageProcessor.Web.Configuration
             }
 
             /// <summary>
+            /// Gets or sets a value indicating whether the cache will apply file change monitors that can be used to invalidate the cache
+            /// </summary>
+            /// <value>True or False to enable or disable this setting</value>
+            /// <remarks>
+            /// Defaults to false, if this is set to true a file change monitor will be created for each cached file that Image Processor creates. 
+            /// This could be useful if you want to be able to delete the cached image files in order to trigger the server cache invalidation, however
+            /// if this setting is enabled and there are a lot of Image Processor cache files, this could end up causing some issues:
+            /// * Performance penalties if hosting on a UNC share
+            /// * ASP.Net app domain restarts if using FCNMode="Single" since the FCN buffer can overflow
+            /// </remarks>
+            [ConfigurationProperty("useFileChangeMonitors", DefaultValue = false, IsRequired = false)]            
+            public bool UseFileChangeMonitors
+            {
+                get { return (bool)this["useFileChangeMonitors"]; }
+
+                set { this["useFileChangeMonitors"] = value; }
+            }
+
+            /// <summary>
             /// Gets or sets the maximum number of days to store an image in the browser cache.
             /// </summary>
             /// <value>The maximum number of days to store an image in the browser cache.</value>
@@ -146,6 +168,39 @@ namespace ImageProcessor.Web.Configuration
                 set
                 {
                     this["browserMaxDays"] = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether to periodically trim the cache.
+            /// </summary>
+            /// <remarks>
+            /// Defaults to true.
+            /// </remarks>
+            [ConfigurationProperty("trimCache", DefaultValue = true, IsRequired = false)]
+            public bool TrimCache
+            {
+                get { return (bool)this["trimCache"]; }
+
+                set { this["trimCache"] = value; }
+            }
+
+            /// <summary>
+            /// Gets or sets the maximum number folder levels to nest the cached images.
+            /// </summary>
+            /// <remarks>Defaults to 6 if not set.</remarks>
+            [ConfigurationProperty("folderDepth", DefaultValue = "6", IsRequired = false)]
+            [IntegerValidator(ExcludeRange = false, MinValue = 0)]
+            public int FolderDepth
+            {
+                get
+                {
+                    return (int)this["folderDepth"];
+                }
+
+                set
+                {
+                    this["folderDepth"] = value;
                 }
             }
 

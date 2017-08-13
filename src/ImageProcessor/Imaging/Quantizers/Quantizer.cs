@@ -28,7 +28,7 @@ namespace ImageProcessor.Imaging.Quantizers
         private readonly bool singlePass;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Quantizer"/> class. 
+        /// Initializes a new instance of the <see cref="Quantizer"/> class.
         /// </summary>
         /// <param name="singlePass">
         /// If true, the quantization only needs to loop through the source pixels once
@@ -95,7 +95,7 @@ namespace ImageProcessor.Imaging.Quantizers
                     this.FirstPass(sourceData, width, height);
                 }
 
-                // Then set the color palette on the output bitmap. I'm passing in the current palette 
+                // Then set the color palette on the output bitmap. I'm passing in the current palette
                 // as there's no way to construct a new, empty palette.
                 output.Palette = this.GetPalette(output.Palette);
 
@@ -115,15 +115,9 @@ namespace ImageProcessor.Imaging.Quantizers
         /// <summary>
         /// Execute the first pass through the pixels in the image
         /// </summary>
-        /// <param name="sourceData">
-        /// The source data
-        /// </param>
-        /// <param name="width">
-        /// The width in pixels of the image
-        /// </param>
-        /// <param name="height">
-        /// The height in pixels of the image
-        /// </param>
+        /// <param name="sourceData">The source data</param>
+        /// <param name="width">The width in pixels of the image</param>
+        /// <param name="height">The height in pixels of the image</param>
         protected virtual void FirstPass(BitmapData sourceData, int width, int height)
         {
             // Define the source data pointers. The source row is a byte to

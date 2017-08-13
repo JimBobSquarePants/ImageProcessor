@@ -25,15 +25,21 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Gets the file headers.
         /// </summary>
-        public override byte[][] FileHeaders => new[] { new byte[] { 137, 80, 78, 71 } };
+        public override byte[][] FileHeaders => new[]
+        {
+            new byte[] { 137, 80, 78, 71 }
+        };
 
         /// <summary>
         /// Gets the list of file extensions.
         /// </summary>
-        public override string[] FileExtensions => new[] { "png" };
+        public override string[] FileExtensions => new[]
+        {
+            "png"
+        };
 
         /// <summary>
-        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
+        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains.
         /// </summary>
         public override string MimeType => "image/png";
 
@@ -76,7 +82,7 @@ namespace ImageProcessor.Imaging.Formats
         /// Saves the current image to the specified file path.
         /// </summary>
         /// <param name="path">The path to save the image to.</param>
-        /// <param name="image"> 
+        /// <param name="image">
         /// The <see cref="T:System.Drawing.Image"/> to save.
         /// </param>
         /// <param name="bitDepth">

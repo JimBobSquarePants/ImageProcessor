@@ -44,7 +44,7 @@ namespace ImageProcessor.Web.Services
         public Dictionary<string, string> Settings { get; set; }
 
         /// <summary>
-        /// Gets or sets the white list of <see cref="System.Uri"/>. 
+        /// Gets or sets the white list of <see cref="System.Uri"/>.
         /// </summary>
         public Uri[] WhiteList { get; set; }
 
@@ -57,7 +57,7 @@ namespace ImageProcessor.Web.Services
         /// <returns>
         /// <c>True</c> if the request is valid; otherwise, <c>False</c>.
         /// </returns>
-        public bool IsValidRequest(string path)
+        public virtual bool IsValidRequest(string path)
         {
             return ImageHelpers.IsValidImageExtension(path);
         }
@@ -71,18 +71,15 @@ namespace ImageProcessor.Web.Services
         /// <returns>
         /// The <see cref="System.Byte"/> array containing the image data.
         /// </returns>
-        public async Task<byte[]> GetImage(object id)
+        public virtual async Task<byte[]> GetImage(object id)
         {
             string path = id.ToString();
             byte[] buffer;
 
             // Check to see if the file exists.
-            // ReSharper disable once AssignNullToNotNullAttribute
-            FileInfo fileInfo = new FileInfo(path);
-
-            if (!fileInfo.Exists)
+            if (!File.Exists(path))
             {
-                throw new HttpException((int)HttpStatusCode.NotFound, "No image exists at " + path);
+                throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {path}");
             }
 
             using (FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
