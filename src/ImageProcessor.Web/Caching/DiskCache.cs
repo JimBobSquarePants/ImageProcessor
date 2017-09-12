@@ -304,7 +304,7 @@ namespace ImageProcessor.Web.Caching
                     // https://referencesource.microsoft.com/#System.Web/StaticFileHandler.cs,505
 
                     // 4. Use reflection to invoke the StaticFileHandler somehow
-                    // 5. Use a custom StataicFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki
+                    // 5. Use a custom StaticFileHandler like https://code.google.com/archive/p/talifun-web/wikis/StaticFileHandler.wiki
 
                     // I've opted to go with the simplest solution and use TransmitFile, I've looked into the source of this and it uses the
                     // Windows Kernel, I'm not sure where in the source the headers get written but if you analyze the request/response headers when
@@ -320,10 +320,10 @@ namespace ImageProcessor.Web.Caching
                     // Since we are going to call Response.End(), we need to go ahead and set the headers
                     HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
                     this.SetETagHeader(context);
-                    context.Response.AddHeader("Content-Length", new FileInfo(this.CachedPath).Length.ToString());
+                    var length = new FileInfo(this.CachedPath).Length;
+                    context.Response.AddHeader("Content-Length", length.ToString());
 
-                    context.Response.TransmitFile(this.CachedPath);
-
+                    context.Response.TransmitFile(this.CachedPath, 0, length);
 
                     // This is quite important expecially if the request is a when an `IImageService` handles the request
                     // based on a custom request handler such as "database.axd/logo.png". If we don't end the request here
@@ -333,7 +333,14 @@ namespace ImageProcessor.Web.Caching
                     // `ApplicationInstance.CompleteRequest();` instead of Response.End() but in this case I believe it is
                     // correct to use Response.End(), a good write-up of why this is can be found here:
                     // see: http://stackoverflow.com/a/36968241/694494
-                    context.Response.End();
+                    try
+                    {
+                        context.Response.End();
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        Thread.ResetAbort();
+                    }
                 }
             }
         }
@@ -391,21 +398,13 @@ namespace ImageProcessor.Web.Caching
 
             if (!dirInfo.Exists)
             {
-                if (isInWebRoot)
-                {
-                    // If this is in the web root, we should just create it
-                    Directory.CreateDirectory(dirInfo.FullName);
-                }
-                else
-                {
-                    throw new ConfigurationErrorsException("The cache folder " + absPath + " does not exist");
-                }
+                Directory.CreateDirectory(dirInfo.FullName);
             }
 
             // This does a reverse map path:
             virtualCachePath = isInWebRoot
-                                   ? dirInfo.FullName.Replace(webRoot, "~/").Replace(@"\", "/")
-                                   : null;
+                ? dirInfo.FullName.Replace(webRoot, "~/").Replace(@"\", "/")
+                : null;
 
             return dirInfo.FullName;
         }
