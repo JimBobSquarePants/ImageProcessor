@@ -54,7 +54,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// </returns>
         public Color ToNormalizedColor()
         {
-            return (this.Sum != 0) ? Color.FromArgb((int) (this.Alpha /= this.Sum), (int) (this.Red /= this.Sum), (int) (this.Green /= this.Sum), (int) (this.Blue /= this.Sum)) : Color.Empty;
+            return (this.Sum != 0) ? Color.FromArgb((int)(this.Alpha /= this.Sum), (int)(this.Red /= this.Sum), (int)(this.Green /= this.Sum), (int)(this.Blue /= this.Sum)) : Color.Empty;
         }
 
         /// <summary>
