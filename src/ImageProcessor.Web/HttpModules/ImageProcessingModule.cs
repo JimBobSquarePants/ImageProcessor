@@ -33,8 +33,6 @@ namespace ImageProcessor.Web.HttpModules
     using ImageProcessor.Web.Processors;
     using ImageProcessor.Web.Services;
 
-    using Microsoft.IO;
-
     /// <summary>
     /// Processes any image requests within the web application.
     /// </summary>
@@ -270,8 +268,10 @@ namespace ImageProcessor.Web.HttpModules
 
             // Check for root or sub domain.
             bool validUrl = false;
-            foreach (Uri uri in origins.WhiteList)
+            foreach (ImageSecuritySection.SafeUrl safeUrl in origins.WhiteList)
             {
+                var uri = safeUrl.Url;
+
                 if (uri.ToString() == "*")
                 {
                     validUrl = true;
@@ -482,25 +482,6 @@ namespace ImageProcessor.Web.HttpModules
                 UrlParser.ParseUrl(url, currentService.Prefix, out requestPath, out queryString);
                 string originalQueryString = queryString;
 
-                // Map the request path if file local.
-                bool isFileLocal = currentService.IsFileLocalService;
-                if (currentService.IsFileLocalService)
-                {
-                    requestPath = HostingEnvironment.MapPath(requestPath);
-                }
-
-                if (string.IsNullOrWhiteSpace(requestPath))
-                {
-                    return;
-                }
-
-                // Parse any protocol values from settings if no protocol is present.
-                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(requestPath).Count == 0 || ProtocolRegex.Matches(requestPath)[0].Index > 0))
-                {
-                    // ReSharper disable once PossibleNullReferenceException
-                    requestPath = currentService.Settings["Protocol"] + "://" + requestPath.TrimStart('/');
-                }
-
                 // Replace any presets in the querystring with the actual value.
                 queryString = this.ReplacePresetsInQueryString(queryString);
 
@@ -527,7 +508,27 @@ namespace ImageProcessor.Web.HttpModules
                 queryString = validatingArgs.QueryString;
                 url = Regex.Replace(url, originalQueryString, queryString, RegexOptions.IgnoreCase);
 
+                // Map the request path if file local.
+                bool isFileLocal = currentService.IsFileLocalService;
+                if (currentService.IsFileLocalService)
+                {
+                    requestPath = HostingEnvironment.MapPath(requestPath);
+                }
+
+                if (string.IsNullOrWhiteSpace(requestPath))
+                {
+                    return;
+                }
+
+                // Parse any protocol values from settings if no protocol is present.
+                if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(requestPath).Count == 0 || ProtocolRegex.Matches(requestPath)[0].Index > 0))
+                {
+                    // ReSharper disable once PossibleNullReferenceException
+                    requestPath = currentService.Settings["Protocol"] + "://" + requestPath.TrimStart('/');
+                }
+
                 // Break out if we don't meet critera.
+                // First check that the request path is valid and whether we are intercepting all requests or the querystring is valid.
                 bool interceptAll = interceptAllRequests != null && interceptAllRequests.Value;
                 if (string.IsNullOrWhiteSpace(requestPath) || (!interceptAll && string.IsNullOrWhiteSpace(queryString)))
                 {
@@ -543,6 +544,33 @@ namespace ImageProcessor.Web.HttpModules
 
                 using (await Locker.LockAsync(rawUrl))
                 {
+                    // Parse the url to see whether we should be doing any work. 
+                    // If we're not intercepting all requests and we don't have valid instructions we shoul break here.
+                    IWebGraphicsProcessor[] processors = null;
+                    AnimationProcessMode mode = AnimationProcessMode.First;
+                    bool processing = false;
+
+                    if (!string.IsNullOrWhiteSpace(queryString))
+                    {
+                        // Attempt to match querystring and processors.
+                        processors = ImageFactoryExtensions.GetMatchingProcessors(queryString);
+
+                        // Animation is not a processor but can be a specific request so we should allow it.
+                        bool processAnimation;
+                        mode = this.ParseAnimationMode(queryString, out processAnimation);
+
+                        // Are we processing or cache busting?
+                        processing = processors != null && (processors.Any() || processAnimation);
+                        bool cacheBusting = this.ParseCacheBuster(queryString);
+                        if (!processing && !cacheBusting)
+                        {
+                            // No? Someone is either attacking the server or hasn't read the instructions.
+                            string message = $"The request {request.Unvalidated.RawUrl} could not be understood by the server due to malformed syntax.";
+                            ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(message);
+                            return;
+                        }
+                    }
+
                     // Create a new cache to help process and cache the request.
                     this.imageCache = (IImageCache)ImageProcessorConfiguration.Instance
                         .ImageCache.GetInstance(requestPath, url, queryString);
@@ -554,6 +582,7 @@ namespace ImageProcessor.Web.HttpModules
                     // Only process if the file has been updated.
                     if (isNewOrUpdated)
                     {
+                        // Ok let's get the image
                         byte[] imageBuffer = null;
                         string mimeType;
 
@@ -584,13 +613,7 @@ namespace ImageProcessor.Web.HttpModules
 
                             if (!string.IsNullOrWhiteSpace(queryString))
                             {
-                                // Animation is not a processor but can be a specific request so we should allow it.
-                                bool processAnimation;
-                                AnimationProcessMode mode = this.ParseAnimationMode(queryString, out processAnimation);
-
-                                // Attempt to match querystring and processors.
-                                IWebGraphicsProcessor[] processors = ImageFactoryExtensions.GetMatchingProcessors(queryString);
-                                if (processors.Any() || processAnimation)
+                                if (processing)
                                 {
                                     // Process the image.
                                     bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
@@ -602,19 +625,11 @@ namespace ImageProcessor.Web.HttpModules
                                         mimeType = imageFactory.CurrentImageFormat.MimeType;
                                     }
                                 }
-                                else if (this.ParseCacheBuster(queryString))
-                                {
-                                    // We're cachebustng. Allow the value to be cached
-                                    await inStream.CopyToAsync(outStream);
-                                    mimeType = FormatUtilities.GetFormat(outStream).MimeType;
-                                }
                                 else
                                 {
-                                    // No match? Someone is either attacking the server or hasn't read the instructions.
-                                    // Either way throw an exception to prevent caching.
-                                    string message = $"The request {request.Unvalidated.RawUrl} could not be understood by the server due to malformed syntax.";
-                                    ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(message);
-                                    throw new HttpException((int)HttpStatusCode.BadRequest, message);
+                                    // We're cachebusting. Allow the value to be cached
+                                    await inStream.CopyToAsync(outStream);
+                                    mimeType = FormatUtilities.GetFormat(outStream).MimeType;
                                 }
                             }
                             else
@@ -674,7 +689,7 @@ namespace ImageProcessor.Web.HttpModules
                     }
 
                     // The cached file is valid so just rewrite the path.
-                    this.imageCache.RewritePath(context); // 
+                    this.imageCache.RewritePath(context);
 
                     // Redirect if not a locally store file.
                     if (!new Uri(cachedPath).IsFile)

@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using ImageProcessor.Web.Caching;
+
 namespace ImageProcessor.Web.Configuration
 {
     using System;

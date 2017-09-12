@@ -174,6 +174,11 @@ namespace ImageProcessor.Web.Caching
         {
         }
 
+        /// <summary>
+        /// Debounces the trimming function
+        /// </summary>
+        /// <param name="trimmer">The trimming function</param>
+        /// <returns>The <see cref="Task"/></returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use ScheduleCacheTrimmer instead")]
         protected virtual Task DebounceTrimmerAsync(Func<Task> trimmer)
@@ -220,11 +225,6 @@ namespace ImageProcessor.Web.Caching
             /// Whether the trimming task is running
             /// </summary>
             private static bool trim;
-
-            /// <summary>
-            /// The asynchronous trimmer task
-            /// </summary>
-            // private static Task task;
 
             /// <summary>
             /// The cancellation token source

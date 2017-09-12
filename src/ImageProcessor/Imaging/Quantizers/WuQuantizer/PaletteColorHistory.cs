@@ -24,27 +24,27 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <summary>
         /// The alpha component.
         /// </summary>
-        public int Alpha;
+        public ulong Alpha;
 
         /// <summary>
         /// The red component.
         /// </summary>
-        public int Red;
+        public ulong Red;
 
         /// <summary>
         /// The green component.
         /// </summary>
-        public int Green;
+        public ulong Green;
 
         /// <summary>
         /// The blue component.
         /// </summary>
-        public int Blue;
+        public ulong Blue;
 
         /// <summary>
         /// The sum of the color components.
         /// </summary>
-        public int Sum;
+        public ulong Sum;
 
         /// <summary>
         /// Normalizes the color.
@@ -54,7 +54,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// </returns>
         public Color ToNormalizedColor()
         {
-            return (this.Sum != 0) ? Color.FromArgb(this.Alpha /= this.Sum, this.Red /= this.Sum, this.Green /= this.Sum, this.Blue /= this.Sum) : Color.Empty;
+            return (this.Sum != 0) ? Color.FromArgb((int)(this.Alpha /= this.Sum), (int)(this.Red /= this.Sum), (int)(this.Green /= this.Sum), (int)(this.Blue /= this.Sum)) : Color.Empty;
         }
 
         /// <summary>
