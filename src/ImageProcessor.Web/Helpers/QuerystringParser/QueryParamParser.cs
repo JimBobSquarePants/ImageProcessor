@@ -67,7 +67,7 @@ namespace ImageProcessor.Web.Helpers
         /// The <see cref="Type"/> to convert the string to.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="T"/>.
+        /// The <typeparamref name="T"/>.
         /// </returns>
         public T ParseValue<T>(string value, CultureInfo culture = null)
         {
