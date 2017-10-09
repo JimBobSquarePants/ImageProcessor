@@ -27,10 +27,10 @@ namespace ImageProcessor.Web.Helpers
     internal sealed class AsyncDuplicateLock
     {
         /// <summary>
-        /// A collection of reference counters used for tracking references to the same object.
+        /// A collection of reference counters used for tracking references to the same key.
         /// </summary>
-        private static readonly Dictionary<object, RefCounted<SemaphoreSlim>> SemaphoreSlims
-                              = new Dictionary<object, RefCounted<SemaphoreSlim>>();
+        private static readonly Dictionary<string, RefCounted<SemaphoreSlim>> SemaphoreSlims
+                              = new Dictionary<string, RefCounted<SemaphoreSlim>>();
 
         /// <summary>
         /// Locks the current thread asynchronously.
@@ -41,7 +41,7 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// The <see cref="IDisposable"/> that will release the lock.
         /// </returns>
-        public IDisposable Lock(object key)
+        public IDisposable Lock(string key)
         {
             GetOrCreate(key).Wait();
             return new Releaser(key);
@@ -56,7 +56,7 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// The <see cref="Task{IDisposable}"/> that will release the lock.
         /// </returns>
-        public async Task<IDisposable> LockAsync(object key)
+        public async Task<IDisposable> LockAsync(string key)
         {
             await GetOrCreate(key).WaitAsync().ConfigureAwait(false);
             return new Releaser(key);
@@ -72,7 +72,7 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// The <see cref="SemaphoreSlim"/>.
         /// </returns>
-        private static SemaphoreSlim GetOrCreate(object key)
+        private static SemaphoreSlim GetOrCreate(string key)
         {
             RefCounted<SemaphoreSlim> item;
             lock (SemaphoreSlims)
@@ -130,7 +130,7 @@ namespace ImageProcessor.Web.Helpers
             /// <summary>
             /// The key identifying the semaphore that limits the number of threads.
             /// </summary>
-            private readonly object key;
+            private readonly string key;
 
             /// <summary>
             /// A value indicating whether this instance of the given entity has been disposed.
@@ -151,7 +151,7 @@ namespace ImageProcessor.Web.Helpers
             /// <param name="key">
             /// The key identifying the semaphore that limits the number of threads.
             /// </param>
-            public Releaser(object key)
+            public Releaser(string key)
             {
                 this.key = key;
             }

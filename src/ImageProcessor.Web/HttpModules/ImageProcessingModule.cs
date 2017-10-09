@@ -542,7 +542,7 @@ namespace ImageProcessor.Web.HttpModules
                     return;
                 }
 
-                using (await Locker.LockAsync(rawUrl))
+                using (await Locker.LockAsync(rawUrl.ToUpperInvariant()))
                 {
                     // Parse the url to see whether we should be doing any work. 
                     // If we're not intercepting all requests and we don't have valid instructions we shoul break here.
