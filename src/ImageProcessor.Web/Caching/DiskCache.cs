@@ -179,9 +179,15 @@ namespace ImageProcessor.Web.Caching
                 directoryInfo.Create();
             }
 
-            using (FileStream fileStream = File.Create(this.CachedPath))
+            // This is a hack. I don't know why there would ever be double access to the file but there is
+            // and it's causing errors to be thrown.
+            // https://github.com/JimBobSquarePants/ImageProcessor/issues/629
+            if (!File.Exists(this.CachedPath))
             {
-                await stream.CopyToAsync(fileStream);
+                using (FileStream fileStream = File.Create(this.CachedPath, (int)stream.Length))
+                {
+                    await stream.CopyToAsync(fileStream);
+                }
             }
         }
 

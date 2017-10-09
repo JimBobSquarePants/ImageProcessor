@@ -50,6 +50,7 @@
     <Compile Include="ExtendedColorTypeConverterTests.cs" />
     <Compile Include="Extensions\DirectoryInfoExtensionsUnitTests.cs" />
     <Compile Include="Extensions\StringExtensionsUnitTests.cs" />
+    <Compile Include="Helpers\AsyncDuplicateLockTests.cs" />
     <Compile Include="Helpers\CachedImageHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryParamParserUnitTests.cs" />
