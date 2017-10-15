@@ -51,6 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\CachedImageHelper.cs" />
+    <Compile Include="Caching\AsyncKeyLock.cs" />
+    <Compile Include="Caching\DoormanPool.cs" />
+    <Compile Include="Caching\Doorman.cs" />
     <Compile Include="Caching\IImageCacheExtended.cs" />
     <Compile Include="Caching\MemoryStreamPool.cs" />
     <Compile Include="Caching\CachedImage.cs" />
@@ -62,7 +65,6 @@
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\TypeInferenceExtensions.cs" />
     <Compile Include="Extensions\TypeInitializationExtensions.cs" />
-    <Compile Include="Helpers\AsyncDuplicateLock.cs" />
     <Compile Include="Helpers\ProcessQueryStringEventArgs.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\GenericConvertableConverter.cs" />
     <Compile Include="Helpers\QuerystringParser\Converters\EnumConverter.cs" />

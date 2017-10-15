@@ -72,7 +72,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// Ensures duplicate requests are atomic.
         /// </summary>
-        private static readonly AsyncDuplicateLock Locker = new AsyncDuplicateLock();
+        private static readonly AsyncKeyLock Locker = new AsyncKeyLock();
 
         /// <summary>
         /// Whether to allow known cache busters.
@@ -251,8 +251,7 @@ namespace ImageProcessor.Web.HttpModules
             }
 
             // Now we check to see if the the url is from a whitelisted location.
-            Uri url;
-            if (!Uri.TryCreate(origin, UriKind.RelativeOrAbsolute, out url))
+            if (!Uri.TryCreate(origin, UriKind.RelativeOrAbsolute, out Uri url))
             {
                 return;
             }
@@ -478,8 +477,7 @@ namespace ImageProcessor.Web.HttpModules
             if (currentService != null)
             {
                 // Parse url
-                string requestPath, queryString;
-                UrlParser.ParseUrl(url, currentService.Prefix, out requestPath, out queryString);
+                UrlParser.ParseUrl(url, currentService.Prefix, out string requestPath, out string queryString);
                 string originalQueryString = queryString;
 
                 // Replace any presets in the querystring with the actual value.
@@ -542,7 +540,7 @@ namespace ImageProcessor.Web.HttpModules
                     return;
                 }
 
-                using (await Locker.LockAsync(rawUrl.ToLowerInvariant()))
+                using (await Locker.LockAsync(rawUrl))
                 {
                     // Parse the url to see whether we should be doing any work. 
                     // If we're not intercepting all requests and we don't have valid instructions we shoul break here.
@@ -556,8 +554,7 @@ namespace ImageProcessor.Web.HttpModules
                         processors = ImageFactoryExtensions.GetMatchingProcessors(queryString);
 
                         // Animation is not a processor but can be a specific request so we should allow it.
-                        bool processAnimation;
-                        mode = this.ParseAnimationMode(queryString, out processAnimation);
+                        mode = this.ParseAnimationMode(queryString, out bool processAnimation);
 
                         // Are we processing or cache busting?
                         processing = processors != null && (processors.Any() || processAnimation);
