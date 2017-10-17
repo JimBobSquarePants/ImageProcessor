@@ -100,8 +100,7 @@ namespace ImageProcessor.Web.Caching
         {
             string configuredPath = this.Settings["VirtualCachePath"];
 
-            string virtualPath;
-            this.absoluteCachePath = GetValidatedAbsolutePath(configuredPath, out virtualPath);
+            this.absoluteCachePath = GetValidatedAbsolutePath(configuredPath, out string virtualPath);
             this.virtualCachePath = virtualPath;
         }
 
@@ -116,7 +115,7 @@ namespace ImageProcessor.Web.Caching
             // TODO: Before this check is performed it should be throttled. For example, only perform this check
             // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
-            string cachedFileName = await this.CreateCachedFileNameAsync();
+            string cachedFileName = await this.CreateCachedFileNameAsync().ConfigureAwait(false);
             this.CachedPath = CachedImageHelper.GetCachedPath(this.absoluteCachePath, cachedFileName, false, this.FolderDepth);
             this.virtualCachedFilePath = CachedImageHelper.GetCachedPath(this.virtualCachePath, cachedFileName, true, this.FolderDepth);
 
@@ -147,7 +146,7 @@ namespace ImageProcessor.Web.Caching
             {
                 // Check to see if the cached image is set to expire
                 // or a new file with the same name has replaced our current image
-                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
+                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc).ConfigureAwait(false))
                 {
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
@@ -186,7 +185,7 @@ namespace ImageProcessor.Web.Caching
             {
                 using (FileStream fileStream = File.Create(this.CachedPath, (int)stream.Length))
                 {
-                    await stream.CopyToAsync(fileStream);
+                    await stream.CopyToAsync(fileStream).ConfigureAwait(false);
                 }
             }
         }
@@ -453,12 +452,11 @@ namespace ImageProcessor.Web.Caching
                         };
                     }
 
-                    string virtualCacheFolderPath;
                     string result = GetValidatedCachePathsImpl(
                         originalPath,
                         mapPath,
                         s => new DirectoryInfo(s),
-                        out virtualCacheFolderPath);
+                        out string virtualCacheFolderPath);
 
                     validatedVirtualCachePath = virtualCacheFolderPath;
                     return result;
@@ -538,7 +536,7 @@ namespace ImageProcessor.Web.Caching
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
                     request.Method = "HEAD";
 
-                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
                     {
                         isUpdated = response.LastModified.ToUniversalTime() > creationDate;
                     }

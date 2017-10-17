@@ -540,7 +540,7 @@ namespace ImageProcessor.Web.HttpModules
                     return;
                 }
 
-                using (await Locker.LockAsync(rawUrl))
+                using (await Locker.LockAsync(rawUrl).ConfigureAwait(false))
                 {
                     // Parse the url to see whether we should be doing any work. 
                     // If we're not intercepting all requests and we don't have valid instructions we shoul break here.
@@ -573,7 +573,7 @@ namespace ImageProcessor.Web.HttpModules
                         .ImageCache.GetInstance(requestPath, url, queryString);
 
                     // Is the file new or updated?
-                    bool isNewOrUpdated = await this.imageCache.IsNewOrUpdatedAsync();
+                    bool isNewOrUpdated = await this.imageCache.IsNewOrUpdatedAsync().ConfigureAwait(false);
                     string cachedPath = this.imageCache.CachedPath;
 
                     // Only process if the file has been updated.
@@ -585,7 +585,7 @@ namespace ImageProcessor.Web.HttpModules
 
                         try
                         {
-                            imageBuffer = await currentService.GetImage(requestPath);
+                            imageBuffer = await currentService.GetImage(requestPath).ConfigureAwait(false);
                         }
                         catch (HttpException ex)
                         {
@@ -625,14 +625,14 @@ namespace ImageProcessor.Web.HttpModules
                                 else
                                 {
                                     // We're cachebusting. Allow the value to be cached
-                                    await inStream.CopyToAsync(outStream);
+                                    await inStream.CopyToAsync(outStream).ConfigureAwait(false);
                                     mimeType = FormatUtilities.GetFormat(outStream).MimeType;
                                 }
                             }
                             else
                             {
                                 // We're capturing all requests.
-                                await inStream.CopyToAsync(outStream);
+                                await inStream.CopyToAsync(outStream).ConfigureAwait(false);
                                 mimeType = FormatUtilities.GetFormat(outStream).MimeType;
                             }
 
@@ -653,7 +653,7 @@ namespace ImageProcessor.Web.HttpModules
                             }
 
                             // Add to the cache.
-                            await this.imageCache.AddImageToCacheAsync(outStream, mimeType);
+                            await this.imageCache.AddImageToCacheAsync(outStream, mimeType).ConfigureAwait(false);
 
                             // Cleanup
                             outStream.Dispose();
@@ -697,7 +697,7 @@ namespace ImageProcessor.Web.HttpModules
                     if (isNewOrUpdated)
                     {
                         // Trim the cache.
-                        await this.imageCache.TrimCacheAsync();
+                        await this.imageCache.TrimCacheAsync().ConfigureAwait(false);
                     }
                 }
             }

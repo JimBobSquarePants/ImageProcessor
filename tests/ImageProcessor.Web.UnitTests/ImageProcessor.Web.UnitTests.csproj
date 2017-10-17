@@ -47,7 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Caching\Class1.cs" />
+    <Compile Include="Caching\AsyncKeyLockTests.cs" />
     <Compile Include="Caching\DoormanPoolTests.cs" />
     <Compile Include="Caching\DoormanTests.cs" />
     <Compile Include="ExtendedColorTypeConverterTests.cs" />
