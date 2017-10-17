@@ -45,6 +45,27 @@ namespace ImageProcessor.Web.UnitTests
         }
 
         /// <summary>
+        /// The gamma regex unit test.
+        /// </summary>
+        /// <param name="input">The input string.</param>
+        /// <param name="expected">The expected result.</param>
+        [Test]
+        [TestCase("gamma=0", 0F)]
+        [TestCase("gamma=270", 270F)]
+        [TestCase("gamma=-270", -270F)]
+        [TestCase("gamma=28", 28F)]
+        [TestCase("gamma=28.7", 28.7F)]
+        public void TestGammaRegex(string input, float expected)
+        {
+            Processors.Gamma rotate = new Processors.Gamma();
+            rotate.MatchRegexIndex(input);
+
+            float result = rotate.Processor.DynamicParameter;
+
+            Assert.AreEqual(expected, result);
+        }
+
+        /// <summary>
         /// The contrast regex unit test.
         /// </summary>
         /// <param name="input">The input string.</param>

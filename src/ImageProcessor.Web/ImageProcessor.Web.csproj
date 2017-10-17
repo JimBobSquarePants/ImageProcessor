@@ -82,6 +82,7 @@
     <Compile Include="Helpers\ValidatingRequestEventArgs.cs" />
     <Compile Include="Processors\DetectEdges.cs" />
     <Compile Include="Processors\EntropyCrop.cs" />
+    <Compile Include="Processors\Gamma.cs" />
     <Compile Include="Processors\Halftone.cs" />
     <Compile Include="Processors\Hue.cs" />
     <Compile Include="Processors\Mask.cs" />
