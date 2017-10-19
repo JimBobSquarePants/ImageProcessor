@@ -12,7 +12,7 @@ properties {
 	$AppVeyor = $null
 	
 	# Input and output paths
-	$env:Path += ";${Env:ProgramFiles(x86)}\MSBuild\14.0\Bin\MsBuild.exe"
+	$env:Path += ";${Env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
 	$BUILD_PATH = Resolve-Path "."
     $SOLUTION_PATH = Join-Path $BUILD_PATH "..\"
 	$SRC_PATH = Join-Path $BUILD_PATH "..\src"
@@ -101,7 +101,7 @@ task Build-Solution -depends Cleanup-Binaries, Set-VersionNumber {
 		[System.Xml.XmlElement] $output = $null
 		foreach($output in $project.outputs.ChildNodes) {
 			# using invoke-expression solves a few character escape issues
-			$buildCommand = "msbuild $(Join-Path $projectPath $project.projfile) /tv:14.0 /p:VisualStudioVersion=14.0 /t:Build /p:Warnings=true /p:Configuration=Release /p:PipelineDependsOnBuild=False /p:OutDir=$(Join-Path $BIN_PATH $output.folder) $($output.additionalParameters) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo"
+			$buildCommand = "msbuild $(Join-Path $projectPath $project.projfile) /tv:15.0 /p:VisualStudioVersion=15.0 /t:Build /p:Warnings=true /p:Configuration=Release /p:PipelineDependsOnBuild=False /p:OutDir=$(Join-Path $BIN_PATH $output.folder) $($output.additionalParameters) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo"
 			Write-Host $buildCommand -ForegroundColor DarkGreen
 			Exec {
 			    Invoke-Expression $buildCommand
@@ -124,7 +124,7 @@ task Build-Tests -depends Cleanup-Binaries {
 	# build the test projects
 	$TestProjects | % {
 		# using invoke-expression solves a few character escape issues
-		$buildCommand = "msbuild $(Join-Path $TESTS_PATH "$_\$_.csproj") /tv:14.0 /p:VisualStudioVersion=14.0 /t:Build /p:Configuration=Release /p:Platform=""AnyCPU"" /p:Warnings=true /clp:WarningsOnly /clp:ErrorsOnly /v:Normal /nologo"
+		$buildCommand = "msbuild $(Join-Path $TESTS_PATH "$_\$_.csproj") /tv:15.0 /p:VisualStudioVersion=15.0 /t:Build /p:Configuration=Release /p:Platform=""AnyCPU"" /p:Warnings=true /clp:WarningsOnly /clp:ErrorsOnly /v:Normal /nologo"
 		Write-Host "Building project $_"
 		Exec {
 			Invoke-Expression $buildCommand
