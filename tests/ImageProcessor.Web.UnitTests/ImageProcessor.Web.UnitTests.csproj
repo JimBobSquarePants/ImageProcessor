@@ -47,6 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caching\AsyncKeyLockTests.cs" />
+    <Compile Include="Caching\DoormanPoolTests.cs" />
+    <Compile Include="Caching\DoormanTests.cs" />
     <Compile Include="ExtendedColorTypeConverterTests.cs" />
     <Compile Include="Extensions\DirectoryInfoExtensionsUnitTests.cs" />
     <Compile Include="Extensions\StringExtensionsUnitTests.cs" />

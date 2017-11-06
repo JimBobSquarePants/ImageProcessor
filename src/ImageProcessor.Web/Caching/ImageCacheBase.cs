@@ -140,7 +140,7 @@ namespace ImageProcessor.Web.Caching
         /// </returns>
         public virtual async Task<string> CreateCachedFileNameAsync()
         {
-            return await Task.FromResult(CachedImageHelper.GetCachedImageFileName(this.FullPath, this.Querystring));
+            return await Task.FromResult(CachedImageHelper.GetCachedImageFileName(this.FullPath, this.Querystring)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace ImageProcessor.Web.Caching
                 }
 
                 trim = true;
-                await trimmer(tokenSource.Token);
+                await trimmer(tokenSource.Token).ConfigureAwait(false);
                 trim = false;
             }
 

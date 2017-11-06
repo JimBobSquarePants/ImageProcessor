@@ -173,7 +173,7 @@ namespace ImageProcessor.Web.Helpers
             WebResponse response;
             try
             {
-                response = await this.GetWebRequest().GetResponseAsync();
+                response = await this.GetWebRequest().GetResponseAsync().ConfigureAwait(false);
             }
             catch (WebException ex)
             {

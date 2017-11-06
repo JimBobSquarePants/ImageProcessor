@@ -85,7 +85,7 @@ namespace ImageProcessor.Web.Services
             using (FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
             {
                 buffer = new byte[file.Length];
-                await file.ReadAsync(buffer, 0, (int)file.Length);
+                await file.ReadAsync(buffer, 0, (int)file.Length).ConfigureAwait(false);
             }
 
             return buffer;
