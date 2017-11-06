@@ -4,6 +4,11 @@
   <plugins>
     <plugin name="Alpha" type="ImageProcessor.Web.Processors.Alpha, ImageProcessor.Web"/>
     <plugin name="AutoRotate" type="ImageProcessor.Web.Processors.AutoRotate, ImageProcessor.Web" enabled="true"/>
+    <plugin name="Background" type="ImageProcessor.Web.Processors.Background, ImageProcessor.Web">
+      <settings>
+        <setting key="VirtualPath" value="~/images/imageprocessor/background/"/>
+      </settings>
+    </plugin>
     <plugin name="BackgroundColor" type="ImageProcessor.Web.Processors.BackgroundColor, ImageProcessor.Web" enabled="true"/>
     <plugin name="Brightness" type="ImageProcessor.Web.Processors.Brightness, ImageProcessor.Web"/>
     <plugin name="Contrast" type="ImageProcessor.Web.Processors.Contrast, ImageProcessor.Web"/>
