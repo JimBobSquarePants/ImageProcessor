@@ -2,7 +2,7 @@
   <services>
     <service name="LocalFileImageService" type="ImageProcessor.Web.Services.LocalFileImageService, ImageProcessor.Web"/>
     <!--Disable the LocalFileImageService and enable this one when using virtual paths. -->
-    <!--<service name="CloudImageService" type="ImageProcessor.Web.Services.CloudImageService, ImageProcessor.Web">
+    <!--<service prefix="media/" name="CloudImageService" type="ImageProcessor.Web.Services.CloudImageService, ImageProcessor.Web">
       <settings>
         <setting key="Container" value=""/>
         <setting key="MaxBytes" value="8194304"/>
