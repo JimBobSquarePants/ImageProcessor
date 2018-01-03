@@ -10,10 +10,11 @@
 
 namespace ImageProcessor.Web.Configuration
 {
+    using System;
     using System.Configuration;
     using System.IO;
     using System.Xml;
-
+    
     using ImageProcessor.Web.Helpers;
 
     /// <summary>
@@ -175,14 +176,14 @@ namespace ImageProcessor.Web.Configuration
             /// Gets or sets the number of minutes to store the rewritten CDN path in the cache
             /// </summary>
             /// <value>The number of minutes to store the rewritten CDN path in the cache</value>
-            /// <remarks>Defaults to 1 if not set.</remarks>
-            [ConfigurationProperty("cachedRewritePathExpiry", DefaultValue = "1", IsRequired = false)]
-            [IntegerValidator(ExcludeRange = false, MinValue = 1, MaxValue = 20)]
-            public int CachedRewritePathExpiry
+            /// <remarks>Defaults to <c>0:1:0</c> if not set.</remarks>
+            [ConfigurationProperty("cachedRewritePathExpiry", DefaultValue = "0:1:0", IsRequired = false)]
+            [PositiveTimeSpanValidator]
+            public TimeSpan CachedRewritePathExpiry
             {
                 get
                 {
-                    return (int)this["cachedRewritePathExpiry"];
+                    return (TimeSpan)this["cachedRewritePathExpiry"];
                 }
 
                 set

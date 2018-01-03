@@ -122,7 +122,7 @@ namespace ImageProcessor.Web.Configuration
         /// <summary>
         /// Gets the image cache rewrite path cache expiry.
         /// </summary>
-        public int ImageCacheRewritePathExpiry { get; private set; }
+        public TimeSpan ImageCacheRewritePathExpiry { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether to preserve exif meta data.
