@@ -85,7 +85,7 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Gets or sets the expiry of the cached path to the cached image.
         /// </summary>
-        public int CachedPathExpiry { get; set; }
+        public TimeSpan CachedPathExpiry { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of days to store the image.

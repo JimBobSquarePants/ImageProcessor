@@ -56,21 +56,24 @@ namespace ImageProcessor.Web.Caching
         }
 
         /// <summary>
-        /// Adds a <see cref="cachedImage"/> to the cache.
+        /// Adds a <see cref="CachedImage"/> to the cache.
         /// </summary>
         /// <param name="cachedImage">
         /// The cached image to add.
         /// </param>
-        /// <param name="expiry">
-        /// The number of minutes to cache the image, defaults to 1.
+        /// <param name="expiration">
+        /// A <see cref="TimeSpan"/> defining the sliding expiration duration, defaults to zero
         /// </param>
         /// <returns>
         /// The value of the item to add or get.
         /// </returns>
-        public static CachedImage Add(CachedImage cachedImage, int expiry = 1)
+        public static CachedImage Add(CachedImage cachedImage, TimeSpan expiration = default(TimeSpan))
         {
+            if (expiration == default(TimeSpan) || expiration == TimeSpan.Zero)
+            { expiration = new TimeSpan(0, 1, 0); }
+
             // Add the CachedImage with a sliding expiration of `expiry` minutes.
-            CacheItemPolicy policy = new CacheItemPolicy { SlidingExpiration = new TimeSpan(0, expiry, 0) };
+            CacheItemPolicy policy = new CacheItemPolicy { SlidingExpiration = expiration };
 
             if (new Uri(cachedImage.Path).IsFile)
             {
@@ -104,5 +107,23 @@ namespace ImageProcessor.Web.Caching
 
             return cachedImage;
         }
+
+        /// <summary>
+        /// Adds a <see cref="CachedImage"/> to the cache.
+        /// </summary>
+        /// <param name="cachedImage">
+        /// The cached image to add.
+        /// </param>
+        /// <param name="expiry">
+        /// The number of minutes to cache the image, defaults to 1.
+        /// </param>
+        /// <returns>
+        /// The value of the item to add or get.
+        /// </returns>
+        public static CachedImage Add(CachedImage cachedImage, int expiry)
+        {
+            return Add(cachedImage, new TimeSpan(0, expiry, 0));
+        }
+    
     }
 }
