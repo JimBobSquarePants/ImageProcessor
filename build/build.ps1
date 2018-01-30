@@ -1,6 +1,7 @@
 $buildNumber = "$env:APPVEYOR_BUILD_NUMBER";
 $buildPath = Resolve-Path ".";
 $binPath = Join-Path $buildPath "build\_BuildOutput";
+$testsPath = Join-Path $buildPath "tests";
 $nuspecsPath = Join-Path $buildPath "build\nuspecs";
 $nugetOutput = Join-Path $binPath "NuGets";
 
@@ -15,6 +16,11 @@ $imageprocessor = @{
 };
 
 $projects = @($imageprocessor);
+
+$testProjects = @(
+    (Join-Path $testsPath "ImageProcessor.UnitTests\ImageProcessor.UnitTests.csproj"),
+    (Join-Path $testsPath "ImageProcessor.Web.UnitTests\ImageProcessor.Web.UnitTests.csproj")
+);
 
 # Updates the AssemblyInfo file with the specified version.
 # http://www.luisrocha.net/2009/11/setting-assembly-version-with-windows.html
@@ -32,18 +38,29 @@ function Update-AssemblyInfo ([string]$file, [string]$version) {
 }
 
 # Loop through our projects, patch, build, and pack.
+
+# Patch and Build
 foreach ($project in $projects) {
 
-	# Patch
     Write-Host "Building project $($project.name) at version $($project.version)";
     Update-AssemblyInfo -file (Join-Path $project.folder "Properties\AssemblyInfo.cs") -version $project.version;
 
-	# Build
     $buildCommand = "msbuild $(Join-Path $project.folder $project.csproj) /t:Build /p:Warnings=true /p:Configuration=Release /p:Platform=AnyCPU /p:PipelineDependsOnBuild=False /p:OutDir=$($project.output) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo";
     Write-Host $buildCommand;
     Invoke-Expression $buildCommand;
+}
 
-	# Pack
+#Test 
+foreach ($testProject in $testProjects) {
+
+    $testBuildCommand = "msbuild $($testProject) /t:Build /p:Configuration=Release /p:Platform=""AnyCPU"" /p:Warnings=true /clp:WarningsOnly /clp:ErrorsOnly /v:Normal /nologo"
+    Write-Host "Building project $($testProject)";
+    Invoke-Expression $testBuildCommand;
+}
+
+# Pack
+foreach ($project in $projects) {
+
     $packCommand = "nuget pack $($project.nuspec) -OutputDirectory $($nugetOutput) -Version $($project.version)";
     Write-Host $packCommand;
     Invoke-Expression $packCommand;
