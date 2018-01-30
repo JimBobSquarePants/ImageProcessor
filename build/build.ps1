@@ -1,4 +1,4 @@
-$buildNumber = "$env:APPVEYOR_BUILD_NUMBER".Trim().PadLeft(5,"0");
+$buildNumber = "$env:APPVEYOR_BUILD_NUMBER".Trim().PadLeft(5, "0");
 $buildPath = Resolve-Path ".";
 $binPath = Join-Path $buildPath "build\_BuildOutput";
 $testsPath = Join-Path $buildPath "tests";
@@ -8,14 +8,72 @@ $nugetOutput = Join-Path $binPath "NuGets";
 # Projects. Nuget Dependencies are handled in the nuspec files themselves and depend on the Major.Minor.Build number only.
 $imageprocessor = @{
     name    = "ImageProcessor"
-    version = "2.5.6.${buildNumber}"
+    version = "2.6.0.${buildNumber}"
     folder  = Join-Path $buildPath "src\ImageProcessor"
     output  = Join-Path $binPath "ImageProcessor\lib\net452"
     csproj  = "ImageProcessor.csproj"
     nuspec  = Join-Path $nuspecsPath "ImageProcessor.nuspec"
 };
 
-$projects = @($imageprocessor);
+$imageProcessorPluginsCair = @{
+    name    = "ImageProcessor.Plugins.Cair"
+    version = "1.1.0.${buildNumber}"
+    folder  = Join-Path $buildPath "src\ImageProcessor.Plugins.Cair"
+    output  = Join-Path $binPath "ImageProcessor.Plugins.Cair\lib\net452"
+    csproj  = "ImageProcessor.Plugins.Cair.csproj"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Plugins.Cair.nuspec"
+};
+
+$imageProcessorPluginsWebP = @{
+    name    = "ImageProcessor.Plugins.WebP"
+    version = "1.1.0.${buildNumber}"
+    folder  = Join-Path $buildPath "src\ImageProcessor.Plugins.WebP"
+    output  = Join-Path $binPath "ImageProcessor.Plugins.WebP\lib\net452"
+    csproj  = "ImageProcessor.Plugins.WebP.csproj"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Plugins.WebP.nuspec"
+};
+
+$imageprocessorWeb = @{
+    name    = "ImageProcessor.Web"
+    version = "4.9.0.${buildNumber}"
+    folder  = Join-Path $buildPath "src\ImageProcessor.Web"
+    output  = Join-Path $binPath "ImageProcessor.Web\lib\net452"
+    csproj  = "ImageProcessor.Web.csproj"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.nuspec"
+};
+
+$imageprocessorWebConfig = @{
+    version = "2.4.0.${buildNumber}"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.nuspec"
+};
+
+$imageProcessorWebPluginsAzureBlobCache = @{
+    name    = "ImageProcessor.Web.Plugins.AzureBlobCache"
+    version = "1.4.0.${buildNumber}"
+    folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.AzureBlobCache"
+    output  = Join-Path $binPath "ImageProcessor.Web.Plugins.AzureBlobCache\lib\net452"
+    csproj  = "ImageProcessor.Web.Plugins.AzureBlobCache.csproj"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.Plugins.AzureBlobCache.nuspec"
+};
+
+$imageProcessorWebPluginsPostProcessor = @{
+    name    = "ImageProcessor.Web.Plugins.PostProcessor"
+    version = "1.3.0.${buildNumber}"
+    folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.PostProcessor"
+    output  = Join-Path $binPath "ImageProcessor.Web.Plugins.PostProcessor\lib\net452"
+    csproj  = "ImageProcessor.Web.Plugins.PostProcessor.csproj"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.Plugins.PostProcessor.nuspec"
+};
+
+$projects = @(
+    $imageprocessor, 
+    $imageProcessorPluginsCair,
+    $imageProcessorPluginsWebP,
+    $imageprocessorWeb,
+    $imageprocessorWebConfig,
+    $imageProcessorWebPluginsAzureBlobCache,
+    $imageProcessorWebPluginsPostProcessor
+);
 
 $testProjects = @(
     (Join-Path $testsPath "ImageProcessor.UnitTests\ImageProcessor.UnitTests.csproj"),
@@ -42,6 +100,11 @@ Invoke-Expression "nuget restore $(Join-Path $buildPath "ImageProcessor.sln")"
 
 # Patch and Build
 foreach ($project in $projects) {
+
+    if ($project.csproj -eq $null -or $project.csproj -eq "") {
+
+        continue;
+    }
 
     Write-Host "Building project $($project.name) at version $($project.version)";
     Update-AssemblyInfo -file (Join-Path $project.folder "Properties\AssemblyInfo.cs") -version $project.version;
