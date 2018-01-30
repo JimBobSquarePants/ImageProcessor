@@ -8,4 +8,4 @@ before_build:
   - git submodule -q update --init
 
 build_script:
-- cmd: build.cmd
+- cmd: .\build\build.cmd
