@@ -15,4 +15,4 @@ build_script:
 - cmd: .\build\build.cmd
 
 artifacts:
-- path: '**\*.nupkg'
+- path: '.build\**\*.nupkg'
