@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5368AF57-74ED-4499-BCCD-38BCB18C4629}"
 EndProject
@@ -30,6 +30,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{4E1AB050-8CC4-4099-80AF-7FF2BFC000E9}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+		build\build-new.ps1 = build\build-new.ps1
 		build\Build.bat = build\Build.bat
 		build\build.ps1 = build\build.ps1
 		build\build.xml = build\build.xml
@@ -176,5 +177,8 @@ Global
 		{73F53C94-37CC-4981-A31B-BC727ABDB34F} = {19517DBA-58AA-4294-97BF-0D02902749B4}
 		{63F86021-9430-43EE-9F59-A74C526A4AB3} = {19517DBA-58AA-4294-97BF-0D02902749B4}
 		{CC88B6F8-0164-4E1E-BE17-A1C2D0597F2C} = {19517DBA-58AA-4294-97BF-0D02902749B4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {58041350-4AD6-4EED-98A1-6DF1698BFFFC}
 	EndGlobalSection
 EndGlobal
