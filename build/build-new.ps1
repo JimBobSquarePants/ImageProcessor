@@ -49,5 +49,4 @@ foreach ($project in $projects) {
     $packCommand = "nuget pack $($project.nuspec) -OutputDirectory $($nugetOutput) -Version $($project.version)";
     Write-Host $packCommand;
     Invoke-Expression $packCommand;
-    # $NUGET_EXE Pack $nuspec_local_path -OutputDirectory $NUGET_OUTPUT -Version "$($_.version)$($_.prerelease)"
 }
