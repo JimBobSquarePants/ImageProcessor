@@ -99,7 +99,7 @@ function Update-AssemblyInfo ([string]$file, [string]$version) {
 Invoke-Expression "nuget restore $(Join-Path $buildPath "ImageProcessor.sln")"
 
 # Patch and Build
-Write-Host "Building Projects" -ForegroundColor HotPink;
+Write-Host "Building Projects" -ForegroundColor Magenta;
 
 foreach ($project in $projects) {
 
@@ -112,12 +112,12 @@ foreach ($project in $projects) {
     Update-AssemblyInfo -file (Join-Path $project.folder "Properties\AssemblyInfo.cs") -version $project.version;
 
     $buildCommand = "msbuild $(Join-Path $project.folder $project.csproj) /t:Build /p:Warnings=true /p:Configuration=Release /p:Platform=AnyCPU /p:PipelineDependsOnBuild=False /p:OutDir=$($project.output) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo";
-    Write-Host $buildCommand -ForegroundColor Yellow;;
+    Write-Host $buildCommand -ForegroundColor Yellow;
     Invoke-Expression $buildCommand;
 }
 
 #Test 
-Write-Host "Building Tests" -ForegroundColor HotPink;
+Write-Host "Building Tests" -ForegroundColor Magenta;
 foreach ($testProject in $testProjects) {
 
     $testBuildCommand = "msbuild $($testProject) /t:Build /p:Configuration=Release /p:Platform=""AnyCPU"" /p:Warnings=true /clp:WarningsOnly /clp:ErrorsOnly /v:Normal /nologo"
@@ -126,7 +126,7 @@ foreach ($testProject in $testProjects) {
 }
 
 # Pack
-Write-Host "Packing Artifacts" -ForegroundColor HotPink;
+Write-Host "Packing Artifacts" -ForegroundColor Magenta;
 foreach ($project in $projects) {
 
     $packCommand = "nuget pack $($project.nuspec) -OutputDirectory $($nugetOutput) -Version $($project.version)";
