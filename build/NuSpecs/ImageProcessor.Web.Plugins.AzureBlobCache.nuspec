@@ -38,5 +38,6 @@
   <files>
     <file src="..\content\ImageProcessor.Web.Plugins.AzureBlobCache\config\imageprocessor\cache.config.transform" target="content\config\imageprocessor\cache.config.transform" />
     <file src="..\_BuildOutput\ImageProcessor.Web.Plugins.AzureBlobCache\lib\net452\ImageProcessor.Web.Plugins.AzureBlobCache.dll" target="lib\net452" />
+    <file src="..\_BuildOutput\ImageProcessor.Web.Plugins.AzureBlobCache\lib\net452\ImageProcessor.Web.Plugins.AzureBlobCache.xml" target="lib\net452" />
   </files>
 </package>

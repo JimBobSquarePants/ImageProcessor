@@ -29,5 +29,6 @@
   </metadata>
   <files>
     <file src="..\_BuildOutput\ImageProcessor.Web.Plugins.PostProcessor\lib\net452\ImageProcessor.Web.Plugins.PostProcessor.dll" target="lib\net452" />
-  </files>
+    <file src="..\_BuildOutput\ImageProcessor.Web.Plugins.PostProcessor\lib\net452\ImageProcessor.Web.Plugins.PostProcessor.xml" target="lib\net452" />
+</files>
 </package>

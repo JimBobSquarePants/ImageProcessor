@@ -29,5 +29,6 @@
   </metadata>
   <files>
     <file src="..\_BuildOutput\ImageProcessor.Plugins.Cair\lib\net452\ImageProcessor.Plugins.Cair.dll" target="lib\net452" />
+    <file src="..\_BuildOutput\ImageProcessor.Plugins.Cair\lib\net452\ImageProcessor.Plugins.Cair.xml" target="lib\net452" />
   </files>
 </package>
