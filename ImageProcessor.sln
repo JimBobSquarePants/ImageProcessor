@@ -32,13 +32,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{4E1AB050
 		appveyor.yml = appveyor.yml
 		build\build.cmd = build\build.cmd
 		build\build.ps1 = build\build.ps1
-		build\build.xml = build\build.xml
-		build\coverage.bat = build\coverage.bat
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{1F68939E-8BBE-4D09-98B5-68B06BBDE68E}"
 	ProjectSection(SolutionItems) = preProject
-		APACHE-2.0-LICENSE.txt = APACHE-2.0-LICENSE.txt
+		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject

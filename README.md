@@ -1,40 +1,39 @@
-# <img src="https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/develop/build/icons/imageprocessor-logo-64.png" width="32" height="32"/> ImageProcessor
+<h1 align="center">
+    <img src="https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/develop/build/icons/imageprocessor-logo-256.png" alt="ImageProcessor" width="175"/>
+    <br>
+    ImageProcessor
+    <br>
+    <br>
+</h1>
 
-**Imageprocessor** is a lightweight, extensible library written in C# that allows you to manipulate images on-the-fly using .NET 4.5+
+**Imageprocessor** is a lightweight, fluent wrapper around System.Drawing.
 
 It's fast, extensible, easy to use, comes bundled with some great features and is fully open source.
 
 For full documentation please see [http://imageprocessor.org/](http://imageprocessor.org/)
 
-**If you are looking for the new cross-platform imaging library it has moved to it's own repository [ImageSharp](https://github.com/JimBobSquarePants/ImageSharp).**
-
 ### Build Status
 
 [![Build status](https://ci.appveyor.com/api/projects/status/8ypr7527dnao04yr/branch/Framework?svg=true)](https://ci.appveyor.com/project/JamesSouth/imageprocessor/branch/Framework)
-[![Coverage Status](https://coveralls.io/repos/JimBobSquarePants/ImageProcessor/badge.svg?branch=V2&service=github)](https://coveralls.io/r/JimBobSquarePants/ImageProcessor?branch=Framework)
+[![Issues open](https://img.shields.io/github/issues-raw/JimBobSquarePants/imageprocessor.svg)](https://huboard.com/JimBobSquarePants/ImageProcessor/)
+[![Source Browser](https://img.shields.io/badge/Browse-Source-green.svg)](http://sourcebrowser.io/Browse/JimBobSquarePants/ImageProcessor/)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/JimBobSquarePants/ImageProcessor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ### Latest Releases
 |Library           |Version           |
 |:-----------------|:-----------------|
 |**ImageProcessor**|[![NuGet](https://buildstats.info/nuget/ImageProcessor)](https://www.nuget.org/packages/ImageProcessor)|
+|**ImageProcessor.Plugins.Cair**|[![NuGet](https://buildstats.info/nuget/ImageProcessor.Plugins.Cair)](https://www.nuget.org/packages/ImageProcessor.Plugins.Cair)|
+|**ImageProcessor.Plugins.WebP**|[![NuGet](https://buildstats.info/nuget/ImageProcessor.Plugins.WebP)](https://www.nuget.org/packages/ImageProcessor.Plugins.WebP)|
 |**ImageProcessor.Web**|[![NuGet](https://buildstats.info/nuget/ImageProcessor.Web)](https://www.nuget.org/packages/ImageProcessor.Web)|
+|**ImageProcessor.Web.Config**|[![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.Config)](https://www.nuget.org/packages/ImageProcessor.Web.Config)|
+|**ImageProcessor.Web.Plugins.AzureBlobCache**|[![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.Plugins.AzureBlobCache)](https://www.nuget.org/packages/ImageProcessor.Web.Plugins.AzureBlobCache)|
+|**ImageProcessor.Web.PostProcessor**|[![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.PostProcessor)](https://www.nuget.org/packages/ImageProcessor.Web.PostProcessor)|
 
-[![Issues open](http://img.shields.io/github/issues-raw/JimBobSquarePants/imageprocessor.svg)](https://huboard.com/JimBobSquarePants/ImageProcessor/)
-[![Source Browser](https://img.shields.io/badge/Browse-Source-green.svg)](http://sourcebrowser.io/Browse/JimBobSquarePants/ImageProcessor/)
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/JimBobSquarePants/ImageProcessor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Contributing to ImageProcessor
-Contribution is most welcome! I mean, that's what this is all about isn't it?
-
-Things I would :heart: people to help me out with:
-
- - Unit tests. I need to get some going for all the regular expressions within the ImageProcessor core plus anywhere else we can think of. If that's your bag please contribute.
- - Documentation. Nobody likes doing docs, I've written a lot but my prose is clumsy and verbose. If you think you can make things clearer or you spot any mistakes please submit a pull request (Guide to how the docs work below).
-
-**Just remember to StyleCop all things! :oncoming_police_car:**
-
-## RoadMap
-Focus for the ImageProcessor libraries has switched to the new library [**ImageSharp**](https://github.com/JimBobSquarePants/ImageSharp). As such very few new features will be added to this library. Bug fixes and enhancements will continue to be developed though. 
+**ImageProcessor is in maintainance mode only**. Focus for the ImageProcessor libraries has switched to a new library [**ImageSharp**](https://github.com/SixLabors/ImageSharp). 
+As such, no new features will be added to this library. Bug fixes will continue to be added. 
 
 ## Documentation
 
@@ -51,10 +50,3 @@ Learn more about using Jekyll by reading its [documentation](http://jekyllrb.com
 
 Grand High Eternal Dictator
 - [James Jackson-South](https://github.com/jimbobsquarepants)
-
-Core Team
-- [Jeavon Leopold](https://github.com/jeavon)
-- [Dirk Lemstra](https://github.com/dlemstra)
-- [Yufeih Huang](https://github.com/yufeih)
-- [Thomas Broust](https://github.com/cosmo0)
-- [Christopher Bauer](https://github.com/christopherbauer)

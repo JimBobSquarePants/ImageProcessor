@@ -62,7 +62,7 @@ $imageProcessorWebPluginsPostProcessor = @{
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.PostProcessor"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.PostProcessor\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.PostProcessor.csproj"
-    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.Plugins.PostProcessor.nuspec"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.PostProcessor.nuspec"
 };
 
 $projects = @(
