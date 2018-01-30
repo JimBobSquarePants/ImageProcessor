@@ -15,6 +15,7 @@ namespace ImageProcessor.Web.Configuration
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Linq;
 
     using ImageProcessor.Configuration;
@@ -75,7 +76,7 @@ namespace ImageProcessor.Web.Configuration
         public static ImageProcessorConfiguration Instance => Lazy.Value;
 
         /// <summary>
-        /// Gets the collection of available procesors to run.
+        /// Gets the collection of available processors to run.
         /// </summary>
         public ConcurrentDictionary<Type, Dictionary<string, string>> AvailableWebGraphicsProcessors { get; } = new ConcurrentDictionary<Type, Dictionary<string, string>>();
 
@@ -141,7 +142,7 @@ namespace ImageProcessor.Web.Configuration
         public bool FixGamma => GetImageProcessingSection().FixGamma;
 
         /// <summary>
-        /// Gets a value indicating whether whether to intercept all image requests including ones
+        /// Gets a value indicating whether to intercept all image requests including ones
         /// without querystring parameters.
         /// </summary>
         public bool InterceptAllRequests => GetImageProcessingSection().InterceptAllRequests;
@@ -277,7 +278,7 @@ namespace ImageProcessor.Web.Configuration
                     .Cast<SettingElement>()
                     .ToDictionary(setting => setting.Key, setting => setting.Value);
 
-                //override the settings found in config section with values in the app.config / deployment slot settings
+                // Override the settings found in config section with values in the app.config / deployment slot settings
                 OverrideDefaultSettingsWithAppSettingsValue(settings, name);
 
             }
@@ -353,7 +354,7 @@ namespace ImageProcessor.Web.Configuration
                     .Cast<SettingElement>()
                     .ToDictionary(setting => setting.Key, setting => setting.Value);
 
-                //override the config section settings with values found in the app.config / deployment slot settings
+                // Override the config section settings with values found in the app.config / deployment slot settings
                 OverrideDefaultSettingsWithAppSettingsValue(settings, name);
             }
             else
@@ -448,15 +449,16 @@ namespace ImageProcessor.Web.Configuration
         {
 
             Dictionary<string, string> copyOfSettingsForEnumeration = new Dictionary<string, string>(defaultSettings);
-            //for each default setting found in the config section
+            
+            // For each default setting found in the config section
             foreach (var setting in copyOfSettingsForEnumeration)
             {
-                //check the app settings for a key in the sepcified format
-                string appSettingKeyName = "ImageProcessor." + serviceOrPluginName + "." + setting.Key;
-                if (!String.IsNullOrEmpty(System.Configuration.ConfigurationManager.AppSettings[appSettingKeyName]))
+                // Check the app settings for a key in the specified format
+                string appSettingKeyName = string.Format("ImageProcessor.{0}.{1}", serviceOrPluginName, setting.Key);
+                if (!String.IsNullOrEmpty(ConfigurationManager.AppSettings[appSettingKeyName]))
                 {
-                    //if the key is found in app settings use the app settings value rather than the value in the config section
-                    defaultSettings[setting.Key] = System.Configuration.ConfigurationManager.AppSettings[appSettingKeyName];
+                    // If the key is found in app settings use the app settings value rather than the value in the config section
+                    defaultSettings[setting.Key] = ConfigurationManager.AppSettings[appSettingKeyName];
                 }
             }
 
