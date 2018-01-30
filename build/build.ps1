@@ -1,4 +1,4 @@
-$buildNumber = "$env:APPVEYOR_BUILD_NUMBER";
+$buildNumber = "$env:APPVEYOR_BUILD_NUMBER".Trim().PadLeft(5,"0");
 $buildPath = Resolve-Path ".";
 $binPath = Join-Path $buildPath "build\_BuildOutput";
 $testsPath = Join-Path $buildPath "tests";
