@@ -99,6 +99,8 @@ function Update-AssemblyInfo ([string]$file, [string]$version) {
 Invoke-Expression "nuget restore $(Join-Path $buildPath "ImageProcessor.sln")"
 
 # Patch and Build
+Write-Host "Building Projects" -ForegroundColor HotPink;
+
 foreach ($project in $projects) {
 
     if ($project.csproj -eq $null -or $project.csproj -eq "") {
@@ -106,26 +108,28 @@ foreach ($project in $projects) {
         continue;
     }
 
-    Write-Host "Building project $($project.name) at version $($project.version)";
+    Write-Host "Building project $($project.name) at version $($project.version)" -ForegroundColor Yellow;
     Update-AssemblyInfo -file (Join-Path $project.folder "Properties\AssemblyInfo.cs") -version $project.version;
 
     $buildCommand = "msbuild $(Join-Path $project.folder $project.csproj) /t:Build /p:Warnings=true /p:Configuration=Release /p:Platform=AnyCPU /p:PipelineDependsOnBuild=False /p:OutDir=$($project.output) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo";
-    Write-Host $buildCommand;
+    Write-Host $buildCommand -ForegroundColor Yellow;;
     Invoke-Expression $buildCommand;
 }
 
 #Test 
+Write-Host "Building Tests" -ForegroundColor HotPink;
 foreach ($testProject in $testProjects) {
 
     $testBuildCommand = "msbuild $($testProject) /t:Build /p:Configuration=Release /p:Platform=""AnyCPU"" /p:Warnings=true /clp:WarningsOnly /clp:ErrorsOnly /v:Normal /nologo"
-    Write-Host "Building project $($testProject)";
+    Write-Host "Building project $($testProject)" -ForegroundColor Yellow;
     Invoke-Expression $testBuildCommand;
 }
 
 # Pack
+Write-Host "Packing Artifacts" -ForegroundColor HotPink;
 foreach ($project in $projects) {
 
     $packCommand = "nuget pack $($project.nuspec) -OutputDirectory $($nugetOutput) -Version $($project.version)";
-    Write-Host $packCommand;
+    Write-Host $packCommand -ForegroundColor Yellow;
     Invoke-Expression $packCommand;
 }
