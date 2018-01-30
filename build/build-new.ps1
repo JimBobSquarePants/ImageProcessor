@@ -1,12 +1,13 @@
 $buildNumber = "$env:APPVEYOR_BUILD_NUMBER";
 $buildPath = Resolve-Path ".";
-$srcPath = Join-Path $buildPath ".\src";
-$binPath = Join-Path $buildPath "_buildoutput";
+$binPath = Join-Path $buildPath ".\_buildoutput";
 $nuspecsPath = Join-Path $buildPath ".\build\nuspecs";
-$nugetOutput = Join-Path $BIN_PATH "NuGets";
+$nugetOutput = Join-Path $binPath ".\NuGets";
 
 Write-Debug $buildPath;
-Write-Debug $srcPath;
+Write-Debug $binPath;
+Write-Debug $nuspecsPath;
+Write-Debug $nugetOutput;
 
 # Our project objects
 $imageprocessor = @{
