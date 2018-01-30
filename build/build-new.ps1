@@ -1,8 +1,8 @@
 $buildNumber = "$env:APPVEYOR_BUILD_NUMBER";
 $buildPath = Resolve-Path ".";
-$binPath = Join-Path $buildPath ".\_buildoutput";
-$nuspecsPath = Join-Path $buildPath ".\build\nuspecs";
-$nugetOutput = Join-Path $binPath ".\NuGets";
+$binPath = Join-Path $buildPath "build\_BuildOutput";
+$nuspecsPath = Join-Path $buildPath "build\nuspecs";
+$nugetOutput = Join-Path $binPath "NuGets";
 
 Write-Debug $buildPath;
 Write-Debug $binPath;
@@ -13,10 +13,10 @@ Write-Debug $nugetOutput;
 $imageprocessor = @{
     name    = "ImageProcessor"
     version = "2.5.6.${buildNumber}"
-    folder  = Join-Path $buildPath "\src\ImageProcessor"
-    output  = Join-Path $binPath "\ImageProcessor\lib\net452"
+    folder  = Join-Path $buildPath "src\ImageProcessor"
+    output  = Join-Path $binPath "ImageProcessor\lib\net452"
     csproj  = "ImageProcessor.csproj"
-    nuspec  = Join-Path $nuspecsPath "\ImageProcessor.nuspec"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.nuspec"
 };
 
 $projects = @($imageprocessor);
@@ -46,8 +46,8 @@ foreach ($project in $projects) {
     Write-Host $buildCommand;
     Invoke-Expression $buildCommand;
 
-	$packCommand = "nuget pack $($project.nuspec) -OutputDirectory $($nugetOutput) -Version $($project.version)";
-	Write-Host $packCommand;
+    $packCommand = "nuget pack $($project.nuspec) -OutputDirectory $($nugetOutput) -Version $($project.version)";
+    Write-Host $packCommand;
     Invoke-Expression $packCommand;
-	# $NUGET_EXE Pack $nuspec_local_path -OutputDirectory $NUGET_OUTPUT -Version "$($_.version)$($_.prerelease)"
+    # $NUGET_EXE Pack $nuspec_local_path -OutputDirectory $NUGET_OUTPUT -Version "$($_.version)$($_.prerelease)"
 }
