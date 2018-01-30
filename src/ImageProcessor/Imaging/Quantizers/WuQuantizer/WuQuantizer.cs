@@ -109,7 +109,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
                 {
                     Color32 pixel = pixelLine[i];
                     byte bestMatch = fallback;
-                    if (pixel.A > alphaThreshold)
+                    if (pixel.A >= alphaThreshold)
                     {
                         bestMatch = lookup.GetPaletteIndex(pixel);
                         paletteHistogram[bestMatch].AddPixel(pixel);
