@@ -1,9 +1,9 @@
-$appveyorBuildNumber = "$env:APPVEYOR_BUILD_NUMBER";
-
+$buildNumber = "$env:APPVEYOR_BUILD_NUMBER";
 $buildPath = Resolve-Path ".";
 $srcPath = Join-Path $buildPath ".\src";
-$nuspecPath = Join-Path $buildPath ".\build\nuspecs"
-$binPath = Join-Path $buildPath "_buildoutput"
+$binPath = Join-Path $buildPath "_buildoutput";
+$nuspecsPath = Join-Path $buildPath ".\build\nuspecs";
+$nugetOutput = Join-Path $BIN_PATH "NuGets";
 
 Write-Debug $buildPath;
 Write-Debug $srcPath;
@@ -11,11 +11,11 @@ Write-Debug $srcPath;
 # Our project objects
 $imageprocessor = @{
     name    = "ImageProcessor"
-    version = "2.5.6.${appveyorBuildNumber}"
+    version = "2.5.6.${buildNumber}"
     folder  = Join-Path $buildPath "\src\ImageProcessor"
     output  = Join-Path $binPath "\ImageProcessor\lib\net452"
     csproj  = "ImageProcessor.csproj"
-    nuspec  = "ImageProcessor.nuspec"
+    nuspec  = Join-Path $nuspecsPath "\ImageProcessor.nuspec"
 };
 
 $projects = @($imageprocessor);
@@ -23,8 +23,6 @@ $projects = @($imageprocessor);
 # Updates the AssemblyInfo file with the specified version
 # http://www.luisrocha.net/2009/11/setting-assembly-version-with-windows.html
 function Update-AssemblyInfo ([string]$file, [string]$version) {
-    
-    Write-Host "Patching assembly to $($version)"
 
     $assemblyVersionPattern = 'AssemblyVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)'
     $fileVersionPattern = 'AssemblyFileVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)'
@@ -37,6 +35,7 @@ function Update-AssemblyInfo ([string]$file, [string]$version) {
     } | Set-Content $file
 }
 
+# Loop through our projects, build and pack
 foreach ($project in $projects) {
 
     Write-Host "Building project $($project.name) at version $($project.version)";
@@ -46,5 +45,8 @@ foreach ($project in $projects) {
     Write-Host $buildCommand;
     Invoke-Expression $buildCommand;
 
-    #TODO: Nuget
+	$packCommand = "nuget pack $($project.nuspec) -OutputDirectory $($nugetOutput) -Version $($project.version)";
+	Write-Host $packCommand;
+    Invoke-Expression $packCommand;
+	# $NUGET_EXE Pack $nuspec_local_path -OutputDirectory $NUGET_OUTPUT -Version "$($_.version)$($_.prerelease)"
 }
