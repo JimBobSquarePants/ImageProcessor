@@ -44,7 +44,7 @@ $imageprocessorWeb = @{
 
 $imageprocessorWebConfig = @{
     version = "2.4.0.${buildNumber}"
-    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.nuspec"
+    nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.Config.nuspec"
 };
 
 $imageProcessorWebPluginsAzureBlobCache = @{
