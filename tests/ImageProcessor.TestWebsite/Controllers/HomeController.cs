@@ -42,6 +42,11 @@ namespace ImageProcessor.TestWebsite.Controllers
             return View();
         }
 
+        public ActionResult Database()
+        {
+            return this.View();
+        }
+
         public ActionResult External()
         {
             return this.View();
