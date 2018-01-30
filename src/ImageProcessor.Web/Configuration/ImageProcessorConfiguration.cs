@@ -258,7 +258,9 @@ namespace ImageProcessor.Web.Configuration
         /// Returns the <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.SettingElementCollection"/> for the given plugin.
         /// </summary>
         /// <param name="name">
-        /// The name of the plugin to get the settings for. Override settings by adding appsettings in web.config using the format ImageProcessor.&lt;.pluginname.&gt.&lt;settingKey&gt; e.g. 'ImageProcessor.GaussianBlur.MaxSize'. The key must exist in the config section for the appsetting to apply"
+        /// The name of the plugin to get the settings for. Override settings by adding appsettings in web.config using the format 
+        /// ImageProcessor.&lt;.plugin-name.&gt;.&lt;settingKey&gt; e.g. 'ImageProcessor.GaussianBlur.MaxSize'. 
+        /// The key must exist in the config section for the appsetting to apply"
         /// </param>
         /// <returns>
         /// The <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.SettingElementCollection"/> for the given plugin.

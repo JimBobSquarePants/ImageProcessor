@@ -175,3 +175,6 @@ build/TestResult.xml
 *.db
 
 _site/
+
+**/[Cc]ache/
+**/[Cc]ache1/
