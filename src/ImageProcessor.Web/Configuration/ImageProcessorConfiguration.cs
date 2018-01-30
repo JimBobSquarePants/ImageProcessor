@@ -257,7 +257,7 @@ namespace ImageProcessor.Web.Configuration
         /// Returns the <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.SettingElementCollection"/> for the given plugin.
         /// </summary>
         /// <param name="name">
-        /// The name of the plugin to get the settings for.
+        /// The name of the plugin to get the settings for. Override settings by adding appsettings in web.config using the format ImageProcessor.&lt;.pluginname.&gt.&lt;settingKey&gt; e.g. 'ImageProcessor.GaussianBlur.MaxSize'. The key must exist in the config section for the appsetting to apply"
         /// </param>
         /// <returns>
         /// The <see cref="T:ImageProcessor.Web.Config.ImageProcessingSection.SettingElementCollection"/> for the given plugin.
@@ -276,6 +276,10 @@ namespace ImageProcessor.Web.Configuration
                 settings = pluginElement.Settings
                     .Cast<SettingElement>()
                     .ToDictionary(setting => setting.Key, setting => setting.Value);
+
+                //override the settings found in config section with values in the app.config / deployment slot settings
+                OverrideDefaultSettingsWithAppSettingsValue(settings, name);
+
             }
             else
             {
@@ -325,7 +329,8 @@ namespace ImageProcessor.Web.Configuration
         }
 
         /// <summary>
-        /// Returns the <see cref="SettingElementCollection"/> for the given plugin.
+        /// Returns the <see cref="SettingElementCollection"/> for the given plugin. 
+        /// Override the settings using appSettings using the following format "ImageProcessor.&lt;PluginName&gt;.&lt;settingKey&gt; e.g. 'ImageProcessor.CloudImageService.Host'. The key must exist in the config section for the appsetting to apply"
         /// </summary>
         /// <param name="name">
         /// The name of the plugin to get the settings for.
@@ -347,6 +352,9 @@ namespace ImageProcessor.Web.Configuration
                 settings = serviceElement.Settings
                     .Cast<SettingElement>()
                     .ToDictionary(setting => setting.Key, setting => setting.Value);
+
+                //override the config section settings with values found in the app.config / deployment slot settings
+                OverrideDefaultSettingsWithAppSettingsValue(settings, name);
             }
             else
             {
@@ -418,12 +426,42 @@ namespace ImageProcessor.Web.Configuration
                         this.ImageCacheSettings = cache.Settings
                                                        .Cast<SettingElement>()
                                                        .ToDictionary(setting => setting.Key, setting => setting.Value);
+                        
+                        //override the settings found with values found in the app.config / deployment slot settings
+                        OverrideDefaultSettingsWithAppSettingsValue(this.ImageCacheSettings, currentCache);
+
                         break;
                     }
                 }
             }
         }
         #endregion
+
+        /// <summary>
+        /// Override the default settings discovered in the config sections, with settings stored in appsettings of app.config or deployment slot settings (if available)
+        /// This will allow the settings to be controlled per deployment slot within Microsoft Azure and similar services
+        /// The setting must exist in the config section to be overwritten by the appconfig values
+        /// </summary>
+        /// <param name="defaultSettings">The list of settings discovered in config section which will be modified with settings found in appSettings</param>
+        /// <param name="serviceOrPluginName">The name of the section, used to construct the appSetting key name</param>
+        private void OverrideDefaultSettingsWithAppSettingsValue(Dictionary<string, string> defaultSettings, string serviceOrPluginName)
+        {
+
+            Dictionary<string, string> copyOfSettingsForEnumeration = new Dictionary<string, string>(defaultSettings);
+            //for each default setting found in the config section
+            foreach (var setting in copyOfSettingsForEnumeration)
+            {
+                //check the app settings for a key in the sepcified format
+                string appSettingKeyName = "ImageProcessor." + serviceOrPluginName + "." + setting.Key;
+                if (!String.IsNullOrEmpty(System.Configuration.ConfigurationManager.AppSettings[appSettingKeyName]))
+                {
+                    //if the key is found in app settings use the app settings value rather than the value in the config section
+                    defaultSettings[setting.Key] = System.Configuration.ConfigurationManager.AppSettings[appSettingKeyName];
+                }
+            }
+
+        }
+        
         #endregion
     }
 }
