@@ -24,7 +24,7 @@ $projects = @($imageprocessor);
 # http://www.luisrocha.net/2009/11/setting-assembly-version-with-windows.html
 function Update-AssemblyInfo ([string]$file, [string]$version) {
     
-Write-Host "Patching assembly to $($version)"
+    Write-Host "Patching assembly to $($version)"
 
     $assemblyVersionPattern = 'AssemblyVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)'
     $fileVersionPattern = 'AssemblyFileVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)'
@@ -42,18 +42,7 @@ foreach ($project in $projects) {
     Write-Host "Building project $($project.name) at version $($project.version)";
     Update-AssemblyInfo -file (Join-Path $project.folder "Properties\AssemblyInfo.cs") -version $project.version;
 
-    $buildCommand = "msbuild $(Join-Path $project.folder $project.csproj) 
-    /t:Build 
-    /p:Warnings=true 
-    /p:Configuration=Release 
-    /p:Platform=AnyCPU
-    /p:PipelineDependsOnBuild=False 
-    /p:OutDir=$($project.output) 
-    /clp:WarningsOnly 
-    /clp:ErrorsOnly 
-    /clp:Summary 
-    /clp:PerformanceSummary 
-    /v:Normal /nologo";
+    $buildCommand = "msbuild $(Join-Path $project.folder $project.csproj) /t:Build /p:Warnings=true /p:Configuration=Release /p:Platform=AnyCPU /p:PipelineDependsOnBuild=False /p:OutDir=$($project.output) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo";
     Write-Host $buildCommand;
     Invoke-Expression $buildCommand;
 
