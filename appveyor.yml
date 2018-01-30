@@ -9,3 +9,6 @@ before_build:
 
 build_script:
 - cmd: .\build\build.cmd
+
+artifacts:
+- path: /.*\.nupkg/
