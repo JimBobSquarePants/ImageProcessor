@@ -37,7 +37,8 @@ function Update-AssemblyInfo ([string]$file, [string]$version) {
     } | Set-Content $file
 }
 
-# Loop through our projects, patch, build, and pack.
+# Restore all packages, loop through our projects, patch, build, and pack.
+Invoke-Expression "nuget restore $(Join-Path $buildPath "ImageProcessor.sln")"
 
 # Patch and Build
 foreach ($project in $projects) {
