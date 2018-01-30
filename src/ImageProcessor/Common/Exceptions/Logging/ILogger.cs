@@ -8,7 +8,6 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-#if NET45
 namespace ImageProcessor.Common.Exceptions
 {
     using System;
@@ -38,4 +37,3 @@ namespace ImageProcessor.Common.Exceptions
         void Log(Type type, string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0);
     }
 }
-#endif

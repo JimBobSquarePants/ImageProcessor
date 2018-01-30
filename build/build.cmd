@@ -1,6 +1,6 @@
 @echo Off
 
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\build\build-new.ps1'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\build\build.ps1'"
 
 if not "%errorlevel%"=="0" goto failure
 

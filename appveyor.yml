@@ -3,10 +3,11 @@ image: Visual Studio 2017
 # Prevent the double build when a branch has an active PR
 skip_branch_with_pr: true
 
-# Update any submodules we add
+# Update any submodules we might add
 before_build:
   - git submodule -q update --init
 
+# Custom build script
 build_script:
 - cmd: .\build\build.cmd
 

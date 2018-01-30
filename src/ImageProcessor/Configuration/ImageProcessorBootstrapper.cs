@@ -38,9 +38,7 @@ namespace ImageProcessor.Configuration
         {
             this.NativeBinaryFactory = new NativeBinaryFactory();
             this.LoadSupportedImageFormats();
-#if NET45
             this.LoadLogger();
-#endif
         }
 
         /// <summary>
@@ -53,12 +51,10 @@ namespace ImageProcessor.Configuration
         /// </summary>
         public IEnumerable<ISupportedImageFormat> SupportedImageFormats { get; private set; }
 
-#if NET45
         /// <summary>
         /// Gets the currently installed logger.
         /// </summary>
         public ILogger Logger { get; private set; }
-#endif
 
         /// <summary>
         /// Gets the native binary factory for registering embedded (unmanaged) binaries.
@@ -77,7 +73,6 @@ namespace ImageProcessor.Configuration
             ((List<ISupportedImageFormat>)this.SupportedImageFormats).AddRange(format);
         }
 
-#if NET45
         /// <summary>
         /// Allows the setting of the default logger. Useful for when 
         /// the type finder fails to dynamically add the custom logger implementation.
@@ -87,7 +82,6 @@ namespace ImageProcessor.Configuration
         {
             this.Logger = logger;
         }
-#endif
 
         /// <summary>
         /// Creates a list, using reflection, of supported image formats that ImageProcessor can run.
@@ -118,7 +112,6 @@ namespace ImageProcessor.Configuration
             }
         }
 
-#if NET45
         /// <summary>
         /// Loads the logger.
         /// </summary>
@@ -146,6 +139,5 @@ namespace ImageProcessor.Configuration
                 }
             }
         }
-#endif
     }
 }

@@ -30,8 +30,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{4E1AB050-8CC4-4099-80AF-7FF2BFC000E9}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
-		build\build-new.ps1 = build\build-new.ps1
-		build\Build.bat = build\Build.bat
+		build\build.cmd = build\build.cmd
 		build\build.ps1 = build\build.ps1
 		build\build.xml = build\build.xml
 		build\coverage.bat = build\coverage.bat
@@ -90,8 +89,8 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}.All|Any CPU.ActiveCfg = All|Any CPU
-		{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}.All|Any CPU.Build.0 = All|Any CPU
+		{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}.All|Any CPU.ActiveCfg = Release|Any CPU
+		{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}.All|Any CPU.Build.0 = Release|Any CPU
 		{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
