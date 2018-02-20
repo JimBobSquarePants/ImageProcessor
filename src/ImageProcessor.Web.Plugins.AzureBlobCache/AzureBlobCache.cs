@@ -307,63 +307,6 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         }
 
         /// <summary>
-        /// Returns a value indicating whether the requested image has been updated.
-        /// </summary>
-        /// <param name="creationDate">The creation date.</param>
-        /// <returns>The <see cref="bool"/></returns>
-        private async Task<bool> IsUpdatedAsync(DateTime creationDate)
-        {
-            bool isUpdated = false;
-
-            try
-            {
-                if (new Uri(this.RequestPath).IsFile)
-                {
-                    if (File.Exists(this.RequestPath))
-                    {
-                        // If it's newer than the cached file then it must be an update.
-                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
-                    }
-                }
-                else if (cloudSourceBlobContainer != null)
-                {
-                    string container = RemoteRegex.Replace(cloudSourceBlobContainer.Uri.ToString(), string.Empty);
-                    string blobPath = RemoteRegex.Replace(this.RequestPath, string.Empty);
-                    blobPath = blobPath.Replace(container, string.Empty).TrimStart('/');
-                    CloudBlockBlob blockBlob = cloudSourceBlobContainer.GetBlockBlobReference(blobPath);
-
-                    if (await blockBlob.ExistsAsync())
-                    {
-                        // Pull the latest info.
-                        await blockBlob.FetchAttributesAsync();
-
-                        if (blockBlob.Properties.LastModified.HasValue)
-                        {
-                            isUpdated = blockBlob.Properties.LastModified.Value.UtcDateTime > creationDate;
-                        }
-                    }
-                }
-                else
-                {
-                    // Try and get the headers for the file, this should allow cache busting for remote files.
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
-                    request.Method = "HEAD";
-
-                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-                    {
-                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
-                    }
-                }
-            }
-            catch
-            {
-                isUpdated = false;
-            }
-
-            return isUpdated;
-        }
-
-        /// <summary>
         /// Rewrites the path to point to the cached image.
         /// </summary>
         /// <param name="context">
@@ -495,6 +438,63 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the requested image has been updated.
+        /// </summary>
+        /// <param name="creationDate">The creation date.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        protected virtual async Task<bool> IsUpdatedAsync(DateTime creationDate)
+        {
+            bool isUpdated = false;
+
+            try
+            {
+                if (new Uri(this.RequestPath).IsFile)
+                {
+                    if (File.Exists(this.RequestPath))
+                    {
+                        // If it's newer than the cached file then it must be an update.
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
+                    }
+                }
+                else if (cloudSourceBlobContainer != null)
+                {
+                    string container = RemoteRegex.Replace(cloudSourceBlobContainer.Uri.ToString(), string.Empty);
+                    string blobPath = RemoteRegex.Replace(this.RequestPath, string.Empty);
+                    blobPath = blobPath.Replace(container, string.Empty).TrimStart('/');
+                    CloudBlockBlob blockBlob = cloudSourceBlobContainer.GetBlockBlobReference(blobPath);
+
+                    if (await blockBlob.ExistsAsync())
+                    {
+                        // Pull the latest info.
+                        await blockBlob.FetchAttributesAsync();
+
+                        if (blockBlob.Properties.LastModified.HasValue)
+                        {
+                            isUpdated = blockBlob.Properties.LastModified.Value.UtcDateTime > creationDate;
+                        }
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+            }
+            catch
+            {
+                isUpdated = false;
+            }
+
+            return isUpdated;
         }
 
         /// <summary>

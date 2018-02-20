@@ -351,6 +351,45 @@ namespace ImageProcessor.Web.Caching
         }
 
         /// <summary>
+        /// Returns a value indicating whether the requested image has been updated.
+        /// </summary>
+        /// <param name="creationDate">The creation date.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        protected virtual async Task<bool> IsUpdatedAsync(DateTime creationDate)
+        {
+            bool isUpdated = false;
+
+            try
+            {
+                if (new Uri(this.RequestPath).IsFile)
+                {
+                    if (File.Exists(this.RequestPath))
+                    {
+                        // If it's newer than the cached file then it must be an update.
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+            }
+            catch
+            {
+                isUpdated = false;
+            }
+
+            return isUpdated;
+        }
+
+        /// <summary>
         /// The internal method that performs the actual validation which can be unit tested
         /// </summary>
         /// <param name="originalPath">
@@ -509,45 +548,6 @@ namespace ImageProcessor.Web.Caching
             }
 
             return directories;
-        }
-
-        /// <summary>
-        /// Returns a value indicating whether the requested image has been updated.
-        /// </summary>
-        /// <param name="creationDate">The creation date.</param>
-        /// <returns>The <see cref="bool"/></returns>
-        private async Task<bool> IsUpdatedAsync(DateTime creationDate)
-        {
-            bool isUpdated = false;
-
-            try
-            {
-                if (new Uri(this.RequestPath).IsFile)
-                {
-                    if (File.Exists(this.RequestPath))
-                    {
-                        // If it's newer than the cached file then it must be an update.
-                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
-                    }
-                }
-                else
-                {
-                    // Try and get the headers for the file, this should allow cache busting for remote files.
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
-                    request.Method = "HEAD";
-
-                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
-                    {
-                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
-                    }
-                }
-            }
-            catch
-            {
-                isUpdated = false;
-            }
-
-            return isUpdated;
         }
 
         /// <summary>
