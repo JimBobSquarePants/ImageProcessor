@@ -91,10 +91,11 @@ namespace ImageProcessor.Web.Helpers
         /// </summary>
         /// <param name="fullPath">The string to parse.</param>
         /// <param name="queryString">The querystring containing instructions.</param>
+        /// <param name="defaultExtension">The default value to return.</param>
         /// <returns>
-        /// The correct file extension for the given string input if it can find one; otherwise an empty string.
+        /// The correct file extension for the given string input if it can find one; otherwise defaults to jpg.
         /// </returns>
-        public string GetExtension(string fullPath, string queryString)
+        public string GetExtension(string fullPath, string queryString, string defaultExtension = "jpg")
         {
             Match match = null;
 
@@ -135,8 +136,7 @@ namespace ImageProcessor.Web.Helpers
                 return value;
             }
 
-            // Fall back to jpg
-            return "jpg";
+            return defaultExtension;
         }
 
         /// <summary>
