@@ -613,8 +613,7 @@ namespace ImageProcessor.Web.Caching
             if (this.cachedImageCreationTimeUtc != DateTime.MinValue)
             {
                 long lastModFileTime = this.cachedImageCreationTimeUtc.ToFileTime();
-                DateTime utcNow = DateTime.UtcNow;
-                long nowFileTime = utcNow.ToFileTime();
+                long nowFileTime = DateTime.UtcNow.ToFileTime();
                 string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
                 if ((nowFileTime - lastModFileTime) <= 30000000)
                 {
