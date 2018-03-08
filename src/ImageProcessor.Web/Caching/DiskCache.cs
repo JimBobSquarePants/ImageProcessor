@@ -130,7 +130,7 @@ namespace ImageProcessor.Web.Caching
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
-                        CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
+                        CreationTimeUtc = File.GetLastWriteTimeUtc(this.CachedPath)
                     };
 
                     CacheIndexer.Add(cachedImage);
