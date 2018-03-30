@@ -130,7 +130,7 @@ namespace ImageProcessor.Web.Caching
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
-                        CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
+                        CreationTimeUtc = File.GetLastWriteTimeUtc(this.CachedPath)
                     };
 
                     CacheIndexer.Add(cachedImage);
@@ -180,13 +180,18 @@ namespace ImageProcessor.Web.Caching
 
             // This is a hack. I don't know why there would ever be double access to the file but there is
             // and it's causing errors to be thrown.
+            // Ensure that an attempt at overwrite is still made, so cached images can be updated
             // https://github.com/JimBobSquarePants/ImageProcessor/issues/629
-            if (!File.Exists(this.CachedPath))
+            try
             {
                 using (FileStream fileStream = File.Create(this.CachedPath, (int)stream.Length))
                 {
                     await stream.CopyToAsync(fileStream).ConfigureAwait(false);
                 }
+            }
+            catch (Exception ex)
+            {
+                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to write to file: {this.CachedPath}, {ex.Message}");
             }
         }
 
@@ -608,8 +613,7 @@ namespace ImageProcessor.Web.Caching
             if (this.cachedImageCreationTimeUtc != DateTime.MinValue)
             {
                 long lastModFileTime = this.cachedImageCreationTimeUtc.ToFileTime();
-                DateTime utcNow = DateTime.UtcNow;
-                long nowFileTime = utcNow.ToFileTime();
+                long nowFileTime = DateTime.UtcNow.ToFileTime();
                 string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
                 if ((nowFileTime - lastModFileTime) <= 30000000)
                 {
