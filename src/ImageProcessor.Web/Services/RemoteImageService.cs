@@ -148,7 +148,8 @@ namespace ImageProcessor.Web.Services
         {
             int timeout = int.Parse(this.Settings["Timeout"]);
             int maxDownloadSize = int.Parse(this.Settings["MaxBytes"]);
-            string userAgent = this.Settings["Useragent"];
+
+            this.Settings.TryGetValue("Useragent", out string userAgent);
             this.remoteFile = new RemoteFile(timeout, maxDownloadSize, userAgent);
         }
     }
