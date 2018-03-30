@@ -310,7 +310,7 @@ namespace ImageProcessor.Web.Configuration
 
                 if (type == null)
                 {
-                    string message = $"Couldn\'t load IImageService: {config.Type}";
+                    string message = $"Couldn't load IImageService: {config.Type}";
                     ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
                     throw new TypeLoadException(message);
                 }
@@ -357,7 +357,7 @@ namespace ImageProcessor.Web.Configuration
                     .ToDictionary(setting => setting.Key, setting => setting.Value);
 
                 // Override the config section settings with values found in the app.config / deployment slot settings
-                OverrideDefaultSettingsWithAppSettingsValue(settings, name);
+                this.OverrideDefaultSettingsWithAppSettingsValue(settings, name);
             }
             else
             {
@@ -429,7 +429,7 @@ namespace ImageProcessor.Web.Configuration
                         this.ImageCacheSettings = cache.Settings
                                                        .Cast<SettingElement>()
                                                        .ToDictionary(setting => setting.Key, setting => setting.Value);
-                        
+
                         //override the settings found with values found in the app.config / deployment slot settings
                         OverrideDefaultSettingsWithAppSettingsValue(this.ImageCacheSettings, currentCache);
 
@@ -451,12 +451,12 @@ namespace ImageProcessor.Web.Configuration
         {
 
             Dictionary<string, string> copyOfSettingsForEnumeration = new Dictionary<string, string>(defaultSettings);
-            
+
             // For each default setting found in the config section
             foreach (var setting in copyOfSettingsForEnumeration)
             {
                 // Check the app settings for a key in the specified format
-                string appSettingKeyName = string.Format("ImageProcessor.{0}.{1}", serviceOrPluginName, setting.Key);
+                string appSettingKeyName = $"ImageProcessor.{serviceOrPluginName}.{setting.Key}";
                 if (!String.IsNullOrEmpty(ConfigurationManager.AppSettings[appSettingKeyName]))
                 {
                     // If the key is found in app settings use the app settings value rather than the value in the config section
@@ -465,7 +465,7 @@ namespace ImageProcessor.Web.Configuration
             }
 
         }
-        
+
         #endregion
     }
 }

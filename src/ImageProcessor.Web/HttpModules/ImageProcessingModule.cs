@@ -624,7 +624,7 @@ namespace ImageProcessor.Web.HttpModules
                                 }
                                 else
                                 {
-                                    // We're cachebusting. Allow the value to be cached
+                                    // We're cache-busting. Allow the value to be cached
                                     await inStream.CopyToAsync(outStream).ConfigureAwait(false);
                                     mimeType = FormatUtilities.GetFormat(outStream).MimeType;
                                 }

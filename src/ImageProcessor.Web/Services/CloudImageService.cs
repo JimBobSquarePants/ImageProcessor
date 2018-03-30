@@ -9,36 +9,30 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
+using ImageProcessor.Web.Caching;
+using ImageProcessor.Web.Helpers;
+using Microsoft.IO;
+
 namespace ImageProcessor.Web.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Net;
-    using System.Threading.Tasks;
-    using System.Web;
-
-    using ImageProcessor.Web.Caching;
-    using ImageProcessor.Web.Helpers;
-
     /// <summary>
     /// A generic cloud image service for retrieving images where the remote location has been rewritten as a
     /// a virtual path. Commonly seen in content management systems like Umbraco.
     /// </summary>
     public class CloudImageService : IImageService
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CloudImageService"/> class.
-        /// </summary>
-        public CloudImageService()
+        private RemoteFile remoteFile;
+        private Dictionary<string, string> settings = new Dictionary<string, string>
         {
-            this.Settings = new Dictionary<string, string>
-            {
-                { "MaxBytes", "4194304" },
-                { "Timeout", "30000" },
-                { "Host", string.Empty }
-            };
-        }
+            {"MaxBytes", "4194304"},
+            {"Timeout", "30000"},
+            {"Host", string.Empty}
+        };
 
         /// <summary>
         /// Gets or sets the prefix for the given implementation.
@@ -57,7 +51,15 @@ namespace ImageProcessor.Web.Services
         /// <summary>
         /// Gets or sets any additional settings required by the service.
         /// </summary>
-        public Dictionary<string, string> Settings { get; set; }
+        public Dictionary<string, string> Settings
+        {
+            get => this.settings;
+            set
+            {
+                this.settings = value;
+                this.InitRemoteFile();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the white list of <see cref="System.Uri"/>.
@@ -81,11 +83,9 @@ namespace ImageProcessor.Web.Services
         /// <summary>
         /// Gets the image using the given identifier.
         /// </summary>
-        /// <param name="id">
-        /// The value identifying the image to fetch.
-        /// </param>
+        /// <param name="id">The value identifying the image to fetch.</param>
         /// <returns>
-        /// The <see cref="System.Byte"/> array containing the image data.
+        /// The <see cref="byte"/> array containing the image data.
         /// </returns>
         public virtual async Task<byte[]> GetImage(object id)
         {
@@ -104,42 +104,44 @@ namespace ImageProcessor.Web.Services
                 }
             }
 
-            Uri uri = new Uri(baseUri, relativeResourceUrl);
-            RemoteFile remoteFile = new RemoteFile(uri)
-            {
-                MaxDownloadSize = int.Parse(this.Settings["MaxBytes"]),
-                TimeoutLength = int.Parse(this.Settings["Timeout"])
-            };
-
             byte[] buffer;
+            Uri uri = new Uri(baseUri, relativeResourceUrl);
 
-            // Prevent response blocking.
-            WebResponse webResponse = await remoteFile.GetWebResponseAsync().ConfigureAwait(false);
-
-            using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
+            if (this.remoteFile == null)
             {
-                using (WebResponse response = webResponse)
+                this.InitRemoteFile();
+            }
+
+            HttpResponseMessage httpResponse = await this.remoteFile.GetResponseAsync(uri).ConfigureAwait(false);
+
+            if (httpResponse == null)
+            {
+                return null;
+            }
+
+            using (RecyclableMemoryStream memoryStream = new RecyclableMemoryStream(MemoryStreamPool.Shared))
+            {
+                using (HttpResponseMessage response = httpResponse)
                 {
-                    using (Stream responseStream = response.GetResponseStream())
+                    using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                     {
-                        if (responseStream != null)
-                        {
-                            responseStream.CopyTo(memoryStream);
+                        responseStream.CopyTo(memoryStream);
 
-                            // Reset the position of the stream to ensure we're reading the correct part.
-                            memoryStream.Position = 0;
-
-                            buffer = memoryStream.GetBuffer();
-                        }
-                        else
-                        {
-                            throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {uri}");
-                        }
+                        // Reset the position of the stream to ensure we're reading the correct part.
+                        memoryStream.Position = 0;
+                        buffer = memoryStream.GetBuffer();
                     }
                 }
             }
 
             return buffer;
+        }
+
+        private void InitRemoteFile()
+        {
+            int timeout = int.Parse(this.Settings["Timeout"]);
+            int maxDownloadSize = int.Parse(this.Settings["MaxBytes"]);
+            this.remoteFile = new RemoteFile(timeout, maxDownloadSize);
         }
     }
 }
