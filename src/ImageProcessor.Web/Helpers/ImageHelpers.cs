@@ -84,18 +84,28 @@ namespace ImageProcessor.Web.Helpers
         }
 
         /// <summary>
+        /// Returns the correct file extension for the given string input. Falls back to <value>jpg</value> if no extension is matched.
+        /// </summary>
+        /// <param name="fullPath">The string to parse.</param>
+        /// <param name="queryString">The querystring containing instructions.</param>
+        /// <returns>
+        /// The correct file extension for the given string input if it can find one; otherwise defaults to <value>jpg</value>.
+        /// </returns>
+        public string GetExtension(string fullPath, string queryString)
+        {
+            return this.GetExtension(fullPath, queryString, "jpg");
+        }
+
+        /// <summary>
         /// Returns the correct file extension for the given string input.
-        /// <remarks>
-        /// Falls back to jpeg if no extension is matched.
-        /// </remarks>
         /// </summary>
         /// <param name="fullPath">The string to parse.</param>
         /// <param name="queryString">The querystring containing instructions.</param>
         /// <param name="defaultExtension">The default value to return.</param>
         /// <returns>
-        /// The correct file extension for the given string input if it can find one; otherwise defaults to jpg.
+        /// The correct file extension for the given string input if it can find one; otherwise <paramref name="defaultExtension"/>.
         /// </returns>
-        public string GetExtension(string fullPath, string queryString, string defaultExtension = "jpg")
+        public string GetExtension(string fullPath, string queryString, string defaultExtension)
         {
             Match match = null;
 
