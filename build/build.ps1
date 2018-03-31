@@ -35,7 +35,7 @@ $imageProcessorPluginsWebP = @{
 
 $imageprocessorWeb = @{
     name    = "ImageProcessor.Web"
-    version = "4.9.1.${buildNumber}"
+    version = "4.9.2.${buildNumber}"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web"
     output  = Join-Path $binPath "ImageProcessor.Web\lib\net452"
     csproj  = "ImageProcessor.Web.csproj"
@@ -49,7 +49,7 @@ $imageprocessorWebConfig = @{
 
 $imageProcessorWebPluginsAzureBlobCache = @{
     name    = "ImageProcessor.Web.Plugins.AzureBlobCache"
-    version = "1.4.1.${buildNumber}"
+    version = "1.4.2.${buildNumber}"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.AzureBlobCache"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.AzureBlobCache\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.AzureBlobCache.csproj"
