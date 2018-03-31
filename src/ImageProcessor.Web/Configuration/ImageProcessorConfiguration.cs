@@ -91,9 +91,14 @@ namespace ImageProcessor.Web.Configuration
         public Type ImageCache { get; private set; }
 
         /// <summary>
-        /// Gets the image cache max days.
+        /// Gets the maximum number of days to store an image in the cache.
         /// </summary>
         public int ImageCacheMaxDays { get; private set; }
+
+        /// <summary>
+        /// Gets the maximum number of minutes to store a cached image reference in memory.
+        /// </summary>
+        public int ImageCacheMaxMinutes { get; private set; }
 
         /// <summary>
         /// Gets the value indicating if the disk cache will apply file change monitors that can be used to invalidate the cache
@@ -414,13 +419,14 @@ namespace ImageProcessor.Web.Configuration
 
                         if (type == null)
                         {
-                            string message = $"Couldn\'t load IImageCache: {cache.Type}";
+                            string message = $"Couldn't load IImageCache: {cache.Type}";
                             ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
                             throw new TypeLoadException(message);
                         }
 
                         this.ImageCache = type;
                         this.ImageCacheMaxDays = cache.MaxDays;
+                        this.ImageCacheMaxMinutes = cache.MaxMinutes;
                         this.UseFileChangeMonitors = cache.UseFileChangeMonitors;
                         this.BrowserCacheMaxDays = cache.BrowserMaxDays;
                         this.TrimCache = cache.TrimCache;
@@ -430,8 +436,8 @@ namespace ImageProcessor.Web.Configuration
                                                        .Cast<SettingElement>()
                                                        .ToDictionary(setting => setting.Key, setting => setting.Value);
 
-                        //override the settings found with values found in the app.config / deployment slot settings
-                        OverrideDefaultSettingsWithAppSettingsValue(this.ImageCacheSettings, currentCache);
+                        // Override the settings found with values found in the app.config / deployment slot settings
+                        this.OverrideDefaultSettingsWithAppSettingsValue(this.ImageCacheSettings, currentCache);
 
                         break;
                     }

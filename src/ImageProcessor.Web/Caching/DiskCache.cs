@@ -133,7 +133,7 @@ namespace ImageProcessor.Web.Caching
                         CreationTimeUtc = File.GetLastWriteTimeUtc(this.CachedPath)
                     };
 
-                    CacheIndexer.Add(cachedImage);
+                    CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                 }
             }
 

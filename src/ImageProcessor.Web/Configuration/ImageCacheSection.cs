@@ -14,7 +14,7 @@ namespace ImageProcessor.Web.Configuration
     using System.Configuration;
     using System.IO;
     using System.Xml;
-    
+
     using ImageProcessor.Web.Helpers;
 
     /// <summary>
@@ -29,15 +29,9 @@ namespace ImageProcessor.Web.Configuration
         [ConfigurationProperty("currentCache", DefaultValue = "DiskCache", IsRequired = true)]
         public string CurrentCache
         {
-            get
-            {
-                return (string)this["currentCache"];
-            }
+            get => (string)this["currentCache"];
 
-            set
-            {
-                this["currentCache"] = value;
-            }
+            set => this["currentCache"] = value;
         }
 
         /// <summary>
@@ -60,9 +54,7 @@ namespace ImageProcessor.Web.Configuration
         /// <returns>The cache configuration section from the current application configuration.</returns>
         public static ImageCacheSection GetConfiguration()
         {
-            ImageCacheSection imageCacheSection = ConfigurationManager.GetSection("imageProcessor/caching") as ImageCacheSection;
-
-            if (imageCacheSection != null)
+            if (ConfigurationManager.GetSection("imageProcessor/caching") is ImageCacheSection imageCacheSection)
             {
                 return imageCacheSection;
             }
@@ -90,9 +82,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("name", DefaultValue = "", IsRequired = true)]
             public string Name
             {
-                get { return (string)this["name"]; }
+                get => (string)this["name"];
 
-                set { this["name"] = value; }
+                set => this["name"] = value;
             }
 
             /// <summary>
@@ -102,9 +94,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("type", DefaultValue = "", IsRequired = true)]
             public string Type
             {
-                get { return (string)this["type"]; }
+                get => (string)this["type"];
 
-                set { this["type"] = value; }
+                set => this["type"] = value;
             }
 
             /// <summary>
@@ -116,15 +108,23 @@ namespace ImageProcessor.Web.Configuration
             [IntegerValidator(ExcludeRange = false, MinValue = -1)]
             public int MaxDays
             {
-                get
-                {
-                    return (int)this["maxDays"];
-                }
+                get => (int)this["maxDays"];
 
-                set
-                {
-                    this["maxDays"] = value;
-                }
+                set => this["maxDays"] = value;
+            }
+            
+            /// <summary>
+            /// Gets or sets the maximum number of minutes to store a cached image reference in memory.
+            /// </summary>
+            /// <value>The maximum number of minutes to store a cached image reference in memory</value>
+            /// <remarks>Defaults to 365 if not set.</remarks>
+            [ConfigurationProperty("maxMemoryMinutes", DefaultValue = "1", IsRequired = false)]
+            [IntegerValidator(ExcludeRange = false, MinValue = -1)]
+            public int MaxMinutes
+            {
+                get => (int)this["maxMemoryMinutes"];
+
+                set => this["maxMemoryMinutes"] = value;
             }
 
             /// <summary>
@@ -138,12 +138,12 @@ namespace ImageProcessor.Web.Configuration
             /// * Performance penalties if hosting on a UNC share
             /// * ASP.Net app domain restarts if using FCNMode="Single" since the FCN buffer can overflow
             /// </remarks>
-            [ConfigurationProperty("useFileChangeMonitors", DefaultValue = false, IsRequired = false)]            
+            [ConfigurationProperty("useFileChangeMonitors", DefaultValue = false, IsRequired = false)]
             public bool UseFileChangeMonitors
             {
-                get { return (bool)this["useFileChangeMonitors"]; }
+                get => (bool)this["useFileChangeMonitors"];
 
-                set { this["useFileChangeMonitors"] = value; }
+                set => this["useFileChangeMonitors"] = value;
             }
 
             /// <summary>
@@ -166,10 +166,7 @@ namespace ImageProcessor.Web.Configuration
                     return maxDays;
                 }
 
-                set
-                {
-                    this["browserMaxDays"] = value;
-                }
+                set => this["browserMaxDays"] = value;
             }
 
             /// <summary>
@@ -181,15 +178,9 @@ namespace ImageProcessor.Web.Configuration
             [PositiveTimeSpanValidator]
             public TimeSpan CachedRewritePathExpiry
             {
-                get
-                {
-                    return (TimeSpan)this["cachedRewritePathExpiry"];
-                }
+                get => (TimeSpan)this["cachedRewritePathExpiry"];
 
-                set
-                {
-                    this["cachedRewritePathExpiry"] = value;
-                }
+                set => this["cachedRewritePathExpiry"] = value;
             }
 
             /// <summary>
@@ -201,9 +192,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("trimCache", DefaultValue = true, IsRequired = false)]
             public bool TrimCache
             {
-                get { return (bool)this["trimCache"]; }
+                get => (bool)this["trimCache"];
 
-                set { this["trimCache"] = value; }
+                set => this["trimCache"] = value;
             }
 
             /// <summary>
@@ -214,15 +205,9 @@ namespace ImageProcessor.Web.Configuration
             [IntegerValidator(ExcludeRange = false, MinValue = 0)]
             public int FolderDepth
             {
-                get
-                {
-                    return (int)this["folderDepth"];
-                }
+                get => (int)this["folderDepth"];
 
-                set
-                {
-                    this["folderDepth"] = value;
-                }
+                set => this["folderDepth"] = value;
             }
 
             /// <summary>
@@ -267,10 +252,7 @@ namespace ImageProcessor.Web.Configuration
             /// </returns>
             public CacheElement this[int index]
             {
-                get
-                {
-                    return (CacheElement)BaseGet(index);
-                }
+                get => (CacheElement)this.BaseGet(index);
 
                 set
                 {

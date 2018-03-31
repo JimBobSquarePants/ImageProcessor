@@ -174,7 +174,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
                     };
 
-                    CacheIndexer.Add(cachedImage);
+                    CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                 }
             }
 
@@ -197,7 +197,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                             CreationTimeUtc = blockBlob.Properties.LastModified.Value.UtcDateTime
                         };
 
-                        CacheIndexer.Add(cachedImage);
+                        CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                     }
                 }
             }
