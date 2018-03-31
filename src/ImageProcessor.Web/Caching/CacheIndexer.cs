@@ -124,6 +124,5 @@ namespace ImageProcessor.Web.Caching
         {
             return Add(cachedImage, new TimeSpan(0, expiry, 0));
         }
-    
     }
 }

@@ -153,7 +153,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         CreationTimeUtc = fileInfo.CreationTimeUtc
                     };
 
-                    CacheIndexer.Add(cachedImage);
+                    CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                 }
             }
 
@@ -182,7 +182,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                             CreationTimeUtc = response.LastModified.ToUniversalTime()
                         };
 
-                        CacheIndexer.Add(cachedImage);
+                        CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                     }
                 }
                 catch (AmazonS3Exception)

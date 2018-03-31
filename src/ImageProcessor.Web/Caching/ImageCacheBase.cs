@@ -67,6 +67,7 @@ namespace ImageProcessor.Web.Caching
             this.Settings = this.AugmentSettingsCore(config.ImageCacheSettings);
             this.CachedPathExpiry = config.ImageCacheRewritePathExpiry;
             this.MaxDays = config.ImageCacheMaxDays;
+            this.ImageCacheMaxMinutes = config.ImageCacheMaxMinutes;
             this.BrowserMaxDays = config.BrowserCacheMaxDays;
             this.TrimCache = config.TrimCache;
             this.FolderDepth = config.FolderDepth;
@@ -91,6 +92,11 @@ namespace ImageProcessor.Web.Caching
         /// Gets or sets the maximum number of days to store the image.
         /// </summary>
         public int MaxDays { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of minutes to store a cached image reference in memory.
+        /// </summary>
+        public int ImageCacheMaxMinutes { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of days to cache the image in the browser.

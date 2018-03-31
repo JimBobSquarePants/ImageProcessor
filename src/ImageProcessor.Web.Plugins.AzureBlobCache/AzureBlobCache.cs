@@ -174,7 +174,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
                     };
 
-                    CacheIndexer.Add(cachedImage);
+                    CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                 }
             }
 
@@ -197,7 +197,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                             CreationTimeUtc = blockBlob.Properties.LastModified.Value.UtcDateTime
                         };
 
-                        CacheIndexer.Add(cachedImage);
+                        CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                     }
                 }
             }
@@ -394,6 +394,14 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             }
             else
             {
+                // Prevent redundant metadata request if paths match.
+                if (this.CachedPath == this.cachedRewritePath)
+                {
+                    ImageProcessingModule.AddCorsRequestHeaders(context);
+                    context.Response.Redirect(this.CachedPath, false);
+                    return;
+                }
+
                 // Redirect the request to the blob URL
                 request.Method = "HEAD";
                 request.Timeout = this.timeout;
