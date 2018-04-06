@@ -57,7 +57,7 @@ namespace ImageProcessor.Imaging.MetaData
         }).ToArray();
 
         /// <summary>
-        /// Gets all required property items plus copyright and geolocation specific property items. 
+        /// Gets all required property items plus copyright specific property items. 
         /// </summary>
         public static readonly ExifPropertyTag[] CopyrightPropertyItems = RequiredPropertyItems.Union(new[]{
             ExifPropertyTag.Copyright,
