@@ -36,7 +36,7 @@ namespace ImageProcessor.Web.Configuration
         /// <summary>
         /// Gets or sets the metadata mode to use when processing images.
         /// </summary>
-        [ConfigurationProperty("metaDataMode", IsRequired = false, DefaultValue = MetaDataMode.None)]
+        [ConfigurationProperty("metaDataMode", IsRequired = false, DefaultValue = MetaDataMode.All)]
         public MetaDataMode MetaDataMode
         {
             get => (MetaDataMode)this["metaDataMode"];
