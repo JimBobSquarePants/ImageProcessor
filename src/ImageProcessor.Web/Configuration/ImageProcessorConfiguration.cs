@@ -136,6 +136,11 @@ namespace ImageProcessor.Web.Configuration
         public bool PreserveExifMetaData => GetImageProcessingSection().PreserveExifMetaData;
 
         /// <summary>
+        /// Gets the metadata mode to use when when processing images.
+        /// </summary>
+        public MetaDataMode MetaDataMode => GetImageProcessingSection().MetaDataMode;
+
+        /// <summary>
         /// Gets a value indicating whether to allow known cachebusters.
         /// </summary>
         public bool AllowCacheBuster => GetImageProcessingSection().AllowCacheBuster;

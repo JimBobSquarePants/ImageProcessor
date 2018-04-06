@@ -29,8 +29,18 @@ namespace ImageProcessor.Web.Configuration
         [ConfigurationProperty("preserveExifMetaData", IsRequired = false, DefaultValue = false)]
         public bool PreserveExifMetaData
         {
-            get { return (bool)this["preserveExifMetaData"]; }
-            set { this["preserveExifMetaData"] = value; }
+            get => (bool)this["preserveExifMetaData"];
+            set => this["preserveExifMetaData"] = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the metadata mode to use when processing images.
+        /// </summary>
+        [ConfigurationProperty("metaDataMode", IsRequired = false, DefaultValue = MetaDataMode.None)]
+        public MetaDataMode MetaDataMode
+        {
+            get => (MetaDataMode)this["metaDataMode"];
+            set => this["metaDataMode"] = value;
         }
 
         /// <summary>
@@ -39,8 +49,8 @@ namespace ImageProcessor.Web.Configuration
         [ConfigurationProperty("allowCacheBuster", IsRequired = false, DefaultValue = true)]
         public bool AllowCacheBuster
         {
-            get { return (bool)this["allowCacheBuster"]; }
-            set { this["allowCacheBuster"] = value; }
+            get => (bool)this["allowCacheBuster"];
+            set => this["allowCacheBuster"] = value;
         }
 
         /// <summary>
@@ -50,8 +60,8 @@ namespace ImageProcessor.Web.Configuration
         [ConfigurationProperty("fixGamma", IsRequired = false, DefaultValue = false)]
         public bool FixGamma
         {
-            get { return (bool)this["fixGamma"]; }
-            set { this["fixGamma"] = value; }
+            get => (bool)this["fixGamma"];
+            set => this["fixGamma"] = value;
         }
 
         /// <summary>
@@ -61,8 +71,8 @@ namespace ImageProcessor.Web.Configuration
         [ConfigurationProperty("interceptAllRequests", IsRequired = false, DefaultValue = false)]
         public bool InterceptAllRequests
         {
-            get { return (bool)this["interceptAllRequests"]; }
-            set { this["interceptAllRequests"] = value; }
+            get => (bool)this["interceptAllRequests"];
+            set => this["interceptAllRequests"] = value;
         }
 
         /// <summary>
@@ -120,9 +130,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("name", DefaultValue = "", IsRequired = true)]
             public string Name
             {
-                get { return (string)this["name"]; }
+                get => (string)this["name"];
 
-                set { this["name"] = value; }
+                set => this["name"] = value;
             }
 
             /// <summary>
@@ -132,9 +142,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("value", DefaultValue = "", IsRequired = true)]
             public string Value
             {
-                get { return (string)this["value"]; }
+                get => (string)this["value"];
 
-                set { this["value"] = value; }
+                set => this["value"] = value;
             }
         }
 
@@ -172,10 +182,7 @@ namespace ImageProcessor.Web.Configuration
             /// </returns>
             public PresetElement this[int index]
             {
-                get
-                {
-                    return (PresetElement)BaseGet(index);
-                }
+                get => (PresetElement)BaseGet(index);
 
                 set
                 {
@@ -226,9 +233,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("name", DefaultValue = "", IsRequired = true)]
             public string Name
             {
-                get { return (string)this["name"]; }
+                get => (string)this["name"];
 
-                set { this["name"] = value; }
+                set => this["name"] = value;
             }
 
             /// <summary>
@@ -237,9 +244,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("type", DefaultValue = "", IsRequired = true)]
             public string Type
             {
-                get { return (string)this["type"]; }
+                get => (string)this["type"];
 
-                set { this["type"] = value; }
+                set => this["type"] = value;
             }
 
             /// <summary>
@@ -248,9 +255,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("enabled", DefaultValue = "false", IsRequired = false)]
             public bool Enabled
             {
-                get { return (bool)this["enabled"]; }
+                get => (bool)this["enabled"];
 
-                set { this["enabled"] = value; }
+                set => this["enabled"] = value;
             }
 
             /// <summary>
@@ -297,10 +304,7 @@ namespace ImageProcessor.Web.Configuration
             /// </returns>
             public PluginElement this[int index]
             {
-                get
-                {
-                    return (PluginElement)BaseGet(index);
-                }
+                get => (PluginElement)BaseGet(index);
 
                 set
                 {

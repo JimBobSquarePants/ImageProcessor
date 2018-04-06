@@ -67,7 +67,7 @@ namespace ImageProcessor.PlayGround
                     stopwatch.Start();
 
                     using (MemoryStream inStream = new MemoryStream(photoBytes))
-                    using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.All })
+                    using (ImageFactory imageFactory = new ImageFactory(MetaDataMode.CopyrightAndGeolocation) { AnimationProcessMode = AnimationProcessMode.All })
                     {
                         try
                         {

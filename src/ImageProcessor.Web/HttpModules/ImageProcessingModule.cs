@@ -85,6 +85,11 @@ namespace ImageProcessor.Web.HttpModules
         private static bool? preserveExifMetaData;
 
         /// <summary>
+        /// The meta data mode to use.
+        /// </summary>
+        private static MetaDataMode? metaDataMode;
+
+        /// <summary>
         /// Whether to perform gamma correction when performing processing.
         /// </summary>
         private static bool? fixGamma;
@@ -313,6 +318,11 @@ namespace ImageProcessor.Web.HttpModules
             if (preserveExifMetaData == null)
             {
                 preserveExifMetaData = ImageProcessorConfiguration.Instance.PreserveExifMetaData;
+            }
+
+            if (metaDataMode == null)
+            {
+                metaDataMode = ImageProcessorConfiguration.Instance.MetaDataMode;
             }
 
             if (allowCacheBuster == null)
@@ -614,9 +624,10 @@ namespace ImageProcessor.Web.HttpModules
                                 {
                                     // Process the image.
                                     bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
+                                    MetaDataMode metaMode = exif ? MetaDataMode.None : metaDataMode.Value;
                                     bool gamma = fixGamma != null && fixGamma.Value;
 
-                                    using (ImageFactory imageFactory = new ImageFactory(exif, gamma) { AnimationProcessMode = mode })
+                                    using (ImageFactory imageFactory = new ImageFactory(metaMode, gamma) { AnimationProcessMode = mode })
                                     {
                                         imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
                                         mimeType = imageFactory.CurrentImageFormat.MimeType;
