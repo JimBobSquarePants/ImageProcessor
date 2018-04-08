@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-    <PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{3B5DD734-FB7A-487D-8CE6-55E7AF9AEA7E}</ProjectGuid>
@@ -106,6 +106,7 @@
     <Compile Include="Imaging\Helpers\ImageMaths.cs" />
     <Compile Include="Imaging\Helpers\PixelOperations.cs" />
     <Compile Include="Imaging\ImageLayer.cs" />
+    <Compile Include="Imaging\MetaData\ExifPropertyTagConstants.cs" />
     <Compile Include="Imaging\MetaData\Rational.cs" />
     <Compile Include="Imaging\MetaData\ExifBitConverter.cs" />
     <Compile Include="Imaging\MetaData\ImageFactoryMetaExtensions.cs" />
@@ -162,6 +163,7 @@
     <Compile Include="Imaging\Resizer.cs" />
     <Compile Include="Imaging\RoundedCornerLayer.cs" />
     <Compile Include="Imaging\TextLayer.cs" />
+    <Compile Include="MetaDataMode.cs" />
     <Compile Include="Processors\Background.cs" />
     <Compile Include="Processors\Resolution.cs" />
     <Compile Include="Processors\Gamma.cs" />

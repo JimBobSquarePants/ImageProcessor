@@ -35,11 +35,15 @@ namespace ImageProcessor
     /// </summary>
     public class ImageFactory : IDisposable
     {
-        #region Fields
         /// <summary>
         /// The default quality for image files.
         /// </summary>
         private const int DefaultQuality = 90;
+
+        /// <summary>
+        /// Whether to preserve exif metadata
+        /// </summary>
+        private bool preserveExifData;
 
         /// <summary>
         /// The backup supported image format.
@@ -63,9 +67,7 @@ namespace ImageProcessor
         /// life in the Garbage Collector.
         /// </remarks>
         private bool isDisposed;
-        #endregion
 
-        #region Constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageFactory"/> class.
         /// </summary>
@@ -84,20 +86,40 @@ namespace ImageProcessor
         /// Whether to preserve exif metadata. Defaults to false.
         /// </param>
         /// <param name="fixGamma">
-        /// Whether to fix the gamma component of the image. Defaults to true.
+        /// Whether to fix the gamma component of the image.
         /// </param>
         public ImageFactory(bool preserveExifData, bool fixGamma)
+            : this(preserveExifData == false ? MetaDataMode.None : MetaDataMode.All, fixGamma)
         {
-            this.PreserveExifData = preserveExifData;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageFactory"/> class.
+        /// </summary>
+        /// <param name="metaDataMode">The metadata mode to use</param>
+        public ImageFactory(MetaDataMode metaDataMode)
+           : this(metaDataMode, false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageFactory"/> class.
+        /// </summary>
+        /// <param name="metaDataMode">The metadata mode to use</param>
+        /// <param name="fixGamma">Whether to fix the gamma component of the image.</param>
+        public ImageFactory(MetaDataMode metaDataMode, bool fixGamma)
+        {
+            // Note the order here. 
+            // We need to set MetaDataMode after PreserveExifData as the first option doesn't allow the granular control allowed by the constructor.
+            this.PreserveExifData = metaDataMode != MetaDataMode.None;
+            this.MetaDataMode = metaDataMode;
             this.ExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
             this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
             this.FixGamma = fixGamma;
         }
-        #endregion
 
-        #region Destructors
         /// <summary>
-        /// Finalizes an instance of the <see cref="T:ImageProcessor.ImageFactory">ImageFactory</see> class.
+        /// Finalizes an instance of the <see cref="ImageFactory">ImageFactory</see> class.
         /// </summary>
         /// <remarks>
         /// Use C# destructor syntax for finalization code.
@@ -113,9 +135,7 @@ namespace ImageProcessor
             // readability and maintainability.
             this.Dispose(false);
         }
-        #endregion
 
-        #region Properties
         /// <summary>
         /// Gets the color depth in number of bits per pixel to save the image with.
         /// This can be used to change the bit depth of images that can be saved with different
@@ -139,9 +159,23 @@ namespace ImageProcessor
         public ISupportedImageFormat CurrentImageFormat { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to preserve exif metadata.
+        /// Gets the metadata mode.
         /// </summary>
-        public bool PreserveExifData { get; set; }
+        public MetaDataMode MetaDataMode { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to preserve exif metadata.
+        /// This property is only settable for backwards compatibility. Set <see cref="MetaDataMode"/> via the constructor instead.
+        /// </summary>
+        public bool PreserveExifData
+        {
+            get => this.preserveExifData;
+            set
+            {
+                this.preserveExifData = value;
+                this.MetaDataMode = this.preserveExifData ? MetaDataMode.All : MetaDataMode.None;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether to fix the gamma component of the current image.
@@ -172,9 +206,7 @@ namespace ImageProcessor
         /// Gets or sets the stream for storing any input stream to prevent disposal.
         /// </summary>
         internal Stream InputStream { get; set; }
-        #endregion
 
-        #region Methods
         /// <summary>
         /// Loads the image to process. Always call this method first.
         /// </summary>
@@ -192,7 +224,7 @@ namespace ImageProcessor
             // of the user.
             stream.CopyTo(memoryStream);
 
-            // Set the position to 0 afterwards.
+            // Set the position to 0 afterward.
             if (stream.CanSeek)
             {
                 stream.Position = 0;
@@ -227,15 +259,14 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
-            IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
-            if (imageFormat != null)
+            if (this.CurrentImageFormat is IAnimatedImageFormat imageFormat)
             {
                 imageFormat.AnimationProcessMode = this.AnimationProcessMode;
             }
 
-            this.backupExifPropertyItems = this.ExifPropertyItems;
+            this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>(this.ExifPropertyItems);
 
-            // Ensure the image is in the most efficient format.
+            // Ensure the image is in the most efficient format but don't reserve exif data.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
             this.Image.Dispose();
@@ -275,7 +306,7 @@ namespace ImageProcessor
                     // Copy the stream.
                     fileStream.CopyTo(memoryStream);
 
-                    // Set the position to 0 afterwards.
+                    // Set the position to 0 afterward.
                     memoryStream.Position = 0;
 
                     // Set our image as the memory stream value.
@@ -300,15 +331,14 @@ namespace ImageProcessor
                         this.ExifPropertyItems[propertyItem.Id] = propertyItem;
                     }
 
-                    this.backupExifPropertyItems = this.ExifPropertyItems;
+                    this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>(this.ExifPropertyItems);
 
-                    IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
-                    if (imageFormat != null)
+                    if (this.CurrentImageFormat is IAnimatedImageFormat imageFormat)
                     {
                         imageFormat.AnimationProcessMode = this.AnimationProcessMode;
                     }
 
-                    // Ensure the image is in the most efficient format.
+                    // Ensure the image is in the most efficient format but don't reserve exif data.
                     Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
                     this.Image.Dispose();
@@ -367,13 +397,12 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
-            IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
-            if (imageFormat != null)
+            if (this.CurrentImageFormat is IAnimatedImageFormat imageFormat)
             {
                 imageFormat.AnimationProcessMode = this.AnimationProcessMode;
             }
 
-            // Ensure the image is in the most efficient format.
+            // Ensure the image is in the most efficient format but don't reserve exif data.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
             this.Image.Dispose();
@@ -464,7 +493,7 @@ namespace ImageProcessor
 
                 // Reset properties.
                 this.CurrentImageFormat = this.backupFormat;
-                this.ExifPropertyItems = this.backupExifPropertyItems;
+                this.ExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>(this.backupExifPropertyItems);
                 this.CurrentImageFormat.Quality = DefaultQuality;
 
                 Image newImage = this.backupFormat.Load(this.InputStream);
@@ -481,7 +510,6 @@ namespace ImageProcessor
             return this;
         }
 
-        #region Manipulation
         /// <summary>
         /// Changes the opacity of the current image.
         /// </summary>
@@ -1385,7 +1413,6 @@ namespace ImageProcessor
 
             return this;
         }
-        #endregion
 
         /// <summary>
         /// Saves the current image to the specified file path. If the extension does not
@@ -1407,28 +1434,7 @@ namespace ImageProcessor
                     directoryInfo.Create();
                 }
 
-                // Clear property items.
-                if (!this.PreserveExifData)
-                {
-                    this.ClearExif(this.Image);
-                }
-                else
-                {
-                    foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
-                    {
-                        // Nasty fix but should handle issue 
-                        // https://github.com/JimBobSquarePants/ImageProcessor/issues/571
-                        try
-                        {
-                            this.Image.SetPropertyItem(propertItem.Value);
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                    }
-                }
-
+                this.SetMetaData();
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image, this.CurrentBitDepth);
             }
 
@@ -1454,28 +1460,7 @@ namespace ImageProcessor
                     stream.SetLength(0);
                 }
 
-                // Clear property items.
-                if (!this.PreserveExifData)
-                {
-                    this.ClearExif(this.Image);
-                }
-                else
-                {
-                    foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
-                    {
-                        // Nasty fix but should handle issue 
-                        // https://github.com/JimBobSquarePants/ImageProcessor/issues/571
-                        try
-                        {
-                            this.Image.SetPropertyItem(propertItem.Value);
-                        }
-                        catch 
-                        {
-                            continue;
-                        }
-                    }
-                }
-
+                this.SetMetaData();
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image, this.CurrentBitDepth);
                 if (stream.CanSeek)
                 {
@@ -1486,7 +1471,6 @@ namespace ImageProcessor
             return this;
         }
 
-        #region IDisposable Members
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.
         /// </summary>
@@ -1535,29 +1519,56 @@ namespace ImageProcessor
             // Note disposing is done.
             this.isDisposed = true;
         }
-        #endregion
-        #endregion
 
         /// <summary>
-        /// Clears any EXIF metadata from the image
+        /// Sets the metadata based on the the current <see cref="MetaDataMode"/>
+        /// The image 
         /// </summary>
-        /// <param name="image">The current image.</param>
-        private void ClearExif(Image image)
+        private void SetMetaData()
         {
-            if (image.PropertyItems.Any())
+            if (this.MetaDataMode == MetaDataMode.All)
             {
                 foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
                 {
-                    // Ensure that we do not try to remove any stripped out properties
-                    // e.g gif comments.
-                    if (image.PropertyIdList.Contains(item.Key))
+                    // Handle issue https://github.com/JimBobSquarePants/ImageProcessor/issues/571
+                    // SetPropertyItem throws a native error if the property item is invalid for that format
+                    // but there's no way to handle individual formats so we do a dumb try...catch...
+                    try
                     {
-                        // The Gif decoder specifically requires these properties so we must not delete them.
-                        if (item.Key != (int)ExifPropertyTag.LoopCount && item.Key != (int)ExifPropertyTag.FrameDelay)
-                        {
-                            image.RemovePropertyItem(item.Key);
-                        }
+                        this.Image.SetPropertyItem(item.Value);
                     }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+
+                return;
+            }
+
+            ExifPropertyTag[] tags = ExifPropertyTagConstants.RequiredPropertyItems;
+            switch (this.MetaDataMode)
+            {
+                case MetaDataMode.Copyright:
+                    tags = ExifPropertyTagConstants.CopyrightPropertyItems;
+                    break;
+                case MetaDataMode.CopyrightAndGeolocation:
+                    tags = ExifPropertyTagConstants.CopyrightAndGeolocationPropertyItems;
+                    break;
+            }
+
+            foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
+            {
+                try
+                {
+                    if (tags.Contains((ExifPropertyTag)item.Key))
+                    {
+                        this.Image.SetPropertyItem(item.Value);
+                    }
+                }
+                catch
+                {
+                    continue;
                 }
             }
         }
