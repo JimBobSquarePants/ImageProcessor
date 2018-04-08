@@ -117,14 +117,14 @@ namespace ImageProcessor.Web.Configuration
             /// Gets or sets the maximum number of minutes to store a cached image reference in memory.
             /// </summary>
             /// <value>The maximum number of minutes to store a cached image reference in memory</value>
-            /// <remarks>Defaults to 365 if not set.</remarks>
-            [ConfigurationProperty("maxMemoryMinutes", DefaultValue = "1", IsRequired = false)]
+            /// <remarks>Defaults to 1 if not set.</remarks>
+            [ConfigurationProperty("memoryMaxMinutes", DefaultValue = "1", IsRequired = false)]
             [IntegerValidator(ExcludeRange = false, MinValue = -1)]
             public int MaxMinutes
             {
-                get => (int)this["maxMemoryMinutes"];
+                get => (int)this["memoryMaxMinutes"];
 
-                set => this["maxMemoryMinutes"] = value;
+                set => this["memoryMaxMinutes"] = value;
             }
 
             /// <summary>

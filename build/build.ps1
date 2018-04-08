@@ -8,7 +8,7 @@ $nugetOutput = Join-Path $binPath "NuGets";
 # Projects. Nuget Dependencies are handled in the nuspec files themselves and depend on the Major.Minor.Build number only.
 $imageprocessor = @{
     name    = "ImageProcessor"
-    version = "2.6.0.${buildNumber}"
+    version = "2.6.1.${buildNumber}"
     folder  = Join-Path $buildPath "src\ImageProcessor"
     output  = Join-Path $binPath "ImageProcessor\lib\net452"
     csproj  = "ImageProcessor.csproj"
@@ -43,7 +43,7 @@ $imageprocessorWeb = @{
 };
 
 $imageprocessorWebConfig = @{
-    version = "2.4.0.${buildNumber}"
+    version = "2.4.1.${buildNumber}"
     nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.Config.nuspec"
 };
 

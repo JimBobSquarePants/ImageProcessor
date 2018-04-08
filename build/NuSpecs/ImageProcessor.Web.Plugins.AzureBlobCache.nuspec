@@ -23,8 +23,8 @@
     <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff Azure Cache Asp</tags>
     <dependencies>
       <group targetFramework=".NETFramework4.5.2">
-        <dependency id="ImageProcessor.Web" version="4.9.0.0" />
-        <dependency id="ImageProcessor.Web.Config" version="2.4.0.0" />
+        <dependency id="ImageProcessor.Web" version="4.9.2.0" />
+        <dependency id="ImageProcessor.Web.Config" version="2.4.1.0" />
         <dependency id="Microsoft.Data.Edm" version="5.6.2" />
         <dependency id="Microsoft.Data.OData" version="5.6.2" />
         <dependency id="Microsoft.Data.Services.Client" version="5.6.2" />
