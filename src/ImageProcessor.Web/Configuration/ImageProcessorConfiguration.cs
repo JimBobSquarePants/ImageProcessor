@@ -331,6 +331,7 @@ namespace ImageProcessor.Web.Configuration
                 {
                     string name = config.Name ?? imageService.GetType().Name;
                     imageService.Prefix = config.Prefix;
+                    imageService.IsRegex = config.IsRegex;
                     imageService.Settings = this.GetServiceSettings(name);
                     imageService.WhiteList = this.GetServiceWhitelist(name);
                 }

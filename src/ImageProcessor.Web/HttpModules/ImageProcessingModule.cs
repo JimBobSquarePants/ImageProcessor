@@ -849,7 +849,10 @@ namespace ImageProcessor.Web.HttpModules
             foreach (IImageService service in services)
             {
                 string key = service.Prefix;
-                if (!string.IsNullOrWhiteSpace(key) && path.StartsWith(key, StringComparison.InvariantCultureIgnoreCase))
+                if (!string.IsNullOrWhiteSpace(key) 
+                    && (service.IsRegex 
+                        ? Regex.IsMatch(path, key, RegexOptions.IgnoreCase) 
+                        : path.StartsWith(key, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     return service;
                 }

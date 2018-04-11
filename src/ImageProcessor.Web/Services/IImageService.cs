@@ -28,6 +28,11 @@ namespace ImageProcessor.Web.Services
         string Prefix { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether Prefix should be evaulated as a regular expression.
+        /// </summary>
+        bool IsRegex { get; set; }
+
+        /// <summary>
         /// Gets a value indicating whether the image service requests files from
         /// the locally based file system.
         /// </summary>

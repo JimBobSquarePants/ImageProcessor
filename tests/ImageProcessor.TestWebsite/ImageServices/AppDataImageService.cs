@@ -34,6 +34,11 @@ namespace ImageProcessor.TestWebsite.ImageServices
         public string Prefix { get; set; } = "appdata.axd";
 
         /// <summary>
+        /// Gets or sets a value indicating whether Prefix should be evaulated as a regular expression.
+        /// </summary>
+        public bool IsRegex { get; set; }
+
+        /// <summary>
         /// Gets a value indicating whether the image service requests files from
         /// the locally based file system.
         /// </summary>

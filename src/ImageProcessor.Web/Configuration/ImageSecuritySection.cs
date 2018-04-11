@@ -111,6 +111,18 @@ namespace ImageProcessor.Web.Configuration
             }
 
             /// <summary>
+            /// Gets or sets the value indicating whether the prefix is a regular expression.
+            /// </summary>
+            /// <value>Is the prefix of the service a regular expression.</value>
+            [ConfigurationProperty("isRegex", DefaultValue = false, IsRequired = false)]
+            public bool IsRegex
+            {
+                get { return (bool)this["isRegex"]; }
+
+                set { this["isRegex"] = value; }
+            }
+
+            /// <summary>
             /// Gets or sets the type of the service.
             /// </summary>
             /// <value>The full Type definition of the service</value>
