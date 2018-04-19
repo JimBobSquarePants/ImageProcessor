@@ -1013,7 +1013,7 @@ namespace ImageProcessor
         public ImageFactory Hue(int degrees, bool rotate = false)
         {
             // Sanitize the input.
-            if (degrees > 360 || degrees < 0 || degrees == 0)
+            if (degrees > 360 || degrees < 0 || (degrees == 0 && rotate))
             {
                 return this;
             }
