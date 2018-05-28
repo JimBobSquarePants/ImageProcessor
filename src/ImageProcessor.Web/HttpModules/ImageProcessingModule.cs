@@ -624,7 +624,7 @@ namespace ImageProcessor.Web.HttpModules
                                 {
                                     // Process the image.
                                     bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
-                                    MetaDataMode metaMode = exif ? MetaDataMode.None : metaDataMode.Value;
+                                    MetaDataMode metaMode = !exif ? MetaDataMode.None : metaDataMode.Value;
                                     bool gamma = fixGamma != null && fixGamma.Value;
 
                                     using (ImageFactory imageFactory = new ImageFactory(metaMode, gamma) { AnimationProcessMode = mode })
