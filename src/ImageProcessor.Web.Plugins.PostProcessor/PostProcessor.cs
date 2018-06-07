@@ -121,11 +121,11 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 
             ProcessStartInfo start = new ProcessStartInfo("cmd")
             {
-                //WindowStyle = ProcessWindowStyle.Hidden,
+                WindowStyle = ProcessWindowStyle.Hidden,
                 WorkingDirectory = PostProcessorBootstrapper.Instance.WorkingPath,
                 Arguments = arguments,
                 UseShellExecute = false,
-                // CreateNoWindow = true
+                CreateNoWindow = true
             };
 
             Process process = null;
