@@ -15,6 +15,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
+    using System.Management;
     using System.Web;
 
     using ImageProcessor.Configuration;
@@ -144,10 +145,33 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 
                 process.Start();
 
+                // Recursively kill all child processes.
+                void KillProcessAndChildren(int pid)
+                {
+                    using (var searcher = new ManagementObjectSearcher($"Select * From Win32_Process Where ParentProcessID={pid}"))
+                    {
+                        ManagementObjectCollection moc = searcher.Get();
+                        foreach (ManagementBaseObject mo in moc)
+                        {
+                            KillProcessAndChildren(Convert.ToInt32(mo["ProcessID"]));
+                        }
+
+                        try
+                        {
+                            Process proc = Process.GetProcessById(pid);
+                            proc.Kill();
+                        }
+                        catch
+                        {
+                            // Process already exited.
+                        }
+                    }
+                }
+
                 // Wait for processing to finish, but not more than our timeout.
                 if (!process.WaitForExit(timeout))
                 {
-                    process.Kill();
+                    KillProcessAndChildren(process.Id);
                     ImageProcessorBootstrapper.Instance.Logger.Log(
                         typeof(PostProcessor),
                         $"Unable to post process image for request {url} within {timeout}ms. Original image returned.");
@@ -155,7 +179,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
             }
             catch (Exception ex)
             {
-                // Some security policies don't allow execution of programs in this way
+                // Some security policies don't allow execution of programs in this way.
                 ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
             }
             finally
