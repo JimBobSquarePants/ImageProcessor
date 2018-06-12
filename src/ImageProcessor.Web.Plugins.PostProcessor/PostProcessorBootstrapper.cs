@@ -131,8 +131,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                 { "libjpeg-62.dll", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.libjpeg-62.dll" },
                 { "pngquant.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngquant.exe" },
                 { "pngout.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.pngout.exe" },
-                { "TruePNG.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.TruePNG.exe" },
-                { "png.cmd", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.png.cmd" }
+                { "TruePNG.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.TruePNG.exe" }
             };
 
             // Write the files out to the bin folder.

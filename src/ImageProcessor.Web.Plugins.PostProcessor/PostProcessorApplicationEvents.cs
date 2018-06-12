@@ -55,7 +55,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// </param>
         private static void PostProcess(object sender, PostProcessingEventArgs e)
         {
-            e.ImageStream = PostProcessor.PostProcessImage(e.Context, e.ImageStream, e.ImageExtension);
+            e.ImageStream = PostProcessor.PostProcessImageAsync(e.Context, e.ImageStream, e.ImageExtension).Result;
         }
     }
 }
