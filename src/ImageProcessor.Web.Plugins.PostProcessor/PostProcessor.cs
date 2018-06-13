@@ -15,6 +15,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
+	using System.Linq;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Web;
@@ -50,6 +51,9 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 			int timeout = PostProcessorBootstrapper.Instance.Timout;
 			try
 			{
+				// Save source file length
+				long length = stream.Length;
+
 				// Create a temporary source file with the correct extension
 				string tempSourceFile = Path.GetTempFileName();
 				sourceFile = Path.ChangeExtension(tempSourceFile, extension);
@@ -58,49 +62,53 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 				// Give our destination file a unique name
 				destinationFile = sourceFile.Replace(extension, "-out" + extension);
 
-				// Save the input stream to our source temp file for post processing
-				long length = stream.Length;
-				using (FileStream fileStream = File.Create(sourceFile))
+				// Get processes to start
+				var processStartInfos = GetProcessStartInfos(extension, length, sourceFile, destinationFile).ToList();
+				if (processStartInfos.Count > 0)
 				{
-					stream.CopyTo(fileStream);
-				}
-
-				// Create cancellation token with timeout
-				using (var cancellationTokenSource = new CancellationTokenSource(timeout))
-				{
-					foreach (var processStartInfo in GetProcessStartInfos(extension, length, sourceFile, destinationFile))
+					// Save the input stream to our source temp file for post processing
+					using (FileStream fileStream = File.Create(sourceFile))
 					{
-						// Use destination file as new source (if previous process created one).
-						if (File.Exists(destinationFile))
-						{
-							File.Copy(destinationFile, sourceFile, true);
-						}
+						stream.CopyTo(fileStream);
+					}
 
-						// Set default properties
-						processStartInfo.FileName = Path.Combine(PostProcessorBootstrapper.Instance.WorkingPath, processStartInfo.FileName);
-						processStartInfo.CreateNoWindow = true;
-						processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-						// Run process
-						using (var processResults = await ProcessEx.RunAsync(processStartInfo, cancellationTokenSource.Token).ConfigureAwait(false))
+					// Create cancellation token with timeout
+					using (var cancellationTokenSource = new CancellationTokenSource(timeout))
+					{
+						foreach (var processStartInfo in processStartInfos)
 						{
-							if (processResults.ExitCode == 1)
+							// Use destination file as new source (if previous process created one).
+							if (File.Exists(destinationFile))
 							{
-								ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url}, {processStartInfo.FileName} {processStartInfo.Arguments} exited with error code 1. Original image returned.");
-								break;
+								File.Copy(destinationFile, sourceFile, true);
+							}
+
+							// Set default properties
+							processStartInfo.FileName = Path.Combine(PostProcessorBootstrapper.Instance.WorkingPath, processStartInfo.FileName);
+							processStartInfo.CreateNoWindow = true;
+							processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+							// Run process
+							using (var processResults = await ProcessEx.RunAsync(processStartInfo, cancellationTokenSource.Token).ConfigureAwait(false))
+							{
+								if (processResults.ExitCode == 1)
+								{
+									ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url}, {processStartInfo.FileName} {processStartInfo.Arguments} exited with error code 1. Original image returned.");
+									break;
+								}
 							}
 						}
 					}
-				}
 
-				// Save result
-				var result = new PostProcessingResultEventArgs(destinationFile, length);
-				if (result.ResultFileSize > 0 && result.Saving > 0)
-				{
-					using (FileStream fileStream = File.OpenRead(destinationFile))
+					// Save result
+					var result = new PostProcessingResultEventArgs(destinationFile, length);
+					if (result.ResultFileSize > 0 && result.Saving > 0)
 					{
-						stream.SetLength(0);
-						fileStream.CopyTo(stream);
+						using (FileStream fileStream = File.OpenRead(destinationFile))
+						{
+							stream.SetLength(0);
+							fileStream.CopyTo(stream);
+						}
 					}
 				}
 			}
