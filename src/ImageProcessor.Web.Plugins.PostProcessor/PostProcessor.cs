@@ -116,9 +116,10 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
             {
                 ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url} within {timeout}ms. Original image returned.");
             }
-            catch
+            catch (Exception ex)
             {
                 // Some security policies don't allow execution of programs in this way
+                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
             }
             finally
             {

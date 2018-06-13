@@ -20,7 +20,7 @@ namespace ImageProcessor.Web.Caching
     using System.Web;
     using System.Web.Hosting;
 
-    using ImageProcessor.Web.Configuration;
+    using Configuration;
 
     /// <summary>
     /// The image cache base provides methods for implementing the <see cref="IImageCacheExtended"/> interface.
@@ -29,6 +29,8 @@ namespace ImageProcessor.Web.Caching
     public abstract class ImageCacheBase : IImageCacheExtended
     {
         private static readonly CacheTrimmer Trimmer = new CacheTrimmer();
+
+        private static readonly object SyncLock = new object();
 
         /// <summary>
         /// The request path for the image.
@@ -217,8 +219,11 @@ namespace ImageProcessor.Web.Caching
         /// <returns>augmented dictionary of settings</returns>
         private Dictionary<string, string> AugmentSettingsCore(Dictionary<string, string> settings)
         {
-            this.AugmentSettings(settings);
-            return settings;
+            lock (SyncLock)
+            {
+                this.AugmentSettings(settings);
+                return settings;
+            }
         }
 
         /// <summary>
