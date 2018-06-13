@@ -69,7 +69,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 					// Save the input stream to our source temp file for post processing
 					using (FileStream fileStream = File.Create(sourceFile))
 					{
-						stream.CopyTo(fileStream);
+						await stream.CopyToAsync(fileStream).ConfigureAwait(false);
 					}
 
 					// Create cancellation token with timeout
@@ -107,7 +107,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 						using (FileStream fileStream = File.OpenRead(destinationFile))
 						{
 							stream.SetLength(0);
-							fileStream.CopyTo(stream);
+							await fileStream.CopyToAsync(stream).ConfigureAwait(false);
 						}
 					}
 				}
