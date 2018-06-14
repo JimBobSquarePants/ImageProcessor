@@ -33,9 +33,6 @@
     <DocumentationFile>bin\Release\ImageProcessor.Web.Plugins.PostProcessor.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="RunProcessAsTask, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RunProcessAsTask.1.2.2\lib\net45\RunProcessAsTask.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -51,12 +48,10 @@
     <Compile Include="PostProcessingResultEventArgs.cs" />
     <Compile Include="PostProcessor.cs" />
     <Compile Include="PostProcessorBootstrapper.cs" />
+    <Compile Include="ProcessEx.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Resources\Unmanaged\README.txt" />
   </ItemGroup>
   <ItemGroup>

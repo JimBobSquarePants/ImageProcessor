@@ -21,7 +21,6 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
     using System.Web;
 
     using ImageProcessor.Configuration;
-    using RunProcessAsTask;
 
     /// <summary>
     /// The image post processor.
