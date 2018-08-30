@@ -22,7 +22,7 @@ namespace ImageProcessor.Web.HttpModules
     using System.Threading.Tasks;
     using System.Web;
     using System.Web.Hosting;
-
+    using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Configuration;
     using ImageProcessor.Imaging;
     using ImageProcessor.Imaging.Formats;
@@ -508,7 +508,7 @@ namespace ImageProcessor.Web.HttpModules
                 // If the validation has failed based on events, return
                 if (validatingArgs.Cancel)
                 {
-                    ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>("Image processing has been cancelled by an event");
+                    ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>($"Image processing for {url} has been cancelled by an event");
                     return;
                 }
 
@@ -627,10 +627,17 @@ namespace ImageProcessor.Web.HttpModules
                                     MetaDataMode metaMode = !exif ? MetaDataMode.None : metaDataMode.Value;
                                     bool gamma = fixGamma != null && fixGamma.Value;
 
-                                    using (ImageFactory imageFactory = new ImageFactory(metaMode, gamma) { AnimationProcessMode = mode })
+                                    try {
+                                        using (var imageFactory = new ImageFactory(metaMode, gamma) { AnimationProcessMode = mode })
+                                        {
+                                            imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
+                                            mimeType = imageFactory.CurrentImageFormat.MimeType;
+                                        }
+                                    }
+                                    catch(ImageFormatException)
                                     {
-                                        imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
-                                        mimeType = imageFactory.CurrentImageFormat.MimeType;
+                                        ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>($"Request {url} is not a valid image.");
+                                        return;
                                     }
                                 }
                                 else
