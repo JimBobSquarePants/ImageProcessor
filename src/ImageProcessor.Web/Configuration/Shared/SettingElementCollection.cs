@@ -45,10 +45,7 @@ namespace ImageProcessor.Web.Configuration
         /// </returns>
         public SettingElement this[int index]
         {
-            get
-            {
-                return (SettingElement)BaseGet(index);
-            }
+            get => (SettingElement)this.BaseGet(index);
 
             set
             {
@@ -76,7 +73,7 @@ namespace ImageProcessor.Web.Configuration
         /// <returns>True if the collection contains the key; otherwise false.</returns>
         public bool ContainsKey(string key)
         {
-            object[] keys = BaseGetAllKeys();
+            object[] keys = this.BaseGetAllKeys();
 
             return keys.Any(obj => (string)obj == key);
         }
@@ -89,10 +86,7 @@ namespace ImageProcessor.Web.Configuration
         /// to return the key for.
         /// </param>
         /// <returns>The element key for a specified PluginElement configuration element.</returns>
-        protected override object GetElementKey(ConfigurationElement element)
-        {
-            return ((SettingElement)element).Key;
-        }
+        protected override object GetElementKey(ConfigurationElement element) => ((SettingElement)element).Key;
 
         /// <summary>
         /// Creates a new SettingElement configuration element.
@@ -100,9 +94,6 @@ namespace ImageProcessor.Web.Configuration
         /// <returns>
         /// A new SettingElement configuration element.
         /// </returns>
-        protected override ConfigurationElement CreateNewElement()
-        {
-            return new SettingElement();
-        }
+        protected override ConfigurationElement CreateNewElement() => new SettingElement();
     }
 }

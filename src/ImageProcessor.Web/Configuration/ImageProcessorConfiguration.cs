@@ -27,7 +27,6 @@ namespace ImageProcessor.Web.Configuration
     /// </summary>
     public sealed class ImageProcessorConfiguration
     {
-        #region Fields
         /// <summary>
         /// A new instance of the <see cref="T:ImageProcessor.Web.Config.ImageProcessorConfig"/> class.
         /// with lazy initialization.
@@ -55,9 +54,7 @@ namespace ImageProcessor.Web.Configuration
         /// The security configuration section from the current application configuration. 
         /// </summary>
         private static ImageSecuritySection imageSecuritySection;
-        #endregion
 
-        #region Constructors
         /// <summary>
         /// Prevents a default instance of the <see cref="ImageProcessorConfiguration"/> class from being created.
         /// </summary>
@@ -67,9 +64,7 @@ namespace ImageProcessor.Web.Configuration
             this.LoadImageServices();
             this.LoadImageCache();
         }
-        #endregion
 
-        #region Properties
         /// <summary>
         /// Gets the current instance of the <see cref="ImageProcessorConfiguration"/> class.
         /// </summary>
@@ -157,9 +152,6 @@ namespace ImageProcessor.Web.Configuration
         /// </summary>
         public bool InterceptAllRequests => GetImageProcessingSection().InterceptAllRequests;
 
-        #endregion
-
-        #region Methods
         /// <summary>
         /// Returns the processing instructions matching the preset defined in the configuration.
         /// </summary>
@@ -187,30 +179,20 @@ namespace ImageProcessor.Web.Configuration
         /// Retrieves the security configuration section from the current application configuration. 
         /// </summary>
         /// <returns>The security configuration section from the current application configuration. </returns>
-        internal ImageSecuritySection GetImageSecuritySection()
-        {
-            return imageSecuritySection ?? (imageSecuritySection = ImageSecuritySection.GetConfiguration());
-        }
+        internal ImageSecuritySection GetImageSecuritySection() => imageSecuritySection ?? (imageSecuritySection = ImageSecuritySection.GetConfiguration());
 
         /// <summary>
         /// Retrieves the processing configuration section from the current application configuration. 
         /// </summary>
         /// <returns>The processing configuration section from the current application configuration. </returns>
-        private static ImageProcessingSection GetImageProcessingSection()
-        {
-            return imageProcessingSection ?? (imageProcessingSection = ImageProcessingSection.GetConfiguration());
-        }
+        private static ImageProcessingSection GetImageProcessingSection() => imageProcessingSection ?? (imageProcessingSection = ImageProcessingSection.GetConfiguration());
 
         /// <summary>
         /// Retrieves the caching configuration section from the current application configuration. 
         /// </summary>
         /// <returns>The caching configuration section from the current application configuration. </returns>
-        private static ImageCacheSection GetImageCacheSection()
-        {
-            return imageCacheSection ?? (imageCacheSection = ImageCacheSection.GetConfiguration());
-        }
+        private static ImageCacheSection GetImageCacheSection() => imageCacheSection ?? (imageCacheSection = ImageCacheSection.GetConfiguration());
 
-        #region GraphicesProcessors
         /// <summary>
         /// Creates and returns a new collection of <see cref="IWebGraphicsProcessor"/> 
         /// <remarks>
@@ -222,11 +204,11 @@ namespace ImageProcessor.Web.Configuration
         /// <returns>The <see cref="T:IWebGraphicsProcessor[]"/></returns>
         public IWebGraphicsProcessor[] CreateWebGraphicsProcessors()
         {
-            List<IWebGraphicsProcessor> processors = new List<IWebGraphicsProcessor>();
+            var processors = new List<IWebGraphicsProcessor>();
 
             foreach (KeyValuePair<Type, Dictionary<string, string>> pair in this.AvailableWebGraphicsProcessors)
             {
-                IWebGraphicsProcessor processor = (IWebGraphicsProcessor)Activator.CreateInstance(pair.Key);
+                var processor = (IWebGraphicsProcessor)Activator.CreateInstance(pair.Key);
                 processor.Processor.Settings = pair.Value;
                 processors.Add(processor);
             }
@@ -248,7 +230,7 @@ namespace ImageProcessor.Web.Configuration
 
             foreach (ImageProcessingSection.PluginElement pluginConfig in pluginConfigs)
             {
-                Type type = Type.GetType(pluginConfig.Type);
+                var type = Type.GetType(pluginConfig.Type);
 
                 if (type == null)
                 {
@@ -291,8 +273,7 @@ namespace ImageProcessor.Web.Configuration
                     .ToDictionary(setting => setting.Key, setting => setting.Value);
 
                 // Override the settings found in config section with values in the app.config / deployment slot settings
-                OverrideDefaultSettingsWithAppSettingsValue(settings, name);
-
+                this.OverrideDefaultSettingsWithAppSettingsValue(settings, name);
             }
             else
             {
@@ -301,9 +282,7 @@ namespace ImageProcessor.Web.Configuration
 
             return settings;
         }
-        #endregion
 
-        #region ImageServices
         /// <summary>
         /// Loads image services from configuration.
         /// </summary>
@@ -316,7 +295,7 @@ namespace ImageProcessor.Web.Configuration
             this.ImageServices = new List<IImageService>();
             foreach (ImageSecuritySection.ServiceElement config in services)
             {
-                Type type = Type.GetType(config.Type);
+                var type = Type.GetType(config.Type);
 
                 if (type == null)
                 {
@@ -325,7 +304,7 @@ namespace ImageProcessor.Web.Configuration
                     throw new TypeLoadException(message);
                 }
 
-                IImageService imageService = Activator.CreateInstance(type) as IImageService;
+                var imageService = Activator.CreateInstance(type) as IImageService;
 
                 if (imageService != null)
                 {
@@ -335,10 +314,8 @@ namespace ImageProcessor.Web.Configuration
                     imageService.WhiteList = this.GetServiceWhitelist(name);
                 }
 
-
                 this.ImageServices.Add(imageService);
             }
-
         }
 
         /// <summary>
@@ -403,9 +380,7 @@ namespace ImageProcessor.Web.Configuration
 
             return whitelist;
         }
-        #endregion
 
-        #region ImageCaches
         /// <summary>
         /// Gets the currently assigned <see cref="IImageCache"/>.
         /// </summary>
@@ -420,7 +395,7 @@ namespace ImageProcessor.Web.Configuration
                 {
                     if (cache.Name == currentCache)
                     {
-                        Type type = Type.GetType(cache.Type);
+                        var type = Type.GetType(cache.Type);
 
                         if (type == null)
                         {
@@ -449,7 +424,6 @@ namespace ImageProcessor.Web.Configuration
                 }
             }
         }
-        #endregion
 
         /// <summary>
         /// Override the default settings discovered in the config sections, with settings stored in appsettings of app.config or deployment slot settings (if available)
@@ -460,23 +434,19 @@ namespace ImageProcessor.Web.Configuration
         /// <param name="serviceOrPluginName">The name of the section, used to construct the appSetting key name</param>
         private void OverrideDefaultSettingsWithAppSettingsValue(Dictionary<string, string> defaultSettings, string serviceOrPluginName)
         {
-
-            Dictionary<string, string> copyOfSettingsForEnumeration = new Dictionary<string, string>(defaultSettings);
+            var copyOfSettingsForEnumeration = new Dictionary<string, string>(defaultSettings);
 
             // For each default setting found in the config section
-            foreach (var setting in copyOfSettingsForEnumeration)
+            foreach (KeyValuePair<string, string> setting in copyOfSettingsForEnumeration)
             {
                 // Check the app settings for a key in the specified format
                 string appSettingKeyName = $"ImageProcessor.{serviceOrPluginName}.{setting.Key}";
-                if (!String.IsNullOrEmpty(ConfigurationManager.AppSettings[appSettingKeyName]))
+                if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings[appSettingKeyName]))
                 {
                     // If the key is found in app settings use the app settings value rather than the value in the config section
                     defaultSettings[setting.Key] = ConfigurationManager.AppSettings[appSettingKeyName];
                 }
             }
-
         }
-
-        #endregion
     }
 }

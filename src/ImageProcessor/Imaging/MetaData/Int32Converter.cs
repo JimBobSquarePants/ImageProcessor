@@ -18,7 +18,7 @@ namespace ImageProcessor.Imaging.MetaData
     /// short term arrays.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    internal struct Int32Converter
+    internal readonly struct Int32Converter
     {
         /// <summary>
         /// The value of the byte array as an integer.
@@ -57,10 +57,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// The value to convert from.
         /// </param>
         public Int32Converter(int value)
-            : this()
-        {
-            this.Value = value;
-        }
+            : this() => this.Value = value;
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="Int32Converter"/> to a 
@@ -72,10 +69,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <returns>
         /// An instance of <see cref="int"/>.
         /// </returns>
-        public static implicit operator int(Int32Converter value)
-        {
-            return value.Value;
-        }
+        public static implicit operator int(Int32Converter value) => value.Value;
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="int"/> to a 
@@ -87,9 +81,6 @@ namespace ImageProcessor.Imaging.MetaData
         /// <returns>
         /// An instance of <see cref="Int32Converter"/>.
         /// </returns>
-        public static implicit operator Int32Converter(int value)
-        {
-            return new Int32Converter(value);
-        }
+        public static implicit operator Int32Converter(int value) => new Int32Converter(value);
     }
 }

@@ -26,20 +26,17 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"rotatebounded=[^&]", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("rotatebounded=[^&]", RegexOptions.Compiled);
 
         /// <summary>
         /// The regular expression to search for.
         /// </summary>
-        private static readonly Regex BoundRegex = new Regex(@"rotatebounded.keepsize=true", RegexOptions.Compiled);
+        private static readonly Regex BoundRegex = new Regex("rotatebounded.keepsize=true", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RotateBounded"/> class.
         /// </summary>
-        public RotateBounded()
-        {
-            this.Processor = new ImageProcessor.Processors.RotateBounded();
-        }
+        public RotateBounded() => this.Processor = new ImageProcessor.Processors.RotateBounded();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

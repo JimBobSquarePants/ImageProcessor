@@ -31,10 +31,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="computerArchitectureInfo">
         /// The computer architecture info.
         /// </param>
-        public ExifBitConverter(IComputerArchitectureInfo computerArchitectureInfo)
-        {
-            this.computerArchitectureInfo = computerArchitectureInfo;
-        }
+        public ExifBitConverter(IComputerArchitectureInfo computerArchitectureInfo) => this.computerArchitectureInfo = computerArchitectureInfo;
 
         /// <summary>
         /// Indicates the byte order ("endianness") in which data is converted using this class.
@@ -50,10 +47,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// most significant byte is on the right end of a word.
         /// </remarks>
         /// <returns>true if this converter is little-endian, false otherwise.</returns>
-        public override bool IsLittleEndian()
-        {
-            return this.computerArchitectureInfo.IsLittleEndian();
-        }
+        public override bool IsLittleEndian() => this.computerArchitectureInfo.IsLittleEndian();
 
         /// <summary>
         /// Converts the given ascii string to an array of bytes optionally adding a null terminator.
@@ -87,10 +81,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <returns>
         /// The <see cref="T:byte[]"/>.
         /// </returns>
-        public byte[] GetBytes(string value)
-        {
-            return this.GetBytes(value, false);
-        }
+        public byte[] GetBytes(string value) => this.GetBytes(value, false);
 
         /// <summary>
         /// Converts the given unsigned rational number to an array of bytes.

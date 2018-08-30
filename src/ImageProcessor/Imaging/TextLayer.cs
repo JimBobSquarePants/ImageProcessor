@@ -109,9 +109,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         public override bool Equals(object obj)
         {
-            TextLayer textLayer = obj as TextLayer;
-
-            if (textLayer == null)
+            if (!(obj is TextLayer textLayer))
             {
                 return false;
             }
@@ -147,18 +145,14 @@ namespace ImageProcessor.Imaging
                 hashCode = (hashCode * 397) ^ this.FontSize;
                 hashCode = (hashCode * 397) ^ this.Position.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.Vertical.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.RightToLeft.GetHashCode();
-                return hashCode;
+                return (hashCode * 397) ^ this.RightToLeft.GetHashCode();
             }
         }
 
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.
         /// </summary>
-        public void Dispose()
-        {
-            this.Dispose(true);
-        }
+        public void Dispose() => this.Dispose(true);
 
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.

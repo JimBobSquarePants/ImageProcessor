@@ -55,7 +55,6 @@ namespace ImageProcessor.Imaging.Formats
         /// </summary>
         int Quality { get; set; }
 
-        #region Methods
         /// <summary>
         /// Applies the given processor the current image.
         /// </summary>
@@ -109,6 +108,5 @@ namespace ImageProcessor.Imaging.Formats
         /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
         Image Save(string path, Image image, long bitDepth);
-        #endregion
     }
 }

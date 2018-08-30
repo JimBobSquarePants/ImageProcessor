@@ -29,69 +29,69 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Processes the image.
         /// </summary>
-        /// <param name="image">The current image to process</param>
-        /// <param name="newImage">The new Image to return</param>
+        /// <param name="source">The current image to process</param>
+        /// <param name="destination">The new Image to return</param>
         /// <returns>
         /// The processed <see cref="System.Drawing.Bitmap"/>.
         /// </returns>
-        public override Bitmap TransformImage(Image image, Image newImage)
+        public override Bitmap TransformImage(Image source, Image destination)
         {
             // Bitmaps for comic pattern
             Bitmap highBitmap = null;
             Bitmap lowBitmap = null;
             Bitmap patternBitmap = null;
             Bitmap edgeBitmap = null;
-            int width = image.Width;
-            int height = image.Height;
+            int width = source.Width;
+            int height = source.Height;
 
             try
             {
-                using (ImageAttributes attributes = new ImageAttributes())
+                using (var attributes = new ImageAttributes())
                 {
-                    Rectangle rectangle = new Rectangle(0, 0, image.Width, image.Height);
+                    var rectangle = new Rectangle(0, 0, source.Width, source.Height);
 
                     attributes.SetColorMatrix(ColorMatrixes.ComicHigh);
 
                     // Draw the image with the high comic colormatrix.
                     highBitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
-                    highBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+                    highBitmap.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
                     // Apply a oil painting filter to the image.
-                    highBitmap = new OilPaintingFilter(3, 5).ApplyFilter((Bitmap)image);
+                    highBitmap = new OilPaintingFilter(3, 5).ApplyFilter((Bitmap)source);
 
                     // Draw the edges.
                     edgeBitmap = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
-                    edgeBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-                    edgeBitmap = Effects.Trace(image, edgeBitmap, 120);
+                    edgeBitmap.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+                    edgeBitmap = Effects.Trace(source, edgeBitmap, 120);
 
-                    using (Graphics graphics = Graphics.FromImage(highBitmap))
+                    using (var graphics = Graphics.FromImage(highBitmap))
                     {
-                        graphics.DrawImage(highBitmap, rectangle, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
+                        graphics.DrawImage(highBitmap, rectangle, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
                     }
 
                     // Create a bitmap for overlaying.
                     lowBitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
-                    lowBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+                    lowBitmap.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
                     // Set the color matrix
                     attributes.SetColorMatrix(this.Matrix);
 
                     // Draw the image with the losatch colormatrix.
-                    using (Graphics graphics = Graphics.FromImage(lowBitmap))
+                    using (var graphics = Graphics.FromImage(lowBitmap))
                     {
-                        graphics.DrawImage(highBitmap, rectangle, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
+                        graphics.DrawImage(highBitmap, rectangle, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
                     }
 
                     // We need to create a new image now with a pattern mask to paint it
                     // onto the other image with.
                     patternBitmap = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
-                    patternBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+                    patternBitmap.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
                     // Create the pattern mask.
-                    using (Graphics graphics = Graphics.FromImage(patternBitmap))
+                    using (var graphics = Graphics.FromImage(patternBitmap))
                     {
                         graphics.Clear(Color.Transparent);
-                   
+
                         for (int y = 0; y < height; y += 8)
                         {
                             for (int x = 0; x < width; x += 4)
@@ -105,7 +105,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
                     // Transfer the alpha channel from the mask to the low saturation image.
                     lowBitmap = Effects.ApplyMask(lowBitmap, patternBitmap);
 
-                    using (Graphics graphics = Graphics.FromImage(newImage))
+                    using (var graphics = Graphics.FromImage(destination))
                     {
                         graphics.Clear(Color.Transparent);
 
@@ -115,7 +115,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
                         graphics.DrawImage(edgeBitmap, 0, 0);
 
                         // Draw an edge around the image.
-                        using (Pen blackPen = new Pen(Color.Black))
+                        using (var blackPen = new Pen(Color.Black))
                         {
                             blackPen.Width = 4;
                             graphics.DrawRectangle(blackPen, rectangle);
@@ -130,12 +130,12 @@ namespace ImageProcessor.Imaging.Filters.Photo
                 }
 
                 // Reassign the image.
-                image.Dispose();
-                image = newImage;
+                source.Dispose();
+                source = destination;
             }
             catch
             {
-                newImage?.Dispose();
+                destination?.Dispose();
 
                 highBitmap?.Dispose();
 
@@ -146,7 +146,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
                 edgeBitmap?.Dispose();
             }
 
-            return (Bitmap)image;
+            return (Bitmap)source;
         }
     }
 }

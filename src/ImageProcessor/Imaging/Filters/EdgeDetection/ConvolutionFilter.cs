@@ -63,21 +63,21 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
             int bufferedWidth = width + 2;
             int bufferedHeight = height + 2;
 
-            Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
-            Bitmap input = new Bitmap(bufferedWidth, bufferedHeight, PixelFormat.Format32bppPArgb);
+            var destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            var input = new Bitmap(bufferedWidth, bufferedHeight, PixelFormat.Format32bppPArgb);
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
             input.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
-            using (Graphics graphics = Graphics.FromImage(input))
+            using (var graphics = Graphics.FromImage(input))
             {
                 // Fixes an issue with transparency not converting properly.
                 graphics.Clear(Color.Transparent);
 
-                Rectangle destinationRectangle = new Rectangle(0, 0, bufferedWidth, bufferedHeight);
-                Rectangle rectangle = new Rectangle(0, 0, width, height);
+                var destinationRectangle = new Rectangle(0, 0, bufferedWidth, bufferedHeight);
+                var rectangle = new Rectangle(0, 0, width, height);
 
                 // If it's greyscale apply a colormatrix to the image.
-                using (ImageAttributes attributes = new ImageAttributes())
+                using (var attributes = new ImageAttributes())
                 {
                     if (this.greyscale)
                     {
@@ -87,7 +87,7 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
                     // We use a trick here to detect right to the edges of the image.
                     // flip/tile the image with a pixel in excess in each direction to duplicate pixels.
                     // Later on we draw pixels without that excess.
-                    using (TextureBrush tb = new TextureBrush(source, rectangle, attributes))
+                    using (var tb = new TextureBrush(source, rectangle, attributes))
                     {
                         tb.WrapMode = WrapMode.TileFlipXY;
                         tb.TranslateTransform(1, 1);
@@ -104,9 +104,9 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
                 int kernelLength = horizontalFilter.GetLength(0);
                 int radius = kernelLength >> 1;
 
-                using (FastBitmap sourceBitmap = new FastBitmap(input))
+                using (var sourceBitmap = new FastBitmap(input))
                 {
-                    using (FastBitmap destinationBitmap = new FastBitmap(destination))
+                    using (var destinationBitmap = new FastBitmap(destination))
                     {
                         // Loop through the pixels.
                         Parallel.For(
@@ -171,7 +171,7 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
                                     byte green = gX.ToByte();
                                     byte blue = bX.ToByte();
 
-                                    Color newColor = Color.FromArgb(red, green, blue);
+                                    var newColor = Color.FromArgb(red, green, blue);
                                     if (y > 0 && x > 0 && y < maxHeight && x < maxWidth)
                                     {
                                         // ReSharper disable once AccessToDisposedClosure
@@ -205,21 +205,21 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
             int bufferedWidth = width + 2;
             int bufferedHeight = height + 2;
 
-            Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
-            Bitmap input = new Bitmap(bufferedWidth, bufferedHeight, PixelFormat.Format32bppPArgb);
+            var destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            var input = new Bitmap(bufferedWidth, bufferedHeight, PixelFormat.Format32bppPArgb);
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
             input.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
-            using (Graphics graphics = Graphics.FromImage(input))
+            using (var graphics = Graphics.FromImage(input))
             {
                 // Fixes an issue with transparency not converting properly.
                 graphics.Clear(Color.Transparent);
 
-                Rectangle destinationRectangle = new Rectangle(0, 0, bufferedWidth, bufferedHeight);
-                Rectangle rectangle = new Rectangle(0, 0, width, height);
+                var destinationRectangle = new Rectangle(0, 0, bufferedWidth, bufferedHeight);
+                var rectangle = new Rectangle(0, 0, width, height);
 
                 // If it's greyscale apply a colormatrix to the image.
-                using (ImageAttributes attributes = new ImageAttributes())
+                using (var attributes = new ImageAttributes())
                 {
                     if (this.greyscale)
                     {
@@ -229,7 +229,7 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
                     // We use a trick here to detect right to the edges of the image.
                     // flip/tile the image with a pixel in excess in each direction to duplicate pixels.
                     // Later on we draw pixels without that excess.
-                    using (TextureBrush tb = new TextureBrush(source, rectangle, attributes))
+                    using (var tb = new TextureBrush(source, rectangle, attributes))
                     {
                         tb.WrapMode = WrapMode.TileFlipXY;
                         tb.TranslateTransform(1, 1);
@@ -247,9 +247,9 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
                 int kernelLength = horizontalFilter.GetLength(0);
                 int radius = kernelLength >> 1;
 
-                using (FastBitmap sourceBitmap = new FastBitmap(input))
+                using (var sourceBitmap = new FastBitmap(input))
                 {
-                    using (FastBitmap destinationBitmap = new FastBitmap(destination))
+                    using (var destinationBitmap = new FastBitmap(destination))
                     {
                         // Loop through the pixels.
                         Parallel.For(
@@ -320,7 +320,7 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
                                     byte green = Math.Sqrt((gX * gX) + (gY * gY)).ToByte();
                                     byte blue = Math.Sqrt((bX * bX) + (bY * bY)).ToByte();
 
-                                    Color newColor = Color.FromArgb(red, green, blue);
+                                    var newColor = Color.FromArgb(red, green, blue);
                                     if (y > 0 && x > 0 && y < maxHeight && x < maxWidth)
                                     {
                                         // ReSharper disable once AccessToDisposedClosure

@@ -10,13 +10,9 @@
 
 namespace ImageProcessor.Imaging
 {
-    #region Using
-
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
-
-    #endregion
 
     /// <summary>
     /// Encapsulates the properties required to resize an image.
@@ -127,9 +123,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         public override bool Equals(object obj)
         {
-            ResizeLayer resizeLayer = obj as ResizeLayer;
-
-            if (resizeLayer == null)
+            if (!(obj is ResizeLayer resizeLayer))
             {
                 return false;
             }
@@ -167,8 +161,7 @@ namespace ImageProcessor.Imaging
                 hashCode = (hashCode * 397) ^ (int)this.AnchorPosition;
                 hashCode = (hashCode * 397) ^ this.Upscale.GetHashCode();
                 hashCode = (hashCode * 397) ^ (this.CenterCoordinates?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ this.AnchorPoint.GetHashCode();
-                return hashCode;
+                return (hashCode * 397) ^ this.AnchorPoint.GetHashCode();
             }
         }
     }

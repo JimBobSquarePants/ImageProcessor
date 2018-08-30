@@ -41,10 +41,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// most significant byte is on the right end of a word.
         /// </remarks>
         /// <returns>true if this converter is little-endian, false otherwise.</returns>
-        public override bool IsLittleEndian()
-        {
-            return true;
-        }
+        public override bool IsLittleEndian() => true;
 
         /// <summary>
         /// Copies the specified number of bytes from value to buffer, starting at index.
@@ -58,7 +55,7 @@ namespace ImageProcessor.Imaging.Helpers
             for (int i = 0; i < bytes; i++)
             {
                 buffer[i + index] = unchecked((byte)(value & 0xff));
-                value = value >> 8;
+                value >>= 8;
             }
         }
 
@@ -66,16 +63,16 @@ namespace ImageProcessor.Imaging.Helpers
         /// Returns a value built from the specified number of bytes from the given buffer,
         /// starting at index.
         /// </summary>
-        /// <param name="buffer">The data in byte array format</param>
+        /// <param name="value">The data in byte array format</param>
         /// <param name="startIndex">The first index to use</param>
         /// <param name="bytesToConvert">The number of bytes to use</param>
         /// <returns>The value built from the given bytes</returns>
-        protected internal override long FromBytes(byte[] buffer, int startIndex, int bytesToConvert)
+        protected internal override long FromBytes(byte[] value, int startIndex, int bytesToConvert)
         {
             long ret = 0;
             for (int i = 0; i < bytesToConvert; i++)
             {
-                ret = unchecked((ret << 8) | buffer[startIndex + bytesToConvert - 1 - i]);
+                ret = unchecked((ret << 8) | value[startIndex + bytesToConvert - 1 - i]);
             }
 
             return ret;

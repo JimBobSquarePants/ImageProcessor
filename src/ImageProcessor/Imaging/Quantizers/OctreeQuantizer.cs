@@ -41,11 +41,6 @@ namespace ImageProcessor.Imaging.Quantizers
         private Octree octree;
 
         /// <summary>
-        /// The transparency threshold.
-        /// </summary>
-        private byte threshold = 64;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="OctreeQuantizer"/> class.
         /// </summary>
         /// <remarks>
@@ -93,18 +88,7 @@ namespace ImageProcessor.Imaging.Quantizers
         /// <summary>
         /// Gets or sets the transparency threshold (0 - 255)
         /// </summary>
-        public byte Threshold
-        {
-            get
-            {
-                return this.threshold;
-            }
-
-            set
-            {
-                this.threshold = value;
-            }
-        }
+        public byte Threshold { get; set; } = 64;
 
         /// <summary>
         /// Execute the first pass through the pixels in the image
@@ -151,7 +135,7 @@ namespace ImageProcessor.Imaging.Quantizers
             byte paletteIndex = (byte)this.maxColors;
 
             // Get the palette index if this non-transparent
-            if (pixel->A > this.threshold)
+            if (pixel->A > this.Threshold)
             {
                 paletteIndex = (byte)this.octree.GetPaletteIndex(pixel);
             }
@@ -207,19 +191,9 @@ namespace ImageProcessor.Imaging.Quantizers
             private readonly OctreeNode root;
 
             /// <summary>
-            /// Array of reducible nodes
-            /// </summary>
-            private readonly OctreeNode[] reducibleNodes;
-
-            /// <summary>
             /// Maximum number of significant bits in the image
             /// </summary>
             private readonly int maxColorBits;
-
-            /// <summary>
-            /// Number of leaves in the tree
-            /// </summary>
-            private int leafCount;
 
             /// <summary>
             /// Store the last node quantized
@@ -240,8 +214,8 @@ namespace ImageProcessor.Imaging.Quantizers
             public Octree(int maxColorBits)
             {
                 this.maxColorBits = maxColorBits;
-                this.leafCount = 0;
-                this.reducibleNodes = new OctreeNode[9];
+                this.Leaves = 0;
+                this.ReducibleNodes = new OctreeNode[9];
                 this.root = new OctreeNode(0, this.maxColorBits, this);
                 this.previousColor = 0;
                 this.previousNode = null;
@@ -250,16 +224,12 @@ namespace ImageProcessor.Imaging.Quantizers
             /// <summary>
             /// Gets or sets the number of leaves in the tree
             /// </summary>
-            private int Leaves
-            {
-                get { return this.leafCount; }
-                set { this.leafCount = value; }
-            }
+            private int Leaves { get; set; }
 
             /// <summary>
             /// Gets the array of reducible nodes
             /// </summary>
-            private OctreeNode[] ReducibleNodes => this.reducibleNodes;
+            private OctreeNode[] ReducibleNodes { get; }
 
             /// <summary>
             /// Add a given color value to the Octree
@@ -309,7 +279,7 @@ namespace ImageProcessor.Imaging.Quantizers
                 }
 
                 // Now palletize the nodes
-                List<Color> palette = new List<Color>(this.Leaves);
+                var palette = new List<Color>(this.Leaves);
                 int paletteIndex = 0;
                 this.root.ConstructPalette(palette, ref paletteIndex);
 
@@ -326,10 +296,7 @@ namespace ImageProcessor.Imaging.Quantizers
             /// <returns>
             /// The index of the given structure.
             /// </returns>
-            public int GetPaletteIndex(Color32* pixel)
-            {
-                return this.root.GetPaletteIndex(pixel, 0);
-            }
+            public int GetPaletteIndex(Color32* pixel) => this.root.GetPaletteIndex(pixel, 0);
 
             /// <summary>
             /// Keep track of the previous node that was quantized
@@ -337,10 +304,7 @@ namespace ImageProcessor.Imaging.Quantizers
             /// <param name="node">
             /// The node last quantized
             /// </param>
-            protected void TrackPrevious(OctreeNode node)
-            {
-                this.previousNode = node;
-            }
+            protected void TrackPrevious(OctreeNode node) => this.previousNode = node;
 
             /// <summary>
             /// Reduce the depth of the tree
@@ -349,17 +313,17 @@ namespace ImageProcessor.Imaging.Quantizers
             {
                 // Find the deepest level containing at least one reducible node
                 int index = this.maxColorBits - 1;
-                while ((index > 0) && (this.reducibleNodes[index] == null))
+                while ((index > 0) && (this.ReducibleNodes[index] == null))
                 {
                     index--;
                 }
 
                 // Reduce the node most recently added to the list at level 'index'
-                OctreeNode node = this.reducibleNodes[index];
-                this.reducibleNodes[index] = node.NextReducible;
+                OctreeNode node = this.ReducibleNodes[index];
+                this.ReducibleNodes[index] = node.NextReducible;
 
                 // Decrement the leaf count after reducing the node
-                this.leafCount -= node.Reduce();
+                this.Leaves -= node.Reduce();
 
                 // And just in case I've reduced the last color to be added, and the next color to
                 // be added is the same, invalidate the previousNode...
@@ -476,9 +440,9 @@ namespace ImageProcessor.Imaging.Quantizers
                     {
                         // Go to the next level down in the tree
                         int shift = 7 - level;
-                        int index = ((pixel->R & Mask[level]) >> (shift - 2)) |
-                                    ((pixel->G & Mask[level]) >> (shift - 1)) |
-                                    ((pixel->B & Mask[level]) >> shift);
+                        int index = ((pixel->R & Mask[level]) >> (shift - 2))
+                                    | ((pixel->G & Mask[level]) >> (shift - 1))
+                                    | ((pixel->B & Mask[level]) >> shift);
 
                         OctreeNode child = this.children[index];
 
@@ -552,10 +516,7 @@ namespace ImageProcessor.Imaging.Quantizers
                         // Loop through children looking for leaves
                         for (int i = 0; i < 8; i++)
                         {
-                            if (this.children[i] != null)
-                            {
-                                this.children[i].ConstructPalette(palette, ref index);
-                            }
+                            this.children[i]?.ConstructPalette(palette, ref index);
                         }
                     }
                 }
@@ -579,9 +540,9 @@ namespace ImageProcessor.Imaging.Quantizers
                     if (!this.leaf)
                     {
                         int shift = 7 - level;
-                        int pixelIndex = ((pixel->R & Mask[level]) >> (shift - 2)) |
-                                    ((pixel->G & Mask[level]) >> (shift - 1)) |
-                                    ((pixel->B & Mask[level]) >> shift);
+                        int pixelIndex = ((pixel->R & Mask[level]) >> (shift - 2))
+                                    | ((pixel->G & Mask[level]) >> (shift - 1))
+                                    | ((pixel->B & Mask[level]) >> shift);
 
                         if (this.children[pixelIndex] != null)
                         {

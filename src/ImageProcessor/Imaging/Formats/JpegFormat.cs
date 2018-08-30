@@ -14,7 +14,6 @@ namespace ImageProcessor.Imaging.Formats
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
-    using System.Linq;
     using System.Text;
 
     /// <summary>
@@ -72,8 +71,7 @@ namespace ImageProcessor.Imaging.Formats
             using (EncoderParameters encoderParameters = FormatUtilities.GetEncodingParameters(this.Quality))
             {
                 ImageCodecInfo imageCodecInfo =
-                    ImageCodecInfo.GetImageEncoders()
-                        .FirstOrDefault(ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+                    Array.Find(ImageCodecInfo.GetImageEncoders(), ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
 
                 if (imageCodecInfo != null)
                 {
@@ -104,8 +102,7 @@ namespace ImageProcessor.Imaging.Formats
             using (EncoderParameters encoderParameters = FormatUtilities.GetEncodingParameters(this.Quality))
             {
                 ImageCodecInfo imageCodecInfo =
-                    ImageCodecInfo.GetImageEncoders()
-                        .FirstOrDefault(ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+                    Array.Find(ImageCodecInfo.GetImageEncoders(), ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
 
                 if (imageCodecInfo != null)
                 {

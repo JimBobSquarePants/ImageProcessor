@@ -152,10 +152,7 @@ namespace ImageProcessor.Web.Caching
         /// <returns>
         /// The asynchronous <see cref="Task"/> returning the value.
         /// </returns>
-        public virtual async Task<string> CreateCachedFileNameAsync()
-        {
-            return await Task.FromResult(CachedImageHelper.GetCachedImageFileName(this.FullPath, this.Querystring)).ConfigureAwait(false);
-        }
+        public virtual Task<string> CreateCachedFileNameAsync() => Task.FromResult(CachedImageHelper.GetCachedImageFileName(this.FullPath, this.Querystring));
 
         /// <summary>
         /// Rewrites the path to point to the cached image.
@@ -173,10 +170,7 @@ namespace ImageProcessor.Web.Caching
         /// <returns>
         /// The true if the date is out with the limit, otherwise; false.
         /// </returns>
-        protected virtual bool IsExpired(DateTime creationDate)
-        {
-            return creationDate < DateTime.UtcNow.AddDays(-this.MaxDays);
-        }
+        protected virtual bool IsExpired(DateTime creationDate) => creationDate < DateTime.UtcNow.AddDays(-this.MaxDays);
 
         /// <summary>
         /// Provides a means to augment the cache settings taken from the configuration in derived classes.
@@ -198,7 +192,7 @@ namespace ImageProcessor.Web.Caching
         protected virtual Task DebounceTrimmerAsync(Func<Task> trimmer)
         {
             // Wrap new method
-            this.ScheduleCacheTrimmer(token => trimmer());
+            this.ScheduleCacheTrimmer(_ => trimmer());
             return Task.FromResult(0);
         }
 
@@ -207,10 +201,7 @@ namespace ImageProcessor.Web.Caching
         /// and that it is a quiet time to do so.
         /// </summary>
         /// <param name="trimmer">The cache trimming method.</param>
-        protected void ScheduleCacheTrimmer(Func<CancellationToken, Task> trimmer)
-        {
-            Trimmer.ScheduleTrimCache(trimmer);
-        }
+        protected void ScheduleCacheTrimmer(Func<CancellationToken, Task> trimmer) => Trimmer.ScheduleTrimCache(trimmer);
 
         /// <summary>
         /// Provides an entry point to augmentation of the <see cref="Settings"/> dictionary
@@ -261,10 +252,7 @@ namespace ImageProcessor.Web.Caching
             /// <summary>
             /// Initializes a new instance of the <see cref="CacheTrimmer"/> class.
             /// </summary>
-            public CacheTrimmer()
-            {
-                HostingEnvironment.RegisterObject(this);
-            }
+            public CacheTrimmer() => HostingEnvironment.RegisterObject(this);
 
             /// <summary>
             /// The sliding delay time
@@ -305,8 +293,8 @@ namespace ImageProcessor.Web.Caching
                         }
                         else if (
                             // Must be less than the max and less than the delay
-                            DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(MaxWaitMilliseconds) &&
-                            DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(WaitMilliseconds))
+                            DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(MaxWaitMilliseconds)
+                            && DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(WaitMilliseconds))
                         {
                             // Delay
                             this.timer.Change(WaitMilliseconds, 0);

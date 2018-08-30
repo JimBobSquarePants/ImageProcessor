@@ -25,10 +25,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Contrast"/> class.
         /// </summary>
-        public Contrast()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Contrast() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.

@@ -32,10 +32,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Hue"/> class.
         /// </summary>
-        public Hue()
-        {
-            this.Processor = new ImageProcessor.Processors.Hue();
-        }
+        public Hue() => this.Processor = new ImageProcessor.Processors.Hue();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

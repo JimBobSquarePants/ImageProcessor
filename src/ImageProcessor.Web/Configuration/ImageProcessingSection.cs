@@ -99,10 +99,7 @@ namespace ImageProcessor.Web.Configuration
         /// <returns>The processing configuration section from the current application configuration. </returns>
         public static ImageProcessingSection GetConfiguration()
         {
-            ImageProcessingSection imageProcessingSection =
-                ConfigurationManager.GetSection("imageProcessor/processing") as ImageProcessingSection;
-
-            if (imageProcessingSection != null)
+            if (ConfigurationManager.GetSection("imageProcessor/processing") is ImageProcessingSection imageProcessingSection)
             {
                 return imageProcessingSection;
             }
@@ -182,7 +179,7 @@ namespace ImageProcessor.Web.Configuration
             /// </returns>
             public PresetElement this[int index]
             {
-                get => (PresetElement)BaseGet(index);
+                get => (PresetElement)this.BaseGet(index);
 
                 set
                 {
@@ -201,10 +198,7 @@ namespace ImageProcessor.Web.Configuration
             /// <returns>
             /// A new PluginConfig configuration element.
             /// </returns>
-            protected override ConfigurationElement CreateNewElement()
-            {
-                return new PresetElement();
-            }
+            protected override ConfigurationElement CreateNewElement() => new PresetElement();
 
             /// <summary>
             /// Gets the element key for a specified PluginElement configuration element.
@@ -216,10 +210,7 @@ namespace ImageProcessor.Web.Configuration
             /// <returns>
             /// The element key for a specified PluginElement configuration element.
             /// </returns>
-            protected override object GetElementKey(ConfigurationElement element)
-            {
-                return ((PresetElement)element).Name;
-            }
+            protected override object GetElementKey(ConfigurationElement element) => ((PresetElement)element).Name;
         }
 
         /// <summary>
@@ -304,7 +295,7 @@ namespace ImageProcessor.Web.Configuration
             /// </returns>
             public PluginElement this[int index]
             {
-                get => (PluginElement)BaseGet(index);
+                get => (PluginElement)this.BaseGet(index);
 
                 set
                 {
@@ -323,10 +314,7 @@ namespace ImageProcessor.Web.Configuration
             /// <returns>
             /// A new Plugin configuration element.
             /// </returns>
-            protected override ConfigurationElement CreateNewElement()
-            {
-                return new PluginElement();
-            }
+            protected override ConfigurationElement CreateNewElement() => new PluginElement();
 
             /// <summary>
             /// Gets the element key for a specified PluginElement configuration element.
@@ -338,10 +326,7 @@ namespace ImageProcessor.Web.Configuration
             /// <returns>
             /// The element key for a specified PluginElement configuration element.
             /// </returns>
-            protected override object GetElementKey(ConfigurationElement element)
-            {
-                return ((PluginElement)element).Name;
-            }
+            protected override object GetElementKey(ConfigurationElement element) => ((PluginElement)element).Name;
         }
     }
 }

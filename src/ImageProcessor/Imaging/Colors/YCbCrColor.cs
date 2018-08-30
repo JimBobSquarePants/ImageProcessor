@@ -20,27 +20,12 @@ namespace ImageProcessor.Imaging.Colors
     /// Represents an YCbCr (luminance, chroma, chroma) color conforming to the ITU-R BT.601 standard used in digital imaging systems.
     /// <see href="http://en.wikipedia.org/wiki/YCbCr"/>
     /// </summary>
-    public struct YCbCrColor : IEquatable<YCbCrColor>
+    public readonly struct YCbCrColor : IEquatable<YCbCrColor>
     {
         /// <summary>
         /// Represents a <see cref="YCbCrColor"/> that is null.
         /// </summary>
         public static readonly YCbCrColor Empty = new YCbCrColor();
-
-        /// <summary>
-        /// The y luminance component.
-        /// </summary>
-        private readonly float y;
-
-        /// <summary>
-        /// The u chroma component.
-        /// </summary>
-        private readonly float cb;
-
-        /// <summary>
-        /// The v chroma component.
-        /// </summary>
-        private readonly float cr;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YCbCrColor"/> struct.
@@ -50,28 +35,28 @@ namespace ImageProcessor.Imaging.Colors
         /// <param name="cr">The v chroma component.</param> 
         private YCbCrColor(float y, float cb, float cr)
         {
-            this.y = ImageMaths.Clamp(y, 0, 255);
-            this.cb = ImageMaths.Clamp(cb, 0, 255);
-            this.cr = ImageMaths.Clamp(cr, 0, 255);
+            this.Y = ImageMaths.Clamp(y, 0, 255);
+            this.Cb = ImageMaths.Clamp(cb, 0, 255);
+            this.Cr = ImageMaths.Clamp(cr, 0, 255);
         }
 
         /// <summary>
         /// Gets the Y luminance component.
         /// <remarks>A value ranging between 0 and 255.</remarks>
         /// </summary>
-        public float Y => this.y;
+        public float Y { get; }
 
         /// <summary>
         /// Gets the U chroma component.
         /// <remarks>A value ranging between 0 and 255.</remarks>
         /// </summary>
-        public float Cb => this.cb;
+        public float Cb { get; }
 
         /// <summary>
         /// Gets the V chroma component.
         /// <remarks>A value ranging between 0 and 255.</remarks>
         /// </summary>
-        public float Cr => this.cr;
+        public float Cr { get; }
 
         /// <summary>
         /// Creates a <see cref="YCbCrColor"/> structure from the three 32-bit YCbCr 
@@ -83,10 +68,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// The <see cref="YCbCrColor"/>.
         /// </returns>
-        public static YCbCrColor FromYCbCr(float y, float cb, float cr)
-        {
-            return new YCbCrColor(y, cb, cr);
-        }
+        public static YCbCrColor FromYCbCr(float y, float cb, float cr) => new YCbCrColor(y, cb, cr);
 
         /// <summary>
         /// Creates a <see cref="YCbCrColor"/> structure from the specified <see cref="System.Drawing.Color"/> structure
@@ -120,10 +102,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// An instance of <see cref="YCbCrColor"/>.
         /// </returns>
-        public static implicit operator YCbCrColor(Color color)
-        {
-            return FromColor(color);
-        }
+        public static implicit operator YCbCrColor(Color color) => FromColor(color);
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="RgbaColor"/> to a 
@@ -135,10 +114,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// An instance of <see cref="YCbCrColor"/>.
         /// </returns>
-        public static implicit operator YCbCrColor(RgbaColor rgbaColor)
-        {
-            return FromColor(rgbaColor);
-        }
+        public static implicit operator YCbCrColor(RgbaColor rgbaColor) => FromColor(rgbaColor);
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="HslaColor"/> to a 
@@ -150,10 +126,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// An instance of <see cref="YCbCrColor"/>.
         /// </returns>
-        public static implicit operator YCbCrColor(HslaColor hslaColor)
-        {
-            return FromColor(hslaColor);
-        }
+        public static implicit operator YCbCrColor(HslaColor hslaColor) => FromColor(hslaColor);
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="YCbCrColor"/> to a 
@@ -201,15 +174,7 @@ namespace ImageProcessor.Imaging.Colors
         /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
         /// </returns>
         /// <param name="obj">Another object to compare to. </param>
-        public override bool Equals(object obj)
-        {
-            if (obj is YCbCrColor)
-            {
-                return this.Equals((YCbCrColor)obj);
-            }
-
-            return false;
-        }
+        public override bool Equals(object obj) => obj is YCbCrColor yCbCrColor && this.Equals(yCbCrColor);
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
@@ -244,8 +209,8 @@ namespace ImageProcessor.Imaging.Colors
         private bool IsEmpty()
         {
             const float Epsilon = .0001f;
-            return Math.Abs(this.y - 0) <= Epsilon && Math.Abs(this.cb - 0) <= Epsilon &&
-                   Math.Abs(this.cr - 0) <= Epsilon;
+            return Math.Abs(this.Y - 0) <= Epsilon && Math.Abs(this.Cb - 0) <= Epsilon
+                   && Math.Abs(this.Cr - 0) <= Epsilon;
         }
     }
 }

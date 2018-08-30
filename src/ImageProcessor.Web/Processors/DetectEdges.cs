@@ -43,10 +43,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="DetectEdges"/> class.
         /// </summary>
-        public DetectEdges()
-        {
-            this.Processor = new ImageProcessor.Processors.DetectEdges();
-        }
+        public DetectEdges() => this.Processor = new ImageProcessor.Processors.DetectEdges();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -84,7 +81,7 @@ namespace ImageProcessor.Web.Processors
             {
                 this.SortOrder = match.Index;
                 NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
-                IEdgeFilter filter = (IEdgeFilter)detectors[QueryParamParser.Instance.ParseValue<string>(queryCollection["detectedges"])];
+                var filter = (IEdgeFilter)detectors[QueryParamParser.Instance.ParseValue<string>(queryCollection["detectedges"])];
                 bool greyscale = QueryParamParser.Instance.ParseValue<bool>(queryCollection["greyscale"]);
                 this.Processor.DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale);
             }
@@ -100,7 +97,7 @@ namespace ImageProcessor.Web.Processors
         /// </returns>
         private static Regex BuildRegex()
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
 
             stringBuilder.Append("detectedges=(");
 

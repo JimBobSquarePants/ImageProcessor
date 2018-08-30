@@ -25,15 +25,12 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"gamma=[^&]", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("gamma=[^&]", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Gamma"/> class.
         /// </summary>
-        public Gamma()
-        {
-            this.Processor = new ImageProcessor.Processors.Gamma();
-        }
+        public Gamma() => this.Processor = new ImageProcessor.Processors.Gamma();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

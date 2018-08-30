@@ -61,9 +61,7 @@ namespace ImageProcessor.Web.Configuration
         /// <returns>The cache configuration section from the current application configuration.</returns>
         public static ImageSecuritySection GetConfiguration()
         {
-            ImageSecuritySection imageSecuritySection = ConfigurationManager.GetSection("imageProcessor/security") as ImageSecuritySection;
-
-            if (imageSecuritySection != null)
+            if (ConfigurationManager.GetSection("imageProcessor/security") is ImageSecuritySection imageSecuritySection)
             {
                 imageSecuritySection.AutoLoadServices = false;
                 return imageSecuritySection;
@@ -93,9 +91,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("name", DefaultValue = "", IsRequired = true)]
             public string Name
             {
-                get { return (string)this["name"]; }
+                get => (string)this["name"];
 
-                set { this["name"] = value; }
+                set => this["name"] = value;
             }
 
             /// <summary>
@@ -105,9 +103,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("prefix", DefaultValue = "", IsRequired = false)]
             public string Prefix
             {
-                get { return (string)this["prefix"]; }
+                get => (string)this["prefix"];
 
-                set { this["prefix"] = value; }
+                set => this["prefix"] = value;
             }
 
             /// <summary>
@@ -117,9 +115,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("type", DefaultValue = "", IsRequired = true)]
             public string Type
             {
-                get { return (string)this["type"]; }
+                get => (string)this["type"];
 
-                set { this["type"] = value; }
+                set => this["type"] = value;
             }
 
             /// <summary>
@@ -173,10 +171,7 @@ namespace ImageProcessor.Web.Configuration
             /// </returns>
             public ServiceElement this[int index]
             {
-                get
-                {
-                    return (ServiceElement)this.BaseGet(index);
-                }
+                get => (ServiceElement)this.BaseGet(index);
 
                 set
                 {
@@ -195,10 +190,7 @@ namespace ImageProcessor.Web.Configuration
             /// <returns>
             /// A new <see cref="ConfigurationElement"/>.
             /// </returns>
-            protected override ConfigurationElement CreateNewElement()
-            {
-                return new ServiceElement();
-            }
+            protected override ConfigurationElement CreateNewElement() => new ServiceElement();
 
             /// <summary>
             /// Gets the element key for a specified configuration element when overridden in a derived class.
@@ -207,10 +199,7 @@ namespace ImageProcessor.Web.Configuration
             /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="ConfigurationElement"/>.
             /// </returns>
             /// <param name="element">The <see cref="ConfigurationElement"/> to return the key for. </param>
-            protected override object GetElementKey(ConfigurationElement element)
-            {
-                return ((ServiceElement)element).Name;
-            }
+            protected override object GetElementKey(ConfigurationElement element) => ((ServiceElement)element).Name;
         }
 
         /// <summary>
@@ -240,10 +229,7 @@ namespace ImageProcessor.Web.Configuration
             /// <returns>The whitelist item at the given index.</returns>
             public SafeUrl this[int index]
             {
-                get
-                {
-                    return this.BaseGet(index) as SafeUrl;
-                }
+                get => this.BaseGet(index) as SafeUrl;
 
                 set
                 {
@@ -262,20 +248,14 @@ namespace ImageProcessor.Web.Configuration
             /// <returns>
             /// A new SafeURL configuration element.
             /// </returns>
-            protected override ConfigurationElement CreateNewElement()
-            {
-                return new SafeUrl();
-            }
+            protected override ConfigurationElement CreateNewElement() => new SafeUrl();
 
             /// <summary>
             /// Gets the element key for a specified whitelist configuration element.
             /// </summary>
             /// <param name="element">The <see cref="ConfigurationElement">ConfigurationElement</see> to return the key for.</param>
             /// <returns>The element key for a specified whitelist configuration element.</returns>
-            protected override object GetElementKey(ConfigurationElement element)
-            {
-                return ((SafeUrl)element).Url;
-            }
+            protected override object GetElementKey(ConfigurationElement element) => ((SafeUrl)element).Url;
         }
 
         /// <summary>
@@ -290,9 +270,9 @@ namespace ImageProcessor.Web.Configuration
             [ConfigurationProperty("url", DefaultValue = "", IsRequired = true)]
             public Uri Url
             {
-                get { return new Uri(this["url"].ToString(), UriKind.RelativeOrAbsolute); }
+                get => new Uri(this["url"].ToString(), UriKind.RelativeOrAbsolute);
 
-                set { this["url"] = value; }
+                set => this["url"] = value;
             }
         }
     }

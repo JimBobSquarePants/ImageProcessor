@@ -27,10 +27,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Watermark"/> class.
         /// </summary>
-        public Watermark()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Watermark() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.
@@ -81,11 +78,11 @@ namespace ImageProcessor.Processors
                     image.RotateFlip(flipType.Value);
                 }
 
-                using (Graphics graphics = Graphics.FromImage(image))
+                using (var graphics = Graphics.FromImage(image))
                 {
                     using (Font font = this.GetFont(textLayer.FontFamily, fontSize, fontStyle))
                     {
-                        using (StringFormat drawFormat = new StringFormat(StringFormat.GenericTypographic))
+                        using (var drawFormat = new StringFormat(StringFormat.GenericTypographic))
                         {
                             StringFormatFlags? formatFlags = this.GetFlags(textLayer);
                             if (formatFlags != null)
@@ -128,7 +125,7 @@ namespace ImageProcessor.Processors
                                         // Scale the shadow position to match the font size.
                                         // Magic number but it's based on artistic preference.
                                         int shadowDiff = (int)Math.Ceiling(fontSize / 24f);
-                                        Point shadowPoint = new Point(origin.Value.X + shadowDiff, origin.Value.Y + shadowDiff);
+                                        var shadowPoint = new Point(origin.Value.X + shadowDiff, origin.Value.Y + shadowDiff);
 
                                         // Set the bounds so any overlapping text will wrap.
                                         if (textLayer.RightToLeft && fallbackUsed)
@@ -208,7 +205,7 @@ namespace ImageProcessor.Processors
             {
                 // Clone the font family and use it. Disposing of the family in the TextLayer is 
                 // the responsibility of the user. 
-                using (FontFamily clone = new FontFamily(fontFamily.Name))
+                using (var clone = new FontFamily(fontFamily.Name))
                 {
                     return new Font(clone, fontSize, fontStyle, GraphicsUnit.Pixel);
                 }

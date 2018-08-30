@@ -19,36 +19,17 @@ namespace ImageProcessor.Imaging.Filters.Binarization
     public class BinaryThreshold
     {
         /// <summary>
-        /// The threshold value.
-        /// </summary>
-        private byte threshold;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="BinaryThreshold"/> class.
         /// </summary>
         /// <param name="threshold">
         /// The threshold.
         /// </param>
-        public BinaryThreshold(byte threshold = 10)
-        {
-            this.threshold = threshold;
-        }
+        public BinaryThreshold(byte threshold = 10) => this.Threshold = threshold;
 
         /// <summary>
         /// Gets or sets the threshold.
         /// </summary>
-        public byte Threshold
-        {
-            get
-            {
-                return this.threshold;
-            }
-
-            set
-            {
-                this.threshold = value;
-            }
-        }
+        public byte Threshold { get; set; }
 
         /// <summary>
         /// Processes the given bitmap to apply the threshold.
@@ -64,18 +45,18 @@ namespace ImageProcessor.Imaging.Filters.Binarization
             int width = source.Width;
             int height = source.Height;
 
-            using (FastBitmap sourceBitmap = new FastBitmap(source))
+            using (var sourceBitmap = new FastBitmap(source))
             {
                 Parallel.For(
-                    0, 
-                    height, 
+                    0,
+                    height,
                     y =>
                     {
                         for (int x = 0; x < width; x++)
                         {
                             // ReSharper disable AccessToDisposedClosure
                             Color color = sourceBitmap.GetPixel(x, y);
-                            sourceBitmap.SetPixel(x, y, color.B >= this.threshold ? Color.White : Color.Black);
+                            sourceBitmap.SetPixel(x, y, color.B >= this.Threshold ? Color.White : Color.Black);
 
                             // ReSharper restore AccessToDisposedClosure
                         }

@@ -41,10 +41,7 @@ namespace ImageProcessor.Imaging
         /// <param name="standardDeviation">
         /// The standard deviation.
         /// </param>
-        public Convolution(double standardDeviation)
-        {
-            this.standardDeviation = standardDeviation;
-        }
+        public Convolution(double standardDeviation) => this.standardDeviation = standardDeviation;
 
         /// <summary>
         /// Gets or sets the threshold to add to the weighted sum.
@@ -104,7 +101,7 @@ namespace ImageProcessor.Imaging
             // Normalise kernel so that the sum of all weights equals 1
             for (int i = 0; i < kernelSize; i++)
             {
-                kernel[i, 0] = kernel[i, 0] / sum;
+                kernel[i, 0] /= sum;
             }
 
             return kernel;
@@ -250,12 +247,12 @@ namespace ImageProcessor.Imaging
         {
             int width = source.Width;
             int height = source.Height;
-            Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            var destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
-            using (FastBitmap sourceBitmap = new FastBitmap(source))
+            using (var sourceBitmap = new FastBitmap(source))
             {
-                using (FastBitmap destinationBitmap = new FastBitmap(destination))
+                using (var destinationBitmap = new FastBitmap(destination))
                 {
                     int kernelLength = kernel.GetLength(0);
                     int radius = kernelLength >> 1;
@@ -365,7 +362,7 @@ namespace ImageProcessor.Imaging
                                 blue += threshold;
                                 alpha += threshold;
 
-                                Color destinationColor = Color.FromArgb(alpha.ToByte(), red.ToByte(), green.ToByte(), blue.ToByte());
+                                var destinationColor = Color.FromArgb(alpha.ToByte(), red.ToByte(), green.ToByte(), blue.ToByte());
 
                                 if (fixGamma)
                                 {
@@ -400,7 +397,7 @@ namespace ImageProcessor.Imaging
             int kernelSize = kernelLength * kernelLength;
             int threshold = this.Threshold;
 
-            Color[,] destination = new Color[width, height];
+            var destination = new Color[width, height];
 
             // For each line
             Parallel.For(
@@ -505,7 +502,7 @@ namespace ImageProcessor.Imaging
                         blue += threshold;
                         alpha += threshold;
 
-                        Color destinationColor = Color.FromArgb(alpha.ToByte(), red.ToByte(), green.ToByte(), blue.ToByte());
+                        var destinationColor = Color.FromArgb(alpha.ToByte(), red.ToByte(), green.ToByte(), blue.ToByte());
 
                         if (fixGamma)
                         {
@@ -547,7 +544,7 @@ namespace ImageProcessor.Imaging
         private double Gaussian2D(double x, double y)
         {
             const double Numerator = 1.0;
-            double denominator = (2 * Math.PI) * Math.Pow(this.standardDeviation, 2);
+            double denominator = 2 * Math.PI * Math.Pow(this.standardDeviation, 2);
 
             double exponentNumerator = (-x * x) + (-y * y);
             double exponentDenominator = 2 * Math.Pow(this.standardDeviation, 2);

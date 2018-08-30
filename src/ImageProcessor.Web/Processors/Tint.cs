@@ -26,15 +26,12 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"tint=[^&]", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("tint=[^&]", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Tint"/> class.
         /// </summary>
-        public Tint()
-        {
-            this.Processor = new ImageProcessor.Processors.Tint();
-        }
+        public Tint() => this.Processor = new ImageProcessor.Processors.Tint();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

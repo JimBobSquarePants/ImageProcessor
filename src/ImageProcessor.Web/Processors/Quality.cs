@@ -31,10 +31,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Quality"/> class.
         /// </summary>
-        public Quality()
-        {
-            this.Processor = new ImageProcessor.Processors.Quality();
-        }
+        public Quality() => this.Processor = new ImageProcessor.Processors.Quality();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

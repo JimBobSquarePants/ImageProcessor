@@ -52,16 +52,6 @@ namespace ImageProcessor.Imaging
         private readonly Bitmap bitmap;
 
         /// <summary>
-        /// The width of the bitmap.
-        /// </summary>
-        private readonly int width;
-
-        /// <summary>
-        /// The height of the bitmap.
-        /// </summary>
-        private readonly int height;
-
-        /// <summary>
         /// The color channel - blue, green, red, alpha.
         /// </summary>
         private readonly int channel;
@@ -200,17 +190,17 @@ namespace ImageProcessor.Imaging
             int pixelFormat = (int)bitmap.PixelFormat;
 
             // Check image format
-            if (!(pixelFormat == Format8bppIndexed ||
-                  pixelFormat == Format24bppRgb ||
-                  pixelFormat == Format32bppArgb ||
-                  pixelFormat == Format32bppPArgb))
+            if (!(pixelFormat == Format8bppIndexed
+                  || pixelFormat == Format24bppRgb
+                  || pixelFormat == Format32bppArgb
+                  || pixelFormat == Format32bppPArgb))
             {
                 throw new ArgumentException("Only 8bpp, 24bpp and 32bpp images are supported.");
             }
 
             this.bitmap = (Bitmap)bitmap;
-            this.width = this.bitmap.Width;
-            this.height = this.bitmap.Height;
+            this.Width = this.bitmap.Width;
+            this.Height = this.bitmap.Height;
 
             this.channel = pixelFormat == Format8bppIndexed ? 0 : 2;
             this.computeIntegrals = computeIntegrals;
@@ -222,12 +212,12 @@ namespace ImageProcessor.Imaging
         /// <summary>
         /// Gets the width, in pixels of the <see cref="System.Drawing.Bitmap"/>.
         /// </summary>
-        public int Width => this.width;
+        public int Width { get; }
 
         /// <summary>
         /// Gets the height, in pixels of the <see cref="System.Drawing.Bitmap"/>.
         /// </summary>
-        public int Height => this.height;
+        public int Height { get; }
 
         /// <summary>
         /// Gets the Integral Image for values' sum.
@@ -268,10 +258,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// An instance of <see cref="System.Drawing.Image"/>.
         /// </returns>
-        public static implicit operator Image(FastBitmap fastBitmap)
-        {
-            return fastBitmap.bitmap;
-        }
+        public static implicit operator Image(FastBitmap fastBitmap) => fastBitmap.bitmap;
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="FastBitmap"/> to a 
@@ -283,10 +270,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// An instance of <see cref="System.Drawing.Bitmap"/>.
         /// </returns>
-        public static implicit operator Bitmap(FastBitmap fastBitmap)
-        {
-            return fastBitmap.bitmap;
-        }
+        public static implicit operator Bitmap(FastBitmap fastBitmap) => fastBitmap.bitmap;
 
         /// <summary>
         /// Gets the color at the specified pixel of the <see cref="System.Drawing.Bitmap"/>.
@@ -297,14 +281,14 @@ namespace ImageProcessor.Imaging
         public Color GetPixel(int x, int y)
         {
 #if DEBUG
-            if ((x < 0) || (x >= this.width))
+            if ((x < 0) || (x >= this.Width))
             {
-                throw new ArgumentOutOfRangeException("x", "Value cannot be less than zero or greater than the bitmap width.");
+                throw new ArgumentOutOfRangeException(nameof(x), "Value cannot be less than zero or greater than the bitmap width.");
             }
 
-            if ((y < 0) || (y >= this.height))
+            if ((y < 0) || (y >= this.Height))
             {
-                throw new ArgumentOutOfRangeException("y", "Value cannot be less than zero or greater than the bitmap height.");
+                throw new ArgumentOutOfRangeException(nameof(y), "Value cannot be less than zero or greater than the bitmap height.");
             }
 #endif
             Color32* data = this[x, y];
@@ -323,14 +307,14 @@ namespace ImageProcessor.Imaging
         public void SetPixel(int x, int y, Color color)
         {
 #if DEBUG
-            if ((x < 0) || (x >= this.width))
+            if ((x < 0) || (x >= this.Width))
             {
-                throw new ArgumentOutOfRangeException("x", "Value cannot be less than zero or greater than the bitmap width.");
+                throw new ArgumentOutOfRangeException(nameof(x), "Value cannot be less than zero or greater than the bitmap width.");
             }
 
-            if ((y < 0) || (y >= this.height))
+            if ((y < 0) || (y >= this.Height))
             {
-                throw new ArgumentOutOfRangeException("y", "Value cannot be less than zero or greater than the bitmap height.");
+                throw new ArgumentOutOfRangeException(nameof(y), "Value cannot be less than zero or greater than the bitmap height.");
             }
 #endif
             Color32* data = this[x, y];
@@ -424,9 +408,7 @@ namespace ImageProcessor.Imaging
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            FastBitmap fastBitmap = obj as FastBitmap;
-
-            if (fastBitmap == null)
+            if (!(obj is FastBitmap fastBitmap))
             {
                 return false;
             }
@@ -440,10 +422,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// A hash code for the current <see cref="T:System.Object"/>.
         /// </returns>
-        public override int GetHashCode()
-        {
-            return this.bitmap.GetHashCode();
-        }
+        public override int GetHashCode() => this.bitmap.GetHashCode();
 
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.
@@ -491,7 +470,7 @@ namespace ImageProcessor.Imaging
         /// </summary>
         private void LockBitmap()
         {
-            Rectangle bounds = new Rectangle(Point.Empty, this.bitmap.Size);
+            var bounds = new Rectangle(Point.Empty, this.bitmap.Size);
 
             // Figure out the number of bytes in a row. This is rounded up to be a multiple
             // of 4 bytes, since a scan line in an image must always be a multiple of 4 bytes
@@ -512,11 +491,11 @@ namespace ImageProcessor.Imaging
             if (this.computeIntegrals)
             {
                 // Allocate values for integral image calculation.
-                this.normalWidth = this.width + 1;
-                int normalHeight = this.height + 1;
+                this.normalWidth = this.Width + 1;
+                int normalHeight = this.Height + 1;
 
-                this.tiltedWidth = this.width + 2;
-                int tiltedHeight = this.height + 2;
+                this.tiltedWidth = this.Width + 2;
+                int tiltedHeight = this.Height + 2;
 
                 this.normalSumImage = new long[normalHeight, this.normalWidth];
                 this.normalSumHandle = GCHandle.Alloc(this.normalSumImage, GCHandleType.Pinned);
@@ -551,13 +530,13 @@ namespace ImageProcessor.Imaging
             byte* src = srcStart;
 
             // For each line
-            for (int y = 1; y <= this.height; y++)
+            for (int y = 1; y <= this.Height; y++)
             {
                 int yy = this.normalWidth * y;
                 int y1 = this.normalWidth * (y - 1);
 
                 // For each pixel
-                for (int x = 1; x <= this.width; x++, src += this.pixelSize)
+                for (int x = 1; x <= this.Width; x++, src += this.pixelSize)
                 {
                     int pixel = *src;
                     int pixelSquared = pixel * pixel;
@@ -579,12 +558,12 @@ namespace ImageProcessor.Imaging
                 src = srcStart;
 
                 // Left-to-right, top-to-bottom pass
-                for (int y = 1; y <= this.height; y++, src += offset)
+                for (int y = 1; y <= this.Height; y++, src += offset)
                 {
                     int yy = this.tiltedWidth * y;
                     int y1 = this.tiltedWidth * (y - 1);
 
-                    for (int x = 2; x < this.width + 2; x++, src += this.pixelSize)
+                    for (int x = 2; x < this.Width + 2; x++, src += this.pixelSize)
                     {
                         int a = y1 + (x - 1);
                         int b = yy + (x - 1);
@@ -596,10 +575,10 @@ namespace ImageProcessor.Imaging
                 }
 
                 {
-                    int yy = this.tiltedWidth * this.height;
-                    int y1 = this.tiltedWidth * (this.height + 1);
+                    int yy = this.tiltedWidth * this.Height;
+                    int y1 = this.tiltedWidth * (this.Height + 1);
 
-                    for (int x = 2; x < this.width + 2; x++, src += this.pixelSize)
+                    for (int x = 2; x < this.Width + 2; x++, src += this.pixelSize)
                     {
                         int a = yy + (x - 1);
                         int c = yy + (x - 2);
@@ -611,12 +590,12 @@ namespace ImageProcessor.Imaging
                 }
 
                 // Right-to-left, bottom-to-top pass
-                for (int y = this.height; y >= 0; y--)
+                for (int y = this.Height; y >= 0; y--)
                 {
                     int yy = this.tiltedWidth * y;
                     int y1 = this.tiltedWidth * (y + 1);
 
-                    for (int x = this.width + 1; x >= 1; x--)
+                    for (int x = this.Width + 1; x >= 1; x--)
                     {
                         int r = yy + x;
                         int b = y1 + (x - 1);
@@ -625,11 +604,11 @@ namespace ImageProcessor.Imaging
                     }
                 }
 
-                for (int y = this.height + 1; y >= 0; y--)
+                for (int y = this.Height + 1; y >= 0; y--)
                 {
                     int yy = this.tiltedWidth * y;
 
-                    for (int x = this.width + 1; x >= 2; x--)
+                    for (int x = this.Width + 1; x >= 2; x--)
                     {
                         int r = yy + x;
                         int b = yy + (x - 2);
