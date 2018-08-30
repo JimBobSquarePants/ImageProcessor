@@ -11,7 +11,6 @@ namespace ImageProcessor.Processors
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
-    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Filters.Binarization;
@@ -27,10 +26,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="EntropyCrop"/> class.
         /// </summary>
-        public EntropyCrop()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public EntropyCrop() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -71,7 +67,7 @@ namespace ImageProcessor.Processors
 
                 newImage = new Bitmap(rectangle.Width, rectangle.Height, PixelFormat.Format32bppPArgb);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-                using (Graphics graphics = Graphics.FromImage(newImage))
+                using (var graphics = Graphics.FromImage(newImage))
                 {
                     graphics.DrawImage(
                                      image,
@@ -87,7 +83,7 @@ namespace ImageProcessor.Processors
                 image.Dispose();
                 image = newImage;
 
-                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Count > 0)
                 {
                     // Set the width EXIF data.
                     factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);

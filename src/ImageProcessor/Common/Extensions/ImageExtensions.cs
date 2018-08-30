@@ -42,11 +42,11 @@ namespace ImageProcessor.Common.Extensions
             {
                 // Read from the correct first frame when performing additional processing
                 source.SelectActiveFrame(FrameDimension.Time, 0);
-                GifDecoder decoder = new GifDecoder(source, animationProcessMode);
-                GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
+                var decoder = new GifDecoder(source, animationProcessMode);
+                var encoder = new GifEncoder(null, null, decoder.LoopCount);
 
                 // Have to use Octree here, there's no way to inject it.
-                OctreeQuantizer quantizer = new OctreeQuantizer();
+                var quantizer = new OctreeQuantizer();
                 for (int i = 0; i < decoder.FrameCount; i++)
                 {
                     GifFrame frame = decoder.GetFrame(source, i);
@@ -59,9 +59,9 @@ namespace ImageProcessor.Common.Extensions
             }
 
             // Create a new image and copy it's pixels.
-            Bitmap copy = new Bitmap(source.Width, source.Height, format);
+            var copy = new Bitmap(source.Width, source.Height, format);
             copy.SetResolution(source.HorizontalResolution, source.VerticalResolution);
-            using (Graphics graphics = Graphics.FromImage(copy))
+            using (var graphics = Graphics.FromImage(copy))
             {
                 graphics.DrawImageUnscaled(source, 0, 0);
             }
@@ -89,9 +89,6 @@ namespace ImageProcessor.Common.Extensions
         /// <returns>
         /// The <see cref="Image"/>.
         /// </returns>
-        public static Image Copy(this Image source, PixelFormat format = PixelFormat.Format32bppPArgb)
-        {
-            return Copy(source, AnimationProcessMode.All, format);
-        }
+        public static Image Copy(this Image source, PixelFormat format = PixelFormat.Format32bppPArgb) => Copy(source, AnimationProcessMode.All, format);
     }
 }

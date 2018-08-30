@@ -36,7 +36,7 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Gets the current http context.
         /// </summary>
-        public HttpContextBase Context { get; private set; }
+        public HttpContextBase Context { get; }
 
         /// <summary>
         /// Gets or sets the query string

@@ -89,7 +89,7 @@ namespace ImageProcessor
         /// Whether to fix the gamma component of the image.
         /// </param>
         public ImageFactory(bool preserveExifData, bool fixGamma)
-            : this(preserveExifData == false ? MetaDataMode.None : MetaDataMode.All, fixGamma)
+            : this(!preserveExifData ? MetaDataMode.None : MetaDataMode.All, fixGamma)
         {
         }
 
@@ -218,7 +218,7 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(Stream stream)
         {
-            MemoryStream memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
 
             // Copy the stream. Disposal of the input stream is the responsibility
             // of the user.
@@ -286,13 +286,13 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(string imagePath)
         {
-            FileInfo fileInfo = new FileInfo(imagePath);
+            var fileInfo = new FileInfo(imagePath);
             if (fileInfo.Exists)
             {
                 this.ImagePath = imagePath;
 
                 // Open a file stream to prevent the need for lock.
-                using (FileStream fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
+                using (var fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
                 {
                     ISupportedImageFormat format = FormatUtilities.GetFormat(fileStream);
 
@@ -301,7 +301,7 @@ namespace ImageProcessor
                         throw new ImageFormatException("Input stream is not a supported format.");
                     }
 
-                    MemoryStream memoryStream = new MemoryStream();
+                    var memoryStream = new MemoryStream();
 
                     // Copy the stream.
                     fileStream.CopyTo(memoryStream);
@@ -366,7 +366,7 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(byte[] bytes)
         {
-            MemoryStream memoryStream = new MemoryStream(bytes);
+            var memoryStream = new MemoryStream(bytes);
 
             ISupportedImageFormat format = FormatUtilities.GetFormat(memoryStream);
 
@@ -428,7 +428,7 @@ namespace ImageProcessor
             // Try saving with the raw format. This might not be possible if the image was created
             // in-memory so we fall back to BMP to keep in line with the default in System.Drawing
             // if no format found.
-            MemoryStream memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
             ISupportedImageFormat format = new BitmapFormat();
             try
             {
@@ -441,8 +441,7 @@ namespace ImageProcessor
                 image.Save(memoryStream, ImageFormat.Bmp);
             }
 
-            IAnimatedImageFormat imageFormat = format as IAnimatedImageFormat;
-            if (imageFormat != null)
+            if (format is IAnimatedImageFormat imageFormat)
             {
                 imageFormat.AnimationProcessMode = this.AnimationProcessMode;
             }
@@ -531,7 +530,7 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Alpha alpha = new Alpha { DynamicParameter = percentage };
+                var alpha = new Alpha { DynamicParameter = percentage };
                 this.backupFormat.ApplyProcessor(alpha.ProcessImage, this);
             }
 
@@ -549,7 +548,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                AutoRotate autoRotate = new AutoRotate();
+                var autoRotate = new AutoRotate();
                 this.backupFormat.ApplyProcessor(autoRotate.ProcessImage, this);
             }
 
@@ -597,7 +596,7 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Brightness brightness = new Brightness { DynamicParameter = percentage };
+                var brightness = new Brightness { DynamicParameter = percentage };
                 this.backupFormat.ApplyProcessor(brightness.ProcessImage, this);
             }
 
@@ -617,7 +616,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                BackgroundColor backgroundColor = new BackgroundColor { DynamicParameter = color };
+                var backgroundColor = new BackgroundColor { DynamicParameter = color };
                 this.backupFormat.ApplyProcessor(backgroundColor.ProcessImage, this);
             }
 
@@ -637,7 +636,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                ResizeLayer layer = new ResizeLayer(size, ResizeMode.Max);
+                var layer = new ResizeLayer(size, ResizeMode.Max);
 
                 return this.Resize(layer);
             }
@@ -665,7 +664,7 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Contrast contrast = new Contrast { DynamicParameter = percentage };
+                var contrast = new Contrast { DynamicParameter = percentage };
                 this.backupFormat.ApplyProcessor(contrast.ProcessImage, this);
             }
 
@@ -685,7 +684,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                CropLayer cropLayer = new CropLayer(rectangle.Left, rectangle.Top, rectangle.Width, rectangle.Height, CropMode.Pixels);
+                var cropLayer = new CropLayer(rectangle.Left, rectangle.Top, rectangle.Width, rectangle.Height, CropMode.Pixels);
                 return this.Crop(cropLayer);
             }
 
@@ -705,7 +704,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Crop crop = new Crop { DynamicParameter = cropLayer };
+                var crop = new Crop { DynamicParameter = cropLayer };
                 this.backupFormat.ApplyProcessor(crop.ProcessImage, this);
             }
 
@@ -728,7 +727,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                DetectEdges detectEdges = new DetectEdges { DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale) };
+                var detectEdges = new DetectEdges { DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale) };
                 this.backupFormat.ApplyProcessor(detectEdges.ProcessImage, this);
             }
 
@@ -760,10 +759,10 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Tuple<int, int, PropertyTagResolutionUnit> resolution =
+                var resolution =
                     new Tuple<int, int, PropertyTagResolutionUnit>(horizontal, vertical, unit);
 
-                Resolution dpi = new Resolution { DynamicParameter = resolution };
+                var dpi = new Resolution { DynamicParameter = resolution };
                 this.backupFormat.ApplyProcessor(dpi.ProcessImage, this);
             }
 
@@ -793,7 +792,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                EntropyCrop autoCrop = new EntropyCrop { DynamicParameter = threshold };
+                var autoCrop = new EntropyCrop { DynamicParameter = threshold };
                 this.backupFormat.ApplyProcessor(autoCrop.ProcessImage, this);
             }
 
@@ -814,7 +813,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Filter filter = new Filter { DynamicParameter = matrixFilter };
+                var filter = new Filter { DynamicParameter = matrixFilter };
                 this.backupFormat.ApplyProcessor(filter.ProcessImage, this);
             }
 
@@ -849,7 +848,7 @@ namespace ImageProcessor
                         : RotateFlipType.RotateNoneFlipX;
                 }
 
-                Flip flip = new Flip { DynamicParameter = rotateFlipType };
+                var flip = new Flip { DynamicParameter = rotateFlipType };
                 this.backupFormat.ApplyProcessor(flip.ProcessImage, this);
             }
 
@@ -896,7 +895,7 @@ namespace ImageProcessor
                 }
 
                 this.CurrentGamma = value;
-                Gamma gamma = new Gamma { DynamicParameter = value };
+                var gamma = new Gamma { DynamicParameter = value };
                 this.backupFormat.ApplyProcessor(gamma.ProcessImage, this);
             }
 
@@ -922,7 +921,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess && size > 0)
             {
-                GaussianLayer layer = new GaussianLayer(size);
+                var layer = new GaussianLayer(size);
                 return this.GaussianBlur(layer);
             }
 
@@ -943,7 +942,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                GaussianBlur gaussianBlur = new GaussianBlur { DynamicParameter = gaussianLayer };
+                var gaussianBlur = new GaussianBlur { DynamicParameter = gaussianLayer };
                 this.backupFormat.ApplyProcessor(gaussianBlur.ProcessImage, this);
             }
 
@@ -969,7 +968,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess && size > 0)
             {
-                GaussianLayer layer = new GaussianLayer(size);
+                var layer = new GaussianLayer(size);
                 return this.GaussianSharpen(layer);
             }
 
@@ -990,7 +989,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                GaussianSharpen gaussianSharpen = new GaussianSharpen { DynamicParameter = gaussianLayer };
+                var gaussianSharpen = new GaussianSharpen { DynamicParameter = gaussianLayer };
                 this.backupFormat.ApplyProcessor(gaussianSharpen.ProcessImage, this);
             }
 
@@ -1020,7 +1019,7 @@ namespace ImageProcessor
 
             if (this.ShouldProcess)
             {
-                Hue hue = new Hue { DynamicParameter = new Tuple<int, bool>(degrees, rotate) };
+                var hue = new Hue { DynamicParameter = new Tuple<int, bool>(degrees, rotate) };
                 this.backupFormat.ApplyProcessor(hue.ProcessImage, this);
             }
 
@@ -1040,7 +1039,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Halftone halftone = new Halftone { DynamicParameter = comicMode };
+                var halftone = new Halftone { DynamicParameter = comicMode };
                 this.backupFormat.ApplyProcessor(halftone.ProcessImage, this);
             }
 
@@ -1065,7 +1064,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Mask mask = new Mask { DynamicParameter = imageLayer };
+                var mask = new Mask { DynamicParameter = imageLayer };
                 this.backupFormat.ApplyProcessor(mask.ProcessImage, this);
             }
 
@@ -1086,7 +1085,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Overlay watermark = new Overlay { DynamicParameter = imageLayer };
+                var watermark = new Overlay { DynamicParameter = imageLayer };
                 this.backupFormat.ApplyProcessor(watermark.ProcessImage, this);
             }
 
@@ -1108,7 +1107,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess && pixelSize > 0)
             {
-                Pixelate pixelate = new Pixelate { DynamicParameter = new Tuple<int, Rectangle?>(pixelSize, rectangle) };
+                var pixelate = new Pixelate { DynamicParameter = new Tuple<int, Rectangle?>(pixelSize, rectangle) };
                 this.backupFormat.ApplyProcessor(pixelate.ProcessImage, this);
             }
 
@@ -1160,7 +1159,7 @@ namespace ImageProcessor
 
             if (this.ShouldProcess && target != Color.Empty && replacement != Color.Empty)
             {
-                ReplaceColor replaceColor = new ReplaceColor
+                var replaceColor = new ReplaceColor
                 {
                     DynamicParameter = new Tuple<Color, Color, int>(target, replacement, fuzziness)
                 };
@@ -1186,7 +1185,7 @@ namespace ImageProcessor
                 int width = size.Width;
                 int height = size.Height;
 
-                ResizeLayer resizeLayer = new ResizeLayer(new Size(width, height));
+                var resizeLayer = new ResizeLayer(new Size(width, height));
                 return this.Resize(resizeLayer);
             }
 
@@ -1206,13 +1205,13 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Dictionary<string, string> resizeSettings = new Dictionary<string, string>
+                var resizeSettings = new Dictionary<string, string>
                 {
                     { "MaxWidth", resizeLayer.Size.Width.ToString("G") },
                     { "MaxHeight", resizeLayer.Size.Height.ToString("G") }
                 };
 
-                Resize resize = new Resize { DynamicParameter = resizeLayer, Settings = resizeSettings };
+                var resize = new Resize { DynamicParameter = resizeLayer, Settings = resizeSettings };
                 this.backupFormat.ApplyProcessor(resize.ProcessImage, this);
             }
 
@@ -1232,7 +1231,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Rotate rotate = new Rotate { DynamicParameter = degrees };
+                var rotate = new Rotate { DynamicParameter = degrees };
                 this.backupFormat.ApplyProcessor(rotate.ProcessImage, this);
             }
 
@@ -1261,7 +1260,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                RotateBounded rotate = new RotateBounded { DynamicParameter = new Tuple<float, bool>(degrees, keepSize) };
+                var rotate = new RotateBounded { DynamicParameter = new Tuple<float, bool>(degrees, keepSize) };
                 this.backupFormat.ApplyProcessor(rotate.ProcessImage, this);
             }
 
@@ -1286,9 +1285,9 @@ namespace ImageProcessor
                     radius = 0;
                 }
 
-                RoundedCornerLayer roundedCornerLayer = new RoundedCornerLayer(radius);
+                var roundedCornerLayer = new RoundedCornerLayer(radius);
 
-                RoundedCorners roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
+                var roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
                 this.backupFormat.ApplyProcessor(roundedCorners.ProcessImage, this);
             }
 
@@ -1313,7 +1312,7 @@ namespace ImageProcessor
                     roundedCornerLayer.Radius = 0;
                 }
 
-                RoundedCorners roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
+                var roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
                 this.backupFormat.ApplyProcessor(roundedCorners.ProcessImage, this);
             }
 
@@ -1340,7 +1339,7 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Saturation saturate = new Saturation { DynamicParameter = percentage };
+                var saturate = new Saturation { DynamicParameter = percentage };
                 this.backupFormat.ApplyProcessor(saturate.ProcessImage, this);
             }
 
@@ -1360,7 +1359,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Tint tint = new Tint { DynamicParameter = color };
+                var tint = new Tint { DynamicParameter = color };
                 this.backupFormat.ApplyProcessor(tint.ProcessImage, this);
             }
 
@@ -1380,7 +1379,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Vignette vignette = new Vignette
+                var vignette = new Vignette
                 {
                     DynamicParameter = color.HasValue && !color.Equals(Color.Transparent)
                                         ? color.Value
@@ -1407,7 +1406,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Watermark watermark = new Watermark { DynamicParameter = textLayer };
+                var watermark = new Watermark { DynamicParameter = textLayer };
                 this.backupFormat.ApplyProcessor(watermark.ProcessImage, this);
             }
 
@@ -1428,7 +1427,7 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                DirectoryInfo directoryInfo = new DirectoryInfo(Path.GetDirectoryName(filePath));
+                var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(filePath));
                 if (!directoryInfo.Exists)
                 {
                     directoryInfo.Create();

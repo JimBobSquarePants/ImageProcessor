@@ -172,7 +172,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Gets the <see cref="T:System.Drawing.Imaging.ColorMatrix"/> for generating the low saturation filter.
         /// </summary>
-        internal static ColorMatrix LoSatch => 
+        internal static ColorMatrix LoSatch =>
             loSatch ?? (loSatch = new ColorMatrix(
             new[]
                 {
@@ -186,7 +186,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Gets the <see cref="T:System.Drawing.Imaging.ColorMatrix"/> for generating the polaroid filter.
         /// </summary>
-        internal static ColorMatrix Polaroid => 
+        internal static ColorMatrix Polaroid =>
             polaroid ?? (polaroid = new ColorMatrix(
             new[]
                 {
@@ -200,7 +200,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Gets the <see cref="T:System.Drawing.Imaging.ColorMatrix"/> for generating the sepia filter.
         /// </summary>
-        internal static ColorMatrix Sepia => 
+        internal static ColorMatrix Sepia =>
             sepia ?? (sepia = new ColorMatrix(
             new[]
                 {

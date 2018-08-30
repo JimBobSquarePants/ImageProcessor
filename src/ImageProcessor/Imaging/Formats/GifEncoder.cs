@@ -31,7 +31,6 @@ namespace ImageProcessor.Imaging.Formats
     /// </summary>
     public class GifEncoder
     {
-        #region Constants
         /// <summary>
         /// The application block size.
         /// </summary>
@@ -106,9 +105,7 @@ namespace ImageProcessor.Imaging.Formats
         /// The source image block position.
         /// </summary>
         private const long SourceImageBlockPosition = 789;
-        #endregion
 
-        #region Fields
         /// <summary>
         /// The converter for creating the output image from a byte array.
         /// </summary>
@@ -118,7 +115,7 @@ namespace ImageProcessor.Imaging.Formats
         /// The stream.
         /// </summary>
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private MemoryStream imageStream;
+        private readonly MemoryStream imageStream;
 
         /// <summary>
         /// The height.
@@ -144,9 +141,7 @@ namespace ImageProcessor.Imaging.Formats
         /// Whether the gif has has the last terminated byte written.
         /// </summary>
         private bool terminated;
-        #endregion
 
-        #region Constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="GifEncoder"/> class.
         /// </summary>
@@ -166,14 +161,12 @@ namespace ImageProcessor.Imaging.Formats
             this.height = height;
             this.repeatCount = repeatCount;
         }
-        #endregion
 
         /// <summary>
         /// Gets or sets the image bytes.
         /// </summary>
         public byte[] ImageBytes { get; set; }
 
-        #region Public Methods and Operators
         /// <summary>
         /// Adds a frame to the gif.
         /// </summary>
@@ -182,7 +175,7 @@ namespace ImageProcessor.Imaging.Formats
         /// </param>
         public void AddFrame(GifFrame frame)
         {
-            using (MemoryStream gifStream = new MemoryStream())
+            using (var gifStream = new MemoryStream())
             {
                 frame.Image.Save(gifStream, ImageFormat.Gif);
                 if (this.isFirstImage)
@@ -245,9 +238,7 @@ namespace ImageProcessor.Imaging.Formats
 
             this.imageStream.Position = 0;
         }
-        #endregion
 
-        #region Methods
         /// <summary>
         /// Writes the header block of the animated gif to the stream.
         /// </summary>
@@ -302,10 +293,7 @@ namespace ImageProcessor.Imaging.Formats
         /// <param name="value">
         /// The value.
         /// </param>
-        private void WriteByte(int value)
-        {
-            this.imageStream.WriteByte(Convert.ToByte(value));
-        }
+        private void WriteByte(int value) => this.imageStream.WriteByte(Convert.ToByte(value));
 
         /// <summary>
         /// Writes the color table.
@@ -334,7 +322,7 @@ namespace ImageProcessor.Imaging.Formats
 
             this.WriteShort(GraphicControlExtensionBlockIdentifier); // Identifier
             this.WriteByte(GraphicControlExtensionBlockSize); // Block Size
-            this.WriteByte(blockhead[3] & 0xf7 | 0x08); // Setting disposal flag
+            this.WriteByte((blockhead[3] & 0xf7) | 0x08); // Setting disposal flag
             this.WriteShort(frameDelay); // Setting frame delay
             this.WriteByte(255); // Transparent color index
             this.WriteByte(0); // Terminator
@@ -367,12 +355,12 @@ namespace ImageProcessor.Imaging.Formats
             {
                 // If first frame, use global color table - else use local
                 sourceGif.Position = SourceGlobalColorInfoPosition;
-                this.WriteByte(sourceGif.ReadByte() & 0x3f | 0x80); // Enabling local color table
+                this.WriteByte((sourceGif.ReadByte() & 0x3f) | 0x80); // Enabling local color table
                 this.WriteColorTable(sourceGif);
             }
             else
             {
-                this.WriteByte(header[9] & 0x07 | 0x07); // Disabling local color table
+                this.WriteByte((header[9] & 0x07) | 0x07); // Disabling local color table
             }
 
             this.WriteByte(header[10]); // LZW Min Code Size
@@ -413,10 +401,6 @@ namespace ImageProcessor.Imaging.Formats
         /// <param name="value">
         /// The value.
         /// </param>
-        private void WriteString(string value)
-        {
-            this.imageStream.Write(value.ToArray().Select(c => (byte)c).ToArray(), 0, value.Length);
-        }
-        #endregion
+        private void WriteString(string value) => this.imageStream.Write(value.ToArray().Select(c => (byte)c).ToArray(), 0, value.Length);
     }
 }

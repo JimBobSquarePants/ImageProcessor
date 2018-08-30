@@ -34,12 +34,12 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// The regular expression to search strings for angles.
         /// </summary>
-        private static readonly Regex AngleRegex = new Regex(@"(^(rotate(bounded)?|angle)|[^.](&,)?rotate(bounded)?|angle)(=|-)[^&|,]+", RegexOptions.Compiled);
+        private static readonly Regex AngleRegex = new Regex("(^(rotate(bounded)?|angle)|[^.](&,)?rotate(bounded)?|angle)(=|-)[^&|,]+", RegexOptions.Compiled);
 
         /// <summary>
         /// The regular expression to search strings for values between 1 and 100.
         /// </summary>
-        private static readonly Regex In100RangeRegex = new Regex(@"(-?0*(?:100|[1-9][0-9]?))", RegexOptions.Compiled);
+        private static readonly Regex In100RangeRegex = new Regex("(-?0*(?:100|[1-9][0-9]?))", RegexOptions.Compiled);
 
         /// <summary>
         /// Returns the correct <see cref="T:System.Int32"/> containing the angle for the given string.
@@ -55,13 +55,12 @@ namespace ImageProcessor.Web.Helpers
             foreach (Match match in AngleRegex.Matches(input))
             {
                 // Split on angle
-                float angle;
                 string value = match.Value;
-                value = match.Value.ToUpperInvariant().Contains("ANGLE")
+                value = match.Value.IndexOf("ANGLE", StringComparison.InvariantCultureIgnoreCase) >= 0
                     ? value.Substring(value.IndexOf("-", StringComparison.Ordinal) + 1)
                     : match.Value.Split('=')[1];
 
-                float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out angle);
+                float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out float angle);
                 return angle;
             }
 
@@ -135,10 +134,10 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         private static Regex BuildColorRegex()
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
             stringBuilder.Append(@"(\d+,\d+,\d+,\d+|([0-9a-fA-F]{3}){1,2}|(");
 
-            KnownColor[] knownColors = (KnownColor[])Enum.GetValues(typeof(KnownColor));
+            var knownColors = (KnownColor[])Enum.GetValues(typeof(KnownColor));
 
             for (int i = 0; i < knownColors.Length; i++)
             {

@@ -69,46 +69,14 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         private const int MaxSideIndex = 32;
 
         /// <summary>
-        /// The transparency threshold.
-        /// </summary>
-        private byte threshold = 0;
-
-        /// <summary>
-        /// The transparency fade.
-        /// </summary>
-        private byte fade = 1;
-
-        /// <summary>
         /// Gets or sets the transparency threshold (0 - 255)
         /// </summary>
-        public byte Threshold
-        {
-            get
-            {
-                return this.threshold;
-            }
-
-            set
-            {
-                this.threshold = value;
-            }
-        }
+        public byte Threshold { get; set; } = 0;
 
         /// <summary>
         /// Gets or sets the alpha fade (0 - 255)
         /// </summary>
-        public byte Fade
-        {
-            get
-            {
-                return this.fade;
-            }
-
-            set
-            {
-                this.fade = value;
-            }
-        }
+        public byte Fade { get; set; } = 1;
 
         /// <summary>
         /// Quantize an image and return the resulting output bitmap
@@ -119,15 +87,12 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <returns>
         /// A quantized version of the image.
         /// </returns>
-        public Bitmap Quantize(Image source)
-        {
-            return this.Quantize(source, this.Threshold, this.Fade);
-        }
+        public Bitmap Quantize(Image source) => this.Quantize(source, this.Threshold, this.Fade);
 
         /// <summary>
         /// Quantize an image and return the resulting output bitmap
         /// </summary>
-        /// <param name="source">
+        /// <param name="image">
         /// The 32 bit per pixel image to quantize.
         /// </param>
         /// <param name="alphaThreshold">
@@ -139,10 +104,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <returns>
         /// A quantized version of the image.
         /// </returns>
-        public Bitmap Quantize(Image source, int alphaThreshold, int alphaFader)
-        {
-            return this.Quantize(source, alphaThreshold, alphaFader, null, 256);
-        }
+        public Bitmap Quantize(Image image, int alphaThreshold, int alphaFader) => this.Quantize(image, alphaThreshold, alphaFader, null, 256);
 
         /// <summary>
         /// Quantize an image and return the resulting output bitmap
@@ -174,10 +136,10 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
                 // The image has to be a 32 bit per pixel Argb image.
                 if (Image.GetPixelFormatSize(source.PixelFormat) != 32)
                 {
-                    Bitmap clone = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppPArgb);
+                    var clone = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppPArgb);
                     clone.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
-                    using (Graphics graphics = Graphics.FromImage(clone))
+                    using (var graphics = Graphics.FromImage(clone))
                     {
                         graphics.PageUnit = GraphicsUnit.Pixel;
                         graphics.Clear(Color.Transparent);
@@ -292,8 +254,8 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1001:CommasMustBeSpacedCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static void CalculateMoments(ColorMoment[,,,] moments)
         {
-            ColorMoment[,] areaSquared = new ColorMoment[SideSize, SideSize];
-            ColorMoment[] area = new ColorMoment[SideSize];
+            var areaSquared = new ColorMoment[SideSize, SideSize];
+            var area = new ColorMoment[SideSize];
             for (int alphaIndex = 1; alphaIndex < SideSize; alphaIndex++)
             {
                 for (int redIndex = 1; redIndex < SideSize; redIndex++)
@@ -301,7 +263,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
                     Array.Clear(area, 0, area.Length);
                     for (int greenIndex = 1; greenIndex < SideSize; greenIndex++)
                     {
-                        ColorMoment line = new ColorMoment();
+                        var line = new ColorMoment();
                         for (int blueIndex = 1; blueIndex < SideSize; blueIndex++)
                         {
                             line.AddFast(ref moments[alphaIndex, redIndex, greenIndex, blueIndex]);
@@ -341,44 +303,44 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
             switch (direction)
             {
                 case Alpha:
-                    return (moment[position, cube.RedMaximum, cube.GreenMaximum, cube.BlueMaximum] -
-                            moment[position, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum] -
-                            moment[position, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum] +
-                            moment[position, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]) -
-                           (moment[position, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum] -
-                            moment[position, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum] -
-                            moment[position, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum] +
-                            moment[position, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
+                    return (moment[position, cube.RedMaximum, cube.GreenMaximum, cube.BlueMaximum]
+                            - moment[position, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum]
+                            - moment[position, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum]
+                            + moment[position, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum])
+                           - (moment[position, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum]
+                            - moment[position, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum]
+                            - moment[position, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum]
+                            + moment[position, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
 
                 case Red:
-                    return (moment[cube.AlphaMaximum, position, cube.GreenMaximum, cube.BlueMaximum] -
-                            moment[cube.AlphaMaximum, position, cube.GreenMinimum, cube.BlueMaximum] -
-                            moment[cube.AlphaMinimum, position, cube.GreenMaximum, cube.BlueMaximum] +
-                            moment[cube.AlphaMinimum, position, cube.GreenMinimum, cube.BlueMaximum]) -
-                           (moment[cube.AlphaMaximum, position, cube.GreenMaximum, cube.BlueMinimum] -
-                            moment[cube.AlphaMaximum, position, cube.GreenMinimum, cube.BlueMinimum] -
-                            moment[cube.AlphaMinimum, position, cube.GreenMaximum, cube.BlueMinimum] +
-                            moment[cube.AlphaMinimum, position, cube.GreenMinimum, cube.BlueMinimum]);
+                    return (moment[cube.AlphaMaximum, position, cube.GreenMaximum, cube.BlueMaximum]
+                            - moment[cube.AlphaMaximum, position, cube.GreenMinimum, cube.BlueMaximum]
+                            - moment[cube.AlphaMinimum, position, cube.GreenMaximum, cube.BlueMaximum]
+                            + moment[cube.AlphaMinimum, position, cube.GreenMinimum, cube.BlueMaximum])
+                           - (moment[cube.AlphaMaximum, position, cube.GreenMaximum, cube.BlueMinimum]
+                            - moment[cube.AlphaMaximum, position, cube.GreenMinimum, cube.BlueMinimum]
+                            - moment[cube.AlphaMinimum, position, cube.GreenMaximum, cube.BlueMinimum]
+                            + moment[cube.AlphaMinimum, position, cube.GreenMinimum, cube.BlueMinimum]);
 
                 case Green:
-                    return (moment[cube.AlphaMaximum, cube.RedMaximum, position, cube.BlueMaximum] -
-                            moment[cube.AlphaMaximum, cube.RedMinimum, position, cube.BlueMaximum] -
-                            moment[cube.AlphaMinimum, cube.RedMaximum, position, cube.BlueMaximum] +
-                            moment[cube.AlphaMinimum, cube.RedMinimum, position, cube.BlueMaximum]) -
-                           (moment[cube.AlphaMaximum, cube.RedMaximum, position, cube.BlueMinimum] -
-                            moment[cube.AlphaMaximum, cube.RedMinimum, position, cube.BlueMinimum] -
-                            moment[cube.AlphaMinimum, cube.RedMaximum, position, cube.BlueMinimum] +
-                            moment[cube.AlphaMinimum, cube.RedMinimum, position, cube.BlueMinimum]);
+                    return (moment[cube.AlphaMaximum, cube.RedMaximum, position, cube.BlueMaximum]
+                            - moment[cube.AlphaMaximum, cube.RedMinimum, position, cube.BlueMaximum]
+                            - moment[cube.AlphaMinimum, cube.RedMaximum, position, cube.BlueMaximum]
+                            + moment[cube.AlphaMinimum, cube.RedMinimum, position, cube.BlueMaximum])
+                           - (moment[cube.AlphaMaximum, cube.RedMaximum, position, cube.BlueMinimum]
+                            - moment[cube.AlphaMaximum, cube.RedMinimum, position, cube.BlueMinimum]
+                            - moment[cube.AlphaMinimum, cube.RedMaximum, position, cube.BlueMinimum]
+                            + moment[cube.AlphaMinimum, cube.RedMinimum, position, cube.BlueMinimum]);
 
                 case Blue:
-                    return (moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMaximum, position] -
-                            moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, position] -
-                            moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, position] +
-                            moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, position]) -
-                           (moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, position] -
-                            moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, position] -
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, position] +
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, position]);
+                    return (moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMaximum, position]
+                            - moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, position]
+                            - moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, position]
+                            + moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, position])
+                           - (moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, position]
+                            - moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, position]
+                            - moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, position]
+                            + moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, position]);
 
                 default:
                     return new ColorMoment();
@@ -406,44 +368,44 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
             switch (direction)
             {
                 case Alpha:
-                    return (-moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMaximum] +
-                            moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum] +
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum] -
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]) -
-                           (-moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum] +
-                            moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum] +
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum] -
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
+                    return -moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMaximum]
+                            + moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum]
+                            + moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum]
+                            - moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]
+                           - (-moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum]
+                            + moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum]
+                            + moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum]
+                            - moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
 
                 case Red:
-                    return (-moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum] +
-                            moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum] +
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum] -
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]) -
-                           (-moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum] +
-                            moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum] +
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum] -
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
+                    return -moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum]
+                            + moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]
+                            + moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum]
+                            - moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]
+                           - (-moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum]
+                            + moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]
+                            + moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum]
+                            - moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
 
                 case Green:
-                    return (-moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum] +
-                            moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum] +
-                            moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum] -
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]) -
-                           (-moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum] +
-                            moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum] +
-                            moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum] -
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
+                    return -moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum]
+                            + moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]
+                            + moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum]
+                            - moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]
+                           - (-moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum]
+                            + moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]
+                            + moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum]
+                            - moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
 
                 case Blue:
-                    return (-moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum] +
-                            moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum] +
-                            moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum] -
-                            moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]) -
-                           (-moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum] +
-                            moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum] +
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum] -
-                            moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
+                    return -moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum]
+                            + moment[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum]
+                            + moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum]
+                            - moment[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]
+                           - (-moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum]
+                            + moment[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum]
+                            + moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum]
+                            - moment[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
 
                 default:
                     return new ColorMoment();
@@ -654,23 +616,23 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1001:CommasMustBeSpacedCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static ColorMoment Volume(ColorMoment[,,,] moments, Box cube)
         {
-            return (moments[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMaximum] -
-                    moments[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum] -
-                    moments[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum] +
-                    moments[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum] -
-                    moments[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMaximum] +
-                    moments[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum] +
-                    moments[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum] -
-                    moments[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]) -
+            return moments[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMaximum]
+                    - moments[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum]
+                    - moments[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum]
+                    + moments[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]
+                    - moments[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMaximum]
+                    + moments[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMaximum]
+                    + moments[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMaximum]
+                    - moments[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMaximum]
 
-                   (moments[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum] -
-                    moments[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum] -
-                    moments[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum] +
-                    moments[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum] -
-                    moments[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum] +
-                    moments[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum] +
-                    moments[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum] -
-                    moments[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
+                   - (moments[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum]
+                    - moments[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMaximum, cube.BlueMinimum]
+                    - moments[cube.AlphaMaximum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum]
+                    + moments[cube.AlphaMinimum, cube.RedMaximum, cube.GreenMinimum, cube.BlueMinimum]
+                    - moments[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum]
+                    + moments[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMaximum, cube.BlueMinimum]
+                    + moments[cube.AlphaMaximum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]
+                    - moments[cube.AlphaMinimum, cube.RedMinimum, cube.GreenMinimum, cube.BlueMinimum]);
         }
 
         /// <summary>
@@ -691,7 +653,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
             --colorCount;
             int next = 0;
             float[] volumeVariance = new float[colorCount];
-            Box[] cubes = new Box[colorCount];
+            var cubes = new Box[colorCount];
             cubes[0].AlphaMaximum = MaxSideIndex;
             cubes[0].RedMaximum = MaxSideIndex;
             cubes[0].GreenMaximum = MaxSideIndex;
@@ -750,7 +712,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1001:CommasMustBeSpacedCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static Color32[] BuildLookups(Box[] cubes, ColorMoment[,,,] moments)
         {
-            Color32[] lookups = new Color32[cubes.Length];
+            var lookups = new Color32[cubes.Length];
 
             for (int cubeIndex = 0; cubeIndex < cubes.Length; cubeIndex++)
             {
@@ -761,15 +723,13 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
                     continue;
                 }
 
-                Color32 lookup = new Color32
+                lookups[cubeIndex] = new Color32
                 {
                     A = (byte)(volume.Alpha / volume.Weight),
                     R = (byte)(volume.Red / volume.Weight),
                     G = (byte)(volume.Green / volume.Weight),
                     B = (byte)(volume.Blue / volume.Weight)
                 };
-
-                lookups[cubeIndex] = lookup;
             }
 
             return lookups;

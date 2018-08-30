@@ -48,7 +48,7 @@ namespace ImageProcessor.Imaging.Formats
 
             // It's actually a list.
             // ReSharper disable once PossibleMultipleEnumeration
-            int numberOfBytesToRead = supportedImageFormats.Max(f => f.FileHeaders.Max(h=>h.Length));
+            int numberOfBytesToRead = supportedImageFormats.Max(f => f.FileHeaders.Max(h => h.Length));
 
             byte[] buffer = new byte[numberOfBytesToRead];
             stream.Read(buffer, 0, buffer.Length);
@@ -95,7 +95,9 @@ namespace ImageProcessor.Imaging.Formats
         {
             // Test value of flags using bitwise AND.
             // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
+#pragma warning disable RCS1130 // Bitwise operation on enum without Flags attribute.
             return (image.PixelFormat & PixelFormat.Indexed) != 0;
+#pragma warning restore RCS1130 // Bitwise operation on enum without Flags attribute.
         }
 
         /// <summary>
@@ -107,10 +109,7 @@ namespace ImageProcessor.Imaging.Formats
         /// <returns>
         /// The true if the image has an alpha channel; otherwise, false.
         /// </returns>
-        public static bool HasAlpha(Image image)
-        {
-            return ((ImageFlags)image.Flags & ImageFlags.HasAlpha) == ImageFlags.HasAlpha;
-        }
+        public static bool HasAlpha(Image image) => ((ImageFlags)image.Flags & ImageFlags.HasAlpha) == ImageFlags.HasAlpha;
 
         /// <summary>
         /// Returns a value indicating whether the given image is animated.
@@ -121,10 +120,7 @@ namespace ImageProcessor.Imaging.Formats
         /// <returns>
         /// The true if the image is animated; otherwise, false.
         /// </returns>
-        public static bool IsAnimated(Image image)
-        {
-            return ImageAnimator.CanAnimate(image);
-        }
+        public static bool IsAnimated(Image image) => ImageAnimator.CanAnimate(image);
 
         /// <summary>
         /// Returns an instance of EncodingParameters for jpeg compression.

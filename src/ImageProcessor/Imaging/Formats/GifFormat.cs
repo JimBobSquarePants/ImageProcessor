@@ -60,9 +60,9 @@ namespace ImageProcessor.Imaging.Formats
         /// <param name="factory">The <see cref="ImageFactory" />.</param>
         public override void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
         {
-            GifDecoder decoder = new GifDecoder(factory.Image, factory.AnimationProcessMode);
+            var decoder = new GifDecoder(factory.Image, factory.AnimationProcessMode);
             Image factoryImage = factory.Image;
-            GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
+            var encoder = new GifEncoder(null, null, decoder.LoopCount);
 
             for (int i = 0; i < decoder.FrameCount; i++)
             {
@@ -80,8 +80,8 @@ namespace ImageProcessor.Imaging.Formats
         public override Image Save(Stream stream, Image image, long bitDepth)
         {
             // Never use default save for gifs. It's terrible.
-            GifDecoder decoder = new GifDecoder(image, AnimationProcessMode.All);
-            GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
+            var decoder = new GifDecoder(image, AnimationProcessMode.All);
+            var encoder = new GifEncoder(null, null, decoder.LoopCount);
 
             for (int i = 0; i < decoder.FrameCount; i++)
             {
@@ -100,8 +100,8 @@ namespace ImageProcessor.Imaging.Formats
             // Never use default save for gifs. It's terrible.
             using (FileStream fs = File.OpenWrite(path))
             {
-                GifDecoder decoder = new GifDecoder(image, AnimationProcessMode.All);
-                GifEncoder encoder = new GifEncoder(null, null, decoder.LoopCount);
+                var decoder = new GifDecoder(image, AnimationProcessMode.All);
+                var encoder = new GifEncoder(null, null, decoder.LoopCount);
 
                 for (int i = 0; i < decoder.FrameCount; i++)
                 {

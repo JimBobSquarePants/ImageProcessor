@@ -26,15 +26,12 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"bgcolor=[^&]", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("bgcolor=[^&]", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BackgroundColor"/> class.
         /// </summary>
-        public BackgroundColor()
-        {
-            this.Processor = new ImageProcessor.Processors.BackgroundColor();
-        }
+        public BackgroundColor() => this.Processor = new ImageProcessor.Processors.BackgroundColor();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -67,8 +64,7 @@ namespace ImageProcessor.Web.Processors
             {
                 this.SortOrder = match.Index;
                 NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
-                Color color = QueryParamParser.Instance.ParseValue<Color>(queryCollection["bgcolor"]);
-                this.Processor.DynamicParameter = color;
+                this.Processor.DynamicParameter = (Color)QueryParamParser.Instance.ParseValue<Color>(queryCollection["bgcolor"]);
             }
 
             return this.SortOrder;

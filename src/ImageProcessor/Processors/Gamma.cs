@@ -25,10 +25,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Gamma"/> class.
         /// </summary>
-        public Gamma()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Gamma() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.

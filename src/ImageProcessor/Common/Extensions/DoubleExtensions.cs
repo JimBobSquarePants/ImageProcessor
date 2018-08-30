@@ -32,9 +32,6 @@ namespace ImageProcessor.Common.Extensions
         /// <returns>
         /// The <see cref="T:System.Byte"/>.
         /// </returns>
-        public static byte ToByte(this double value)
-        {
-            return Convert.ToByte(ImageMaths.Clamp(value, 0, 255));
-        }
+        public static byte ToByte(this double value) => Convert.ToByte(ImageMaths.Clamp(value, 0, 255));
     }
 }

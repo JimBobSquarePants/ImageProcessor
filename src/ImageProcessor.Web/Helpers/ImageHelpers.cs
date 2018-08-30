@@ -78,10 +78,7 @@ namespace ImageProcessor.Web.Helpers
         /// </summary>
         /// <param name="fileName">The string containing the filename to check.</param>
         /// <returns>True the value contains a valid image extension, otherwise false.</returns>
-        public static bool IsValidImageExtension(string fileName)
-        {
-            return EndFormatRegex.IsMatch(fileName);
-        }
+        public static bool IsValidImageExtension(string fileName) => EndFormatRegex.IsMatch(fileName);
 
         /// <summary>
         /// Returns the correct file extension for the given string input. Falls back to <value>jpg</value> if no extension is matched.
@@ -91,10 +88,7 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// The correct file extension for the given string input if it can find one; otherwise defaults to <value>jpg</value>.
         /// </returns>
-        public string GetExtension(string fullPath, string queryString)
-        {
-            return this.GetExtension(fullPath, queryString, "jpg");
-        }
+        public string GetExtension(string fullPath, string queryString) => this.GetExtension(fullPath, queryString, "jpg");
 
         /// <summary>
         /// Returns the correct file extension for the given string input.
@@ -114,7 +108,7 @@ namespace ImageProcessor.Web.Helpers
                 match = this.formatProcessor.RegexPattern.Match(queryString);
             }
 
-            if (match == null || !match.Success)
+            if (match?.Success != true)
             {
                 // Test against the path minus the querystring so any other
                 // processors don't interere.
@@ -138,7 +132,7 @@ namespace ImageProcessor.Web.Helpers
                 }
 
                 // Ah the enigma that is the png file.
-                if (value.ToLowerInvariant().EndsWith("png8"))
+                if (value.EndsWith("png8", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return "png";
                 }
@@ -185,7 +179,7 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         private static string BuildExtensionRegexPattern()
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
             stringBuilder.Append("(");
             int counter = 0;
             foreach (ISupportedImageFormat imageFormat in ImageProcessorBootstrapper.Instance.SupportedImageFormats)

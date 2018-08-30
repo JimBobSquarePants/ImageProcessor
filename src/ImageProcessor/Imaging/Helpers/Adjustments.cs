@@ -59,19 +59,19 @@ namespace ImageProcessor.Imaging.Helpers
             }
 
             float factor = (float)percentage / 100;
-            int width = source.Width;
-            int height = source.Height;
+
+            Rectangle bounds = rectangle ?? new Rectangle(0, 0, source.Width, source.Height);
 
             // Traditional examples using a color matrix alter the rgb values also.
-            using (FastBitmap bitmap = new FastBitmap(source))
+            using (var bitmap = new FastBitmap(source))
             {
                 // Loop through the pixels.
                 Parallel.For(
-                    0,
-                    height,
+                    bounds.Y,
+                    bounds.Bottom,
                     y =>
                     {
-                        for (int x = 0; x < width; x++)
+                        for (int x = bounds.X; x < bounds.Right; x++)
                         {
                             // ReSharper disable AccessToDisposedClosure
                             Color color = bitmap.GetPixel(x, y);
@@ -111,7 +111,7 @@ namespace ImageProcessor.Imaging.Helpers
             float brightnessFactor = (float)threshold / 100;
             Rectangle bounds = rectangle ?? new Rectangle(0, 0, source.Width, source.Height);
 
-            ColorMatrix colorMatrix =
+            var colorMatrix =
                 new ColorMatrix(
                     new[]
                         {
@@ -122,9 +122,9 @@ namespace ImageProcessor.Imaging.Helpers
                             new[] { brightnessFactor, brightnessFactor, brightnessFactor, 0, 1 }
                         });
 
-            using (Graphics graphics = Graphics.FromImage(source))
+            using (var graphics = Graphics.FromImage(source))
             {
-                using (ImageAttributes imageAttributes = new ImageAttributes())
+                using (var imageAttributes = new ImageAttributes())
                 {
                     imageAttributes.SetColorMatrix(colorMatrix);
                     graphics.DrawImage(source, bounds, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, imageAttributes);
@@ -166,7 +166,7 @@ namespace ImageProcessor.Imaging.Helpers
             contrastFactor++;
             float factorTransform = 0.5f * (1.0f - contrastFactor);
 
-            ColorMatrix colorMatrix =
+            var colorMatrix =
                 new ColorMatrix(
                     new[]
                     {
@@ -177,9 +177,9 @@ namespace ImageProcessor.Imaging.Helpers
                         new[] { factorTransform, factorTransform, factorTransform, 0, 1 }
                     });
 
-            using (Graphics graphics = Graphics.FromImage(source))
+            using (var graphics = Graphics.FromImage(source))
             {
-                using (ImageAttributes imageAttributes = new ImageAttributes())
+                using (var imageAttributes = new ImageAttributes())
                 {
                     imageAttributes.SetColorMatrix(colorMatrix);
                     graphics.DrawImage(source, bounds, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, imageAttributes);
@@ -214,14 +214,13 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                byte val = ((255.0 * Math.Pow(x / 255.0, value)) + 0.5).ToByte();
-                ramp[x] = val;
+                ramp[x] = ((255.0 * Math.Pow(x / 255.0, value)) + 0.5).ToByte();
             }
 
             int width = source.Width;
             int height = source.Height;
 
-            using (FastBitmap bitmap = new FastBitmap(source))
+            using (var bitmap = new FastBitmap(source))
             {
                 Parallel.For(
                     0,
@@ -232,7 +231,7 @@ namespace ImageProcessor.Imaging.Helpers
                         {
                             // ReSharper disable once AccessToDisposedClosure
                             Color composite = bitmap.GetPixel(x, y);
-                            Color linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
+                            var linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
                             // ReSharper disable once AccessToDisposedClosure
                             bitmap.SetPixel(x, y, linear);
                         }
@@ -259,7 +258,7 @@ namespace ImageProcessor.Imaging.Helpers
             int width = source.Width;
             int height = source.Height;
 
-            using (FastBitmap bitmap = new FastBitmap(source))
+            using (var bitmap = new FastBitmap(source))
             {
                 Parallel.For(
                     0,
@@ -270,7 +269,7 @@ namespace ImageProcessor.Imaging.Helpers
                         {
                             // ReSharper disable once AccessToDisposedClosure
                             Color composite = bitmap.GetPixel(x, y);
-                            Color linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
+                            var linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
                             // ReSharper disable once AccessToDisposedClosure
                             bitmap.SetPixel(x, y, linear);
                         }
@@ -297,7 +296,7 @@ namespace ImageProcessor.Imaging.Helpers
             int width = source.Width;
             int height = source.Height;
 
-            using (FastBitmap bitmap = new FastBitmap(source))
+            using (var bitmap = new FastBitmap(source))
             {
                 Parallel.For(
                     0,
@@ -308,7 +307,7 @@ namespace ImageProcessor.Imaging.Helpers
                         {
                             // ReSharper disable once AccessToDisposedClosure
                             Color composite = bitmap.GetPixel(x, y);
-                            Color linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
+                            var linear = Color.FromArgb(composite.A, ramp[composite.R], ramp[composite.G], ramp[composite.B]);
                             // ReSharper disable once AccessToDisposedClosure
                             bitmap.SetPixel(x, y, linear);
                         }
@@ -330,8 +329,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                byte val = (255f * SRGBToLinear(x / 255f)).ToByte();
-                ramp[x] = val;
+                ramp[x] = (255f * SRGBToLinear(x / 255f)).ToByte();
             }
 
             return ramp;
@@ -349,8 +347,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                byte val = (255f * LinearToSRGB(x / 255f)).ToByte();
-                ramp[x] = val;
+                ramp[x] = (255f * LinearToSRGB(x / 255f)).ToByte();
             }
 
             return ramp;
@@ -367,7 +364,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// </returns>
         private static float SRGBToLinear(float signal)
         {
-            float a = 0.055f;
+            const float a = 0.055f;
 
             if (signal <= 0.04045)
             {
@@ -388,7 +385,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// </returns>
         private static float LinearToSRGB(float signal)
         {
-            float a = 0.055f;
+            const float a = 0.055f;
 
             if (signal <= 0.0031308)
             {

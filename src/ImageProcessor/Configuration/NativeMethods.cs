@@ -16,7 +16,7 @@ namespace ImageProcessor.Configuration
     /// <summary>
     /// Provides access to unmanaged native methods.
     /// </summary>
-    internal class NativeMethods
+    internal static class NativeMethods
     {
         /// <summary>
         /// Loads the specified module into the address space of the calling process. 
@@ -56,7 +56,9 @@ namespace ImageProcessor.Configuration
         /// If the function succeeds, the return value is a handle to the module; otherwise null.
         /// </returns>
         [DllImport("libdl")]
+#pragma warning disable IDE1006 // Naming Styles
         public static extern IntPtr dlopen(string libname, int flags);
+#pragma warning restore IDE1006 // Naming Styles
 
         /// <summary>
         /// Frees the loaded dynamic-link library (DLL) module and, if necessary, decrements its reference count. 
@@ -67,6 +69,8 @@ namespace ImageProcessor.Configuration
         /// The LoadLibrary, LoadLibraryEx, GetModuleHandle, or GetModuleHandleEx function returns this handle.</param>
         /// <returns>If the function succeeds, the return value is nonzero; otherwise zero.</returns>
         [DllImport("libdl")]
+#pragma warning disable IDE1006 // Naming Styles
         public static extern int dlclose(IntPtr hModule);
+#pragma warning restore IDE1006 // Naming Styles
     }
 }

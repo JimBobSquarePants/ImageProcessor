@@ -32,28 +32,28 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <param name="source">The current image to process</param>
         /// <param name="destination">The new Image to return</param>
         /// <returns>
-        /// The processed <see cref="System.Drawing.Bitmap"/>.
+        /// The processed <see cref="Bitmap"/>.
         /// </returns>
         public override Bitmap TransformImage(Image source, Image destination)
         {
-            using (Graphics graphics = Graphics.FromImage(destination))
+            using (var graphics = Graphics.FromImage(destination))
             {
-                using (ImageAttributes attributes = new ImageAttributes())
+                using (var attributes = new ImageAttributes())
                 {
                     attributes.SetColorMatrix(this.Matrix);
 
-                    Rectangle rectangle = new Rectangle(0, 0, source.Width, source.Height);
+                    var rectangle = new Rectangle(0, 0, source.Width, source.Height);
 
                     graphics.DrawImage(source, rectangle, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
 
                     // Overlay the image with some semi-transparent colors to finish the effect.
-                    using (GraphicsPath path = new GraphicsPath())
+                    using (var path = new GraphicsPath())
                     {
                         path.AddRectangle(rectangle);
 
                         // Paint a burgundy rectangle with a transparency of ~30% over the image.
                         // Paint a blue rectangle with a transparency of 20% over the image.
-                        using (SolidBrush brush = new SolidBrush(Color.FromArgb(77, 38, 14, 28)))
+                        using (var brush = new SolidBrush(Color.FromArgb(77, 38, 14, 28)))
                         {
                             Region oldClip = graphics.Clip;
                             graphics.Clip = new Region(rectangle);

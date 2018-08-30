@@ -65,7 +65,7 @@ namespace ImageProcessor.Processors
 
             try
             {
-                Color baseColor = (Color)this.DynamicParameter;
+                var baseColor = (Color)this.DynamicParameter;
                 return Effects.Vignette(image, baseColor);
             }
             catch (Exception ex)

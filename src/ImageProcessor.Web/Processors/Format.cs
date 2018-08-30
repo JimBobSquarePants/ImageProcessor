@@ -11,7 +11,6 @@
 namespace ImageProcessor.Web.Processors
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -33,10 +32,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Format"/> class.
         /// </summary>
-        public Format()
-        {
-            this.Processor = new ImageProcessor.Processors.Format();
-        }
+        public Format() => this.Processor = new ImageProcessor.Processors.Format();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -88,7 +84,7 @@ namespace ImageProcessor.Web.Processors
         /// </returns>
         private static Regex BuildRegex()
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
 
             // png8 is a special case for determining indexed png's.
             stringBuilder.Append("format=(png8");
@@ -119,8 +115,8 @@ namespace ImageProcessor.Web.Processors
             identifier = identifier.ToLowerInvariant();
             string finalIdentifier = identifier.Equals("png8") ? "png" : identifier;
             ISupportedImageFormat newFormat = null;
-            List<ISupportedImageFormat> formats = ImageProcessorBootstrapper.Instance.SupportedImageFormats.ToList();
-            ISupportedImageFormat format = formats.FirstOrDefault(f => f.FileExtensions.Any(e => e.Equals(finalIdentifier, StringComparison.InvariantCultureIgnoreCase)));
+            var formats = ImageProcessorBootstrapper.Instance.SupportedImageFormats.ToList();
+            ISupportedImageFormat format = formats.Find(f => f.FileExtensions.Any(e => e.Equals(finalIdentifier, StringComparison.InvariantCultureIgnoreCase)));
 
             if (format != null)
             {

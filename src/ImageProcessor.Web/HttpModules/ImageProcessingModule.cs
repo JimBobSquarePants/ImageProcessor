@@ -38,7 +38,6 @@ namespace ImageProcessor.Web.HttpModules
     /// </summary>
     public class ImageProcessingModule : IHttpModule
     {
-        #region Fields
         /// <summary>
         /// The key for storing the response type of the current image.
         /// </summary>
@@ -52,7 +51,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// The regular expression to search strings for presets with.
         /// </summary>
-        private static readonly Regex PresetRegex = new Regex(@"preset=[^&]+", RegexOptions.Compiled);
+        private static readonly Regex PresetRegex = new Regex("preset=[^&]+", RegexOptions.Compiled);
 
         /// <summary>
         /// The regular expression to search strings for protocols with.
@@ -117,9 +116,7 @@ namespace ImageProcessor.Web.HttpModules
         /// The image cache.
         /// </summary>
         private IImageCache imageCache;
-        #endregion
 
-        #region Destructors
         /// <summary>
         /// Finalizes an instance of the <see cref="T:ImageProcessor.Web.HttpModules.ImageProcessingModule"/> class.
         /// </summary>
@@ -137,7 +134,6 @@ namespace ImageProcessor.Web.HttpModules
             // readability and maintainability.
             this.Dispose(false);
         }
-        #endregion
 
         /// <summary>
         /// The process querystring event handler. DO NOT USE!
@@ -162,15 +158,6 @@ namespace ImageProcessor.Web.HttpModules
         /// The event that is called when a new image is processed.
         /// </summary>
         public static event EventHandler<PostProcessingEventArgs> OnPostProcessing;
-
-        /// <summary>
-        /// The event that is called when a querystring is processed. DO NOT USE!
-        /// </summary>
-        [Obsolete("Use ValidatingRequest instead")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#pragma warning disable 618
-        public static event ProcessQuerystringEventHandler OnProcessQuerystring;
-#pragma warning restore 618
 
         /// <summary>
         /// This will make the browser and server keep the output
@@ -274,7 +261,7 @@ namespace ImageProcessor.Web.HttpModules
             bool validUrl = false;
             foreach (ImageSecuritySection.SafeUrl safeUrl in origins.WhiteList)
             {
-                var uri = safeUrl.Url;
+                Uri uri = safeUrl.Url;
 
                 if (uri.ToString() == "*")
                 {
@@ -284,7 +271,7 @@ namespace ImageProcessor.Web.HttpModules
 
                 if (!uri.IsAbsoluteUri)
                 {
-                    Uri rebaseUri = new Uri($"http://{uri.ToString().TrimStart('.', '/')}");
+                    var rebaseUri = new Uri($"http://{uri.ToString().TrimStart('.', '/')}");
                     validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
                 }
                 else
@@ -304,16 +291,15 @@ namespace ImageProcessor.Web.HttpModules
             }
         }
 
-        #region IHttpModule Members
         /// <summary>
         /// Initializes a module and prepares it to handle requests.
         /// </summary>
-        /// <param name="application">
+        /// <param name="context">
         /// An <see cref="T:System.Web.HttpApplication"/> that provides
         /// access to the methods, properties, and events common to all
         /// application objects within an ASP.NET application
         /// </param>
-        public void Init(HttpApplication application)
+        public void Init(HttpApplication context)
         {
             if (preserveExifMetaData == null)
             {
@@ -340,11 +326,11 @@ namespace ImageProcessor.Web.HttpModules
                 interceptAllRequests = ImageProcessorConfiguration.Instance.InterceptAllRequests;
             }
 
-            EventHandlerTaskAsyncHelper postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
-            application.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
+            var postAuthorizeHelper = new EventHandlerTaskAsyncHelper(this.PostAuthorizeRequest);
+            context.AddOnPostAuthorizeRequestAsync(postAuthorizeHelper.BeginEventHandler, postAuthorizeHelper.EndEventHandler);
 
-            application.PostReleaseRequestState += this.PostReleaseRequestState;
-            application.EndRequest += this.OnEndRequest;
+            context.PostReleaseRequestState += this.PostReleaseRequestState;
+            context.EndRequest += this.OnEndRequest;
         }
 
         /// <summary>
@@ -387,10 +373,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <returns>
         /// The <see cref="string"/>.
         /// </returns>
-        protected virtual string GetRequestUrl(HttpRequest request)
-        {
-            return request.Unvalidated.RawUrl;
-        }
+        protected virtual string GetRequestUrl(HttpRequest request) => request.Unvalidated.RawUrl;
 
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.
@@ -415,7 +398,6 @@ namespace ImageProcessor.Web.HttpModules
             // Note disposing is done.
             this.isDisposed = true;
         }
-        #endregion
 
         /// <summary>
         /// Occurs when the ASP.NET event handler finishes execution.
@@ -453,7 +435,6 @@ namespace ImageProcessor.Web.HttpModules
             }
         }
 
-        #region Private
         /// <summary>
         /// Processes the image.
         /// </summary>
@@ -470,7 +451,7 @@ namespace ImageProcessor.Web.HttpModules
             string rawUrl = this.GetRequestUrl(request);
 
             // Should we ignore this request?
-            if (string.IsNullOrWhiteSpace(rawUrl) || rawUrl.ToUpperInvariant().Contains("IPIGNORE=TRUE"))
+            if (string.IsNullOrWhiteSpace(rawUrl) || rawUrl.IndexOf("IPIGNORE=TRUE", StringComparison.InvariantCultureIgnoreCase) >= 0)
             {
                 return;
             }
@@ -493,16 +474,10 @@ namespace ImageProcessor.Web.HttpModules
                 // Replace any presets in the querystring with the actual value.
                 queryString = this.ReplacePresetsInQueryString(queryString);
 
-                HttpContextWrapper httpContextBase = new HttpContextWrapper(context);
+                var httpContextBase = new HttpContextWrapper(context);
 
                 // Execute the handler which can change the querystring
-                //  LEGACY:
-#pragma warning disable 618
-                queryString = this.CheckQuerystringHandler(context, queryString, rawUrl);
-#pragma warning restore 618
-
-                // NEW WAY:
-                ValidatingRequestEventArgs validatingArgs = new ValidatingRequestEventArgs(httpContextBase, queryString);
+                var validatingArgs = new ValidatingRequestEventArgs(httpContextBase, queryString);
                 this.OnValidatingRequest(validatingArgs);
 
                 // If the validation has failed based on events, return
@@ -567,7 +542,7 @@ namespace ImageProcessor.Web.HttpModules
                         mode = this.ParseAnimationMode(queryString, out bool processAnimation);
 
                         // Are we processing or cache busting?
-                        processing = processors != null && (processors.Any() || processAnimation);
+                        processing = processors != null && (processors.Length > 0 || processAnimation);
                         bool cacheBusting = this.ParseCacheBuster(queryString);
                         if (!processing && !cacheBusting)
                         {
@@ -627,14 +602,15 @@ namespace ImageProcessor.Web.HttpModules
                                     MetaDataMode metaMode = !exif ? MetaDataMode.None : metaDataMode.Value;
                                     bool gamma = fixGamma != null && fixGamma.Value;
 
-                                    try {
+                                    try
+                                    {
                                         using (var imageFactory = new ImageFactory(metaMode, gamma) { AnimationProcessMode = mode })
                                         {
                                             imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
                                             mimeType = imageFactory.CurrentImageFormat.MimeType;
                                         }
                                     }
-                                    catch(ImageFormatException)
+                                    catch (ImageFormatException)
                                     {
                                         ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>($"Request {url} is not a valid image.");
                                         return;
@@ -659,7 +635,7 @@ namespace ImageProcessor.Web.HttpModules
                             if (handler != null)
                             {
                                 string extension = Path.GetExtension(cachedPath);
-                                PostProcessingEventArgs args = new PostProcessingEventArgs
+                                var args = new PostProcessingEventArgs
                                 {
                                     Context = context,
                                     ImageStream = outStream,
@@ -731,14 +707,9 @@ namespace ImageProcessor.Web.HttpModules
         private bool ParseCacheBuster(string queryString)
         {
             NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
-            if (allowCacheBuster != null && allowCacheBuster.Value
+            return allowCacheBuster != null && allowCacheBuster.Value
                 && (queryCollection.AllKeys.Contains("v", StringComparer.InvariantCultureIgnoreCase)
-                || queryCollection.AllKeys.Contains("rnd", StringComparer.InvariantCultureIgnoreCase)))
-            {
-                return true;
-            }
-
-            return false;
+                || queryCollection.AllKeys.Contains("rnd", StringComparer.InvariantCultureIgnoreCase));
         }
 
         /// <summary>
@@ -805,38 +776,7 @@ namespace ImageProcessor.Web.HttpModules
         /// Raises the ValidatingRequest event
         /// </summary>
         /// <param name="args">The <see cref="ValidatingRequestEventArgs"/></param>
-        private void OnValidatingRequest(ValidatingRequestEventArgs args)
-        {
-            ValidatingRequest?.Invoke(this, args);
-        }
-
-        /// <summary>
-        /// Checks if there is a handler that changes the querystring and executes that handler.
-        /// </summary>
-        /// <param name="context">The current request context.</param>
-        /// <param name="queryString">The query string.</param>
-        /// <param name="rawUrl">The raw request url.</param>
-        /// <returns>
-        /// The <see cref="string"/> containing the updated querystring.
-        /// </returns>
-        [Obsolete("This is here for legacy reasons, use the OnValidatingRequest method instead")]
-        private string CheckQuerystringHandler(HttpContext context, string queryString, string rawUrl)
-        {
-            // Fire the process querystring event.
-            ProcessQuerystringEventHandler handler = OnProcessQuerystring;
-            if (handler != null)
-            {
-                ProcessQueryStringEventArgs args = new ProcessQueryStringEventArgs
-                {
-                    Context = context,
-                    Querystring = queryString ?? string.Empty,
-                    RawUrl = rawUrl ?? string.Empty
-                };
-                queryString = handler(this, args);
-            }
-
-            return queryString;
-        }
+        private void OnValidatingRequest(ValidatingRequestEventArgs args) => ValidatingRequest?.Invoke(this, args);
 
         /// <summary>
         /// Gets the correct <see cref="IImageService"/> for the given request.
@@ -875,6 +815,5 @@ namespace ImageProcessor.Web.HttpModules
             // Return the next unprefixed service.
             return services.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Prefix) && s.IsValidRequest(path) && s.GetType() != typeof(LocalFileImageService));
         }
-        #endregion
     }
 }

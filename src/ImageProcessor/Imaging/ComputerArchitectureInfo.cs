@@ -21,9 +21,6 @@ namespace ImageProcessor.Imaging
         /// Returns a value indicating whether the current computer architecture is little endian. 
         /// </summary>
         /// <returns>The <see cref="bool"/></returns>
-        public bool IsLittleEndian()
-        {
-            return BitConverter.IsLittleEndian;
-        }
+        public bool IsLittleEndian() => BitConverter.IsLittleEndian;
     }
 }

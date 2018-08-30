@@ -15,7 +15,6 @@ namespace ImageProcessor.Imaging.Formats
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
-    using System.Linq;
 
     /// <summary>
     /// Provides the necessary information to support tiff images.
@@ -88,14 +87,13 @@ namespace ImageProcessor.Imaging.Formats
         public override Image Save(Stream stream, Image image, long bitDepth)
         {
             // Tiffs can be saved with different bit depths.
-            using (EncoderParameters encoderParameters = new EncoderParameters(2))
+            using (var encoderParameters = new EncoderParameters(2))
             {
                 encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, (long)(bitDepth == 1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW));
                 encoderParameters.Param[1] = new EncoderParameter(Encoder.ColorDepth, Math.Min(32, bitDepth));
 
                 ImageCodecInfo imageCodecInfo =
-                    ImageCodecInfo.GetImageEncoders()
-                        .FirstOrDefault(ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+                    Array.Find(ImageCodecInfo.GetImageEncoders(), ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
 
                 if (imageCodecInfo != null)
                 {
@@ -122,14 +120,13 @@ namespace ImageProcessor.Imaging.Formats
         public override Image Save(string path, Image image, long bitDepth)
         {
             // Tiffs can be saved with different bit depths.
-            using (EncoderParameters encoderParameters = new EncoderParameters(2))
+            using (var encoderParameters = new EncoderParameters(2))
             {
                 encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, (long)(bitDepth == 1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW));
                 encoderParameters.Param[1] = new EncoderParameter(Encoder.ColorDepth, Math.Min(32, bitDepth));
 
                 ImageCodecInfo imageCodecInfo =
-                    ImageCodecInfo.GetImageEncoders()
-                        .FirstOrDefault(ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+                    Array.Find(ImageCodecInfo.GetImageEncoders(), ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
 
                 if (imageCodecInfo != null)
                 {

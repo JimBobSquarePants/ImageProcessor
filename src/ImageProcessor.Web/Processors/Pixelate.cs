@@ -13,13 +13,10 @@ namespace ImageProcessor.Web.Processors
     using System;
     using System.Collections.Specialized;
     using System.Drawing;
-    using System.Globalization;
-    using System.Text;
     using System.Text.RegularExpressions;
     using System.Web;
 
     using ImageProcessor.Processors;
-    using ImageProcessor.Web.Extensions;
     using ImageProcessor.Web.Helpers;
 
     /// <summary>
@@ -30,25 +27,12 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"pixelate=[^&]", RegexOptions.Compiled);
-
-        /// <summary>
-        /// The pixel regex.
-        /// </summary>
-        private static readonly Regex PixelRegex = new Regex(@"pixelate=\d+", RegexOptions.Compiled);
-
-        /// <summary>
-        /// The rectangle regex.
-        /// </summary>
-        private static readonly Regex RectangleRegex = new Regex(@"pixelrect=\d+,\d+,\d+,\d+", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("pixelate=[^&]", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Pixelate"/> class.
         /// </summary>
-        public Pixelate()
-        {
-            this.Processor = new ImageProcessor.Processors.Pixelate();
-        }
+        public Pixelate() => this.Processor = new ImageProcessor.Processors.Pixelate();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -85,59 +69,12 @@ namespace ImageProcessor.Web.Processors
 
                 Rectangle? rectangle = queryCollection["pixelrect"] != null
                       ? QueryParamParser.Instance.ParseValue<Rectangle>(queryCollection["pixelrect"])
-                      : (Rectangle?)null; 
+                      : (Rectangle?)null;
 
                 this.Processor.DynamicParameter = new Tuple<int, Rectangle?>(size, rectangle);
             }
 
             return this.SortOrder;
-        }
-
-        /// <summary>
-        /// Returns the correct size of pixels.
-        /// </summary>
-        /// <param name="input">
-        /// The input containing the value to parse.
-        /// </param>
-        /// <returns>
-        /// The <see cref="int"/> representing the pixel size.
-        /// </returns>
-        public int ParseSize(string input)
-        {
-            int size = 0;
-
-            foreach (Match match in PixelRegex.Matches(input))
-            {
-                size = int.Parse(match.Value.Split('=')[1], CultureInfo.InvariantCulture);
-            }
-
-            return size;
-        }
-
-        /// <summary>
-        /// Returns the correct <see cref="Nullable{Rectange}"/> for the given string.
-        /// </summary>
-        /// <param name="input">
-        /// The input string containing the value to parse.
-        /// </param>
-        /// <returns>
-        /// The correct <see cref="Nullable{Rectange}"/>
-        /// </returns>
-        private Rectangle? ParseRectangle(string input)
-        {
-            int[] dimensions = { };
-
-            foreach (Match match in RectangleRegex.Matches(input))
-            {
-                dimensions = match.Value.ToPositiveIntegerArray();
-            }
-
-            if (dimensions.Length == 4)
-            {
-                return new Rectangle(dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-            }
-
-            return null;
         }
     }
 }

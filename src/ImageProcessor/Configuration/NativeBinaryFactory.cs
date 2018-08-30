@@ -48,10 +48,7 @@ namespace ImageProcessor.Configuration
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeBinaryFactory"/> class.
         /// </summary>
-        public NativeBinaryFactory()
-        {
-            nativeBinaries = new ConcurrentDictionary<string, IntPtr>();
-        }
+        public NativeBinaryFactory() => nativeBinaries = new ConcurrentDictionary<string, IntPtr>();
 
         /// <summary>
         /// Finalizes an instance of the <see cref="T:ImageProcessor.Configuration.NativeBinaryFactory">ImageFactory</see> class. 
@@ -96,12 +93,12 @@ namespace ImageProcessor.Configuration
                 {
                     IntPtr pointer;
                     string folder = this.Is64BitEnvironment ? "x64" : "x86";
-                    Assembly assembly = Assembly.GetExecutingAssembly();
+                    var assembly = Assembly.GetExecutingAssembly();
                     string targetBasePath = new Uri(assembly.Location).LocalPath;
-                    string targetPath = Path.GetFullPath(Path.Combine(targetBasePath, "..\\" + folder + "\\" + name));
+                    string targetPath = Path.GetFullPath(Path.Combine(targetBasePath, "..\\" + folder + "\\" + b));
 
                     // Copy the file across if necessary.
-                    FileInfo fileInfo = new FileInfo(targetPath);
+                    var fileInfo = new FileInfo(targetPath);
                     bool rewrite = true;
                     if (fileInfo.Exists)
                     {
@@ -116,7 +113,7 @@ namespace ImageProcessor.Configuration
                     if (rewrite)
                     {
                         // ReSharper disable once AssignNullToNotNullAttribute
-                        DirectoryInfo directoryInfo = new DirectoryInfo(Path.GetDirectoryName(targetPath));
+                        var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(targetPath));
                         if (!directoryInfo.Exists)
                         {
                             directoryInfo.Create();
@@ -137,7 +134,7 @@ namespace ImageProcessor.Configuration
 
                     if (pointer == IntPtr.Zero)
                     {
-                        throw new ApplicationException("Cannot load " + name);
+                        throw new ApplicationException("Cannot load " + b);
                     }
 
                     return pointer;

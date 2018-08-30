@@ -19,32 +19,12 @@ namespace ImageProcessor.Imaging.Colors
     /// <summary>
     /// Represents an CMYK (cyan, magenta, yellow, keyline) color.
     /// </summary>
-    public struct CmykColor : IEquatable<CmykColor>
+    public readonly struct CmykColor : IEquatable<CmykColor>
     {
         /// <summary>
         /// Represents a <see cref="CmykColor"/> that is null.
         /// </summary>
         public static readonly CmykColor Empty = new CmykColor();
-
-        /// <summary>
-        /// The cyan color component.
-        /// </summary>
-        private readonly float c;
-
-        /// <summary>
-        /// The magenta color component.
-        /// </summary>
-        private readonly float m;
-
-        /// <summary>
-        /// The yellow color component.
-        /// </summary>
-        private readonly float y;
-
-        /// <summary>
-        /// The keyline black color component.
-        /// </summary>
-        private readonly float k;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmykColor"/> struct.
@@ -63,10 +43,10 @@ namespace ImageProcessor.Imaging.Colors
         /// </param>
         private CmykColor(float cyan, float magenta, float yellow, float keyline)
         {
-            this.c = Clamp(cyan);
-            this.m = Clamp(magenta);
-            this.y = Clamp(yellow);
-            this.k = Clamp(keyline);
+            this.C = Clamp(cyan);
+            this.M = Clamp(magenta);
+            this.Y = Clamp(yellow);
+            this.K = Clamp(keyline);
         }
 
         /// <summary>
@@ -78,59 +58,48 @@ namespace ImageProcessor.Imaging.Colors
         private CmykColor(Color color)
         {
             CmykColor cmykColor = color;
-            this.c = cmykColor.c;
-            this.m = cmykColor.m;
-            this.y = cmykColor.y;
-            this.k = cmykColor.k;
+            this.C = cmykColor.C;
+            this.M = cmykColor.M;
+            this.Y = cmykColor.Y;
+            this.K = cmykColor.K;
         }
 
         /// <summary>
         /// Gets the cyan component.
         /// <remarks>A value ranging between 0 and 100.</remarks>
         /// </summary>
-        public float C => this.c;
+        public float C { get; }
 
         /// <summary>
         /// Gets the magenta component.
         /// <remarks>A value ranging between 0 and 100.</remarks>
         /// </summary>
-        public float M => this.m;
+        public float M { get; }
 
         /// <summary>
         /// Gets the yellow component.
         /// <remarks>A value ranging between 0 and 100.</remarks>
         /// </summary>
-        public float Y => this.y;
+        public float Y { get; }
 
         /// <summary>
         /// Gets the keyline black component.
         /// <remarks>A value ranging between 0 and 100.</remarks>
         /// </summary>
-        public float K => this.k;
+        public float K { get; }
 
         /// <summary>
         /// Creates a <see cref="CmykColor"/> structure from the four 32-bit CMYK 
         /// components (cyan, magenta, yellow, and keyline) values.
         /// </summary>
-        /// <param name="cyan">
-        /// The cyan component.
-        /// </param>
-        /// <param name="magenta">
-        /// The magenta component.
-        /// </param>
-        /// <param name="yellow">
-        /// The yellow component.
-        /// </param>
-        /// <param name="keyline">
-        /// The keyline black component.
-        /// </param>
+        /// <param name="cyan">The cyan component.</param>
+        /// <param name="magenta">The magenta component.</param>
+        /// <param name="yellow">The yellow component.</param>
+        /// <param name="keyline">The keyline black component.</param>
         /// <returns>
         /// The <see cref="CmykColor"/>.
         /// </returns>
-        public static CmykColor FromCmykColor(float cyan, float magenta, float yellow, float keyline)
-        {
-            return new CmykColor(cyan, magenta, yellow, keyline);
-        }
+        public static CmykColor FromCmykColor(float cyan, float magenta, float yellow, float keyline) => new CmykColor(cyan, magenta, yellow, keyline);
 
         /// <summary>
         /// Creates a <see cref="CmykColor"/> structure from the specified <see cref="System.Drawing.Color"/> structure
@@ -141,10 +110,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// The <see cref="CmykColor"/>.
         /// </returns>
-        public static CmykColor FromColor(Color color)
-        {
-            return new CmykColor(color);
-        }
+        public static CmykColor FromColor(Color color) => new CmykColor(color);
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="System.Drawing.Color"/> to a 
@@ -186,10 +152,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// An instance of <see cref="CmykColor"/>.
         /// </returns>
-        public static implicit operator CmykColor(RgbaColor rgbaColor)
-        {
-            return FromColor(rgbaColor);
-        }
+        public static implicit operator CmykColor(RgbaColor rgbaColor) => FromColor(rgbaColor);
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="YCbCrColor"/> to a 
@@ -219,9 +182,9 @@ namespace ImageProcessor.Imaging.Colors
         /// </returns>
         public static implicit operator Color(CmykColor cmykColor)
         {
-            int red = Convert.ToInt32((1 - (cmykColor.c / 100)) * (1 - (cmykColor.k / 100)) * 255.0);
-            int green = Convert.ToInt32((1 - (cmykColor.m / 100)) * (1 - (cmykColor.k / 100)) * 255.0);
-            int blue = Convert.ToInt32((1 - (cmykColor.y / 100)) * (1 - (cmykColor.k / 100)) * 255.0);
+            int red = Convert.ToInt32((1 - (cmykColor.C / 100)) * (1 - (cmykColor.K / 100)) * 255.0);
+            int green = Convert.ToInt32((1 - (cmykColor.M / 100)) * (1 - (cmykColor.K / 100)) * 255.0);
+            int blue = Convert.ToInt32((1 - (cmykColor.Y / 100)) * (1 - (cmykColor.K / 100)) * 255.0);
             return Color.FromArgb(red.ToByte(), green.ToByte(), blue.ToByte());
         }
 
@@ -237,9 +200,9 @@ namespace ImageProcessor.Imaging.Colors
         /// </returns>
         public static implicit operator RgbaColor(CmykColor cmykColor)
         {
-            int red = Convert.ToInt32((1 - (cmykColor.c / 100)) * (1 - (cmykColor.k / 100)) * 255.0);
-            int green = Convert.ToInt32((1 - (cmykColor.m / 100)) * (1 - (cmykColor.k / 100)) * 255.0);
-            int blue = Convert.ToInt32((1 - (cmykColor.y / 100)) * (1 - (cmykColor.k / 100)) * 255.0);
+            int red = Convert.ToInt32((1 - (cmykColor.C / 100)) * (1 - (cmykColor.K / 100)) * 255.0);
+            int green = Convert.ToInt32((1 - (cmykColor.M / 100)) * (1 - (cmykColor.K / 100)) * 255.0);
+            int blue = Convert.ToInt32((1 - (cmykColor.Y / 100)) * (1 - (cmykColor.K / 100)) * 255.0);
             return RgbaColor.FromRgba(red.ToByte(), green.ToByte(), blue.ToByte());
         }
 
@@ -253,10 +216,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// An instance of <see cref="YCbCrColor"/>.
         /// </returns>
-        public static implicit operator YCbCrColor(CmykColor cmykColor)
-        {
-            return YCbCrColor.FromColor(cmykColor);
-        }
+        public static implicit operator YCbCrColor(CmykColor cmykColor) => YCbCrColor.FromColor(cmykColor);
 
         /// <summary>
         /// Allows the implicit conversion of an instance of <see cref="CmykColor"/> to a 
@@ -268,10 +228,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// An instance of <see cref="HslaColor"/>.
         /// </returns>
-        public static implicit operator HslaColor(CmykColor cmykColor)
-        {
-            return HslaColor.FromColor(cmykColor);
-        }
+        public static implicit operator HslaColor(CmykColor cmykColor) => HslaColor.FromColor(cmykColor);
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -296,15 +253,7 @@ namespace ImageProcessor.Imaging.Colors
         /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
         /// </returns>
         /// <param name="obj">Another object to compare to. </param>
-        public override bool Equals(object obj)
-        {
-            if (obj is CmykColor)
-            {
-                return this.Equals((CmykColor)obj);
-            }
-
-            return false;
-        }
+        public override bool Equals(object obj) => obj is CmykColor cmykColor && this.Equals(cmykColor);
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
@@ -339,10 +288,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// The sanitized <see cref="float"/>.
         /// </returns>
-        private static float Clamp(float value)
-        {
-            return ImageMaths.Clamp(value, 0, 100);
-        }
+        private static float Clamp(float value) => ImageMaths.Clamp(value, 0, 100);
 
         /// <summary>
         /// Returns a value indicating whether the current instance is empty.
@@ -353,8 +299,8 @@ namespace ImageProcessor.Imaging.Colors
         private bool IsEmpty()
         {
             const float Epsilon = .0001f;
-            return Math.Abs(this.c - 0) <= Epsilon && Math.Abs(this.m - 0) <= Epsilon &&
-                   Math.Abs(this.y - 0) <= Epsilon && Math.Abs(this.k - 0) <= Epsilon;
+            return Math.Abs(this.C - 0) <= Epsilon && Math.Abs(this.M - 0) <= Epsilon
+                   && Math.Abs(this.Y - 0) <= Epsilon && Math.Abs(this.K - 0) <= Epsilon;
         }
     }
 }

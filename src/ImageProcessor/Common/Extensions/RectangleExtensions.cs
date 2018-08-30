@@ -29,10 +29,10 @@ namespace ImageProcessor.Common.Extensions
         /// </returns>
         public static bool IsEqual(this Rectangle first, Rectangle second, int threshold)
         {
-            return (Math.Abs(first.X - second.X) < threshold) &&
-                   (Math.Abs(first.Y - second.Y) < threshold) &&
-                   (Math.Abs(first.Width - second.Width) < threshold) &&
-                   (Math.Abs(first.Height - second.Height) < threshold);
+            return (Math.Abs(first.X - second.X) < threshold)
+                   && (Math.Abs(first.Y - second.Y) < threshold)
+                   && (Math.Abs(first.Width - second.Width) < threshold)
+                   && (Math.Abs(first.Height - second.Height) < threshold);
         }
     }
 }
