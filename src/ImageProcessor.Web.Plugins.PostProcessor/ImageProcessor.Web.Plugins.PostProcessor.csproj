@@ -53,7 +53,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Unmanaged\README.txt" />
-    <EmbeddedResource Include="Resources\Unmanaged\x86\png.cmd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Unmanaged\x64\gifsicle.exe" />
