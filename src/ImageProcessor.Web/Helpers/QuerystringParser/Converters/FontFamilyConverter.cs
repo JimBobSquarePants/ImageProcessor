@@ -76,6 +76,11 @@ namespace ImageProcessor.Web.Helpers
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed. </exception>
         public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
+            if (value == null)
+            {
+                return null;
+            }
+
             string s = value as string;
             if (!string.IsNullOrWhiteSpace(s))
             {
@@ -102,18 +107,17 @@ namespace ImageProcessor.Web.Helpers
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed. </exception>
         public override object ConvertTo(CultureInfo culture, object value, Type destinationType)
         {
-            if (null == value)
+            if (value == null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
 
-            FontFamily fontFamily = value as FontFamily;
-            if (fontFamily == null)
+            if (!(value is FontFamily fontFamily))
             {
                 throw new ArgumentException("value");
             }
 
-            if (null == destinationType)
+            if (destinationType == null)
             {
                 throw new ArgumentNullException(nameof(destinationType));
             }

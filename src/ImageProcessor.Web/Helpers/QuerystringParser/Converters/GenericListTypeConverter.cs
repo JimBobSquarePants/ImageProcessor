@@ -79,12 +79,10 @@ namespace ImageProcessor.Web.Helpers
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed.</exception>
         public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
-            string input = value as string;
-            if (input != null)
+            var result = new List<T>();
+            if (value is string input)
             {
                 string[] items = this.GetStringArray(input, culture);
-
-                List<T> result = new List<T>();
 
                 Array.ForEach(
                     items,
@@ -96,11 +94,9 @@ namespace ImageProcessor.Web.Helpers
                             result.Add((T)item);
                         }
                     });
-
-                return result;
             }
 
-            return base.ConvertFrom(culture, value, propertyType);
+            return result;
         }
 
         /// <summary>
