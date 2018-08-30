@@ -15,7 +15,6 @@ namespace ImageProcessor.Imaging
     using System.Drawing;
     using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
-    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Common.Extensions;
@@ -33,10 +32,7 @@ namespace ImageProcessor.Imaging
         /// <param name="size">
         /// The <see cref="Size"/> to resize the image to.
         /// </param>
-        public Resizer(Size size)
-        {
-            this.ResizeLayer = new ResizeLayer(size);
-        }
+        public Resizer(Size size) => this.ResizeLayer = new ResizeLayer(size);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Resizer"/> class.
@@ -44,10 +40,7 @@ namespace ImageProcessor.Imaging
         /// <param name="resizeLayer">
         /// The <see cref="ResizeLayer"/>.
         /// </param>
-        public Resizer(ResizeLayer resizeLayer)
-        {
-            this.ResizeLayer = resizeLayer;
-        }
+        public Resizer(ResizeLayer resizeLayer) => this.ResizeLayer = resizeLayer;
 
         /// <summary>
         /// Gets or sets the <see cref="ResizeLayer"/>.
@@ -100,13 +93,13 @@ namespace ImageProcessor.Imaging
         /// </returns>
         protected virtual Bitmap ResizeComposite(Image source, int width, int height, Rectangle destination)
         {
-            Bitmap resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            var resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             resized.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
-            using (Graphics graphics = Graphics.FromImage(resized))
+            using (var graphics = Graphics.FromImage(resized))
             {
                 GraphicsHelper.SetGraphicsOptions(graphics);
-                using (ImageAttributes attributes = new ImageAttributes())
+                using (var attributes = new ImageAttributes())
                 {
                     attributes.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(source, destination, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
@@ -126,10 +119,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// The <see cref="Bitmap"/>.
         /// </returns>
-        protected virtual Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination)
-        {
-            return this.ResizeLinear(source, width, height, destination, this.AnimationProcessMode);
-        }
+        protected virtual Bitmap ResizeLinear(Image source, int width, int height, Rectangle destination) => this.ResizeLinear(source, width, height, destination, this.AnimationProcessMode);
 
         /// <summary>
         /// Gets an image resized using the linear color space with gamma correction adjustments.
@@ -147,13 +137,13 @@ namespace ImageProcessor.Imaging
             // Adjust the gamma value so that the image is in the linear color space.
             Bitmap linear = Adjustments.ToLinear(source.Copy(animationProcessMode));
 
-            Bitmap resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            var resized = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             resized.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
-            using (Graphics graphics = Graphics.FromImage(resized))
+            using (var graphics = Graphics.FromImage(resized))
             {
                 GraphicsHelper.SetGraphicsOptions(graphics);
-                using (ImageAttributes attributes = new ImageAttributes())
+                using (var attributes = new ImageAttributes())
                 {
                     attributes.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(linear, destination, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
@@ -379,7 +369,7 @@ namespace ImageProcessor.Imaging
                     {
                         ratio = percentWidth;
 
-                        if (centerCoordinates != null && centerCoordinates.Any())
+                        if (centerCoordinates?.Length > 0)
                         {
                             double center = -(ratio * sourceHeight) * centerCoordinates[0];
                             destinationY = (int)center + (height / 2);
@@ -420,7 +410,7 @@ namespace ImageProcessor.Imaging
                     {
                         ratio = percentHeight;
 
-                        if (centerCoordinates != null && centerCoordinates.Any())
+                        if (centerCoordinates?.Length > 0)
                         {
                             double center = -(ratio * sourceWidth) * centerCoordinates[1];
                             destinationX = (int)center + (width / 2);
@@ -543,7 +533,7 @@ namespace ImageProcessor.Imaging
                 }
 
                 // Restrict sizes
-                if (restrictedSizes != null && restrictedSizes.Any())
+                if (restrictedSizes?.Count > 0)
                 {
                     bool reject = true;
                     foreach (Size restrictedSize in restrictedSizes)
@@ -570,13 +560,13 @@ namespace ImageProcessor.Imaging
                 if (width > 0 && height > 0 && width <= maxWidth && height <= maxHeight)
                 {
                     // Exit if upscaling is not allowed.
-                    if ((width > sourceWidth || height > sourceHeight) && upscale == false && resizeMode != ResizeMode.Stretch)
+                    if ((width > sourceWidth || height > sourceHeight) && !upscale && resizeMode != ResizeMode.Stretch)
                     {
                         return (Bitmap)source;
                     }
 
                     // Do the resize.
-                    Rectangle destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
+                    var destination = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
 
                     newImage = linear ? this.ResizeLinear(source, width, height, destination, this.AnimationProcessMode) : this.ResizeComposite(source, width, height, destination);
 

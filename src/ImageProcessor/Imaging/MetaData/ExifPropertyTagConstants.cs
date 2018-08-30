@@ -13,7 +13,7 @@ namespace ImageProcessor.Imaging.MetaData
     /// <summary>
     /// Contains constants grouping together common property items.
     /// </summary>
-    public class ExifPropertyTagConstants
+    public static class ExifPropertyTagConstants
     {
         /// <summary>
         /// Gets all required property items. The Gif format specifically requires these properties.

@@ -26,12 +26,12 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <summary>
         /// Processes the image.
         /// </summary>
-        /// <param name="image">The current image to process</param>
-        /// <param name="newImage">The new Image to return</param>
+        /// <param name="source">The current image to process</param>
+        /// <param name="destination">The new image to return</param>
         /// <returns>
         /// The processed <see cref="System.Drawing.Bitmap"/>.
         /// </returns>
-        public abstract Bitmap TransformImage(Image image, Image newImage);
+        public abstract Bitmap TransformImage(Image source, Image destination);
 
         /// <summary>
         /// Determines whether the specified <see cref="IMatrixFilter" />, is equal to this instance.
@@ -42,9 +42,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// </returns>
         public override bool Equals(object obj)
         {
-            IMatrixFilter filter = obj as IMatrixFilter;
-
-            if (filter == null)
+            if (!(obj is IMatrixFilter filter))
             {
                 return false;
             }
@@ -64,8 +62,7 @@ namespace ImageProcessor.Imaging.Filters.Photo
             unchecked
             {
                 int hashCode = this.GetType().Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Matrix.GetHashCode();
-                return hashCode;
+                return (hashCode * 397) ^ this.Matrix.GetHashCode();
             }
         }
     }

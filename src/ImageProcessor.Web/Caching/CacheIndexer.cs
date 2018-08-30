@@ -35,8 +35,7 @@ namespace ImageProcessor.Web.Caching
         public static CachedImage Get(string cachedPath)
         {
             string key = Path.GetFileNameWithoutExtension(cachedPath);
-            CachedImage cachedImage = (CachedImage)MemCache.GetItem(key);
-            return cachedImage;
+            return (CachedImage)MemCache.GetItem(key);
         }
 
         /// <summary>
@@ -73,7 +72,7 @@ namespace ImageProcessor.Web.Caching
             { expiration = new TimeSpan(0, 1, 0); }
 
             // Add the CachedImage with a sliding expiration of `expiry` minutes.
-            CacheItemPolicy policy = new CacheItemPolicy { SlidingExpiration = expiration };
+            var policy = new CacheItemPolicy { SlidingExpiration = expiration };
 
             if (new Uri(cachedImage.Path).IsFile)
             {
@@ -120,9 +119,6 @@ namespace ImageProcessor.Web.Caching
         /// <returns>
         /// The value of the item to add or get.
         /// </returns>
-        public static CachedImage Add(CachedImage cachedImage, int expiry)
-        {
-            return Add(cachedImage, new TimeSpan(0, expiry, 0));
-        }
+        public static CachedImage Add(CachedImage cachedImage, int expiry) => Add(cachedImage, new TimeSpan(0, expiry, 0));
     }
 }

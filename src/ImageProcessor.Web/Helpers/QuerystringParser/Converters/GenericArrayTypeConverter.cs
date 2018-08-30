@@ -39,7 +39,7 @@ namespace ImageProcessor.Web.Helpers
         public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
             object result = base.ConvertFrom(culture, value, propertyType);
-            IList<T> list = result as IList<T>;
+            var list = result as IList<T>;
             return list?.ToArray() ?? result;
         }
     }

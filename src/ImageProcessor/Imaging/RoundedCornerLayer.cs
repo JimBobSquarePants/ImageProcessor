@@ -42,7 +42,6 @@ namespace ImageProcessor.Imaging
             this.BottomRight = bottomRight;
         }
 
-        #region Properties
         /// <summary>
         /// Gets or sets the radius of the corners.
         /// </summary>
@@ -67,7 +66,6 @@ namespace ImageProcessor.Imaging
         /// Gets or sets a value indicating whether bottom right corners are to be added.
         /// </summary>
         public bool BottomRight { get; set; }
-        #endregion
 
         /// <summary>
         /// Returns a value that indicates whether the specified object is an 
@@ -83,9 +81,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         public override bool Equals(object obj)
         {
-            RoundedCornerLayer rounded = obj as RoundedCornerLayer;
-
-            if (rounded == null)
+            if (!(obj is RoundedCornerLayer rounded))
             {
                 return false;
             }
@@ -109,8 +105,7 @@ namespace ImageProcessor.Imaging
                 hashCode = (hashCode * 397) ^ this.TopLeft.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.TopRight.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.BottomLeft.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.BottomRight.GetHashCode();
-                return hashCode;
+                return (hashCode * 397) ^ this.BottomRight.GetHashCode();
             }
         }
     }

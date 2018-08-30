@@ -20,20 +20,20 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
         /// <summary>
         /// Gets the horizontal gradient operator.
         /// </summary>
-        public double[,] HorizontalGradientOperator => new double[,] 
+        public double[,] HorizontalGradientOperator => new double[,]
         {
-            { 6, 0, -6 }, 
-            { 0, 0, 0 }, 
+            { 6, 0, -6 },
+            { 0, 0, 0 },
             { -6, 0, 6 }
         };
 
         /// <summary>
         /// Gets the vertical gradient operator.
         /// </summary>
-        public double[,] VerticalGradientOperator => new double[,] 
+        public double[,] VerticalGradientOperator => new double[,]
         {
-            { -6, 0, 6 }, 
-            { 0, 0, 0 }, 
+            { -6, 0, 6 },
+            { 0, 0, 0 },
             { 6, 0, -6 }
         };
     }

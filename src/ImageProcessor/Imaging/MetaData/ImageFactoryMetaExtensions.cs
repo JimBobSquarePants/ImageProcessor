@@ -115,10 +115,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <returns>
         /// The <see cref="ImageFactory"/>.
         /// </returns>
-        public static ImageFactory SetPropertyItem(this ImageFactory imageFactory, ExifPropertyTag id, byte[] value)
-        {
-            return imageFactory.SetPropertyItem(id, ExifPropertyTagType.Undefined, value.Length, value);
-        }
+        public static ImageFactory SetPropertyItem(this ImageFactory imageFactory, ExifPropertyTag id, byte[] value) => imageFactory.SetPropertyItem(id, ExifPropertyTagType.Undefined, value.Length, value);
 
         /// <summary>
         /// Sets a property item with the given id to the collection within the current

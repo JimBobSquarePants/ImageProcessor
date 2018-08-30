@@ -15,7 +15,6 @@ namespace ImageProcessor.Processors
     using System.Drawing;
     using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
-    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
@@ -30,10 +29,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Crop"/> class.
         /// </summary>
-        public Crop()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Crop() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.
@@ -95,7 +91,7 @@ namespace ImageProcessor.Processors
                     rectangleF = new RectangleF(cropLayer.Left, cropLayer.Top, cropLayer.Right, cropLayer.Bottom);
                 }
 
-                Rectangle rectangle = Rectangle.Round(rectangleF);
+                var rectangle = Rectangle.Round(rectangleF);
 
                 if (rectangle.X < sourceWidth && rectangle.Y < sourceHeight)
                 {
@@ -121,7 +117,7 @@ namespace ImageProcessor.Processors
                         this.ForwardRotateFlip(rotationValue, ref image);
                     }
 
-                    using (Graphics graphics = Graphics.FromImage(newImage))
+                    using (var graphics = Graphics.FromImage(newImage))
                     {
                         GraphicsHelper.SetGraphicsOptions(graphics);
 
@@ -129,7 +125,7 @@ namespace ImageProcessor.Processors
                         // as the algorithm appears to be pulling averaging detail from surrounding pixels beyond the edge 
                         // of the image. Using the ImageAttributes class to specify that the pixels beyond are simply mirror 
                         // images of the pixels within solves this problem.
-                        using (ImageAttributes wrapMode = new ImageAttributes())
+                        using (var wrapMode = new ImageAttributes())
                         {
                             wrapMode.SetWrapMode(WrapMode.TileFlipXY);
 
@@ -154,7 +150,7 @@ namespace ImageProcessor.Processors
                         this.ReverseRotateFlip(rotationValue, ref image);
                     }
 
-                    if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                    if (factory.PreserveExifData && factory.ExifPropertyItems.Count > 0)
                     {
                         // Set the width EXIF data.
                         factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);

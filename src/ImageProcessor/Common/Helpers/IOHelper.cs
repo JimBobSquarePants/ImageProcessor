@@ -26,7 +26,7 @@ namespace ImageProcessor.Common.Helpers
     /// Adapted from identically named class within <see href="https://github.com/umbraco/Umbraco-CMS"/>
     /// </remarks>
     /// </summary>
-    internal class IOHelper
+    internal static class IOHelper
     {
         /// <summary>
         /// The root directory.
@@ -111,13 +111,13 @@ namespace ImageProcessor.Common.Helpers
         /// The <see cref="string"/> representing the root path of the currently running application.</returns>
         internal static string GetRootDirectorySafe()
         {
-            if (string.IsNullOrEmpty(rootDirectory) == false)
+            if (!string.IsNullOrEmpty(rootDirectory))
             {
                 return rootDirectory;
             }
 
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            Uri uri = new Uri(codeBase);
+            var uri = new Uri(codeBase);
             string path = uri.LocalPath;
             string baseDirectory = Path.GetDirectoryName(path);
             if (string.IsNullOrEmpty(baseDirectory))

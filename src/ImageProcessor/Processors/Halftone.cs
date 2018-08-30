@@ -27,10 +27,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Halftone"/> class.
         /// </summary>
-        public Halftone()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Halftone() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -69,7 +66,7 @@ namespace ImageProcessor.Processors
             Bitmap edgeBitmap = null;
             try
             {
-                HalftoneFilter filter = new HalftoneFilter(5);
+                var filter = new HalftoneFilter(5);
                 newImage = new Bitmap(image);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                 newImage = filter.ApplyFilter(newImage);
@@ -82,14 +79,14 @@ namespace ImageProcessor.Processors
                     edgeBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                     edgeBitmap = Effects.Trace(image, edgeBitmap, 120);
 
-                    using (Graphics graphics = Graphics.FromImage(newImage))
+                    using (var graphics = Graphics.FromImage(newImage))
                     {
                         // Overlay the image.
                         graphics.DrawImage(edgeBitmap, 0, 0);
-                        Rectangle rectangle = new Rectangle(0, 0, width, height);
+                        var rectangle = new Rectangle(0, 0, width, height);
 
                         // Draw an edge around the image.
-                        using (Pen blackPen = new Pen(Color.Black))
+                        using (var blackPen = new Pen(Color.Black))
                         {
                             blackPen.Width = 4;
                             graphics.DrawRectangle(blackPen, rectangle);

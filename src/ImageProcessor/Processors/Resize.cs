@@ -14,7 +14,6 @@ namespace ImageProcessor.Processors
     using System.Collections.Generic;
     using System.Drawing;
     using System.Globalization;
-    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging;
@@ -78,18 +77,15 @@ namespace ImageProcessor.Processors
 
                 // Augment the layer with the extra information.
                 resizeLayer.RestrictedSizes = this.RestrictedSizes;
-                Size maxSize = new Size();
-
-                int maxWidth;
-                int maxHeight;
-                int.TryParse(this.Settings["MaxWidth"], NumberStyles.Any, CultureInfo.InvariantCulture, out maxWidth);
-                int.TryParse(this.Settings["MaxHeight"], NumberStyles.Any, CultureInfo.InvariantCulture, out maxHeight);
+                var maxSize = new Size();
+                int.TryParse(this.Settings["MaxWidth"], NumberStyles.Any, CultureInfo.InvariantCulture, out int maxWidth);
+                int.TryParse(this.Settings["MaxHeight"], NumberStyles.Any, CultureInfo.InvariantCulture, out int maxHeight);
 
                 maxSize.Width = maxWidth;
                 maxSize.Height = maxHeight;
 
                 resizeLayer.MaxSize = maxSize;
-                Resizer resizer = new Resizer(resizeLayer) { ImageFormat = factory.CurrentImageFormat, AnimationProcessMode = factory.AnimationProcessMode };
+                var resizer = new Resizer(resizeLayer) { ImageFormat = factory.CurrentImageFormat, AnimationProcessMode = factory.AnimationProcessMode };
                 newImage = resizer.ResizeImage(image, factory.FixGamma);
 
                 // Check that the original image has not been returned.
@@ -99,7 +95,7 @@ namespace ImageProcessor.Processors
                     image.Dispose();
                     image = newImage;
 
-                    if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                    if (factory.PreserveExifData && factory.ExifPropertyItems.Count > 0)
                     {
                         // Set the width EXIF data.
                         factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);

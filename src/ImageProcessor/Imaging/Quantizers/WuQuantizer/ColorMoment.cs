@@ -157,10 +157,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <returns>
         /// The <see cref="long"/> representing the amplitude.
         /// </returns>
-        public long Amplitude()
-        {
-            return (this.Alpha * this.Alpha) + (this.Red * this.Red) + (this.Green * this.Green) + (this.Blue * this.Blue);
-        }
+        public long Amplitude() => (this.Alpha * this.Alpha) + (this.Red * this.Red) + (this.Green * this.Green) + (this.Blue * this.Blue);
 
         /// <summary>
         /// The variance.
@@ -180,9 +177,6 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <returns>
         /// The <see cref="long"/>.
         /// </returns>
-        public long WeightedDistance()
-        {
-            return this.Amplitude() / this.Weight;
-        }
+        public long WeightedDistance() => this.Amplitude() / this.Weight;
     }
 }

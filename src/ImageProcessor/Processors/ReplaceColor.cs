@@ -28,10 +28,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="ReplaceColor"/> class.
         /// </summary>
-        public ReplaceColor()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public ReplaceColor() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -97,7 +94,7 @@ namespace ImageProcessor.Processors
                 int width = image.Width;
                 int height = image.Height;
 
-                using (FastBitmap fastBitmap = new FastBitmap(newImage))
+                using (var fastBitmap = new FastBitmap(newImage))
                 {
                     Parallel.For(
                         0,

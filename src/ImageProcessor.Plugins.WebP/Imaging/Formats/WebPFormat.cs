@@ -105,13 +105,11 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         /// </returns>
         public override Image Save(Stream stream, Image image, long bitDepth)
         {
-            byte[] bytes;
-
             // Encode in webP format.
             // If Quality is 100, encode losslessly instead of lossily
-            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
+            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out byte[] bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
             {
-                using (MemoryStream memoryStream = new MemoryStream(bytes))
+                using (var memoryStream = new MemoryStream(bytes))
                 {
                     memoryStream.CopyTo(stream);
                     memoryStream.Position = stream.Position = 0;
@@ -140,11 +138,9 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         /// </returns>
         public override Image Save(string path, Image image, long bitDepth)
         {
-            byte[] bytes;
-
             // Encode in webP format.
             // If Quality is 100, encode losslessly instead of lossily
-            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
+            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out byte[] bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
             {
                 File.WriteAllBytes(path, bytes);
             }
@@ -162,17 +158,15 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         private static Bitmap Decode(byte[] webpData)
         {
             // Get the image width and height
-            GCHandle pinnedWebP = GCHandle.Alloc(webpData, GCHandleType.Pinned);
+            var pinnedWebP = GCHandle.Alloc(webpData, GCHandleType.Pinned);
             IntPtr ptrData = pinnedWebP.AddrOfPinnedObject();
             uint dataSize = (uint)webpData.Length;
 
             Bitmap bitmap = null;
             BitmapData bitmapData = null;
             IntPtr outputBuffer = IntPtr.Zero;
-            int width;
-            int height;
 
-            if (NativeMethods.WebPGetInfo(ptrData, dataSize, out width, out height) != 1)
+            if (NativeMethods.WebPGetInfo(ptrData, dataSize, out int width, out int height) != 1)
             {
                 throw new ImageFormatException("WebP image header is corrupted.");
             }

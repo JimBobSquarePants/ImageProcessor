@@ -78,18 +78,12 @@ namespace ImageProcessor.Imaging.Colors
         /// The combined color components.
         /// </param>
         public Color32(int argb)
-            : this()
-        {
-            this.Argb = argb;
-        }
+            : this() => this.Argb = argb;
 
         /// <summary>
         /// Gets the color for this Color32 object
         /// </summary>
-        public Color Color
-        {
-            get { return Color.FromArgb(this.A, this.R, this.G, this.B); }
-        }
+        public Color Color => Color.FromArgb(this.A, this.R, this.G, this.B);
 
         /// <summary>
         /// Indicates whether this instance and a specified object are equal.
@@ -98,25 +92,14 @@ namespace ImageProcessor.Imaging.Colors
         /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
         /// </returns>
         /// <param name="obj">Another object to compare to. </param>
-        public override bool Equals(object obj)
-        {
-            if (obj is Color32)
-            {
-                return this.Equals((Color32)obj);
-            }
-
-            return false;
-        }
+        public override bool Equals(object obj) => obj is Color32 color32 && this.Equals(color32);
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
         /// </summary>
         /// <param name="other">An object to compare with this object.</param>
         /// <returns>true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.</returns>
-        public bool Equals(Color32 other)
-        {
-            return this.Argb.Equals(other.Argb);
-        }
+        public bool Equals(Color32 other) => this.Argb.Equals(other.Argb);
 
         /// <summary>
         /// Returns the hash code for this instance.
@@ -124,10 +107,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// A 32-bit signed integer that is the hash code for this instance.
         /// </returns>
-        public override int GetHashCode()
-        {
-            return this.GetHashCode(this);
-        }
+        public override int GetHashCode() => this.GetHashCode(this);
 
         /// <summary>
         /// Returns the hash code for the given instance.
@@ -145,8 +125,7 @@ namespace ImageProcessor.Imaging.Colors
                 int hashCode = obj.B.GetHashCode();
                 hashCode = (hashCode * 397) ^ obj.G.GetHashCode();
                 hashCode = (hashCode * 397) ^ obj.R.GetHashCode();
-                hashCode = (hashCode * 397) ^ obj.A.GetHashCode();
-                return hashCode;
+                return (hashCode * 397) ^ obj.A.GetHashCode();
             }
         }
     }

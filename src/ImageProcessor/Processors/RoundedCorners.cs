@@ -28,10 +28,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="RoundedCorners"/> class.
         /// </summary>
-        public RoundedCorners()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public RoundedCorners() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.
@@ -75,9 +72,7 @@ namespace ImageProcessor.Processors
                 bool bottomRight = roundedCornerLayer.BottomRight;
 
                 // Create a rounded image.
-                image = this.RoundCornerImage(image, radius, topLeft, topRight, bottomLeft, bottomRight);
-
-                return image;
+                return this.RoundCornerImage(image, radius, topLeft, topRight, bottomLeft, bottomRight);
             }
             catch (Exception ex)
             {
@@ -102,16 +97,16 @@ namespace ImageProcessor.Processors
             int cornerDiameter = cornerRadius * 2;
 
             // Create a new empty bitmap to hold rotated image
-            Bitmap newImage = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppPArgb);
+            var newImage = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppPArgb);
             newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             // Make a graphics object from the empty bitmap
-            using (Graphics graphics = Graphics.FromImage(newImage))
+            using (var graphics = Graphics.FromImage(newImage))
             {
                 GraphicsHelper.SetGraphicsOptions(graphics, true, true);
 
                 // Add rounded corners
-                using (GraphicsPath path = new GraphicsPath())
+                using (var path = new GraphicsPath())
                 {
                     // Determined if the top left has a rounded corner
                     if (topLeft)

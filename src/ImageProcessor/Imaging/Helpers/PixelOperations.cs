@@ -68,8 +68,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                byte val = ((255.0 * Math.Pow(x / 255.0, value)) + 0.5).ToByte();
-                ramp[x] = val;
+                ramp[x] = ((255.0 * Math.Pow(x / 255.0, value)) + 0.5).ToByte();
             }
 
             byte r = ramp[color.R];
@@ -159,8 +158,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                byte val = (255f * Math.Pow(x / 255f, 2.2)).ToByte();
-                ramp[x] = val;
+                ramp[x] = (255f * Math.Pow(x / 255f, 2.2)).ToByte();
             }
 
             return ramp;
@@ -178,8 +176,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                byte val = (255f * Math.Pow(x / 255f, 1 / 2.2)).ToByte();
-                ramp[x] = val;
+                ramp[x] = (255f * Math.Pow(x / 255f, 1 / 2.2)).ToByte();
             }
 
             return ramp;
@@ -197,8 +194,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                byte val = (255f * SRGBToLinear(x / 255f)).ToByte();
-                ramp[x] = val;
+                ramp[x] = (255f * SRGBToLinear(x / 255f)).ToByte();
             }
 
             return ramp;
@@ -216,8 +212,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                byte val = (255f * LinearToSRGB(x / 255f)).ToByte();
-                ramp[x] = val;
+                ramp[x] = (255f * LinearToSRGB(x / 255f)).ToByte();
             }
 
             return ramp;
@@ -234,7 +229,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// </returns>
         private static float SRGBToLinear(float signal)
         {
-            float a = 0.055f;
+            const float a = 0.055f;
 
             if (signal <= 0.04045)
             {
@@ -255,7 +250,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// </returns>
         private static float LinearToSRGB(float signal)
         {
-            float a = 0.055f;
+            const float a = 0.055f;
 
             if (signal <= 0.0031308)
             {

@@ -81,9 +81,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         public override bool Equals(object obj)
         {
-            CropLayer cropLayer = obj as CropLayer;
-
-            if (cropLayer == null)
+            if (!(obj is CropLayer cropLayer))
             {
                 return false;
             }
@@ -110,8 +108,7 @@ namespace ImageProcessor.Imaging
                 hashCode = (hashCode * 397) ^ this.Top.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.Right.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.Bottom.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int)this.CropMode;
-                return hashCode;
+                return (hashCode * 397) ^ (int)this.CropMode;
             }
         }
     }

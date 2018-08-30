@@ -28,10 +28,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Background"/> class.
         /// </summary>
-        public Background()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Background() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -87,16 +84,16 @@ namespace ImageProcessor.Processors
                 if (image.Size != background.Size || image.Size != new Size(backgroundWidth, backgroundHeight))
                 {
                     // Find the maximum possible dimensions and resize the image.
-                    ResizeLayer layer = new ResizeLayer(new Size(backgroundWidth, backgroundHeight), ResizeMode.Max);
-                    Resizer resizer = new Resizer(layer) { AnimationProcessMode = factory.AnimationProcessMode };
+                    var layer = new ResizeLayer(new Size(backgroundWidth, backgroundHeight), ResizeMode.Max);
+                    var resizer = new Resizer(layer) { AnimationProcessMode = factory.AnimationProcessMode };
                     background = resizer.ResizeImage(background, factory.FixGamma);
                     backgroundWidth = background.Width;
                     backgroundHeight = background.Height;
                 }
 
                 // Figure out bounds.
-                Rectangle parent = new Rectangle(0, 0, width, height);
-                Rectangle child = new Rectangle(0, 0, backgroundWidth, backgroundHeight);
+                var parent = new Rectangle(0, 0, width, height);
+                var child = new Rectangle(0, 0, backgroundWidth, backgroundHeight);
 
                 // Apply opacity.
                 if (opacity < 100)
@@ -107,7 +104,7 @@ namespace ImageProcessor.Processors
                 newImage = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-                using (Graphics graphics = Graphics.FromImage(newImage))
+                using (var graphics = Graphics.FromImage(newImage))
                 {
                     GraphicsHelper.SetGraphicsOptions(graphics, true);
 

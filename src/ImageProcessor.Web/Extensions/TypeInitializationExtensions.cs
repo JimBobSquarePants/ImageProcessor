@@ -43,10 +43,7 @@ namespace ImageProcessor.Web.Extensions
         /// <param name="type">The type on which the method was invoked.</param>
         /// <param name="argument">The argument to pass to the constructor.</param>
         /// <returns>An instance of the given <paramref name="type"/>.</returns>
-        public static object GetInstance<TArg>(this Type type, TArg argument)
-        {
-            return GetInstance<TArg, TypeToIgnore>(type, argument, null);
-        }
+        public static object GetInstance<TArg>(this Type type, TArg argument) => GetInstance<TArg, TypeToIgnore>(type, argument, null);
 
         /// <summary>
         /// Returns an instance of the <paramref name="type"/> on which the method is invoked.
@@ -57,10 +54,7 @@ namespace ImageProcessor.Web.Extensions
         /// <param name="argument1">The first argument to pass to the constructor.</param>
         /// <param name="argument2">The second argument to pass to the constructor.</param>
         /// <returns>An instance of the given <paramref name="type"/>.</returns>
-        public static object GetInstance<TArg1, TArg2>(this Type type, TArg1 argument1, TArg2 argument2)
-        {
-            return GetInstance<TArg1, TArg2, TypeToIgnore>(type, argument1, argument2, null);
-        }
+        public static object GetInstance<TArg1, TArg2>(this Type type, TArg1 argument1, TArg2 argument2) => GetInstance<TArg1, TArg2, TypeToIgnore>(type, argument1, argument2, null);
 
         /// <summary>
         /// Returns an instance of the <paramref name="type"/> on which the method is invoked.
@@ -124,8 +118,7 @@ namespace ImageProcessor.Web.Extensions
             private static void CacheInstanceCreationMethodIfRequired(Type type)
             {
                 // Bail out if we've already cached the instance creation method:
-                Func<TArg1, TArg2, TArg3, object> cached;
-                if (InstanceCreationMethods.TryGetValue(type, out cached))
+                if (InstanceCreationMethods.TryGetValue(type, out Func<TArg1, TArg2, TArg3, object> cached))
                 {
                     return;
                 }

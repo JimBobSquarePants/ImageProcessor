@@ -33,13 +33,13 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// </returns>
         public override Bitmap TransformImage(Image source, Image destination)
         {
-            using (Graphics graphics = Graphics.FromImage(destination))
+            using (var graphics = Graphics.FromImage(destination))
             {
-                using (ImageAttributes attributes = new ImageAttributes())
+                using (var attributes = new ImageAttributes())
                 {
                     attributes.SetColorMatrix(this.Matrix);
 
-                    Rectangle rectangle = new Rectangle(0, 0, source.Width, source.Height);
+                    var rectangle = new Rectangle(0, 0, source.Width, source.Height);
 
                     graphics.DrawImage(source, rectangle, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
                 }

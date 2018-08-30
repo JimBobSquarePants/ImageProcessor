@@ -32,10 +32,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <param name="image">
         /// The image to store.
         /// </param>
-        public ImageBuffer(Bitmap image)
-        {
-            this.Image = image;
-        }
+        public ImageBuffer(Bitmap image) => this.Image = image;
 
         /// <summary>
         /// Gets the image.
@@ -54,9 +51,9 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
             {
                 int width = this.Image.Width;
                 int height = this.Image.Height;
-                Color32[] pixels = new Color32[width];
+                var pixels = new Color32[width];
 
-                using (FastBitmap bitmap = new FastBitmap(this.Image))
+                using (var bitmap = new FastBitmap(this.Image))
                 {
                     for (int y = 0; y < height; y++)
                     {

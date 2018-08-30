@@ -26,32 +26,6 @@ namespace ImageProcessor.Imaging.Filters.Artistic
     public class HalftoneFilter
     {
         /// <summary>
-        /// The angle of the cyan component in degrees.
-        /// </summary>
-        private float cyanAngle = 15f;
-
-        /// <summary>
-        /// The angle of the magenta component in degrees.
-        /// </summary>
-        private float magentaAngle = 75f;
-
-        /// <summary>
-        /// The angle of the yellow component in degrees.
-        /// </summary>
-        // ReSharper disable once RedundantDefaultMemberInitializer
-        private float yellowAngle = 0f;
-
-        /// <summary>
-        /// The angle of the keyline component in degrees.
-        /// </summary>
-        private float keylineAngle = 45f;
-
-        /// <summary>
-        /// The distance between component points.
-        /// </summary>
-        private int distance = 4;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="HalftoneFilter"/> class.
         /// </summary>
         public HalftoneFilter()
@@ -64,90 +38,32 @@ namespace ImageProcessor.Imaging.Filters.Artistic
         /// <param name="distance">
         /// The distance.
         /// </param>
-        public HalftoneFilter(int distance)
-        {
-            this.distance = distance;
-        }
+        public HalftoneFilter(int distance) => this.Distance = distance;
 
         /// <summary>
         /// Gets or sets the angle of the cyan component in degrees.
         /// </summary>
-        public float CyanAngle
-        {
-            get
-            {
-                return this.cyanAngle;
-            }
-
-            set
-            {
-                this.cyanAngle = value;
-            }
-        }
+        public float CyanAngle { get; set; } = 15f;
 
         /// <summary>
         /// Gets or sets the angle of the magenta component in degrees.
         /// </summary>
-        public float MagentaAngle
-        {
-            get
-            {
-                return this.magentaAngle;
-            }
-
-            set
-            {
-                this.magentaAngle = value;
-            }
-        }
+        public float MagentaAngle { get; set; } = 75f;
 
         /// <summary>
         /// Gets or sets the angle of the yellow component in degrees.
         /// </summary>
-        public float YellowAngle
-        {
-            get
-            {
-                return this.yellowAngle;
-            }
-
-            set
-            {
-                this.yellowAngle = value;
-            }
-        }
+        public float YellowAngle { get; set; }
 
         /// <summary>
         /// Gets or sets the angle of the keyline black component in degrees.
         /// </summary>
-        public float KeylineAngle
-        {
-            get
-            {
-                return this.keylineAngle;
-            }
-
-            set
-            {
-                this.keylineAngle = value;
-            }
-        }
+        public float KeylineAngle { get; set; } = 45f;
 
         /// <summary>
         /// Gets or sets the distance between component points.
         /// </summary>
-        public int Distance
-        {
-            get
-            {
-                return this.distance;
-            }
-
-            set
-            {
-                this.distance = value;
-            }
-        }
+        public int Distance { get; set; } = 4;
 
         /// <summary>
         /// Applies the halftone filter. 
@@ -172,21 +88,21 @@ namespace ImageProcessor.Imaging.Filters.Artistic
             {
                 int sourceWidth = source.Width;
                 int sourceHeight = source.Height;
-                int width = source.Width + this.distance;
-                int height = source.Height + this.distance;
+                int width = source.Width + this.Distance;
+                int height = source.Height + this.Distance;
 
                 // Draw a slightly larger image, flipping the top/left pixels to prevent
                 // jagged edge of output.
                 padded = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
                 padded.SetResolution(source.HorizontalResolution, source.VerticalResolution);
-                using (Graphics graphicsPadded = Graphics.FromImage(padded))
+                using (var graphicsPadded = Graphics.FromImage(padded))
                 {
                     graphicsPadded.Clear(Color.White);
-                    Rectangle destinationRectangle = new Rectangle(0, 0, sourceWidth + this.distance, source.Height + this.distance);
-                    using (TextureBrush tb = new TextureBrush(source))
+                    var destinationRectangle = new Rectangle(0, 0, sourceWidth + this.Distance, source.Height + this.Distance);
+                    using (var tb = new TextureBrush(source))
                     {
                         tb.WrapMode = WrapMode.TileFlipXY;
-                        tb.TranslateTransform(this.distance, this.distance);
+                        tb.TranslateTransform(this.Distance, this.Distance);
                         graphicsPadded.FillRectangle(tb, destinationRectangle);
                     }
                 }
@@ -200,12 +116,12 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                 Point center = Point.Empty;
 
                 // Yellow oversaturates the output.
-                int offset = this.distance;
-                float yellowMultiplier = this.distance * 1.587f;
-                float magentaMultiplier = this.distance * 2.176f;
-                float multiplier = this.distance * 2.2f;
-                float max = this.distance * (float)Math.Sqrt(2);
-                float magentaMax = this.distance * (float)Math.Sqrt(1.4545);
+                int offset = this.Distance;
+                float yellowMultiplier = this.Distance * 1.587f;
+                float magentaMultiplier = this.Distance * 2.176f;
+                float multiplier = this.Distance * 2.2f;
+                float max = this.Distance * (float)Math.Sqrt(2);
+                float magentaMax = this.Distance * (float)Math.Sqrt(1.4545);
 
                 // Bump up the keyline max so that black looks black.
                 float keylineMax = max * (float)Math.Sqrt(2);
@@ -231,12 +147,12 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                 newImage.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
                 // Check bounds against this.
-                Rectangle rectangle = new Rectangle(0, 0, width, height);
+                var rectangle = new Rectangle(0, 0, width, height);
 
-                using (Graphics graphicsCyan = Graphics.FromImage(cyan))
-                using (Graphics graphicsMagenta = Graphics.FromImage(magenta))
-                using (Graphics graphicsYellow = Graphics.FromImage(yellow))
-                using (Graphics graphicsKeyline = Graphics.FromImage(keyline))
+                using (var graphicsCyan = Graphics.FromImage(cyan))
+                using (var graphicsMagenta = Graphics.FromImage(magenta))
+                using (var graphicsYellow = Graphics.FromImage(yellow))
+                using (var graphicsKeyline = Graphics.FromImage(keyline))
                 {
                     // Set the quality properties.
                     graphicsCyan.PixelOffsetMode = PixelOffsetMode.Half;
@@ -262,7 +178,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
 
                     // This is too slow. The graphics object can't be called within a parallel 
                     // loop so we have to do it old school. :(
-                    using (FastBitmap sourceBitmap = new FastBitmap(padded))
+                    using (var sourceBitmap = new FastBitmap(padded))
                     {
                         for (int y = minY; y < maxY; y += offset)
                         {
@@ -273,7 +189,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                                 float brushWidth;
 
                                 // Cyan
-                                Point rotatedPoint = ImageMaths.RotatePoint(new Point(x, y), this.cyanAngle, center);
+                                Point rotatedPoint = ImageMaths.RotatePoint(new Point(x, y), this.CyanAngle, center);
                                 int angledX = rotatedPoint.X;
                                 int angledY = rotatedPoint.Y;
                                 if (rectangle.Contains(new Point(angledX, angledY)))
@@ -285,7 +201,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                                 }
 
                                 // Magenta
-                                rotatedPoint = ImageMaths.RotatePoint(new Point(x, y), this.magentaAngle, center);
+                                rotatedPoint = ImageMaths.RotatePoint(new Point(x, y), this.MagentaAngle, center);
                                 angledX = rotatedPoint.X;
                                 angledY = rotatedPoint.Y;
                                 if (rectangle.Contains(new Point(angledX, angledY)))
@@ -297,7 +213,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                                 }
 
                                 // Yellow
-                                rotatedPoint = ImageMaths.RotatePoint(new Point(x, y), this.yellowAngle, center);
+                                rotatedPoint = ImageMaths.RotatePoint(new Point(x, y), this.YellowAngle, center);
                                 angledX = rotatedPoint.X;
                                 angledY = rotatedPoint.Y;
                                 if (rectangle.Contains(new Point(angledX, angledY)))
@@ -309,7 +225,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                                 }
 
                                 // Keyline 
-                                rotatedPoint = ImageMaths.RotatePoint(new Point(x, y), this.keylineAngle, center);
+                                rotatedPoint = ImageMaths.RotatePoint(new Point(x, y), this.KeylineAngle, center);
                                 angledX = rotatedPoint.X;
                                 angledY = rotatedPoint.Y;
                                 if (rectangle.Contains(new Point(angledX, angledY)))
@@ -327,17 +243,17 @@ namespace ImageProcessor.Imaging.Filters.Artistic
                     }
 
                     // Set our white background.
-                    using (Graphics graphics = Graphics.FromImage(newImage))
+                    using (var graphics = Graphics.FromImage(newImage))
                     {
                         graphics.Clear(Color.White);
                     }
 
                     // Blend the colors now to mimic adaptive blending.
-                    using (FastBitmap cyanBitmap = new FastBitmap(cyan))
-                    using (FastBitmap magentaBitmap = new FastBitmap(magenta))
-                    using (FastBitmap yellowBitmap = new FastBitmap(yellow))
-                    using (FastBitmap keylineBitmap = new FastBitmap(keyline))
-                    using (FastBitmap destinationBitmap = new FastBitmap(newImage))
+                    using (var cyanBitmap = new FastBitmap(cyan))
+                    using (var magentaBitmap = new FastBitmap(magenta))
+                    using (var yellowBitmap = new FastBitmap(yellow))
+                    using (var keylineBitmap = new FastBitmap(keyline))
+                    using (var destinationBitmap = new FastBitmap(newImage))
                     {
                         Parallel.For(
                             offset,
@@ -377,35 +293,12 @@ namespace ImageProcessor.Imaging.Filters.Artistic
             }
             catch
             {
-                if (padded != null)
-                {
-                    padded.Dispose();
-                }
-
-                if (cyan != null)
-                {
-                    cyan.Dispose();
-                }
-
-                if (magenta != null)
-                {
-                    magenta.Dispose();
-                }
-
-                if (yellow != null)
-                {
-                    yellow.Dispose();
-                }
-
-                if (keyline != null)
-                {
-                    keyline.Dispose();
-                }
-
-                if (newImage != null)
-                {
-                    newImage.Dispose();
-                }
+                padded?.Dispose();
+                cyan?.Dispose();
+                magenta?.Dispose();
+                yellow?.Dispose();
+                keyline?.Dispose();
+                newImage?.Dispose();
             }
 
             return source;
@@ -427,9 +320,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
         {
             int maxWidth = 0;
             int maxHeight = 0;
-            List<float> angles = new List<float> { this.CyanAngle, this.MagentaAngle, this.YellowAngle, this.KeylineAngle };
-
-            foreach (float angle in angles)
+            foreach (float angle in new List<float> { this.CyanAngle, this.MagentaAngle, this.YellowAngle, this.KeylineAngle })
             {
                 Size rotatedSize = ImageMaths.GetBoundingRotatedRectangle(width, height, angle).Size;
                 maxWidth = Math.Max(maxWidth, rotatedSize.Width);

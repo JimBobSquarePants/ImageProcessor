@@ -20,9 +20,6 @@ namespace ImageProcessor.Web.Extensions
         /// </summary>
         /// <param name="value">The object to test against.</param>
         /// <returns>True; if the value is null or an empty string; otherwise; false.</returns>
-        public static bool IsNullOrEmptyString(this object value)
-        {
-            return value == null || value as string == string.Empty;
-        }
+        public static bool IsNullOrEmptyString(this object value) => value == null || (value as string)?.Length == 0;
     }
 }

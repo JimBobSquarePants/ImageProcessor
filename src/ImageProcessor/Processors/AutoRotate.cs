@@ -33,10 +33,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoRotate"/> class.
         /// </summary>
-        public AutoRotate()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public AutoRotate() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.

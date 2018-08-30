@@ -22,8 +22,8 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
         /// </summary>
         public double[,] HorizontalGradientOperator => new double[,]
         {
-            { -1, 0, 1 }, 
-            { -1, 0, 1 }, 
+            { -1, 0, 1 },
+            { -1, 0, 1 },
             { -1, 0, 1 }
         };
 
@@ -32,8 +32,8 @@ namespace ImageProcessor.Imaging.Filters.EdgeDetection
         /// </summary>
         public double[,] VerticalGradientOperator => new double[,]
         {
-            { 1, 1, 1 }, 
-            { 0, 0, 0 }, 
+            { 1, 1, 1 },
+            { 0, 0, 0 },
             { -1, -1, -1 }
         };
     }

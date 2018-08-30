@@ -28,10 +28,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Saturation"/> class.
         /// </summary>
-        public Saturation()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Saturation() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.
@@ -84,7 +81,7 @@ namespace ImageProcessor.Processors
                 newImage = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppPArgb);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-                ColorMatrix colorMatrix =
+                var colorMatrix =
                     new ColorMatrix(
                         new[]
                             {
@@ -107,9 +104,9 @@ namespace ImageProcessor.Processors
                                 new float[] { 0, 0, 0, 0, 1 }
                             });
 
-                using (Graphics graphics = Graphics.FromImage(newImage))
+                using (var graphics = Graphics.FromImage(newImage))
                 {
-                    using (ImageAttributes imageAttributes = new ImageAttributes())
+                    using (var imageAttributes = new ImageAttributes())
                     {
                         imageAttributes.SetColorMatrix(colorMatrix);
 

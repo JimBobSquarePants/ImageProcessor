@@ -57,10 +57,7 @@ namespace ImageProcessor.Web.Services
         /// <returns>
         /// <c>True</c> if the request is valid; otherwise, <c>False</c>.
         /// </returns>
-        public virtual bool IsValidRequest(string path)
-        {
-            return ImageHelpers.IsValidImageExtension(path);
-        }
+        public virtual bool IsValidRequest(string path) => ImageHelpers.IsValidImageExtension(path);
 
         /// <summary>
         /// Gets the image using the given identifier.
@@ -82,7 +79,7 @@ namespace ImageProcessor.Web.Services
                 throw new HttpException((int)HttpStatusCode.NotFound, $"No image exists at {path}");
             }
 
-            using (FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+            using (var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
             {
                 buffer = new byte[file.Length];
                 await file.ReadAsync(buffer, 0, (int)file.Length).ConfigureAwait(false);

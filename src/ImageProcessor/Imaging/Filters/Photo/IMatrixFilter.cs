@@ -27,9 +27,9 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// Processes the image.
         /// </summary>
         /// <param name="source">The current image to process</param>
-        /// <param name="destination">The new Image to return</param>
+        /// <param name="destination">The new image to return</param>
         /// <returns>
-        /// The processed <see cref="System.Drawing.Bitmap"/>.
+        /// The processed <see cref="Bitmap"/>.
         /// </returns>
         Bitmap TransformImage(Image source, Image destination);
     }

@@ -26,10 +26,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="BackgroundColor"/> class.
         /// </summary>
-        public BackgroundColor()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public BackgroundColor() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the DynamicParameter.
@@ -65,7 +62,7 @@ namespace ImageProcessor.Processors
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                 // Make a graphics object from the empty bitmap.
-                using (Graphics graphics = Graphics.FromImage(newImage))
+                using (var graphics = Graphics.FromImage(newImage))
                 {
                     GraphicsHelper.SetGraphicsOptions(graphics, true);
 

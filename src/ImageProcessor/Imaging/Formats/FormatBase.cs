@@ -23,10 +23,7 @@ namespace ImageProcessor.Imaging.Formats
         /// <summary>
         /// Initializes a new instance of the <see cref="FormatBase"/> class.
         /// </summary>
-        protected FormatBase()
-        {
-            this.Quality = 90;
-        }
+        protected FormatBase() => this.Quality = 90;
 
         /// <summary>
         /// Gets the file headers.
@@ -68,10 +65,7 @@ namespace ImageProcessor.Imaging.Formats
         /// </summary>
         /// <param name="processor">The processor delegate.</param>
         /// <param name="factory">The <see cref="ImageFactory" />.</param>
-        public virtual void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
-        {
-            factory.Image = processor.Invoke(factory);
-        }
+        public virtual void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory) => factory.Image = processor.Invoke(factory);
 
         /// <summary>
         /// Decodes the image to process.
@@ -129,17 +123,15 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+        /// Determines whether the specified <see cref="object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
-            ISupportedImageFormat format = obj as ISupportedImageFormat;
-
-            if (format == null)
+            if (!(obj is ISupportedImageFormat format))
             {
                 return false;
             }
@@ -159,8 +151,7 @@ namespace ImageProcessor.Imaging.Formats
             {
                 int hashCode = this.MimeType.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.IsIndexed.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Quality;
-                return hashCode;
+                return (hashCode * 397) ^ this.Quality;
             }
         }
     }
