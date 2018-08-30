@@ -15,7 +15,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using ImageProcessor.Web.Caching;
 using ImageProcessor.Web.Helpers;
-using Microsoft.IO;
 
 namespace ImageProcessor.Web.Services
 {
@@ -129,17 +128,17 @@ namespace ImageProcessor.Web.Services
                 return null;
             }
 
-            using (var memoryStream = new RecyclableMemoryStream(MemoryStreamPool.Shared))
+            using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
             {
                 using (HttpResponseMessage response = httpResponse)
                 {
                     using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                     {
-                        responseStream.CopyTo(memoryStream);
+                        await responseStream.CopyToAsync(memoryStream).ConfigureAwait(false);
 
                         // Reset the position of the stream to ensure we're reading the correct part.
                         memoryStream.Position = 0;
-                        buffer = memoryStream.GetBuffer();
+                        buffer = memoryStream.ToArray();
                     }
                 }
             }
