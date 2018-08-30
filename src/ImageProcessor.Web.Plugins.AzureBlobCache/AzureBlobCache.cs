@@ -457,7 +457,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
             try
             {
-                if (new Uri(this.RequestPath).IsFile)
+                if ((Uri.IsWellFormedUriString(this.RequestPath, UriKind.Absolute)) && (new Uri(this.RequestPath).IsFile))
                 {
                     if (File.Exists(this.RequestPath))
                     {
