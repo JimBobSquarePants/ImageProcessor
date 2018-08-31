@@ -17,6 +17,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Web;
 
@@ -37,6 +38,11 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
     /// </summary>
     public class AmazonS3Cache : ImageCacheBase
     {
+        /// <summary>
+        /// The regular expression for parsing a remote uri.
+        /// </summary>
+        private static readonly Regex RemoteRegex = new Regex("^http(s)?://", RegexOptions.Compiled);
+
         /// <summary>
         /// The assembly version.
         /// </summary>
@@ -68,10 +74,39 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         private readonly string awsBucketName;
 
         /// <summary>
-        /// Image Processor Cache folder in S3.
-        /// TODO: Why is this here? What does it do and why is it a constant?
+        /// The Key prefix to use for cache files
         /// </summary>
-        private string imageProcessorCachePrefix = @"imageprocessor_cache/";
+        private string awsCacheKeyPrefix;
+
+        /// <summary>
+        /// Determines if the CDN request is redirected or rewritten
+        /// </summary>
+        private readonly bool streamCachedImage;
+
+        /// <summary>
+        /// The timeout length for requesting the CDN url.
+        /// </summary>
+        private readonly int timeout = 1000;
+
+        /// <summary>
+        /// The cached rewrite path.
+        /// </summary>
+        private string cachedRewritePath;
+
+        /// <summary>
+        /// The cloud source S3 container.
+        /// </summary>
+        private readonly AmazonS3Client amazonS3SourceCache;
+
+        /// <summary>
+        /// The Amazon S3 Source URI.
+        /// </summary>
+        private readonly string cloudSourceUri;
+
+        /// <summary>
+        /// The Amazon S3 Source Bucket Name.
+        /// </summary>
+        private readonly string amazonS3SourceBucketName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmazonS3Cache"/> class.
@@ -88,18 +123,67 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         public AmazonS3Cache(string requestPath, string fullPath, string querystring)
             : base(requestPath, fullPath, querystring)
         {
-            this.awsAccessKey = this.Settings["AwsAccessKey"];
-            this.awsSecretKey = this.Settings["AwsSecretKey"];
+            awsAccessKey = Settings.ContainsKey("AwsAccessKey") ? Settings["AwsAccessKey"] : string.Empty;
+            awsSecretKey = Settings.ContainsKey("AwsSecretKey") ? Settings["AwsSecretKey"] : string.Empty;
+
             this.awsBucketName = this.Settings["AwsBucketName"];
-            RegionEndpoint awsRegionEndpoint = this.GetRegionEndpoint();
+            this.awsCacheKeyPrefix = this.Settings["AwsCacheKeyPrefix"];
+            string endPointRegion = Settings.ContainsKey("RegionEndpoint") ? Settings["RegionEndpoint"] : string.Empty;
+            RegionEndpoint awsRegionEndpoint = GetRegionEndpoint(endPointRegion);
 
             if (this.AwsIsValid)
             {
-                // Create S3 client from AWS Access Key and AWS Secret Access Key.
+                // If Keys are provided then use these, otherwise we'll use IAM access keys
                 this.amazonS3ClientCache = new AmazonS3Client(this.awsAccessKey, this.awsSecretKey, awsRegionEndpoint);
+            }
+            else if (!string.IsNullOrWhiteSpace(this.awsBucketName))
+            {
+                this.amazonS3ClientCache = new AmazonS3Client(awsRegionEndpoint);
             }
 
             this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot") ? this.Settings["CachedCDNRoot"] : string.Empty;
+
+            if (amazonS3SourceCache == null)
+            {
+                amazonS3SourceBucketName = Settings.ContainsKey("SourceS3Bucket") ? Settings["SourceS3Bucket"] : string.Empty;
+                cloudSourceUri = Settings.ContainsKey("CloudSourceURI") ? Settings["CloudSourceURI"] : string.Empty;
+
+                string sourceAccount = this.Settings.ContainsKey("SourceStorageAccount")
+                    ? this.Settings["SourceStorageAccount"]
+                    : string.Empty;
+
+                // Repeat for source if it exists
+                if (!string.IsNullOrWhiteSpace(amazonS3SourceBucketName))
+                {
+                    string awsSourceAccessKey = Settings.ContainsKey("AwsSourceAccessKey") ? Settings["AwsSourceAccessKey"] : string.Empty;
+                    string awsSourceSecretKey = Settings.ContainsKey("AwsSourceSecretKey") ? Settings["AwsSourceSecretKey"] : string.Empty;
+                    string sourceEndPointRegion = Settings.ContainsKey("SourceRegionEndpoint") ? Settings["SourceRegionEndpoint"] : string.Empty;
+                    RegionEndpoint awsSourceRegionEndpoint = GetRegionEndpoint(sourceEndPointRegion);
+
+                    if (!string.IsNullOrWhiteSpace(awsSourceAccessKey)
+                        && !string.IsNullOrWhiteSpace(awsSourceSecretKey))
+                    {
+                        // If Keys are provided then use these, otherwise we'll use IAM access keys
+                        amazonS3SourceCache = new AmazonS3Client(awsSourceAccessKey, awsSourceSecretKey, awsSourceRegionEndpoint);
+                    }
+                    else
+                    {
+                        amazonS3SourceCache = new AmazonS3Client(awsSourceRegionEndpoint);
+                    }
+                }
+            }
+
+            if (this.Settings.ContainsKey("CachedCDNTimeout"))
+            {
+                int.TryParse(this.Settings["CachedCDNTimeout"], out int t);
+                this.timeout = t;
+            }
+
+            // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
+            // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site.
+            this.streamCachedImage = this.Settings.ContainsKey("StreamCachedImage") && this.Settings["StreamCachedImage"].ToLower() == "true";
+
+
         }
 
         /// <summary>
@@ -126,13 +210,10 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             // Collision rate of about 1 in 10000 for the folder structure.
             // That gives us massive scope to store millions of files.
             string pathFromKey = string.Join("\\", cachedFileName.ToCharArray().Take(6));
-            this.CachedPath = Path.Combine(this.cachedCdnRoot, this.imageProcessorCachePrefix, pathFromKey, cachedFileName)
+            this.CachedPath = Path.Combine(this.cachedCdnRoot, this.awsCacheKeyPrefix, pathFromKey, cachedFileName)
                                   .Replace(@"\", "/");
 
-            // TODO: What is the S3 version of the following lines? The Above doesn't match what I expect
-            //this.CachedPath = Path.Combine(this.cloudCachedBlobContainer.Uri.ToString(), pathFromKey, cachedFileName).Replace(@"\", "/");
-            //this.cachedRewritePath = Path.Combine(this.cachedCdnRoot, this.cloudCachedBlobContainer.Name, pathFromKey, cachedFileName).Replace(@"\", "/");
-
+            this.cachedRewritePath = this.CachedPath;
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
@@ -185,7 +266,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                     }
                 }
-                catch (AmazonS3Exception)
+                catch (AmazonS3Exception ex)
                 {
                     // Nothing in S3 so we should return true.
                     isUpdated = true;
@@ -199,8 +280,9 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             }
             else
             {
-                // Check to see if the cached image is set to expire.
-                if (this.IsExpired(cachedImage.CreationTimeUtc))
+                // Check to see if the cached image is set to expire
+                // or a new file with the same name has replaced our current image
+                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
                 {
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
@@ -310,62 +392,62 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <returns>
         /// The asynchronous <see cref="Task"/> returning the value.
         /// </returns>
-        public override async Task<string> CreateCachedFileNameAsync()
-        {
-            string streamHash = string.Empty;
+        //public override async Task<string> CreateCachedFileNameAsync()
+        //{
+        //    string streamHash = string.Empty;
 
-            try
-            {
-                if (new Uri(this.RequestPath).IsFile)
-                {
-                    // Get the hash for the filestream. That way we can ensure that if the image is
-                    // updated but has the same name we will know.
-                    FileInfo imageFileInfo = new FileInfo(this.RequestPath);
-                    if (imageFileInfo.Exists)
-                    {
-                        // Pull the latest info.
-                        imageFileInfo.Refresh();
+        //    try
+        //    {
+        //        if (new Uri(this.RequestPath).IsFile)
+        //        {
+        //            // Get the hash for the filestream. That way we can ensure that if the image is
+        //            // updated but has the same name we will know.
+        //            FileInfo imageFileInfo = new FileInfo(this.RequestPath);
+        //            if (imageFileInfo.Exists)
+        //            {
+        //                // Pull the latest info.
+        //                imageFileInfo.Refresh();
 
-                        // Checking the stream itself is far too processor intensive so we make a best guess.
-                        string creation = imageFileInfo.CreationTimeUtc.ToString(CultureInfo.InvariantCulture);
-                        string length = imageFileInfo.Length.ToString(CultureInfo.InvariantCulture);
-                        streamHash = string.Format("{0}{1}", creation, length);
-                    }
-                }
-                else
-                {
-                    // Try and get the headers for the file, this should allow cache busting for remote files.
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
-                    request.Method = "HEAD";
+        //                // Checking the stream itself is far too processor intensive so we make a best guess.
+        //                string creation = imageFileInfo.CreationTimeUtc.ToString(CultureInfo.InvariantCulture);
+        //                string length = imageFileInfo.Length.ToString(CultureInfo.InvariantCulture);
+        //                streamHash = string.Format("{0}{1}", creation, length);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            // Try and get the headers for the file, this should allow cache busting for remote files.
+        //            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+        //            request.Method = "HEAD";
 
-                    using (HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync()))
-                    {
-                        string lastModified = response.LastModified.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
-                        string length = response.ContentLength.ToString(CultureInfo.InvariantCulture);
-                        streamHash = string.Format("{0}{1}", lastModified, length);
-                    }
-                }
+        //            using (HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync()))
+        //            {
+        //                string lastModified = response.LastModified.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
+        //                string length = response.ContentLength.ToString(CultureInfo.InvariantCulture);
+        //                streamHash = string.Format("{0}{1}", lastModified, length);
+        //            }
+        //        }
 
-                // TODO: Pull from other cloud folder/bucket to match the AzureBlobCache behaviour.
-            }
-            catch
-            {
-                streamHash = string.Empty;
-            }
+        //        // TODO: Pull from other cloud folder/bucket to match the AzureBlobCache behaviour.
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        streamHash = string.Empty;
+        //    }
 
-            // Use an sha1 hash of the full path including the querystring to create the image name.
-            // That name can also be used as a key for the cached image and we should be able to use
-            // The characters of that hash as sub-folders.
-            string parsedExtension = ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
-            string encryptedName = (streamHash + this.FullPath).ToSHA1Fingerprint();
+        //    // Use an sha1 hash of the full path including the querystring to create the image name.
+        //    // That name can also be used as a key for the cached image and we should be able to use
+        //    // The characters of that hash as sub-folders.
+        //    string parsedExtension = ImageHelpers.Instance.GetExtension(this.FullPath, this.Querystring);
+        //    string encryptedName = (streamHash + this.FullPath).ToSHA1Fingerprint();
 
-            string cachedFileName = string.Format(
-                 "{0}.{1}",
-                 encryptedName,
-                 !string.IsNullOrWhiteSpace(parsedExtension) ? parsedExtension.Replace(".", string.Empty) : "jpg");
+        //    string cachedFileName = string.Format(
+        //         "{0}.{1}",
+        //         encryptedName,
+        //         !string.IsNullOrWhiteSpace(parsedExtension) ? parsedExtension.Replace(".", string.Empty) : "jpg");
 
-            return cachedFileName;
-        }
+        //    return cachedFileName;
+        //}
 
         /// <summary>
         /// Rewrites the path to point to the cached image.
@@ -375,33 +457,138 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </param>
         public override void RewritePath(HttpContext context)
         {
-            // TODO: This doesn't look correct to me. Where is the CDN path?
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.CachedPath);
-            request.Method = "HEAD";
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.cachedRewritePath);
 
-            TryFiveTimes(
-                () =>
+            if (this.streamCachedImage)
+            {
+                // Map headers to enable 304s to pass through
+                if (context.Request.Headers["If-Modified-Since"] != null)
                 {
-                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    TrySetIfModifiedSinceDate(context, request);
+                }
+
+                string[] mapRequestHeaders = { "Cache-Control", "If-None-Match" };
+                foreach (string h in mapRequestHeaders)
+                {
+                    if (context.Request.Headers[h] != null)
                     {
-                        HttpStatusCode responseCode = response.StatusCode;
-                        context.Response.Redirect(
-                            responseCode == HttpStatusCode.NotFound ? this.RequestPath : this.CachedPath,
-                            false);
+                        request.Headers.Add(h, context.Request.Headers[h]);
+                    }
+                }
+
+                // Write the blob storage directly to the stream
+                request.Method = "GET";
+                request.Timeout = this.timeout;
+
+                HttpWebResponse response = null;
+                try
+                {
+                    response = (HttpWebResponse)request.GetResponse();
+                }
+                catch (WebException ex)
+                {
+                    // A 304 is not an error
+                    // It appears that some CDN's on Azure (Akamai) do not work properly when making head requests.
+                    // They will return a response url and other headers but a 500 status code.
+                    if (ex.Response != null && (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified
+                                                || ex.Response.ResponseUri.AbsoluteUri.Equals(this.cachedRewritePath, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        response = (HttpWebResponse)ex.Response;
+                    }
+                    else
+                    {
+                        response?.Dispose();
+                        ImageProcessorBootstrapper.Instance.Logger.Log<AmazonS3Cache>("Unable to stream cached path: " + this.cachedRewritePath);
+                        return;
+                    }
+                }
+
+                Stream cachedStream = response.GetResponseStream();
+
+                if (cachedStream != null)
+                {
+                    HttpResponse contextResponse = context.Response;
+
+                    // If streaming but not using a CDN the headers will be null.
+                    // See https://github.com/JimBobSquarePants/ImageProcessor/pull/466
+                    string etagHeader = response.Headers["ETag"];
+                    if (!string.IsNullOrWhiteSpace(etagHeader))
+                    {
+                        contextResponse.Headers.Add("ETag", etagHeader);
                     }
 
-                    // TODO: Above seems wrong. We should be using something like below toggling between CDN and Bucket URL
-                    //using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                    //{
-                    //    HttpStatusCode responseCode = response.StatusCode;
-                    //    ImageProcessingModule.AddCorsRequestHeaders(context);
-                    //    context.Response.Redirect(responseCode == HttpStatusCode.NotFound ? this.CachedPath : this.cachedRewritePath, false);
-                    //}
-                },
-                () =>
+                    string lastModifiedHeader = response.Headers["Last-Modified"];
+                    if (!string.IsNullOrWhiteSpace(lastModifiedHeader))
+                    {
+                        contextResponse.Headers.Add("Last-Modified", lastModifiedHeader);
+                    }
+
+                    cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
+                    ImageProcessingModule.SetHeaders(
+                        context,
+                        response.StatusCode == HttpStatusCode.NotModified ? null : response.ContentType,
+                        null,
+                        this.BrowserMaxDays,
+                        response.StatusCode);
+                }
+
+                cachedStream?.Dispose();
+                response.Dispose();
+            }
+            else
+            {
+                // Prevent redundant metadata request if paths match.
+                if (this.CachedPath == this.cachedRewritePath)
                 {
-                    ImageProcessorBootstrapper.Instance.Logger.Log<AmazonS3Cache>("Unable to rewrite cached path to: " + this.CachedPath);
-                });
+                    ImageProcessingModule.AddCorsRequestHeaders(context);
+                    context.Response.Redirect(this.CachedPath, false);
+                    return;
+                }
+
+                // Redirect the request to the blob URL
+                request.Method = "HEAD";
+                request.Timeout = this.timeout;
+
+                HttpWebResponse response = null;
+                try
+                {
+                    response = (HttpWebResponse)request.GetResponse();
+                    response.Dispose();
+                    ImageProcessingModule.AddCorsRequestHeaders(context);
+                    context.Response.Redirect(this.cachedRewritePath, false);
+                }
+                catch (WebException ex)
+                {
+                    response = (HttpWebResponse)ex.Response;
+
+                    if (response != null)
+                    {
+                        HttpStatusCode responseCode = response.StatusCode;
+
+                        // A 304 is not an error
+                        // It appears that some CDN's on Azure (Akamai) do not work properly when making head requests.
+                        // They will return a response url and other headers but a 500 status code.
+                        if (responseCode == HttpStatusCode.NotModified
+                            || response.ResponseUri.AbsoluteUri.Equals(this.cachedRewritePath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            response.Dispose();
+                            ImageProcessingModule.AddCorsRequestHeaders(context);
+                            context.Response.Redirect(this.cachedRewritePath, false);
+                        }
+                        else
+                        {
+                            response.Dispose();
+                            ImageProcessorBootstrapper.Instance.Logger.Log<AmazonS3Cache>("Unable to rewrite cached path to: " + this.cachedRewritePath);
+                        }
+                    }
+                    else
+                    {
+                        // It's a 404, we should redirect to the cached path we have just saved to.
+                        ImageProcessingModule.AddCorsRequestHeaders(context);
+                        context.Response.Redirect(this.CachedPath, false);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -473,40 +660,106 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// Helper to get AWS Region Endpoint from configuration file
         /// </summary>
         /// <returns>Region Endpoint</returns>
-        private RegionEndpoint GetRegionEndpoint()
+        private RegionEndpoint GetRegionEndpoint(string endpoint)
         {
-            string regionEndpointAsString;
-            if (this.Settings.TryGetValue("RegionEndpoint", out regionEndpointAsString))
+            string lclEndpoint = endpoint.ToLower();
+
+            if (!String.IsNullOrEmpty(lclEndpoint))
+                return  RegionEndpoint.GetBySystemName(lclEndpoint);
+            else
+                return RegionEndpoint.EUWest1;
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the requested image has been updated.
+        /// </summary>
+        /// <param name="creationDate">The creation date.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        protected virtual async Task<bool> IsUpdatedAsync(DateTime creationDate)
+        {
+            bool isUpdated = false;
+
+            try
             {
-                regionEndpointAsString = regionEndpointAsString.ToUpperInvariant();
+                if ((Uri.IsWellFormedUriString(this.RequestPath,UriKind.Absolute)) && (new Uri(this.RequestPath).IsFile))
+                {
+                    if (File.Exists(this.RequestPath))
+                    {
+                        // If it's newer than the cached file then it must be an update.
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
+                    }
+                }
+                else if(amazonS3SourceCache != null)
+                {
+                    string container = RemoteRegex.Replace(this.cloudSourceUri, string.Empty);
+                    string s3Path = RemoteRegex.Replace(this.RequestPath, string.Empty);
+                    string key = s3Path.Replace(container, string.Empty).TrimStart('/');
+
+                    GetObjectMetadataRequest objectMetaDataRequest = new GetObjectMetadataRequest
+                    {
+                        BucketName = this.amazonS3SourceBucketName,
+                        Key = key,
+                    };
+
+                    GetObjectMetadataResponse response = await this.amazonS3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest);
+
+                    if (response != null)
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+            }
+            catch
+            {
+                isUpdated = false;
             }
 
-            switch (regionEndpointAsString)
-            {
-                case "APNORTHEAST1":
-                    return RegionEndpoint.APNortheast1;
-                case "APSOUTHEAST1":
-                    return RegionEndpoint.APSoutheast1;
-                case "APSOUTHEAST2":
-                    return RegionEndpoint.APSoutheast2;
-                case "CNNORTH1":
-                    return RegionEndpoint.CNNorth1;
-                case "EUCENTRAL1":
-                    return RegionEndpoint.EUCentral1;
-                case "SAEAST1":
-                    return RegionEndpoint.SAEast1;
-                case "USEAST1":
-                    return RegionEndpoint.USEast1;
-                case "USGOVCLOUDWEST1":
-                    return RegionEndpoint.USGovCloudWest1;
-                case "USWEST1":
-                    return RegionEndpoint.USWest1;
-                case "USWEST2":
-                    return RegionEndpoint.USWest2;
+            return isUpdated;
+        }
 
-                // Set EUWest1 as default RegionEndoint
-                default:
-                    return RegionEndpoint.EUWest1;
+        /// <summary>
+        /// Tries to set IfModifiedSince header however this crashes when context.Request.Headers["If-Modified-Since"] exists,
+        /// but cannot be parsed. It cannot be parsed when it comes from Google Bot as UTC <example>Sun, 27 Nov 2016 20:01:45 UTC</example>
+        /// so DateTime.TryParse. If it returns false, then log the error.
+        /// </summary>
+        /// <param name="context">The current context</param>
+        /// <param name="request">The current request</param>
+        private static void TrySetIfModifiedSinceDate(HttpContext context, HttpWebRequest request)
+        {
+            DateTime ifModifiedDate;
+
+            string ifModifiedFromRequest = context.Request.Headers["If-Modified-Since"];
+
+            if (DateTime.TryParse(ifModifiedFromRequest, out ifModifiedDate))
+            {
+                request.IfModifiedSince = ifModifiedDate;
+            }
+            else
+            {
+                if (ifModifiedFromRequest.ToLower().Contains("utc"))
+                {
+                    ifModifiedFromRequest = ifModifiedFromRequest.ToLower().Replace("utc", string.Empty);
+
+                    if (DateTime.TryParse(ifModifiedFromRequest, out ifModifiedDate))
+                    {
+                        request.IfModifiedSince = ifModifiedDate;
+                    }
+                }
+                else
+                {
+                    ImageProcessorBootstrapper.Instance.Logger.Log<AmazonS3Cache>($"Unable to parse date {context.Request.Headers["If-Modified-Since"]} for {context.Request.Url}");
+                }
             }
         }
     }
