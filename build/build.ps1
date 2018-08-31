@@ -81,7 +81,7 @@ $projects = @(
     $imageprocessorWeb,
     $imageprocessorWebConfig,
     $imageProcessorWebPluginsAzureBlobCache,
-	$imageProcessorWebPluginsAmazonS3Cache
+    $imageProcessorWebPluginsAmazonS3Cache,
     $imageProcessorWebPluginsPostProcessor
 );
 
