@@ -136,17 +136,6 @@ namespace ImageProcessor.Web.HttpModules
         }
 
         /// <summary>
-        /// The process querystring event handler. DO NOT USE!
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="ProcessQueryStringEventArgs"/>.
-        /// </param>
-        /// <returns>Returns the processed querystring.</returns>
-        [Obsolete("Use ValidatingRequest instead")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public delegate string ProcessQuerystringEventHandler(object sender, ProcessQueryStringEventArgs e);
-
-        /// <summary>
         /// Event to use to validate the request or manipulate the request parameters
         /// </summary>
         /// <remarks>

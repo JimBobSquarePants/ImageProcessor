@@ -47,6 +47,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuspecs", "Nuspecs", "{E0B8
 		build\NuSpecs\ImageProcessor.Plugins.WebP.nuspec = build\NuSpecs\ImageProcessor.Plugins.WebP.nuspec
 		build\NuSpecs\ImageProcessor.Web.Config.nuspec = build\NuSpecs\ImageProcessor.Web.Config.nuspec
 		build\NuSpecs\ImageProcessor.Web.nuspec = build\NuSpecs\ImageProcessor.Web.nuspec
+		build\NuSpecs\ImageProcessor.Web.Plugins.AmazonS3Cache.nuspec = build\NuSpecs\ImageProcessor.Web.Plugins.AmazonS3Cache.nuspec
 		build\NuSpecs\ImageProcessor.Web.Plugins.AzureBlobCache.nuspec = build\NuSpecs\ImageProcessor.Web.Plugins.AzureBlobCache.nuspec
 		build\NuSpecs\ImageProcessor.Web.PostProcessor.nuspec = build\NuSpecs\ImageProcessor.Web.PostProcessor.nuspec
 	EndProjectSection
