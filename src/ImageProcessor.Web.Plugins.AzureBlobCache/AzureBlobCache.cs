@@ -546,10 +546,24 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private static CloudBlobContainer CreateContainer(CloudBlobClient cloudBlobClient, string containerName, BlobContainerPublicAccessType accessType)
         {
             CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
-
-            if (!container.Exists())
+            if (cloudBlobClient.Credentials.IsSAS)
             {
-                container.Create();
+                // Shared access signatures (SAS) have some limitations compared to shared access keys
+                // read more on: https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1
+                string[] sasTokenProperties = cloudBlobClient.Credentials.SASToken.Split("&".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                bool isAccountSas = sasTokenProperties.Where(k => k.ToLowerInvariant().StartsWith("si=")).FirstOrDefault() == null;
+                if (isAccountSas)
+                {
+                    container.CreateIfNotExists();
+                    // permissions can't be set!                    
+                }
+            }
+            else
+            {
+                if (!container.Exists())
+                {
+                    container.Create();
+                }
                 container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
             }
 
