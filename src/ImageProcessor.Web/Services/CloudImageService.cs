@@ -89,10 +89,16 @@ namespace ImageProcessor.Web.Services
         public virtual async Task<byte[]> GetImage(object id)
         {
             string host = this.Settings["Host"];
+            string sasQueryString = this.Settings["SASQueryString"];
             string container = this.Settings.ContainsKey("Container") ? this.Settings["Container"] : string.Empty;
             var baseUri = new Uri(host);
 
             string relativeResourceUrl = id.ToString();
+            if (!string.IsNullOrEmpty(sasQueryString))
+            {
+                relativeResourceUrl += (relativeResourceUrl.Contains("?") ? "&" : "?") + sasQueryString.TrimStart('?');
+            }
+
             if (!string.IsNullOrEmpty(container))
             {
                 // TODO: Check me.
