@@ -60,6 +60,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         private static CloudBlobContainer cloudSourceBlobContainer;
 
         /// <summary>
+        /// Cache item for Azure private blobs 'Shared Access Signature' (SAS)
+        /// </summary>
+        private static SASCache sasCache;
+
+        /// <summary>
         /// The cached root url for a content delivery network.
         /// </summary>
         private readonly string cachedCdnRoot;
@@ -106,7 +111,9 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             if (cloudCachedBlobContainer == null)
             {
                 // Retrieve references to a container.
-                cloudCachedBlobContainer = CreateContainer(cloudCachedBlobClient, this.Settings["CachedBlobContainer"], BlobContainerPublicAccessType.Blob);
+                bool usePrivateContainer = this.Settings.ContainsKey("UsePrivateContainer") && !string.Equals(this.Settings["UsePrivateContainer"], "false", StringComparison.OrdinalIgnoreCase);
+                BlobContainerPublicAccessType accessType = usePrivateContainer ? BlobContainerPublicAccessType.Off : BlobContainerPublicAccessType.Blob;
+                cloudCachedBlobContainer = CreateContainer(cloudCachedBlobClient, this.Settings["CachedBlobContainer"], accessType);
             }
 
             if (cloudSourceBlobContainer == null)
@@ -303,7 +310,59 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
             return Task.FromResult(0);
         }
-
+        private string GetPathWithSasTokenQuery(string path)
+        {
+            BlobContainerPermissions permissions = cloudCachedBlobContainer.GetPermissions();
+            if (permissions.PublicAccess != BlobContainerPublicAccessType.Off)
+            {
+                // nothing is required for public blobs
+                return path;
+            }
+            if (sasCache != null)
+            {
+                if (sasCache.CreationTime.AddMinutes(sasCache.ValidityMinutes / 2) > DateTime.UtcNow)
+                {
+                    return path + sasCache.SASQueryString;
+                }
+            }
+            string sasQueryString = Settings.ContainsKey("SASQueryString") ? Settings["SASQueryString"] : null;
+            if (!cloudCachedBlobClient.Credentials.IsSharedKey && string.IsNullOrEmpty(sasQueryString))
+            {
+                return path;
+            }
+            if (!cloudCachedBlobClient.Credentials.IsSharedKey)
+            {
+                return path + sasQueryString;
+            }
+            if (path.Contains("?"))
+            {
+                return path;
+            }
+            else
+            {
+                // Shared Access Signatures can only be generated under shared key credentials!
+                string sasValidityMinutesSetting = Settings.ContainsKey("SASValidityInMinutes") ? Settings["SASValidityInMinutes"] : null;
+                double.TryParse(sasValidityMinutesSetting, out double sasValidityMinutes);
+                if (sasValidityMinutes <= 5)
+                {
+                    sasValidityMinutes = 30;
+                }
+                SharedAccessBlobPolicy accessPolicy = new SharedAccessBlobPolicy()
+                {
+                    Permissions = SharedAccessBlobPermissions.Read,
+                    SharedAccessStartTime = DateTime.UtcNow.AddMinutes(-5),
+                    SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(sasValidityMinutes)
+                };
+                sasQueryString = cloudCachedBlobContainer.GetSharedAccessSignature(accessPolicy);
+                sasCache = new SASCache()
+                {
+                    SASQueryString = sasQueryString,
+                    CreationTime = DateTime.UtcNow,
+                    ValidityMinutes = sasValidityMinutes
+                };
+                return path + sasQueryString;
+            }
+        }
         /// <summary>
         /// Rewrites the path to point to the cached image.
         /// </summary>
@@ -312,7 +371,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </param>
         public override void RewritePath(HttpContext context)
         {
-            var request = (HttpWebRequest)WebRequest.Create(this.cachedRewritePath);
+            var request = (HttpWebRequest)WebRequest.Create(GetPathWithSasTokenQuery(this.cachedRewritePath));
 
             if (this.streamCachedImage)
             {
@@ -396,7 +455,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 if (this.CachedPath == this.cachedRewritePath)
                 {
                     ImageProcessingModule.AddCorsRequestHeaders(context);
-                    context.Response.Redirect(this.CachedPath, false);
+                    context.Response.Redirect(GetPathWithSasTokenQuery(this.CachedPath), false);
                     return;
                 }
 
@@ -410,7 +469,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                     response = (HttpWebResponse)request.GetResponse();
                     response.Dispose();
                     ImageProcessingModule.AddCorsRequestHeaders(context);
-                    context.Response.Redirect(this.cachedRewritePath, false);
+                    context.Response.Redirect(GetPathWithSasTokenQuery(this.cachedRewritePath), false);
                 }
                 catch (WebException ex)
                 {
@@ -428,7 +487,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         {
                             response.Dispose();
                             ImageProcessingModule.AddCorsRequestHeaders(context);
-                            context.Response.Redirect(this.cachedRewritePath, false);
+                            context.Response.Redirect(GetPathWithSasTokenQuery(this.cachedRewritePath), false);
                         }
                         else
                         {
@@ -440,7 +499,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                     {
                         // It's a 404, we should redirect to the cached path we have just saved to.
                         ImageProcessingModule.AddCorsRequestHeaders(context);
-                        context.Response.Redirect(this.CachedPath, false);
+                        context.Response.Redirect(GetPathWithSasTokenQuery(this.CachedPath), false);
                     }
                 }
             }
@@ -564,6 +623,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 {
                     container.Create();
                 }
+
                 container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
             }
 

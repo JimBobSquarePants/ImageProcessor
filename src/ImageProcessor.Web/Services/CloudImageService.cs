@@ -89,7 +89,7 @@ namespace ImageProcessor.Web.Services
         public virtual async Task<byte[]> GetImage(object id)
         {
             string host = this.Settings["Host"];
-            string sasQueryString = this.Settings["SASQueryString"];
+            string sasQueryString = this.Settings.ContainsKey("SASQueryString") ? this.Settings["SASQueryString"] : null;
             string container = this.Settings.ContainsKey("Container") ? this.Settings["Container"] : string.Empty;
             var baseUri = new Uri(host);
 
