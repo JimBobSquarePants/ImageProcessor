@@ -622,9 +622,9 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 if (!container.Exists())
                 {
                     container.Create();
+                    container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
                 }
 
-                container.SetPermissions(new BlobContainerPermissions { PublicAccess = accessType });
             }
 
             return container;
