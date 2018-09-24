@@ -14,13 +14,12 @@ using System.Web;
 
 namespace ImageProcessor.Web.Plugins.PostProcessor
 {
-
     using ImageProcessor.Web.Helpers;
     using ImageProcessor.Web.HttpModules;
 
     /// <summary>
     /// Binds the PostProcessor to process any image requests within the web application.
-    /// Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs"/>
+    /// Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs" />
     /// </summary>
     public static class PostProcessorApplicationEvents
     {
@@ -33,9 +32,12 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         }
 
         /// <summary>
-        /// Sets the timeout limit in ms for the post processor. This defaults to 5000ms
+        /// Sets the timeout limit in milliseconds for the post processor.
         /// </summary>
-        /// <param name="milliseconds"></param>
+        /// <param name="milliseconds">The timeout limit in milliseconds.</param>
+        /// <remarks>
+        /// The default timeout is 5000 milliseconds. Timeouts lower or equal to 0 are ignored (to prevent waiting indefinitely for the post processor processes to exit).
+        /// </remarks>
         public static void SetPostProcessingTimeout(int milliseconds)
         {
             if (milliseconds > 0)
@@ -45,14 +47,10 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         }
 
         /// <summary>
-        /// Asynchronously post-processes cached images.
+        /// Post-processes cached images.
         /// </summary>
-        /// <param name="sender">
-        /// The source of the event.
-        /// </param>
-        /// <param name="e">
-        /// An <see cref="PostProcessingEventArgs">EventArgs</see> that contains the event data.
-        /// </param>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An <see cref="PostProcessingEventArgs">EventArgs</see> that contains the event data.</param>
         private static void PostProcess(object sender, PostProcessingEventArgs e)
         {
             e.ImageStream = PostProcessor.PostProcessImageAsync(e.Context, e.ImageStream, e.ImageExtension).Result;

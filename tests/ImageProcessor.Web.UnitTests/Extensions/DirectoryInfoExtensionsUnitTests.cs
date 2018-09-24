@@ -7,14 +7,13 @@
 
 namespace ImageProcessor.Web.UnitTests.Extensions
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-
-    using Web.Extensions;
-
     using NUnit.Framework;
+    using Web.Extensions;
 
     /// <summary>
     /// The directory info extensions unit tests.
@@ -142,6 +141,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             /// Then should return enumerable directories asynchronously given path with subdirectories
             /// </summary>
             [Test]
+            [Obsolete("This test method uses an obsolete method.")]
             public async Task ThenShouldReturnEnumerableDirectoriesAsyncGivenPathWithSubDirectories()
             {
                 // Arrange
@@ -159,6 +159,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
             /// Then return empty enumerable directories asynchronously given invalid directory
             /// </summary>
             [Test]
+            [Obsolete("This test method uses an obsolete method.")]
             public async Task ThenReturnEmptyEnumerableGivenInvalidDirectory()
             {
                 // Arrange
