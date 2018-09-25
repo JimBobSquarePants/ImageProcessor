@@ -45,7 +45,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// </returns>
         public static Bitmap Vignette(Image source, Color baseColor, Rectangle? rectangle = null, bool invert = false)
         {
-            using (Graphics graphics = Graphics.FromImage(source))
+            using (var graphics = Graphics.FromImage(source))
             {
                 Rectangle bounds = rectangle ?? new Rectangle(0, 0, source.Width, source.Height);
                 Rectangle ellipsebounds = bounds;
@@ -58,10 +58,10 @@ namespace ImageProcessor.Imaging.Helpers
                 int y = ellipsebounds.Height - (int)Math.Floor(.70712 * ellipsebounds.Height);
                 ellipsebounds.Inflate(x, y);
 
-                using (GraphicsPath path = new GraphicsPath())
+                using (var path = new GraphicsPath())
                 {
                     path.AddEllipse(ellipsebounds);
-                    using (PathGradientBrush brush = new PathGradientBrush(path))
+                    using (var brush = new PathGradientBrush(path))
                     {
                         // Fill a rectangle with an elliptical gradient brush that goes from transparent to opaque. 
                         // This has the effect of painting the far corners with the given color and shade less on the way in to the centre.
@@ -82,7 +82,7 @@ namespace ImageProcessor.Imaging.Helpers
                         brush.CenterColor = centerColor;
                         brush.SurroundColors = new[] { edgeColor };
 
-                        Blend blend = new Blend
+                        var blend = new Blend
                         {
                             Positions = new[] { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0F },
                             Factors = new[] { 0.0f, 0.5f, 1f, 1f, 1.0f, 1.0f }
@@ -109,10 +109,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="rectangle">The rectangle to define the bounds of the area to vignette. If null then the effect is applied
         /// to the entire image.</param>
         /// <returns>The <see cref="Bitmap"/> with the vignette applied.</returns>
-        public static Bitmap Glow(Image source, Color baseColor, Rectangle? rectangle = null)
-        {
-            return Vignette(source, baseColor, rectangle, true);
-        }
+        public static Bitmap Glow(Image source, Color baseColor, Rectangle? rectangle = null) => Vignette(source, baseColor, rectangle, true);
 
         /// <summary>
         /// Applies the given image mask to the source.
@@ -139,13 +136,13 @@ namespace ImageProcessor.Imaging.Helpers
             int width = mask.Width;
             int height = mask.Height;
 
-            Bitmap toMask = new Bitmap(source);
+            var toMask = new Bitmap(source);
             toMask.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             // Loop through and replace the alpha channel
-            using (FastBitmap maskBitmap = new FastBitmap(mask))
+            using (var maskBitmap = new FastBitmap(mask))
             {
-                using (FastBitmap sourceBitmap = new FastBitmap(toMask))
+                using (var sourceBitmap = new FastBitmap(toMask))
                 {
                     Parallel.For(
                         0,
@@ -170,9 +167,9 @@ namespace ImageProcessor.Imaging.Helpers
             }
 
             // Ensure the background is cleared out on non alpha supporting formats.
-            Bitmap clear = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            var clear = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             clear.SetResolution(source.HorizontalResolution, source.VerticalResolution);
-            using (Graphics graphics = Graphics.FromImage(clear))
+            using (var graphics = Graphics.FromImage(clear))
             {
                 GraphicsHelper.SetGraphicsOptions(graphics, true);
                 graphics.Clear(Color.Transparent);
@@ -205,7 +202,7 @@ namespace ImageProcessor.Imaging.Helpers
             int height = source.Height;
 
             // Grab the edges converting to greyscale, and invert the colors.
-            ConvolutionFilter filter = new ConvolutionFilter(new SobelEdgeFilter(), true);
+            var filter = new ConvolutionFilter(new SobelEdgeFilter(), true);
 
             using (Bitmap temp = filter.Process2DFilter(source))
             {
@@ -217,7 +214,7 @@ namespace ImageProcessor.Imaging.Helpers
 
             // Loop through and replace any colors more white than the threshold
             // with a transparent one. 
-            using (FastBitmap destinationBitmap = new FastBitmap(destination))
+            using (var destinationBitmap = new FastBitmap(destination))
             {
                 Parallel.For(
                     0,

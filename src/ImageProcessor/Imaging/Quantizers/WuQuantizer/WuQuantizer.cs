@@ -45,10 +45,10 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// </returns>
         internal override Bitmap GetQuantizedImage(ImageBuffer imageBuffer, int colorCount, Color32[] lookups, int alphaThreshold)
         {
-            Bitmap result = new Bitmap(imageBuffer.Image.Width, imageBuffer.Image.Height, PixelFormat.Format8bppIndexed);
+            var result = new Bitmap(imageBuffer.Image.Width, imageBuffer.Image.Height, PixelFormat.Format8bppIndexed);
             result.SetResolution(imageBuffer.Image.HorizontalResolution, imageBuffer.Image.VerticalResolution);
-            ImageBuffer resultBuffer = new ImageBuffer(result);
-            PaletteColorHistory[] paletteHistogram = new PaletteColorHistory[colorCount + 1];
+            var resultBuffer = new ImageBuffer(result);
+            var paletteHistogram = new PaletteColorHistory[colorCount + 1];
             resultBuffer.UpdatePixelIndexes(IndexedPixels(imageBuffer, lookups, alphaThreshold, paletteHistogram));
             result.Palette = BuildPalette(result.Palette, paletteHistogram);
             return result;
@@ -98,7 +98,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         private static IEnumerable<byte[]> IndexedPixels(ImageBuffer image, Color32[] lookups, int alphaThreshold, PaletteColorHistory[] paletteHistogram)
         {
             byte[] lineIndexes = new byte[image.Image.Width];
-            PaletteLookup lookup = new PaletteLookup(lookups);
+            var lookup = new PaletteLookup(lookups);
 
             // Determine the correct fallback color.
             byte fallback = lookups.Length < AlphaMax ? AlphaMin : AlphaMax;

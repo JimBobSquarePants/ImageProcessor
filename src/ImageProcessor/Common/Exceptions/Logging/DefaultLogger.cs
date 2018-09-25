@@ -27,10 +27,7 @@ namespace ImageProcessor.Common.Exceptions
         /// <param name="text">The message to log.</param>
         /// <param name="callerName">The property or method name calling the log.</param>
         /// <param name="lineNumber">The line number where the method is called.</param>
-        public void Log<T>(string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0)
-        {
-            this.LogInternal(typeof(T), text, callerName, lineNumber);
-        }
+        public void Log<T>(string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0) => this.LogInternal(typeof(T), text, callerName, lineNumber);
 
         /// <summary>
         /// Logs the specified message.
@@ -39,22 +36,19 @@ namespace ImageProcessor.Common.Exceptions
         /// <param name="text">The message to log.</param>
         /// <param name="callerName">The property or method name calling the log.</param>
         /// <param name="lineNumber">The line number where the method is called.</param>
-        public void Log(Type type, string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0)
-        {
-            this.LogInternal(type, text, callerName, lineNumber);
-        }
+        public void Log(Type type, string text, [CallerMemberName] string callerName = null, [CallerLineNumber] int lineNumber = 0) => this.LogInternal(type, text, callerName, lineNumber);
 
-		/// <summary>
-		/// Logs the specified message.
-		/// </summary>
-		/// <param name="type">The type calling the logger.</param>
-		/// <param name="text">The message to log.</param>
-		/// <param name="callerName">The property or method name calling the log.</param>
-		/// <param name="lineNumber">The line number where the method is called.</param>
-		[Conditional("TRACE")]
-		private void LogInternal(Type type, string text, string callerName = null, int lineNumber = 0)
+        /// <summary>
+        /// Logs the specified message.
+        /// </summary>
+        /// <param name="type">The type calling the logger.</param>
+        /// <param name="text">The message to log.</param>
+        /// <param name="callerName">The property or method name calling the log.</param>
+        /// <param name="lineNumber">The line number where the method is called.</param>
+        [Conditional("TRACE")]
+        private void LogInternal(Type type, string text, string callerName = null, int lineNumber = 0)
         {
-            string message = String.Format("{0} - {1}: {2} {3}:{4}", DateTime.UtcNow.ToString("s"), type.Name, callerName, lineNumber, text);
+            string message = string.Format("{0} - {1}: {2} {3}:{4}", DateTime.UtcNow.ToString("s"), type.Name, callerName, lineNumber, text);
 
             Trace.WriteLine(message);
         }

@@ -25,10 +25,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="DetectEdges"/> class.
         /// </summary>
-        public DetectEdges()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public DetectEdges() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -67,7 +64,7 @@ namespace ImageProcessor.Processors
 
             try
             {
-                ConvolutionFilter convolutionFilter = new ConvolutionFilter(filter, greyscale);
+                var convolutionFilter = new ConvolutionFilter(filter, greyscale);
 
                 // Check and assign the correct method. Don't use reflection for speed.
                 return filter is I2DEdgeFilter

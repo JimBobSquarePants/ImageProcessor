@@ -71,10 +71,7 @@ namespace ImageProcessor.Imaging
         /// </summary>
         public int Size
         {
-            get
-            {
-                return this.size;
-            }
+            get => this.size;
 
             set
             {
@@ -97,10 +94,7 @@ namespace ImageProcessor.Imaging
         /// </summary>
         public double Sigma
         {
-            get
-            {
-                return this.sigma;
-            }
+            get => this.sigma;
 
             set
             {
@@ -123,10 +117,7 @@ namespace ImageProcessor.Imaging
         /// </summary>
         public int Threshold
         {
-            get
-            {
-                return this.threshold;
-            }
+            get => this.threshold;
 
             set
             {
@@ -153,9 +144,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         public override bool Equals(object obj)
         {
-            GaussianLayer gaussianLayer = obj as GaussianLayer;
-
-            if (gaussianLayer == null)
+            if (!(obj is GaussianLayer gaussianLayer))
             {
                 return false;
             }
@@ -177,8 +166,7 @@ namespace ImageProcessor.Imaging
             {
                 int hashCode = this.Size;
                 hashCode = (hashCode * 397) ^ this.Size.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Threshold;
-                return hashCode;
+                return (hashCode * 397) ^ this.Threshold;
             }
         }
     }

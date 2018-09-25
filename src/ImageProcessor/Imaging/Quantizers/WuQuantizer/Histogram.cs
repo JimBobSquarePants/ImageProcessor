@@ -41,9 +41,6 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <summary>
         /// The clear.
         /// </summary>
-        internal void Clear()
-        {
-            Array.Clear(this.Moments, 0, SideSize * SideSize * SideSize * SideSize);
-        }
+        internal void Clear() => Array.Clear(this.Moments, 0, SideSize * SideSize * SideSize * SideSize);
     }
 }

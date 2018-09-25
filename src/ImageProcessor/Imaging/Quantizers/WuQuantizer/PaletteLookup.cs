@@ -71,8 +71,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         public byte GetPaletteIndex(Color32 pixel)
         {
             int pixelKey = pixel.Argb & this.paletteMask;
-            LookupNode[] bucket;
-            if (!this.lookupNodes.TryGetValue(pixelKey, out bucket))
+            if (!this.lookupNodes.TryGetValue(pixelKey, out LookupNode[] bucket))
             {
                 bucket = this.Palette;
             }
@@ -188,7 +187,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
             byte greenMask = ComputeBitMask(maxGreen, Convert.ToInt32(Math.Round(uniqueGreens / totalUniques * availableBits)));
             byte blueMask = ComputeBitMask(maxBlue, Convert.ToInt32(Math.Round(uniqueBlues / totalUniques * availableBits)));
 
-            Color32 maskedPixel = new Color32(alphaMask, redMask, greenMask, blueMask);
+            var maskedPixel = new Color32(alphaMask, redMask, greenMask, blueMask);
             return maskedPixel.Argb;
         }
 
@@ -226,13 +225,12 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         private void BuildLookup(Color32[] palette)
         {
             int mask = GetMask(palette);
-            Dictionary<int, List<LookupNode>> tempLookup = new Dictionary<int, List<LookupNode>>();
+            var tempLookup = new Dictionary<int, List<LookupNode>>();
             foreach (LookupNode lookup in this.Palette)
             {
                 int pixelKey = lookup.Color32.Argb & mask;
 
-                List<LookupNode> bucket;
-                if (!tempLookup.TryGetValue(pixelKey, out bucket))
+                if (!tempLookup.TryGetValue(pixelKey, out List<LookupNode> bucket))
                 {
                     bucket = new List<LookupNode>();
                     tempLookup[pixelKey] = bucket;

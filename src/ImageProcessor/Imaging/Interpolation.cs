@@ -32,25 +32,23 @@ namespace ImageProcessor.Imaging
         public static double BiCubicKernel(double x)
         {
             // The coefficient.
-            double a = -0.5;
+            const double a = -0.5;
 
             if (x < 0)
             {
                 x = -x;
             }
 
-            double bicubicCoeffient = 0;
-
             if (x <= 1)
             {
-                bicubicCoeffient = (((1.5 * x) - 2.5) * x * x) + 1;
+                return (((1.5 * x) - 2.5) * x * x) + 1;
             }
             else if (x < 2)
             {
-                bicubicCoeffient = (((((a * x) + 2.5) * x) - 4) * x) + 2;
+                return (((((a * x) + 2.5) * x) - 4) * x) + 2;
             }
 
-            return bicubicCoeffient;
+            return 0;
         }
 
         /// <summary>

@@ -16,12 +16,10 @@ namespace ImageProcessor.Web.Helpers
 
     using ImageProcessor.Web.Caching;
 
-    using Microsoft.IO;
-
     /// <summary>
     /// Provides helper methods for working with resources.
     /// </summary>
-    public class ResourceHelpers
+    public static class ResourceHelpers
     {
         /// <summary>
         /// Converts an assembly resource into a string.

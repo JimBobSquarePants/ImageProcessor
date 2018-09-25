@@ -27,10 +27,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Pixelate"/> class.
         /// </summary>
-        public Pixelate()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Pixelate() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -81,10 +78,12 @@ namespace ImageProcessor.Processors
                 newImage = new Bitmap(image);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-                using (FastBitmap fastBitmap = new FastBitmap(newImage))
+                using (var fastBitmap = new FastBitmap(newImage))
                 {
                     // Get the range on the y-plane to choose from.
+#pragma warning disable RCS1196 // Call extension method as instance method.
                     IEnumerable<int> range = EnumerableExtensions.SteppedRange(y, i => i < y + height && i < maxHeight, size);
+#pragma warning restore RCS1196 // Call extension method as instance method.
 
                     Parallel.ForEach(
                         range,

@@ -15,7 +15,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using ImageProcessor.Web.Caching;
 using ImageProcessor.Web.Helpers;
-using Microsoft.IO;
 
 namespace ImageProcessor.Web.Services
 {
@@ -24,7 +23,10 @@ namespace ImageProcessor.Web.Services
     /// </summary>
     public class RemoteImageService : IImageService
     {
+        private static readonly HttpClient Client = new HttpClient(RemoteFile.Handler);
+
         private RemoteFile remoteFile;
+
         private Dictionary<string, string> settings = new Dictionary<string, string>
         {
             { "MaxBytes", "4194304" },
@@ -77,7 +79,7 @@ namespace ImageProcessor.Web.Services
         public virtual bool IsValidRequest(string path)
         {
             // Check the url is from a whitelisted location.
-            Uri url = new Uri(path);
+            var url = new Uri(path);
             string upper = url.Host.ToUpperInvariant();
 
             // Check for root or sub domain.
@@ -86,7 +88,7 @@ namespace ImageProcessor.Web.Services
             {
                 if (!uri.IsAbsoluteUri)
                 {
-                    Uri rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
+                    var rebaseUri = new Uri("http://" + uri.ToString().TrimStart('.', '/'));
                     validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
                 }
                 else
@@ -126,17 +128,17 @@ namespace ImageProcessor.Web.Services
                 return null;
             }
 
-            using (RecyclableMemoryStream memoryStream = new RecyclableMemoryStream(MemoryStreamPool.Shared))
+            using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
             {
                 using (HttpResponseMessage response = httpResponse)
                 {
                     using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                     {
-                        responseStream.CopyTo(memoryStream);
+                        await responseStream.CopyToAsync(memoryStream).ConfigureAwait(false);
 
                         // Reset the position of the stream to ensure we're reading the correct part.
                         memoryStream.Position = 0;
-                        buffer = memoryStream.GetBuffer();
+                        buffer = memoryStream.ToArray();
                     }
                 }
             }
@@ -150,7 +152,7 @@ namespace ImageProcessor.Web.Services
             int maxDownloadSize = int.Parse(this.Settings["MaxBytes"]);
 
             this.Settings.TryGetValue("Useragent", out string userAgent);
-            this.remoteFile = new RemoteFile(timeout, maxDownloadSize, userAgent);
+            this.remoteFile = new RemoteFile(Client, timeout, maxDownloadSize, userAgent);
         }
     }
 }

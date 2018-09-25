@@ -20,7 +20,7 @@ namespace ImageProcessor.UnitTests.Extensions
     /// <summary>
     /// The enumerable extensions unit tests.
     /// </summary>
-    public class EnumerableExtensionsUnitTests
+    public static class EnumerableExtensionsUnitTests
     {
         /// <summary>
         /// The when stepped range.
@@ -35,7 +35,7 @@ namespace ImageProcessor.UnitTests.Extensions
             public void ThenShouldReturn1Through9NumbersGiven1Then10Then1()
             {
                 // Arrange // Act
-                var enumerable = EnumerableExtensions.SteppedRange(1, 10, 1);
+                IEnumerable<int> enumerable = EnumerableExtensions.SteppedRange(1, 10, 1);
 
                 // Assert
                 Assert.That(enumerable, Is.EquivalentTo(new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
@@ -48,7 +48,7 @@ namespace ImageProcessor.UnitTests.Extensions
             public void ThenShouldReturnNegative10Through0GivenBetweenRangeNegative10Then1Then1()
             {
                 // Arrange // Act
-                var enumerable = EnumerableExtensions.SteppedRange(-10, 1, 1);
+                IEnumerable<int> enumerable = EnumerableExtensions.SteppedRange(-10, 1, 1);
 
                 // Assert
                 Assert.That(enumerable, Is.EquivalentTo(new List<int> { 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10 }));
@@ -61,7 +61,7 @@ namespace ImageProcessor.UnitTests.Extensions
             public void ThenShouldReturn1Then3Then5Then7Then9GivenBetweenRange1Then10Then2()
             {
                 // Arrange // Act
-                var enumerable = EnumerableExtensions.SteppedRange(1, 10, 2);
+                IEnumerable<int> enumerable = EnumerableExtensions.SteppedRange(1, 10, 2);
 
                 // Assert
                 Assert.That(enumerable, Is.EquivalentTo(new List<int> { 1, 3, 5, 7, 9 }));
@@ -91,7 +91,7 @@ namespace ImageProcessor.UnitTests.Extensions
             public void ThenReturn0To9GivenFunction0ThenILessThan10Then1()
             {
                 // Arrange // Act
-                var enumerable = EnumerableExtensions.SteppedRange(0, i => i < 10, 1);
+                IEnumerable<int> enumerable = EnumerableExtensions.SteppedRange(0, i => i < 10, 1);
 
                 // Assert
                 Assert.That(enumerable, Is.EquivalentTo(new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));

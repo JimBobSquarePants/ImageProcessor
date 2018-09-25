@@ -36,37 +36,44 @@ namespace ImageProcessor.Web.Helpers
     /// This class will not throw an exception if the Uri supplied points to a resource local to the running application instance.
     /// <para>
     /// There shouldn't be any security issues there, as the internal <see cref="HttpClient"/> instance is still calling it remotely.
-    /// Any local files that shouldn't be accessed by this won't be allowed by the remote call.
+    /// Any local files that shouldn't be accessed by this and won't be allowed by the remote call.
     /// </para>
     /// </remarks>
     internal sealed class RemoteFile
     {
-        private static readonly HttpClientHandler Handler = new HttpClientHandler()
+        /// <summary>
+        /// The default message handler used by HttpClient instances.
+        /// </summary>
+        public static readonly HttpClientHandler Handler = new HttpClientHandler()
         {
             AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             Credentials = CredentialCache.DefaultNetworkCredentials
         };
 
-        private static readonly HttpClient Client = new HttpClient(Handler);
+        private readonly HttpClient client;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteFile"/> class.
         /// </summary>
+        /// <param name="client">The client used for creating the web request.</param>
         /// <param name="timeoutMilliseconds">The maximum time, in milliseconds, to wait before the request times out.</param>
         /// <param name="maxDownloadSize">The maximum download size, in bytes, that a remote file download attempt can be.</param>
-        public RemoteFile(int timeoutMilliseconds, int maxDownloadSize)
-            : this(timeoutMilliseconds, maxDownloadSize, null)
+        public RemoteFile(HttpClient client, int timeoutMilliseconds, int maxDownloadSize)
+            : this(client, timeoutMilliseconds, maxDownloadSize, null)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteFile"/> class.
         /// </summary>
+        /// <param name="client">The client used for creating the web request.</param>
         /// <param name="timeoutMilliseconds">The maximum time, in milliseconds, to wait before the request times out.</param>
         /// <param name="maxDownloadSize">The maximum download size, in bytes, that a remote file download attempt can be.</param>
         /// <param name="userAgent">The User-Agent header to be passed when requesting the remote file.</param>
-        public RemoteFile(int timeoutMilliseconds, int maxDownloadSize, string userAgent)
+        public RemoteFile(HttpClient client, int timeoutMilliseconds, int maxDownloadSize, string userAgent)
         {
+            this.client = client ?? new HttpClient(Handler);
+
             if (timeoutMilliseconds >= 0)
             {
                 this.Timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
@@ -81,11 +88,11 @@ namespace ImageProcessor.Web.Helpers
 
             // We're reusing the same static HttpClient so we don't exhaust the number of sockets available under heavy loads.
             // We're always using the same timeout, and user-agent values per all instances so it's ok to set the values here per instance.
-            Client.Timeout = this.Timeout;
-            var key = "User-Agent";
-            if (!string.IsNullOrWhiteSpace(this.UserAgent) && !Client.DefaultRequestHeaders.TryGetValues(key, out var _))
+            this.client.Timeout = this.Timeout;
+            const string key = "User-Agent";
+            if (!string.IsNullOrWhiteSpace(this.UserAgent) && !this.client.DefaultRequestHeaders.TryGetValues(key, out IEnumerable<string> _))
             {
-                Client.DefaultRequestHeaders.Add(key, this.UserAgent);
+                this.client.DefaultRequestHeaders.Add(key, this.UserAgent);
             }
         }
 
@@ -113,6 +120,7 @@ namespace ImageProcessor.Web.Helpers
         /// </para>
         /// </remarks>
         /// </summary>
+        /// <param name="uri">The request uri.</param>
         /// <returns>The <see cref="HttpResponseMessage"/> used to download this file.</returns>
         /// <returns>
         /// The <see cref="IEnumerable{T}"/>.
@@ -128,7 +136,7 @@ namespace ImageProcessor.Web.Helpers
             HttpStatusCode statusCode = HttpStatusCode.OK;
             try
             {
-                response = await Client.GetAsync(uri).ConfigureAwait(false);
+                response = await this.client.GetAsync(uri).ConfigureAwait(false);
                 statusCode = response.StatusCode;
                 response.EnsureSuccessStatusCode();
 
@@ -138,7 +146,7 @@ namespace ImageProcessor.Web.Helpers
                     if (contentLength > this.MaxDownloadSize)
                     {
                         response.Dispose();
-                        string message = "An attempt to download a remote file has been halted because the file is larger than allowed.";
+                        const string message = "An attempt to download a remote file has been halted because the file is larger than allowed.";
                         ImageProcessorBootstrapper.Instance.Logger.Log<RemoteFile>(message);
                         throw new SecurityException(message);
                     }

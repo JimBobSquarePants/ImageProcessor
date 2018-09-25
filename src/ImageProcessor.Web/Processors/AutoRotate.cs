@@ -23,15 +23,12 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"autorotate=true", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("autorotate=true", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoRotate"/> class.
         /// </summary>
-        public AutoRotate()
-        {
-            this.Processor = new ImageProcessor.Processors.AutoRotate();
-        }
+        public AutoRotate() => this.Processor = new ImageProcessor.Processors.AutoRotate();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

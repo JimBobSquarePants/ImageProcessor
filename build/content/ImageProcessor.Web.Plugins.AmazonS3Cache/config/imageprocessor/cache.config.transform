@@ -1,4 +1,4 @@
-<caching currentCache="AzureBlobCache">
+<caching currentCache="AmazonS3Cache">
   <caches>
     <cache name="AmazonS3Cache" type="ImageProcessor.Web.Plugins.AmazonS3Cache.AmazonS3Cache, ImageProcessor.Web.Plugins.AmazonS3Cache" maxDays="365">
       <settings>

@@ -52,10 +52,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
         /// <returns>
         /// The normalized <see cref="Color"/>.
         /// </returns>
-        public Color ToNormalizedColor()
-        {
-            return (this.Sum != 0) ? Color.FromArgb((int)(this.Alpha /= this.Sum), (int)(this.Red /= this.Sum), (int)(this.Green /= this.Sum), (int)(this.Blue /= this.Sum)) : Color.Empty;
-        }
+        public Color ToNormalizedColor() => (this.Sum != 0) ? Color.FromArgb((int)(this.Alpha /= this.Sum), (int)(this.Red /= this.Sum), (int)(this.Green /= this.Sum), (int)(this.Blue /= this.Sum)) : Color.Empty;
 
         /// <summary>
         /// Adds a pixel to the color history.

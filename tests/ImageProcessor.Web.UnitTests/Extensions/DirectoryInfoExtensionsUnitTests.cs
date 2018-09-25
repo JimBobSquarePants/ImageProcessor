@@ -7,18 +7,19 @@
 
 namespace ImageProcessor.Web.UnitTests.Extensions
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using NUnit.Framework;
+
     using Web.Extensions;
+
+    using NUnit.Framework;
 
     /// <summary>
     /// The directory info extensions unit tests.
     /// </summary>
-    public class DirectoryInfoExtensionsUnitTests
+    public static class DirectoryInfoExtensionsUnitTests
     {
         /// <summary>
         /// The when safe enumerable directories.
@@ -78,6 +79,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
                 // Assert
                 Assert.That(directories, Is.EquivalentTo(directoryList.Select(s => new DirectoryInfo(s))));
             }
+
             /// <summary>
             /// The then should return empty enumerable directories given path with invalid directory
             /// </summary>
@@ -92,85 +94,6 @@ namespace ImageProcessor.Web.UnitTests.Extensions
 
                 // Assert
                 Assert.That(directories, Is.EquivalentTo(Enumerable.Empty<DirectoryInfo>()));
-            }
-        }
-
-        /// <summary>
-        /// The when safe enumerable directories async.
-        /// </summary>
-        [TestFixture]
-        public class WhenSafeEnumerableDirectoriesAsync
-        {
-            /// <summary>
-            /// The test directory root.
-            /// </summary>
-            private static readonly string TestDirectoryRoot = TestContext.CurrentContext.TestDirectory + @"\DirectoryInfoExtensionsTests";
-
-            /// <summary>
-            /// The directory count.
-            /// </summary>
-            private const int DirectoryCount = 6;
-
-            /// <summary>
-            /// The directory list.
-            /// </summary>
-            private IEnumerable<string> directoryList;
-
-            /// <summary>
-            /// The setup directories.
-            /// </summary>
-            [SetUp]
-            public void SetupDirectories()
-            {
-                directoryList = Enumerable.Range(1, DirectoryCount).Select(i => string.Format("{0}/TestDirectory{1}", TestDirectoryRoot, i));
-                foreach (var directory in directoryList)
-                {
-                    Directory.CreateDirectory(directory);
-                }
-            }
-
-            /// <summary>
-            /// The remove directories.
-            /// </summary>
-            [TearDown]
-            public void RemoveDirectories()
-            {
-                Directory.Delete(TestDirectoryRoot, true);
-            }
-            /// <summary>
-            /// Then should return enumerable directories asynchronously given path with subdirectories
-            /// </summary>
-            [Test]
-            [Obsolete("This test method uses an obsolete method.")]
-            public async Task ThenShouldReturnEnumerableDirectoriesAsyncGivenPathWithSubDirectories()
-            {
-                // Arrange
-                var info = new DirectoryInfo(TestDirectoryRoot);
-                var asyncResult = info.SafeEnumerateDirectoriesAsync();
-
-                // Act
-                var directories = await asyncResult;
-
-                // Assert
-                Assert.That(directories, Is.EquivalentTo(directoryList.Select(s => new DirectoryInfo(s))));
-            }
-
-            /// <summary>
-            /// Then return empty enumerable directories asynchronously given invalid directory
-            /// </summary>
-            [Test]
-            [Obsolete("This test method uses an obsolete method.")]
-            public async Task ThenReturnEmptyEnumerableGivenInvalidDirectory()
-            {
-                // Arrange
-                var info = new DirectoryInfo(string.Format("{0}Bad", TestDirectoryRoot));
-                var asyncResult = info.SafeEnumerateDirectoriesAsync();
-
-                // Act
-                var directories = await asyncResult;
-
-                // Assert
-                Assert.That(directories, Is.EqualTo(Enumerable.Empty<DirectoryInfo>()));
             }
         }
     }

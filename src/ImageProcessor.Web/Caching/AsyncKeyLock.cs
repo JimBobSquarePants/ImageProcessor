@@ -78,10 +78,7 @@ namespace ImageProcessor.Web.Caching
             /// Initializes a new instance of the <see cref="Releaser"/> class.
             /// </summary>
             /// <param name="key">The key identifying the doorman that limits the number of threads.</param>
-            public Releaser(string key)
-            {
-                this.key = key;
-            }
+            public Releaser(string key) => this.key = key;
 
             /// <inheritdoc />
             public void Dispose()

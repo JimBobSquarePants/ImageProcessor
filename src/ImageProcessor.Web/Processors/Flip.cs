@@ -22,15 +22,12 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"flip=(horizontal|vertical|both)", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("flip=(horizontal|vertical|both)", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Flip"/> class.
         /// </summary>
-        public Flip()
-        {
-            this.Processor = new ImageProcessor.Processors.Flip();
-        }
+        public Flip() => this.Processor = new ImageProcessor.Processors.Flip();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -66,9 +63,7 @@ namespace ImageProcessor.Web.Processors
                 this.SortOrder = match.Index;
 
                 // We do not use the full enum so use switch.
-                string direction = match.Value.Split('=')[1];
-
-                switch (direction)
+                switch (match.Value.Split('=')[1])
                 {
                     case "horizontal":
                         this.Processor.DynamicParameter = RotateFlipType.RotateNoneFlipX;

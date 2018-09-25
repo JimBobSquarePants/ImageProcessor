@@ -101,7 +101,7 @@ namespace ImageProcessor.Common.Helpers
         /// </returns>
         internal static HashSet<Assembly> GetAllAssemblies()
         {
-            using (UpgradeableReadLock locker = new UpgradeableReadLock(Locker))
+            using (var locker = new UpgradeableReadLock(Locker))
             {
                 if (allAssemblies == null)
                 {
@@ -112,14 +112,14 @@ namespace ImageProcessor.Common.Helpers
                         // NOTE: we cannot use AppDomain.CurrentDomain.GetAssemblies() because this only returns assemblies that have
                         // already been loaded in to the app domain, instead we will look directly into the bin folder and load each one.
                         string binFolder = IOHelper.GetRootDirectoryBinFolder();
-                        List<string> binAssemblyFiles = Directory.GetFiles(binFolder, "*.dll", SearchOption.TopDirectoryOnly).ToList();
-                        HashSet<Assembly> assemblies = new HashSet<Assembly>();
+                        var binAssemblyFiles = Directory.GetFiles(binFolder, "*.dll", SearchOption.TopDirectoryOnly).ToList();
+                        var assemblies = new HashSet<Assembly>();
 
                         foreach (string file in binAssemblyFiles)
                         {
                             try
                             {
-                                AssemblyName assemblyName = AssemblyName.GetAssemblyName(file);
+                                var assemblyName = AssemblyName.GetAssemblyName(file);
                                 assemblies.Add(Assembly.Load(assemblyName));
                             }
                             catch (Exception ex)
@@ -137,7 +137,7 @@ namespace ImageProcessor.Common.Helpers
                         }
 
                         // If for some reason they are still no assemblies, then use the AppDomain to load in already loaded assemblies.
-                        if (!assemblies.Any())
+                        if (assemblies.Count == 0)
                         {
                             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
                             {
@@ -147,12 +147,12 @@ namespace ImageProcessor.Common.Helpers
 
                         // Here we are trying to get the App_Code assembly
                         string[] fileExtensions = { ".cs", ".vb" };
-                        DirectoryInfo appCodeFolder = new DirectoryInfo(IOHelper.MapPath("~/App_code"));
+                        var appCodeFolder = new DirectoryInfo(IOHelper.MapPath("~/App_code"));
 
                         // Check if the folder exists and if there are any files in it with the supported file extensions
-                        if (appCodeFolder.Exists && fileExtensions.Any(x => appCodeFolder.GetFiles("*" + x).Any()))
+                        if (appCodeFolder.Exists && fileExtensions.Any(x => appCodeFolder.GetFiles("*" + x).Length > 0))
                         {
-                            Assembly appCodeAssembly = Assembly.Load("App_Code");
+                            var appCodeAssembly = Assembly.Load("App_Code");
                             if (!assemblies.Contains(appCodeAssembly))
                             {
                                 assemblies.Add(appCodeAssembly);
@@ -192,10 +192,10 @@ namespace ImageProcessor.Common.Helpers
                     Assembly[] assemblies = GetAssembliesWithKnownExclusions().ToArray();
                     DirectoryInfo binFolder = Assembly.GetExecutingAssembly().GetAssemblyFile().Directory;
                     // ReSharper disable once PossibleNullReferenceException
-                    List<string> binAssemblyFiles = Directory.GetFiles(binFolder.FullName, "*.dll", SearchOption.TopDirectoryOnly).ToList();
+                    var binAssemblyFiles = Directory.GetFiles(binFolder.FullName, "*.dll", SearchOption.TopDirectoryOnly).ToList();
                     IEnumerable<AssemblyName> domainAssemblyNames = binAssemblyFiles.Select(AssemblyName.GetAssemblyName);
-                    HashSet<Assembly> safeDomainAssemblies = new HashSet<Assembly>();
-                    HashSet<Assembly> binFolderAssemblyList = new HashSet<Assembly>();
+                    var safeDomainAssemblies = new HashSet<Assembly>();
+                    var binFolderAssemblyList = new HashSet<Assembly>();
 
                     foreach (Assembly assembly in assemblies)
                     {
@@ -232,17 +232,16 @@ namespace ImageProcessor.Common.Helpers
         internal static HashSet<Assembly> GetAssembliesWithKnownExclusions(
             IEnumerable<Assembly> excludeFromResults = null)
         {
-            using (UpgradeableReadLock locker = new UpgradeableReadLock(LocalFilteredAssemblyCacheLocker))
+            using (var locker = new UpgradeableReadLock(LocalFilteredAssemblyCacheLocker))
             {
-                if (LocalFilteredAssemblyCache.Any())
+                if (LocalFilteredAssemblyCache.Count > 0)
                 {
                     return LocalFilteredAssemblyCache;
                 }
 
                 locker.UpgradeToWriteLock();
 
-                IEnumerable<Assembly> assemblies = GetFilteredAssemblies(excludeFromResults, KnownAssemblyExclusionFilter);
-                foreach (Assembly assembly in assemblies)
+                foreach (Assembly assembly in GetFilteredAssemblies(excludeFromResults, KnownAssemblyExclusionFilter))
                 {
                     LocalFilteredAssemblyCache.Add(assembly);
                 }

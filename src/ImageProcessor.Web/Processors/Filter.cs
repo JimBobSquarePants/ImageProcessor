@@ -39,10 +39,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Filter"/> class.
         /// </summary>
-        public Filter()
-        {
-            this.Processor = new ImageProcessor.Processors.Filter();
-        }
+        public Filter() => this.Processor = new ImageProcessor.Processors.Filter();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -99,7 +96,7 @@ namespace ImageProcessor.Web.Processors
                               .Where(p => p.PropertyType.IsAssignableFrom(typeof(IMatrixFilter)))
                               .ToList();
 
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
             stringBuilder.Append("filter=(");
             int counter = 0;
 
@@ -142,7 +139,7 @@ namespace ImageProcessor.Web.Processors
                     PropertyInfo filter =
                         type.GetProperties(Flags)
                             .Where(p => p.PropertyType.IsAssignableFrom(typeof(IMatrixFilter)))
-                            .First(p => p.Name.Equals(identifier, StringComparison.InvariantCultureIgnoreCase));
+                            .First(p => p.Name.Equals(f, StringComparison.InvariantCultureIgnoreCase));
 
                     return filter.GetValue(null, null) as IMatrixFilter;
                 });

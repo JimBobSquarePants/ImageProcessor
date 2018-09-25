@@ -18,7 +18,6 @@ namespace ImageProcessor.Web.Processors
     /// </summary>
     public interface IWebGraphicsProcessor
     {
-        #region Properties
         /// <summary>
         /// Gets the regular expression to search strings for.
         /// </summary>
@@ -33,19 +32,14 @@ namespace ImageProcessor.Web.Processors
         /// Gets the associated graphics processor.
         /// </summary>
         IGraphicsProcessor Processor { get; }
-        #endregion
 
-        #region Methods
         /// <summary>
         /// The position in the original string where the first character of the captured substring was found.
         /// </summary>
-        /// <param name="queryString">
-        /// The query string to search.
-        /// </param>
+        /// <param name="queryString">The query string to search.</param>
         /// <returns>
         /// The zero-based starting position in the original string where the captured substring was found.
         /// </returns>
         int MatchRegexIndex(string queryString);
-        #endregion
     }
 }

@@ -31,10 +31,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Crop"/> class.
         /// </summary>
-        public Crop()
-        {
-            this.Processor = new ImageProcessor.Processors.Crop();
-        }
+        public Crop() => this.Processor = new ImageProcessor.Processors.Crop();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -73,8 +70,7 @@ namespace ImageProcessor.Web.Processors
 
                 // Default CropMode.Pixels will be returned.
                 CropMode cropMode = QueryParamParser.Instance.ParseValue<CropMode>(queryCollection["cropmode"]);
-                CropLayer cropLayer = new CropLayer(coordinates[0], coordinates[1], coordinates[2], coordinates[3], cropMode);
-                this.Processor.DynamicParameter = cropLayer;
+                this.Processor.DynamicParameter = (CropLayer)new CropLayer(coordinates[0], coordinates[1], coordinates[2], coordinates[3], cropMode);
             }
 
             return this.SortOrder;

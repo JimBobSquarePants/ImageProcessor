@@ -25,10 +25,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Brightness"/> class.
         /// </summary>
-        public Brightness()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Brightness() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.

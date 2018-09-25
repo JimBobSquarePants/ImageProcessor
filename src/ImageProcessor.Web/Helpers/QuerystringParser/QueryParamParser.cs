@@ -11,28 +11,21 @@
 namespace ImageProcessor.Web.Helpers
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Globalization;
-    using System.Linq.Expressions;
     using System.Web;
 
     /// <summary>
     /// The query parameter parser that converts string values to different types.
     /// </summary>
-    public class QueryParamParser
+    public sealed class QueryParamParser
     {
         /// <summary>
         /// A new instance of the <see cref="QueryParamParser"/> class.
         /// with lazy initialization.
         /// </summary>
         private static readonly Lazy<QueryParamParser> Lazy = new Lazy<QueryParamParser>(() => new QueryParamParser());
-
-        /// <summary>
-        /// The cache for storing created default types.
-        /// </summary>
-        private static readonly ConcurrentDictionary<Type, object> TypeDefaultsCache = new ConcurrentDictionary<Type, object>();
 
         /// <summary>
         /// Prevents a default instance of the <see cref="QueryParamParser"/> class from being created.
@@ -57,7 +50,7 @@ namespace ImageProcessor.Web.Helpers
         /// Parses the given string value converting it to the given type.
         /// </summary>
         /// <param name="value">
-        /// The <see cref="String"/> value to parse.
+        /// The <see cref="string"/> value to parse.
         /// </param>
         /// <param name="culture">
         /// The <see cref="CultureInfo"/> to use as the current culture.
@@ -71,42 +64,23 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         public T ParseValue<T>(string value, CultureInfo culture = null)
         {
-            return (T)this.ParseValue(typeof(T), value, culture);
-        }
-
-        /// <summary>
-        /// Parses the given string value converting it to the given type.
-        /// </summary>
-        /// <param name="type">
-        /// The <see cref="Type"/> to convert the string to.
-        /// </param>
-        /// <param name="value">
-        /// The <see cref="string"/> value to parse.
-        /// </param>
-        /// <param name="culture">
-        /// The <see cref="CultureInfo"/> to use as the current culture.
-        /// <remarks>If not set will parse using <see cref="CultureInfo.InvariantCulture"/></remarks>
-        /// </param>
-        /// <returns>
-        /// The <see cref="object"/>.
-        /// </returns>
-        public object ParseValue(Type type, string value, CultureInfo culture = null)
-        {
             if (culture == null)
             {
                 culture = CultureInfo.InvariantCulture;
             }
 
+            Type type = typeof(T);
+
             IQueryParamConverter converter = QueryTypeDescriptor.GetConverter(type);
             try
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                return converter.ConvertFrom(culture, HttpUtility.UrlDecode(value), type);
+                return (T)converter.ConvertFrom(culture, HttpUtility.UrlDecode(value), type);
             }
             catch
             {
                 // Return the default value
-                return TypeDefaultsCache.GetOrAdd(type, t => this.GetDefaultValue(type));
+                return default(T);
             }
         }
 
@@ -119,42 +93,27 @@ namespace ImageProcessor.Web.Helpers
         /// <param name="converterType">
         /// The type of <see cref="IQueryParamConverter"/> to add.
         /// </param>
-        public void AddTypeConverter(Type type, Type converterType)
-        {
-            QueryTypeDescriptor.AddConverter(type, converterType);
-        }
+        public void AddTypeConverter(Type type, Type converterType) => QueryTypeDescriptor.AddConverter(type, converterType);
 
         /// <summary>
         /// Adds color converters.
         /// </summary>
-        private void AddColorConverters()
-        {
-            this.AddTypeConverter(typeof(Color), typeof(ColorTypeConverter));
-        }
+        private void AddColorConverters() => this.AddTypeConverter(typeof(Color), typeof(ColorTypeConverter));
 
         /// <summary>
         /// Adds font family converters.
         /// </summary>
-        private void AddFontFamilyConverters()
-        {
-            this.AddTypeConverter(typeof(FontFamily), typeof(FontFamilyConverter));
-        }
+        private void AddFontFamilyConverters() => this.AddTypeConverter(typeof(FontFamily), typeof(FontFamilyConverter));
 
         /// <summary>
         /// Adds point converters.
         /// </summary>
-        private void AddPointConverters()
-        {
-            this.AddTypeConverter(typeof(Point), typeof(PointConverter));
-        }
+        private void AddPointConverters() => this.AddTypeConverter(typeof(Point), typeof(PointConverter));
 
         /// <summary>
         /// Adds point converters.
         /// </summary>
-        private void AddSizeConverters()
-        {
-            this.AddTypeConverter(typeof(Size), typeof(SizeConverter));
-        }
+        private void AddSizeConverters() => this.AddTypeConverter(typeof(Size), typeof(SizeConverter));
 
         /// <summary>
         /// Add the generic converters
@@ -232,38 +191,6 @@ namespace ImageProcessor.Web.Helpers
             this.AddTypeConverter(typeof(string[]), typeof(GenericArrayTypeConverter<string>));
 
             this.AddTypeConverter(typeof(Color[]), typeof(GenericArrayTypeConverter<Color>));
-        }
-
-        /// <summary>
-        /// Returns the default value for the given type.
-        /// </summary>
-        /// <param name="type">
-        /// The <see cref="Type"/> to return.
-        /// </param>
-        /// <returns>
-        /// The <see cref="object"/> representing the default value.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if the given <see cref="Type"/> is null.
-        /// </exception>
-        private object GetDefaultValue(Type type)
-        {
-            // Validate parameters.
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            // We want an Func<object> which returns the default.
-            // Create that expression here.
-            // Have to convert to object.
-            // The default value, always get what the *code* tells us.
-            Expression<Func<object>> e =
-                Expression.Lambda<Func<object>>(
-                Expression.Convert(Expression.Default(type), typeof(object)));
-
-            // Compile and return the value.
-            return e.Compile()();
         }
     }
 }

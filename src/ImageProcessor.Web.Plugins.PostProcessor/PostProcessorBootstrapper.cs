@@ -74,7 +74,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         {
             // None of the tools used here are called using dllimport so we don't go through the normal registration channel.
             string folder = ImageProcessorBootstrapper.Instance.NativeBinaryFactory.Is64BitEnvironment ? "x64" : "x86";
-            Assembly assembly = Assembly.GetExecutingAssembly();
+            var assembly = Assembly.GetExecutingAssembly();
 
             if (assembly.Location == null)
             {
@@ -123,7 +123,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
             }
 
             // Get the resources and copy them across.
-            Dictionary<string, string> resources = new Dictionary<string, string>
+            var resources = new Dictionary<string, string>
             {
                 { "gifsicle.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged." + folder + ".gifsicle.exe" },
                 { "jpegtran.exe", "ImageProcessor.Web.Plugins.PostProcessor.Resources.Unmanaged.x86.jpegtran.exe" },

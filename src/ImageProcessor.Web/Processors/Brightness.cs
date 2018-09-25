@@ -31,10 +31,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Brightness"/> class.
         /// </summary>
-        public Brightness()
-        {
-            this.Processor = new ImageProcessor.Processors.Brightness();
-        }
+        public Brightness() => this.Processor = new ImageProcessor.Processors.Brightness();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

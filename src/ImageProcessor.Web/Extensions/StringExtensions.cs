@@ -22,7 +22,6 @@ namespace ImageProcessor.Web.Extensions
     /// </summary>
     public static class StringExtensions
     {
-        #region Cryptography
         /// <summary>
         /// Creates an MD5 fingerprint of the String.
         /// </summary>
@@ -32,7 +31,7 @@ namespace ImageProcessor.Web.Extensions
         {
             byte[] bytes = Encoding.Unicode.GetBytes(expression.ToCharArray());
 
-            using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
+            using (var md5 = new MD5CryptoServiceProvider())
             {
                 byte[] hash = md5.ComputeHash(bytes);
 
@@ -53,7 +52,7 @@ namespace ImageProcessor.Web.Extensions
         {
             byte[] bytes = Encoding.ASCII.GetBytes(expression.ToCharArray());
 
-            using (SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider())
+            using (var sha1 = new SHA1CryptoServiceProvider())
             {
                 byte[] hash = sha1.ComputeHash(bytes);
 
@@ -64,9 +63,7 @@ namespace ImageProcessor.Web.Extensions
                     .ToString().ToLowerInvariant();
             }
         }
-        #endregion
 
-        #region Numbers
         /// <summary>
         /// Creates an array of integers scraped from the String.
         /// </summary>
@@ -79,7 +76,7 @@ namespace ImageProcessor.Web.Extensions
                 throw new ArgumentNullException(nameof(expression));
             }
 
-            Regex regex = new Regex(@"[\d+]+(?=[,-])|[\d+]+(?![,-])", RegexOptions.Compiled);
+            var regex = new Regex(@"[\d+]+(?=[,-])|[\d+]+(?![,-])", RegexOptions.Compiled);
 
             MatchCollection matchCollection = regex.Matches(expression);
 
@@ -108,7 +105,7 @@ namespace ImageProcessor.Web.Extensions
                 throw new ArgumentNullException(nameof(expression));
             }
 
-            Regex regex = new Regex(@"[\d+\.]+(?=[,-])|[\d+\.]+(?![,-])", RegexOptions.Compiled);
+            var regex = new Regex(@"[\d+\.]+(?=[,-])|[\d+\.]+(?![,-])", RegexOptions.Compiled);
 
             MatchCollection matchCollection = regex.Matches(expression);
 
@@ -124,21 +121,13 @@ namespace ImageProcessor.Web.Extensions
 
             return matches;
         }
-        #endregion
 
-        #region Files and Paths
         /// <summary>
         /// Checks the string to see whether the value is a valid virtual path name.
         /// </summary>
         /// <param name="expression">The <see cref="T:System.String">String</see> instance that this method extends.</param>
         /// <returns>True if the given string is a valid virtual path name</returns>
-        public static bool IsValidVirtualPathName(this string expression)
-        {
-            Uri uri;
-
-            return Uri.TryCreate(expression, UriKind.Relative, out uri) && uri.IsWellFormedOriginalString();
-        }
-        #endregion
+        public static bool IsValidVirtualPathName(this string expression) => Uri.TryCreate(expression, UriKind.Relative, out Uri uri) && uri.IsWellFormedOriginalString();
 
         /// <summary>
         /// Trims a specified string from the start of another string.

@@ -26,10 +26,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Filter"/> class.
         /// </summary>
-        public Filter()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Filter() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.
@@ -71,7 +68,7 @@ namespace ImageProcessor.Processors
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
                 IMatrixFilter matrix = this.DynamicParameter;
                 newImage = matrix.TransformImage(image, newImage);
-                
+
                 image.Dispose();
                 image = newImage;
             }

@@ -28,15 +28,12 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"watermark=", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("watermark=", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Watermark"/> class.
         /// </summary>
-        public Watermark()
-        {
-            this.Processor = new ImageProcessor.Processors.Watermark();
-        }
+        public Watermark() => this.Processor = new ImageProcessor.Processors.Watermark();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -71,7 +68,7 @@ namespace ImageProcessor.Web.Processors
             {
                 this.SortOrder = match.Index;
                 NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
-                TextLayer textLayer = new TextLayer
+                var textLayer = new TextLayer
                 {
                     Text = this.ParseText(queryCollection),
                     Position = this.ParsePosition(queryCollection),
@@ -92,7 +89,6 @@ namespace ImageProcessor.Web.Processors
             return this.SortOrder;
         }
 
-        #region Private Methods
         /// <summary>
         /// Returns the correct <see cref="T:System.String"/> for the given parameter collection.
         /// </summary>
@@ -102,10 +98,7 @@ namespace ImageProcessor.Web.Processors
         /// <returns>
         /// The correct <see cref="T:System.String"/>.
         /// </returns>
-        private string ParseText(NameValueCollection queryCollection)
-        {
-            return QueryParamParser.Instance.ParseValue<string>(queryCollection["watermark"]);
-        }
+        private string ParseText(NameValueCollection queryCollection) => QueryParamParser.Instance.ParseValue<string>(queryCollection["watermark"]);
 
         /// <summary>
         /// Returns the correct <see cref="T:System.Drawing.Point"/> for the given parameter collection.
@@ -196,10 +189,7 @@ namespace ImageProcessor.Web.Processors
         /// <returns>
         /// True if the watermark is to have a shadow; otherwise false.
         /// </returns>
-        private bool ParseDropShadow(NameValueCollection queryCollection)
-        {
-            return QueryParamParser.Instance.ParseValue<bool>(queryCollection["dropshadow"]);
-        }
+        private bool ParseDropShadow(NameValueCollection queryCollection) => QueryParamParser.Instance.ParseValue<bool>(queryCollection["dropshadow"]);
 
         /// <summary>
         /// Returns the correct <see cref="T:System.Int32"/> containing the opacity for the parameter collection.
@@ -234,10 +224,7 @@ namespace ImageProcessor.Web.Processors
         /// <returns>
         /// True if the watermark is to be written right to left; otherwise false.
         /// </returns>
-        private bool ParseRightToLeft(NameValueCollection queryCollection)
-        {
-            return QueryParamParser.Instance.ParseValue<bool>(queryCollection["rtl"]);
-        }
+        private bool ParseRightToLeft(NameValueCollection queryCollection) => QueryParamParser.Instance.ParseValue<bool>(queryCollection["rtl"]);
 
         /// <summary>
         /// Returns a value indicating whether the watermark is to be written vertically.
@@ -248,10 +235,6 @@ namespace ImageProcessor.Web.Processors
         /// <returns>
         /// True if the watermark is to be written vertically; otherwise false.
         /// </returns>
-        private bool ParseVertical(NameValueCollection queryCollection)
-        {
-            return QueryParamParser.Instance.ParseValue<bool>(queryCollection["vertical"]);
-        }
-        #endregion
+        private bool ParseVertical(NameValueCollection queryCollection) => QueryParamParser.Instance.ParseValue<bool>(queryCollection["vertical"]);
     }
 }

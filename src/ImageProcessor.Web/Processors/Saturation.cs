@@ -31,10 +31,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Saturation"/> class.
         /// </summary>
-        public Saturation()
-        {
-            this.Processor = new ImageProcessor.Processors.Saturation();
-        }
+        public Saturation() => this.Processor = new ImageProcessor.Processors.Saturation();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

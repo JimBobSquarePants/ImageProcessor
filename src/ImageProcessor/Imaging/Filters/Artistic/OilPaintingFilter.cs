@@ -52,10 +52,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
         /// </summary>
         public int Levels
         {
-            get
-            {
-                return this.levels;
-            }
+            get => this.levels;
 
             set
             {
@@ -71,10 +68,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
         /// </summary>
         public int BrushSize
         {
-            get
-            {
-                return this.brushSize;
-            }
+            get => this.brushSize;
 
             set
             {
@@ -102,11 +96,11 @@ namespace ImageProcessor.Imaging.Filters.Artistic
 
             int radius = this.brushSize >> 1;
 
-            Bitmap destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            var destination = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
-            using (FastBitmap sourceBitmap = new FastBitmap(source))
+            using (var sourceBitmap = new FastBitmap(source))
             {
-                using (FastBitmap destinationBitmap = new FastBitmap(destination))
+                using (var destinationBitmap = new FastBitmap(destination))
                 {
                     Parallel.For(
                         0,
@@ -163,7 +157,7 @@ namespace ImageProcessor.Imaging.Filters.Artistic
 
                                             int currentIntensity = (int)Math.Round(((sourceBlue + sourceGreen + sourceRed) / 3.0 * (this.levels - 1)) / 255.0);
 
-                                            intensityBin[currentIntensity] += 1;
+                                            intensityBin[currentIntensity]++;
                                             blueBin[currentIntensity] += sourceBlue;
                                             greenBin[currentIntensity] += sourceGreen;
                                             redBin[currentIntensity] += sourceRed;

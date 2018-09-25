@@ -37,8 +37,12 @@ namespace ImageProcessor.Web.Helpers
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed.</exception>
         public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
-            string input = value as string;
-            if (input != null)
+            if (value == null)
+            {
+                return default(T);
+            }
+
+            if (value is string input)
             {
                 Type t = typeof(T);
                 Type u = Nullable.GetUnderlyingType(t);

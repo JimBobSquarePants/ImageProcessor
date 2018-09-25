@@ -172,7 +172,7 @@ namespace ImageProcessor.Web.Caching
         public override async Task AddImageToCacheAsync(Stream stream, string contentType)
         {
             // ReSharper disable once AssignNullToNotNullAttribute
-            DirectoryInfo directoryInfo = new DirectoryInfo(Path.GetDirectoryName(this.CachedPath));
+            var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(this.CachedPath));
             if (!directoryInfo.Exists)
             {
                 directoryInfo.Create();
@@ -255,9 +255,8 @@ namespace ImageProcessor.Web.Caching
                                 // Remove from the cache and delete each CachedImage.
                                 CacheIndexer.Remove(fileInfo.Name);
                                 fileInfo.Delete();
-                                count -= 1;
+                                count--;
                             }
-
                             catch (Exception ex)
                             {
                                 // Log it but skip to the next file.
@@ -330,7 +329,7 @@ namespace ImageProcessor.Web.Caching
                     // Since we are going to call Response.End(), we need to go ahead and set the headers
                     HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
                     this.SetETagHeader(context);
-                    var length = new FileInfo(this.CachedPath).Length;
+                    long length = new FileInfo(this.CachedPath).Length;
                     context.Response.AddHeader("Content-Length", length.ToString());
 
                     context.Response.TransmitFile(this.CachedPath, 0, length);
@@ -377,10 +376,10 @@ namespace ImageProcessor.Web.Caching
                 else
                 {
                     // Try and get the headers for the file, this should allow cache busting for remote files.
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    var request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
                     request.Method = "HEAD";
 
-                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
+                    using (var response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
                     {
                         isUpdated = response.LastModified.ToUniversalTime() > creationDate;
                     }
@@ -576,7 +575,8 @@ namespace ImageProcessor.Web.Caching
                 }
 
                 // If the directory is empty of files delete it to remove the FCN.
-                if (!Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly).Any() && !Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly).Any())
+                if (Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly).Length == 0
+                    && Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly).Length == 0)
                 {
                     Directory.Delete(directory);
                 }
@@ -587,7 +587,6 @@ namespace ImageProcessor.Web.Caching
             {
                 // Log it but skip to the next directory.
                 ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory}, {ex.Message}");
-
             }
         }
 

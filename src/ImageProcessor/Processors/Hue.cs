@@ -25,10 +25,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Hue"/> class.
         /// </summary>
-        public Hue()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Hue() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -67,7 +64,7 @@ namespace ImageProcessor.Processors
 
                 int width = image.Width;
                 int height = image.Height;
-                using (FastBitmap fastBitmap = new FastBitmap(image))
+                using (var fastBitmap = new FastBitmap(image))
                 {
                     if (!rotate)
                     {
@@ -75,8 +72,8 @@ namespace ImageProcessor.Processors
                         {
                             for (int x = 0; x < width; x++)
                             {
-                                HslaColor original = HslaColor.FromColor(fastBitmap.GetPixel(x, y));
-                                HslaColor altered = HslaColor.FromHslaColor(degrees / 360f, original.S, original.L, original.A);
+                                var original = HslaColor.FromColor(fastBitmap.GetPixel(x, y));
+                                var altered = HslaColor.FromHslaColor(degrees / 360f, original.S, original.L, original.A);
                                 fastBitmap.SetPixel(x, y, altered);
                             }
                         }
@@ -87,8 +84,8 @@ namespace ImageProcessor.Processors
                         {
                             for (int x = 0; x < width; x++)
                             {
-                                HslaColor original = HslaColor.FromColor(fastBitmap.GetPixel(x, y));
-                                HslaColor altered = HslaColor.FromHslaColor((original.H + (degrees / 360f)) % 1, original.S, original.L, original.A);
+                                var original = HslaColor.FromColor(fastBitmap.GetPixel(x, y));
+                                var altered = HslaColor.FromHslaColor((original.H + (degrees / 360f)) % 1, original.S, original.L, original.A);
                                 fastBitmap.SetPixel(x, y, altered);
                             }
                         }

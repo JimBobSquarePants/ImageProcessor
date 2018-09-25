@@ -24,10 +24,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Quality"/> class.
         /// </summary>
-        public Quality()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Quality() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.

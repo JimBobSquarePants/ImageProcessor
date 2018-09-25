@@ -16,7 +16,7 @@ namespace ImageProcessor.Web.Helpers
     /// <summary>
     /// Provides access to unmanaged native methods.
     /// </summary>
-    internal class NativeMethods
+    internal static class NativeMethods
     {
         /// <summary>
         /// Loads the specified module into the address space of the calling process. 

@@ -112,7 +112,7 @@ namespace ImageProcessor.Web.Configuration
 
                 set => this["maxDays"] = value;
             }
-            
+
             /// <summary>
             /// Gets or sets the maximum number of minutes to store a cached image reference in memory.
             /// </summary>
@@ -271,10 +271,7 @@ namespace ImageProcessor.Web.Configuration
             /// <returns>
             /// A new <see cref="ConfigurationElement"/>.
             /// </returns>
-            protected override ConfigurationElement CreateNewElement()
-            {
-                return new CacheElement();
-            }
+            protected override ConfigurationElement CreateNewElement() => new CacheElement();
 
             /// <summary>
             /// Gets the element key for a specified configuration element when overridden in a derived class.
@@ -283,10 +280,7 @@ namespace ImageProcessor.Web.Configuration
             /// An <see cref="T:System.Object"/> that acts as the key for the specified <see cref="ConfigurationElement"/>.
             /// </returns>
             /// <param name="element">The <see cref="ConfigurationElement"/> to return the key for. </param>
-            protected override object GetElementKey(ConfigurationElement element)
-            {
-                return ((CacheElement)element).Name;
-            }
+            protected override object GetElementKey(ConfigurationElement element) => ((CacheElement)element).Name;
         }
     }
 }

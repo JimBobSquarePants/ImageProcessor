@@ -33,15 +33,7 @@ namespace ImageProcessor.Web.Helpers
         /// <param name="sourceType">
         /// A <see cref="T:System.Type"/> that represents the type you want to convert from. 
         /// </param>
-        public virtual bool CanConvertFrom(Type sourceType)
-        {
-            if (sourceType == typeof(InstanceDescriptor))
-            {
-                return true;
-            }
-
-            return false;
-        }
+        public virtual bool CanConvertFrom(Type sourceType) => sourceType == typeof(InstanceDescriptor);
 
         /// <summary>
         /// Gets a value indicating whether this converter can convert an object to the given destination type.
@@ -50,10 +42,7 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// true if this converter can perform the conversion; otherwise, false.
         /// </returns>
-        public virtual bool CanConvertTo(Type destinationType)
-        {
-            return destinationType == typeof(string);
-        }
+        public virtual bool CanConvertTo(Type destinationType) => destinationType == typeof(string);
 
         /// <summary>
         /// Converts the given object to the type of this converter, using the specified culture 
@@ -70,8 +59,7 @@ namespace ImageProcessor.Web.Helpers
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed.</exception>
         public virtual object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
-            InstanceDescriptor id = value as InstanceDescriptor;
-            if (id != null)
+            if (value is InstanceDescriptor id)
             {
                 return id.Invoke();
             }
@@ -114,12 +102,11 @@ namespace ImageProcessor.Web.Helpers
 
                 // Pre-whidbey we just did a ToString() here.  To minimize the chance of a breaking change we
                 // still send requests for the CurrentCulture to ToString() (which should return the same).
-                if (culture != null && !culture.Equals(CultureInfo.CurrentCulture))
+                if (culture?.Equals(CultureInfo.CurrentCulture) == false)
                 {
                     // VSWhidbey 75433 - If the object is IFormattable, use this interface to convert to string
                     // so we use the specified culture rather than the CurrentCulture like object.ToString() does.
-                    IFormattable formattable = value as IFormattable;
-                    if (formattable != null)
+                    if (value is IFormattable formattable)
                     {
                         return formattable.ToString(/* format = */ null, /* formatProvider = */ culture);
                     }
@@ -139,10 +126,7 @@ namespace ImageProcessor.Web.Helpers
         /// <returns>
         /// An <see cref="T:System.Object"/> that represents the converted value.
         /// </returns>
-        public object ConvertFromInvariantString(string text, Type propertyType)
-        {
-            return this.ConvertFrom(CultureInfo.InvariantCulture, text, propertyType);
-        }
+        public object ConvertFromInvariantString(string text, Type propertyType) => this.ConvertFrom(CultureInfo.InvariantCulture, text, propertyType);
 
         /// <summary>
         /// Gets a suitable exception to throw when a conversion cannot be performed.
