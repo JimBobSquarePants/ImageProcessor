@@ -166,6 +166,7 @@
     <Compile Include="Imaging\TextLayer.cs" />
     <Compile Include="MetaDataMode.cs" />
     <Compile Include="Processors\Background.cs" />
+    <Compile Include="Processors\OverlayColor.cs" />
     <Compile Include="Processors\Resolution.cs" />
     <Compile Include="Processors\Gamma.cs" />
     <Compile Include="Processors\Alpha.cs" />

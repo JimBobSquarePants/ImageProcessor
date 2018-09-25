@@ -46,6 +46,7 @@
         <setting key="VirtualPath" value="~/images/imageprocessor/overlay/"/>
       </settings>
     </plugin>
+    <plugin name="OverlayColor" type="ImageProcessor.Web.Processors.OverlayColor, ImageProcessor.Web"/>
     <plugin name="Pixelate" type="ImageProcessor.Web.Processors.Pixelate, ImageProcessor.Web"/>
     <plugin name="Quality" type="ImageProcessor.Web.Processors.Quality, ImageProcessor.Web" enabled="true"/>
     <plugin name="ReplaceColor" type="ImageProcessor.Web.Processors.ReplaceColor, ImageProcessor.Web"/>

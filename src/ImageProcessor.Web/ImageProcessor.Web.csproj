@@ -90,6 +90,7 @@
     <Compile Include="Processors\Mask.cs" />
     <Compile Include="Processors\Background.cs" />
     <Compile Include="Processors\Overlay.cs" />
+    <Compile Include="Processors\OverlayColor.cs" />
     <Compile Include="Processors\Pixelate.cs" />
     <Compile Include="Processors\ReplaceColor.cs" />
     <Compile Include="Processors\RotateBounded.cs" />
