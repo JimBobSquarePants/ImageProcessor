@@ -15,6 +15,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
     /// </summary>
     public class AzureImageService : IImageService
     {
+        private string containerName;
         private CloudBlobContainer blobContainer;
         private Dictionary<string, string> settings = new Dictionary<string, string>();
 
@@ -59,7 +60,16 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </returns>
         public async Task<byte[]> GetImage(object id)
         {
-            CloudBlockBlob blockBlob = this.blobContainer.GetBlockBlobReference(id.ToString());
+            CloudBlockBlob blockBlob = null;
+            string prefix = $"/{this.containerName}/";
+            if (!string.IsNullOrEmpty(this.containerName) && id.ToString().ToLower().StartsWith(prefix))
+            {
+                blockBlob = this.blobContainer.GetBlockBlobReference(id.ToString().Substring(prefix.Length));
+            }
+            else
+            {
+                blockBlob = this.blobContainer.GetBlockBlobReference(id.ToString());
+            }
 
             if (blockBlob.Exists())
             {
@@ -93,15 +103,15 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // Create the blob client.
             CloudBlobClient blobClient = cloudCachedStorageAccount.CreateCloudBlobClient();
 
-            string container = this.Settings.ContainsKey("Container")
-                ? this.Settings["Container"]
+            this.containerName = this.Settings.ContainsKey("Container")
+                ? this.Settings["Container"].ToLower().Trim('/')
                 : string.Empty;
 
             BlobContainerPublicAccessType accessType = this.Settings.ContainsKey("AccessType")
                 ? (BlobContainerPublicAccessType)Enum.Parse(typeof(BlobContainerPublicAccessType), this.Settings["AccessType"])
                 : BlobContainerPublicAccessType.Blob;
 
-            this.blobContainer = CreateContainer(blobClient, container, accessType);
+            this.blobContainer = CreateContainer(blobClient, this.containerName, accessType);
         }
 
         /// <summary>
