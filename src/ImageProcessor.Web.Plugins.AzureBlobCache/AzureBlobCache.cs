@@ -322,11 +322,14 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         }
         private string GetPathWithSasTokenQuery(string path)
         {
-            BlobContainerPermissions permissions = cloudCachedBlobContainer.GetPermissions();
-            if (permissions.PublicAccess != BlobContainerPublicAccessType.Off)
+            if (cloudCachedBlobClient.Credentials.IsSharedKey)
             {
-                // nothing is required for public blobs
-                return path;
+                BlobContainerPermissions permissions = cloudCachedBlobContainer.GetPermissions();
+                if (permissions.PublicAccess != BlobContainerPublicAccessType.Off)
+                {
+                    // nothing is required for public blobs
+                    return path;
+                }
             }
             if (sasCache != null)
             {
