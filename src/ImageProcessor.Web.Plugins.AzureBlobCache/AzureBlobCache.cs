@@ -324,7 +324,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </param>
         public override void RewritePath(HttpContext context)
         {
-            if (streamCachedImage)
+            bool requestRequiresRedirect = context.Request.Url.Query.ToLower().Contains("&redirect=true");
+            if (streamCachedImage && !requestRequiresRedirect)
             {
                 string blobPath = this.CachedPath.Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
                 CloudBlockBlob blockBlob = cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
