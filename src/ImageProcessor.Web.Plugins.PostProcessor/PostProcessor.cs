@@ -125,7 +125,9 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                 WorkingDirectory = PostProcessorBootstrapper.Instance.WorkingPath,
                 Arguments = arguments,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
 
             Process process = null;
