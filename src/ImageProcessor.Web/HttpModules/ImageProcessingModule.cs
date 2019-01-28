@@ -191,7 +191,15 @@ namespace ImageProcessor.Web.HttpModules
 
             cache.SetExpires(DateTime.Now.ToUniversalTime().AddDays(maxDays));
             cache.SetMaxAge(new TimeSpan(maxDays, 0, 0, 0));
-            cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
+
+            if (ParseCacheBuster(context.Request.QueryString))
+            {
+                cache.AppendCacheExtension("immutable");
+            }
+            else
+            {
+                cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
+            }
 
             AddCorsRequestHeaders(context);
         }
@@ -532,7 +540,7 @@ namespace ImageProcessor.Web.HttpModules
 
                         // Are we processing or cache busting?
                         processing = processors != null && (processors.Length > 0 || processAnimation);
-                        bool cacheBusting = this.ParseCacheBuster(queryString);
+                        bool cacheBusting = ParseCacheBuster(queryString);
                         if (!processing && !cacheBusting)
                         {
                             // No? Someone is either attacking the server or hasn't read the instructions.
@@ -691,14 +699,25 @@ namespace ImageProcessor.Web.HttpModules
         /// </summary>
         /// <param name="queryString">The query string to search.</param>
         /// <returns>
-        /// The <see cref="bool"/>.
+        ///   <c>true</c> if the query string contains cache buster variables; otherwise, <c>false</c>.
         /// </returns>
-        private bool ParseCacheBuster(string queryString)
+        private static bool ParseCacheBuster(string queryString)
         {
-            NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
+            return ParseCacheBuster(HttpUtility.ParseQueryString(queryString));
+        }
+
+        /// <summary>
+        /// Return a value indicating whether common cache buster variables are being passed through.
+        /// </summary>
+        /// <param name="queryString">The query string to search.</param>
+        /// <returns>
+        ///   <c>true</c> if the query string contains cache buster variables; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool ParseCacheBuster(NameValueCollection queryString)
+        {
             return allowCacheBuster != null && allowCacheBuster.Value
-                && (queryCollection.AllKeys.Contains("v", StringComparer.InvariantCultureIgnoreCase)
-                || queryCollection.AllKeys.Contains("rnd", StringComparer.InvariantCultureIgnoreCase));
+                && (queryString.AllKeys.Contains("v", StringComparer.InvariantCultureIgnoreCase)
+                || queryString.AllKeys.Contains("rnd", StringComparer.InvariantCultureIgnoreCase));
         }
 
         /// <summary>
