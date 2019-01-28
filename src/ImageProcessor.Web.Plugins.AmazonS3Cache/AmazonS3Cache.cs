@@ -35,6 +35,8 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
     /// </summary>
     public class AmazonS3Cache : ImageCacheBase
     {
+        private static readonly object SyncLock = new object();
+
         /// <summary>
         /// The regular expression for parsing a remote uri.
         /// </summary>
@@ -48,7 +50,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <summary>
         /// The Amazon S3 client.
         /// </summary>
-        private readonly AmazonS3Client amazonS3ClientCache;
+        private static AmazonS3Client amazonS3ClientCache;
 
         /// <summary>
         /// The cached root url for a content delivery network.
@@ -120,66 +122,79 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         public AmazonS3Cache(string requestPath, string fullPath, string querystring)
             : base(requestPath, fullPath, querystring)
         {
-            this.awsAccessKey = this.Settings.ContainsKey("AwsAccessKey") ? this.Settings["AwsAccessKey"] : string.Empty;
-            this.awsSecretKey = this.Settings.ContainsKey("AwsSecretKey") ? this.Settings["AwsSecretKey"] : string.Empty;
-
-            this.awsBucketName = this.Settings["AwsBucketName"];
-            this.awsCacheKeyPrefix = this.Settings["AwsCacheKeyPrefix"];
-            string endPointRegion = this.Settings.ContainsKey("RegionEndpoint") ? this.Settings["RegionEndpoint"] : string.Empty;
-            RegionEndpoint awsRegionEndpoint = this.GetRegionEndpoint(endPointRegion);
-
-            if (this.AwsIsValid)
+            if (!(amazonS3ClientCache is null))
             {
-                // If Keys are provided then use these, otherwise we'll use IAM access keys
-                this.amazonS3ClientCache = new AmazonS3Client(this.awsAccessKey, this.awsSecretKey, awsRegionEndpoint);
-            }
-            else if (!string.IsNullOrWhiteSpace(this.awsBucketName))
-            {
-                this.amazonS3ClientCache = new AmazonS3Client(awsRegionEndpoint);
+                return;
             }
 
-            this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot") ? this.Settings["CachedCDNRoot"] : string.Empty;
-
-            if (this.amazonS3SourceCache == null)
+            lock (SyncLock)
             {
-                this.amazonS3SourceBucketName = this.Settings.ContainsKey("SourceS3Bucket") ? this.Settings["SourceS3Bucket"] : string.Empty;
-                this.cloudSourceUri = this.Settings.ContainsKey("CloudSourceURI") ? this.Settings["CloudSourceURI"] : string.Empty;
-
-                string sourceAccount = this.Settings.ContainsKey("SourceStorageAccount")
-                    ? this.Settings["SourceStorageAccount"]
-                    : string.Empty;
-
-                // Repeat for source if it exists
-                if (!string.IsNullOrWhiteSpace(this.amazonS3SourceBucketName))
+                if (!(amazonS3ClientCache is null))
                 {
-                    string awsSourceAccessKey = this.Settings.ContainsKey("AwsSourceAccessKey") ? this.Settings["AwsSourceAccessKey"] : string.Empty;
-                    string awsSourceSecretKey = this.Settings.ContainsKey("AwsSourceSecretKey") ? this.Settings["AwsSourceSecretKey"] : string.Empty;
-                    string sourceEndPointRegion = this.Settings.ContainsKey("SourceRegionEndpoint") ? this.Settings["SourceRegionEndpoint"] : string.Empty;
-                    RegionEndpoint awsSourceRegionEndpoint = this.GetRegionEndpoint(sourceEndPointRegion);
+                    return;
+                }
 
-                    if (!string.IsNullOrWhiteSpace(awsSourceAccessKey)
-                        && !string.IsNullOrWhiteSpace(awsSourceSecretKey))
+                this.awsAccessKey = this.Settings.ContainsKey("AwsAccessKey") ? this.Settings["AwsAccessKey"] : string.Empty;
+                this.awsSecretKey = this.Settings.ContainsKey("AwsSecretKey") ? this.Settings["AwsSecretKey"] : string.Empty;
+
+                this.awsBucketName = this.Settings["AwsBucketName"];
+                this.awsCacheKeyPrefix = this.Settings["AwsCacheKeyPrefix"];
+                string endPointRegion = this.Settings.ContainsKey("RegionEndpoint") ? this.Settings["RegionEndpoint"] : string.Empty;
+                RegionEndpoint awsRegionEndpoint = this.GetRegionEndpoint(endPointRegion);
+
+                if (this.AwsIsValid)
+                {
+                    // If Keys are provided then use these, otherwise we'll use IAM access keys
+                    amazonS3ClientCache = new AmazonS3Client(this.awsAccessKey, this.awsSecretKey, awsRegionEndpoint);
+                }
+                else if (!string.IsNullOrWhiteSpace(this.awsBucketName))
+                {
+                    amazonS3ClientCache = new AmazonS3Client(awsRegionEndpoint);
+                }
+
+                this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot") ? this.Settings["CachedCDNRoot"] : string.Empty;
+
+                if (this.amazonS3SourceCache == null)
+                {
+                    this.amazonS3SourceBucketName = this.Settings.ContainsKey("SourceS3Bucket") ? this.Settings["SourceS3Bucket"] : string.Empty;
+                    this.cloudSourceUri = this.Settings.ContainsKey("CloudSourceURI") ? this.Settings["CloudSourceURI"] : string.Empty;
+
+                    string sourceAccount = this.Settings.ContainsKey("SourceStorageAccount")
+                        ? this.Settings["SourceStorageAccount"]
+                        : string.Empty;
+
+                    // Repeat for source if it exists
+                    if (!string.IsNullOrWhiteSpace(this.amazonS3SourceBucketName))
                     {
-                        // If Keys are provided then use these, otherwise we'll use IAM access keys
-                        this.amazonS3SourceCache = new AmazonS3Client(awsSourceAccessKey, awsSourceSecretKey, awsSourceRegionEndpoint);
-                    }
-                    else
-                    {
-                        this.amazonS3SourceCache = new AmazonS3Client(awsSourceRegionEndpoint);
+                        string awsSourceAccessKey = this.Settings.ContainsKey("AwsSourceAccessKey") ? this.Settings["AwsSourceAccessKey"] : string.Empty;
+                        string awsSourceSecretKey = this.Settings.ContainsKey("AwsSourceSecretKey") ? this.Settings["AwsSourceSecretKey"] : string.Empty;
+                        string sourceEndPointRegion = this.Settings.ContainsKey("SourceRegionEndpoint") ? this.Settings["SourceRegionEndpoint"] : string.Empty;
+                        RegionEndpoint awsSourceRegionEndpoint = this.GetRegionEndpoint(sourceEndPointRegion);
+
+                        if (!string.IsNullOrWhiteSpace(awsSourceAccessKey)
+                            && !string.IsNullOrWhiteSpace(awsSourceSecretKey))
+                        {
+                            // If Keys are provided then use these, otherwise we'll use IAM access keys
+                            this.amazonS3SourceCache = new AmazonS3Client(awsSourceAccessKey, awsSourceSecretKey, awsSourceRegionEndpoint);
+                        }
+                        else
+                        {
+                            this.amazonS3SourceCache = new AmazonS3Client(awsSourceRegionEndpoint);
+                        }
                     }
                 }
-            }
 
-            if (this.Settings.ContainsKey("CachedCDNTimeout"))
-            {
-                int.TryParse(this.Settings["CachedCDNTimeout"], out int t);
-                this.timeout = t;
-            }
+                if (this.Settings.ContainsKey("CachedCDNTimeout"))
+                {
+                    int.TryParse(this.Settings["CachedCDNTimeout"], out int t);
+                    this.timeout = t;
+                }
 
-            // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
-            // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site.
-            this.streamCachedImage = this.Settings.ContainsKey("StreamCachedImage")
-                && string.Equals(this.Settings["StreamCachedImage"], "true", StringComparison.OrdinalIgnoreCase);
+                // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
+                // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site.
+                this.streamCachedImage = this.Settings.ContainsKey("StreamCachedImage")
+                    && string.Equals(this.Settings["StreamCachedImage"], "true", StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>
@@ -248,7 +263,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         Key = key,
                     };
 
-                    GetObjectMetadataResponse response = await this.amazonS3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest).ConfigureAwait(false);
+                    GetObjectMetadataResponse response = await amazonS3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest).ConfigureAwait(false);
 
                     if (response != null)
                     {
@@ -302,7 +317,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// </returns>
         public override async Task AddImageToCacheAsync(Stream stream, string contentType)
         {
-            var transferUtility = new TransferUtility(this.amazonS3ClientCache);
+            var transferUtility = new TransferUtility(amazonS3ClientCache);
 
             string path = this.GetFolderStructureForAmazon(this.CachedPath);
             string filename = Path.GetFileName(this.CachedPath);
@@ -349,7 +364,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
 
             do
             {
-                ListObjectsResponse response = await this.amazonS3ClientCache.ListObjectsAsync(request).ConfigureAwait(false);
+                ListObjectsResponse response = await amazonS3ClientCache.ListObjectsAsync(request).ConfigureAwait(false);
 
                 results.AddRange(response.S3Objects);
 
@@ -374,7 +389,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 }
 
                 CacheIndexer.Remove(file.Key);
-                await this.amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
+                await amazonS3ClientCache.DeleteObjectAsync(new DeleteObjectRequest
                 {
                     BucketName = this.awsBucketName,
                     Key = file.Key
@@ -614,7 +629,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                         Key = key,
                     };
 
-                    GetObjectMetadataResponse response = await this.amazonS3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest).ConfigureAwait(false);
+                    GetObjectMetadataResponse response = await amazonS3ClientCache.GetObjectMetadataAsync(objectMetaDataRequest).ConfigureAwait(false);
 
                     if (response != null)
                     {
@@ -650,7 +665,14 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
         /// <param name="request">The current request</param>
         private static void TrySetIfModifiedSinceDate(HttpContext context, HttpWebRequest request)
         {
-            string ifModifiedFromRequest = context.Request.Headers["If-Modified-Since"];
+            const string IfModifiedSince = "If-Modified-Since";
+
+            if (context.Request.Headers[IfModifiedSince] is null)
+            {
+                return;
+            }
+
+            string ifModifiedFromRequest = context.Request.Headers[IfModifiedSince];
 
             if (DateTime.TryParse(ifModifiedFromRequest, out DateTime ifModifiedDate))
             {
@@ -658,9 +680,10 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
             }
             else
             {
-                if (ifModifiedFromRequest.IndexOf("utc", StringComparison.OrdinalIgnoreCase) >= 0)
+                const string Utc = "utc";
+                if (ifModifiedFromRequest.IndexOf(Utc, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    ifModifiedFromRequest = ifModifiedFromRequest.ToLower().Replace("utc", string.Empty);
+                    ifModifiedFromRequest = ifModifiedFromRequest.ToLower().Replace(Utc, string.Empty);
 
                     if (DateTime.TryParse(ifModifiedFromRequest, out ifModifiedDate))
                     {

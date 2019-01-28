@@ -108,6 +108,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
             lock (SyncLock)
             {
+                if (!(cloudCachedBlobContainer is null))
+                {
+                    return;
+                }
+
                 // Retrieve storage accounts from connection string.
                 var cloudCachedStorageAccount = CloudStorageAccount.Parse(this.Settings["CachedStorageAccount"]);
 
