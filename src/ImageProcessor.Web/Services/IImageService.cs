@@ -13,6 +13,7 @@ namespace ImageProcessor.Web.Services
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using System.Web;
 
     /// <summary>
     ///  Defines properties and methods for allowing retrieval of images from different sources.
@@ -64,5 +65,23 @@ namespace ImageProcessor.Web.Services
         /// The <see cref="System.Byte"/> array containing the image data.
         /// </returns>
         Task<byte[]> GetImage(object id);
+    }
+
+    /// <summary>
+    /// An extension to IImageService that allows the passing of the current request context.
+    /// </summary>
+    public interface IImageService2 : IImageService
+    {
+        /// <summary>
+        /// Gets the image using the given identifier.
+        /// </summary>
+        /// <param name="id">
+        /// The value identifying the image to fetch.
+        /// </param>
+        /// <param name="context">The request context.</param>
+        /// <returns>
+        /// The <see cref="byte"/> array containing the image data.
+        /// </returns>
+        Task<byte[]> GetImage(object id, HttpContext context);
     }
 }

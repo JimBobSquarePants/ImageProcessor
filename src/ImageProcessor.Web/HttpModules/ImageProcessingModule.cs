@@ -578,7 +578,14 @@ namespace ImageProcessor.Web.HttpModules
 
                         try
                         {
-                            imageBuffer = await currentService.GetImage(requestPath).ConfigureAwait(false);
+                            if (currentService is IImageService2 imageService2)
+                            {
+                                imageBuffer = await imageService2.GetImage(requestPath, context).ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                imageBuffer = await currentService.GetImage(requestPath).ConfigureAwait(false);
+                            }
                         }
                         catch (HttpException ex)
                         {
@@ -712,10 +719,7 @@ namespace ImageProcessor.Web.HttpModules
         /// <returns>
         ///   <c>true</c> if the query string contains cache buster variables; otherwise, <c>false</c>.
         /// </returns>
-        private static bool ParseCacheBuster(string queryString)
-        {
-            return ParseCacheBuster(HttpUtility.ParseQueryString(queryString));
-        }
+        private static bool ParseCacheBuster(string queryString) => ParseCacheBuster(HttpUtility.ParseQueryString(queryString));
 
         /// <summary>
         /// Return a value indicating whether common cache buster variables are being passed through.
