@@ -19,6 +19,7 @@ namespace ImageProcessor.Processors
     using System.Drawing;
 
     using ImageProcessor.Common.Exceptions;
+    using ImageProcessor.Common.Extensions;
     using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
@@ -71,8 +72,7 @@ namespace ImageProcessor.Processors
                 const int Orientation = (int)ExifPropertyTag.Orientation;
                 if (!factory.PreserveExifData && factory.ExifPropertyItems.ContainsKey(Orientation))
                 {
-                    int rotationValue = factory.ExifPropertyItems[Orientation].Value[0];
-                    switch (rotationValue)
+                    switch (factory.ExifPropertyItems[Orientation].Value[0])
                     {
                         case 8:
                             // Rotated 90 right
@@ -99,9 +99,17 @@ namespace ImageProcessor.Processors
                             image.RotateFlip(RotateFlipType.RotateNoneFlipX);
                             break;
                     }
+
+                    // System.Drawing incorrectly limits future drawing operations to the old dimensions
+                    // The workaround is to clone the image.
+                    // https://github.com/JimBobSquarePants/ImageProcessor/issues/709
+                    Image copy = image.Copy(factory.AnimationProcessMode, image.PixelFormat, false);
+                    image.Dispose();
+                    return factory.Image = copy;
                 }
 
                 return image;
+
             }
             catch (Exception ex)
             {
