@@ -34,8 +34,16 @@ namespace ImageProcessor.Web.Helpers
             // Remove any service identifier prefixes from the url.
             if (!string.IsNullOrWhiteSpace(servicePrefix))
             {
+                // Handle when prefix is contained in filename.
                 string[] split = Regex.Split(url, servicePrefix, RegexOptions.IgnoreCase);
-                url = split.Length > 1 ? split[1].TrimStart("?") : split[0].TrimStart("?");
+                if (split.Length > 1)
+                {
+                    url = string.Join(servicePrefix, split.Skip(1).ToArray()).TrimStart("?");
+                }
+                else
+                {
+                    url = split[0].TrimStart("?");
+                }
             }
 
             // Workaround for handling entirely encoded path for https://github.com/JimBobSquarePants/ImageProcessor/issues/478
