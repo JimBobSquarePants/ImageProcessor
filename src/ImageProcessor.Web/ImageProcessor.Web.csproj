@@ -24,6 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\ImageProcessor.Web.xml</DocumentationFile>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\ImageProcessor.Web.xml</DocumentationFile>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -54,7 +56,6 @@
   <ItemGroup>
     <Compile Include="Caching\CachedImageHelper.cs" />
     <Compile Include="Caching\AsyncKeyLock.cs" />
-    <Compile Include="Caching\DoormanPool.cs" />
     <Compile Include="Caching\Doorman.cs" />
     <Compile Include="Caching\IImageCacheExtended.cs" />
     <Compile Include="Caching\MemoryStreamPool.cs" />
