@@ -24,77 +24,112 @@ namespace ImageProcessor.Web.Caching
         private static readonly Dictionary<string, Doorman> Keys = new Dictionary<string, Doorman>();
 
         /// <summary>
-        /// Locks the current thread asynchronously.
+        /// A pool of unused doorman counters that can be re-used to avoid allocations.
+        /// </summary>
+        private static readonly Stack<Doorman> Pool = new Stack<Doorman>(MaxPoolSize);
+
+        /// <summary>
+        /// Maximum size of the doorman pool. If the pool is already full when releasing
+        /// a doorman, it is simply left for garbage collection.
+        /// </summary>
+        private const int MaxPoolSize = 20;
+
+        /// <summary>
+        /// SpinLock used to protect access to the Keys and Pool collections.
+        /// </summary>
+        private static SpinLock spinLock = new SpinLock(false);
+
+        /// <summary>
+        /// Locks the current thread in read mode asynchronously.
         /// </summary>
         /// <param name="key">The key identifying the specific object to lock against.</param>
         /// <returns>
         /// The <see cref="Task{IDisposable}"/> that will release the lock.
         /// </returns>
-        public async Task<IDisposable> LockAsync(string key)
+        public async Task<IDisposable> ReaderLockAsync(string key)
         {
-            string lowerKey = key.ToLowerInvariant();
-            await GetOrCreate(lowerKey).WaitAsync().ConfigureAwait(false);
-            return new Releaser(lowerKey);
+            Doorman doorman = GetDoorman(key);
+
+            return await doorman.ReaderLockAsync().ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Returns a <see cref="SemaphoreSlim"/> matching on the given key
-        ///  or a new one if none is found.
+        /// Locks the current thread in write mode asynchronously.
         /// </summary>
-        /// <param name="key">The key identifying the semaphore.</param>
+        /// <param name="key">The key identifying the specific object to lock against.</param>
         /// <returns>
-        /// The <see cref="SemaphoreSlim"/>.
+        /// The <see cref="Task{IDisposable}"/> that will release the lock.
         /// </returns>
-        private static SemaphoreSlim GetOrCreate(string key)
+        public async Task<IDisposable> WriterLockAsync(string key)
         {
-            Doorman item;
-            lock (Keys)
+            Doorman doorman = GetDoorman(key);
+
+            return await doorman.WriterLockAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Gets the doorman for the specified key. If no such doorman exists, an unused doorman
+        /// is obtained from the pool (or a new one is allocated if the pool is empty), and it's
+        /// assigned to the requested key.
+        /// </summary>
+        /// <param name="key">The key for the desired doorman.</param>
+        /// <returns>The <see cref="Doorman"/>.</returns>
+        private static Doorman GetDoorman(string key)
+        {
+            Doorman doorman;
+            bool lockTaken = false;
+            try
             {
-                if (Keys.TryGetValue(key, out item))
+                spinLock.Enter(ref lockTaken);
+
+                if (!Keys.TryGetValue(key, out doorman))
                 {
-                    ++item.RefCount;
+                    doorman = (Pool.Count > 0) ? Pool.Pop() : new Doorman(ReleaseDoorman);
+                    doorman.Key = key;
+                    Keys.Add(key, doorman);
                 }
-                else
+
+                doorman.RefCount++;
+            }
+            finally
+            {
+                if (lockTaken)
                 {
-                    item = DoormanPool.Rent();
-                    Keys[key] = item;
+                    spinLock.Exit();
                 }
             }
 
-            return item.Semaphore;
+            return doorman;
         }
 
         /// <summary>
-        /// The disposable releaser tasked with releasing the semaphore.
+        /// Releases a reference to a doorman. If the ref-count hits zero, then the doorman is
+        /// returned to the pool (or is simply left for the garbage collector to cleanup if the
+        /// pool is already full).
         /// </summary>
-        private sealed class Releaser : IDisposable
+        /// <param name="doorman">The <see cref="Doorman"/>.</param>
+        private static void ReleaseDoorman(Doorman doorman)
         {
-            /// <summary>
-            /// The key identifying the <see cref="Doorman"/> that limits the number of threads.
-            /// </summary>
-            private readonly string key;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Releaser"/> class.
-            /// </summary>
-            /// <param name="key">The key identifying the doorman that limits the number of threads.</param>
-            public Releaser(string key) => this.key = key;
-
-            /// <inheritdoc />
-            public void Dispose()
+            bool lockTaken = false;
+            try
             {
-                lock (Keys)
-                {
-                    Doorman doorman = Keys[this.key];
-                    --doorman.RefCount;
-                    if (doorman.RefCount == 0)
-                    {
-                        Keys.Remove(this.key);
-                        doorman.Reset();
-                        DoormanPool.Return(doorman);
-                    }
+                spinLock.Enter(ref lockTaken);
 
-                    doorman.Semaphore.Release();
+                if (--doorman.RefCount == 0)
+                {
+                    Keys.Remove(doorman.Key);
+                    if (Pool.Count < MaxPoolSize)
+                    {
+                        doorman.Key = null;
+                        Pool.Push(doorman);
+                    }
+                }
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    spinLock.Exit();
                 }
             }
         }

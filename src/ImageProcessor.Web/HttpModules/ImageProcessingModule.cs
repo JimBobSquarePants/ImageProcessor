@@ -524,14 +524,16 @@ namespace ImageProcessor.Web.HttpModules
                 return;
             }
 
-            using (await Locker.LockAsync(rawUrl).ConfigureAwait(false))
+            bool isNewOrUpdated = false;
+            string cachedPath = string.Empty;
+            bool processing = false;
+            IWebGraphicsProcessor[] processors = null;
+            AnimationProcessMode mode = AnimationProcessMode.First;
+
+            using (await Locker.ReaderLockAsync(rawUrl).ConfigureAwait(false))
             {
                 // Parse the url to see whether we should be doing any work. 
                 // If we're not intercepting all requests and we don't have valid instructions we shoul break here.
-                IWebGraphicsProcessor[] processors = null;
-                AnimationProcessMode mode = AnimationProcessMode.First;
-                bool processing = false;
-
                 if (!string.IsNullOrWhiteSpace(queryString))
                 {
                     // Attempt to match querystring and processors.
@@ -557,135 +559,149 @@ namespace ImageProcessor.Web.HttpModules
                     .ImageCache.GetInstance(requestPath, url, queryString);
 
                 // Is the file new or updated?
-                bool isNewOrUpdated = await this.imageCache.IsNewOrUpdatedAsync().ConfigureAwait(false);
-                string cachedPath = this.imageCache.CachedPath;
+                isNewOrUpdated = await this.imageCache.IsNewOrUpdatedAsync().ConfigureAwait(false);
+                cachedPath = this.imageCache.CachedPath;
 
-                // Only process if the file has been updated.
-                if (isNewOrUpdated)
+                if (!isNewOrUpdated)
                 {
-                    // Ok let's get the image
-                    byte[] imageBuffer = null;
-                    string mimeType;
+                    // The cached file is valid so just rewrite the path.
+                    this.imageCache.RewritePath(context);
 
-                    try
+                    // Redirect if not a locally store file.
+                    if (!new Uri(cachedPath).IsFile)
                     {
-                        if (currentService is IImageService2 imageService2)
-                        {
-                            imageBuffer = await imageService2.GetImage(requestPath, context).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            imageBuffer = await currentService.GetImage(requestPath).ConfigureAwait(false);
-                        }
-                    }
-                    catch (HttpException ex)
-                    {
-                        // We want 404's to be handled by IIS so that other handlers/modules can still run.
-                        if (ex.GetHttpCode() == (int)HttpStatusCode.NotFound)
-                        {
-                            ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(ex.Message);
-                            return;
-                        }
+                        context.ApplicationInstance.CompleteRequest();
                     }
 
-                    if (imageBuffer == null)
+                    return;
+                }
+            }
+
+            // Only process if the file has been updated.
+            using (await Locker.WriterLockAsync(rawUrl).ConfigureAwait(false))
+            {
+                // Ok let's get the image
+                byte[] imageBuffer = null;
+                string mimeType;
+
+                try
+                {
+                    if (currentService is IImageService2 imageService2)
                     {
+                        imageBuffer = await imageService2.GetImage(requestPath, context).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        imageBuffer = await currentService.GetImage(requestPath).ConfigureAwait(false);
+                    }
+                }
+                catch (HttpException ex)
+                {
+                    // We want 404's to be handled by IIS so that other handlers/modules can still run.
+                    if (ex.GetHttpCode() == (int)HttpStatusCode.NotFound)
+                    {
+                        ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>(ex.Message);
                         return;
-                    }
-
-                    // Using recyclable streams here should dramatically reduce the overhead required
-                    using (MemoryStream inStream = MemoryStreamPool.Shared.GetStream("inStream", imageBuffer, 0, imageBuffer.Length))
-                    {
-                        // Process the Image. Use a recyclable stream here to reduce the allocations
-                        MemoryStream outStream = MemoryStreamPool.Shared.GetStream();
-
-                        if (!string.IsNullOrWhiteSpace(queryString))
-                        {
-                            if (processing)
-                            {
-                                // Process the image.
-                                bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
-                                MetaDataMode metaMode = !exif ? MetaDataMode.None : metaDataMode.Value;
-                                bool gamma = fixGamma != null && fixGamma.Value;
-
-                                try
-                                {
-                                    using (var imageFactory = new ImageFactory(metaMode, gamma) { AnimationProcessMode = mode })
-                                    {
-                                        imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
-                                        mimeType = imageFactory.CurrentImageFormat.MimeType;
-                                    }
-                                }
-                                catch (ImageFormatException)
-                                {
-                                    ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>($"Request {url} is not a valid image.");
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                // We're cache-busting. Allow the value to be cached
-                                await inStream.CopyToAsync(outStream).ConfigureAwait(false);
-                                mimeType = FormatUtilities.GetFormat(outStream).MimeType;
-                            }
-                        }
-                        else
-                        {
-                            // We're capturing all requests.
-                            await inStream.CopyToAsync(outStream).ConfigureAwait(false);
-                            mimeType = FormatUtilities.GetFormat(outStream).MimeType;
-                        }
-
-                        // Fire the post processing event.
-                        EventHandler<PostProcessingEventArgs> handler = OnPostProcessing;
-                        if (handler != null)
-                        {
-                            string extension = Path.GetExtension(cachedPath);
-                            var args = new PostProcessingEventArgs
-                            {
-                                Context = context,
-                                ImageStream = outStream,
-                                ImageExtension = extension
-                            };
-
-                            handler(this, args);
-                            outStream = args.ImageStream;
-                        }
-
-                        // Add to the cache.
-                        await this.imageCache.AddImageToCacheAsync(outStream, mimeType).ConfigureAwait(false);
-
-                        // Cleanup
-                        outStream.Dispose();
-                    }
-
-                    // Store the response type and cache dependency in the context for later retrieval.
-                    context.Items[CachedResponseTypeKey] = mimeType;
-                    bool isFileCached = new Uri(cachedPath).IsFile;
-
-                    if (isFileLocal)
-                    {
-                        if (isFileCached)
-                        {
-                            // Some services might only provide filename so we can't monitor for the browser.
-                            context.Items[CachedResponseFileDependency] = Path.GetFileName(requestPath) == requestPath
-                                ? new[] { cachedPath }
-                                : new[] { requestPath, cachedPath };
-                        }
-                        else
-                        {
-                            context.Items[CachedResponseFileDependency] = Path.GetFileName(requestPath) == requestPath
-                                ? null
-                                : new[] { requestPath };
-                        }
-                    }
-                    else if (isFileCached)
-                    {
-                        context.Items[CachedResponseFileDependency] = new[] { cachedPath };
                     }
                 }
 
-                // The cached file is valid so just rewrite the path.
+                if (imageBuffer == null)
+                {
+                    return;
+                }
+
+                // Using recyclable streams here should dramatically reduce the overhead required
+                using (MemoryStream inStream = MemoryStreamPool.Shared.GetStream("inStream", imageBuffer, 0, imageBuffer.Length))
+                {
+                    // Process the Image. Use a recyclable stream here to reduce the allocations
+                    MemoryStream outStream = MemoryStreamPool.Shared.GetStream();
+
+                    if (!string.IsNullOrWhiteSpace(queryString))
+                    {
+                        if (processing)
+                        {
+                            // Process the image.
+                            bool exif = preserveExifMetaData != null && preserveExifMetaData.Value;
+                            MetaDataMode metaMode = !exif ? MetaDataMode.None : metaDataMode.Value;
+                            bool gamma = fixGamma != null && fixGamma.Value;
+
+                            try
+                            {
+                                using (var imageFactory = new ImageFactory(metaMode, gamma) { AnimationProcessMode = mode })
+                                {
+                                    imageFactory.Load(inStream).AutoProcess(processors).Save(outStream);
+                                    mimeType = imageFactory.CurrentImageFormat.MimeType;
+                                }
+                            }
+                            catch (ImageFormatException)
+                            {
+                                ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessingModule>($"Request {url} is not a valid image.");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            // We're cache-busting. Allow the value to be cached
+                            await inStream.CopyToAsync(outStream).ConfigureAwait(false);
+                            mimeType = FormatUtilities.GetFormat(outStream).MimeType;
+                        }
+                    }
+                    else
+                    {
+                        // We're capturing all requests.
+                        await inStream.CopyToAsync(outStream).ConfigureAwait(false);
+                        mimeType = FormatUtilities.GetFormat(outStream).MimeType;
+                    }
+
+                    // Fire the post processing event.
+                    EventHandler<PostProcessingEventArgs> handler = OnPostProcessing;
+                    if (handler != null)
+                    {
+                        string extension = Path.GetExtension(cachedPath);
+                        var args = new PostProcessingEventArgs
+                        {
+                            Context = context,
+                            ImageStream = outStream,
+                            ImageExtension = extension
+                        };
+
+                        handler(this, args);
+                        outStream = args.ImageStream;
+                    }
+
+                    // Add to the cache.
+                    await this.imageCache.AddImageToCacheAsync(outStream, mimeType).ConfigureAwait(false);
+
+                    // Cleanup
+                    outStream.Dispose();
+                }
+
+                // Store the response type and cache dependency in the context for later retrieval.
+                context.Items[CachedResponseTypeKey] = mimeType;
+                bool isFileCached = new Uri(cachedPath).IsFile;
+
+                if (isFileLocal)
+                {
+                    if (isFileCached)
+                    {
+                        // Some services might only provide filename so we can't monitor for the browser.
+                        context.Items[CachedResponseFileDependency] = Path.GetFileName(requestPath) == requestPath
+                            ? new[] { cachedPath }
+                            : new[] { requestPath, cachedPath };
+                    }
+                    else
+                    {
+                        context.Items[CachedResponseFileDependency] = Path.GetFileName(requestPath) == requestPath
+                            ? null
+                            : new[] { requestPath };
+                    }
+                }
+                else if (isFileCached)
+                {
+                    context.Items[CachedResponseFileDependency] = new[] { cachedPath };
+                }
+
+                // The cached file has been saved so now rewrite the path.
                 this.imageCache.RewritePath(context);
 
                 // Redirect if not a locally store file.
@@ -694,11 +710,8 @@ namespace ImageProcessor.Web.HttpModules
                     context.ApplicationInstance.CompleteRequest();
                 }
 
-                if (isNewOrUpdated)
-                {
-                    // Trim the cache.
-                    await this.imageCache.TrimCacheAsync().ConfigureAwait(false);
-                }
+                // Trim the cache.
+                await this.imageCache.TrimCacheAsync().ConfigureAwait(false);
             }
         }
 
