@@ -492,7 +492,7 @@ namespace ImageProcessor.Web.HttpModules
             {
                 url = url + "?" + queryString;
             }
-            else
+            else if (!string.IsNullOrWhiteSpace(queryString))
             {
                 url = Regex.Replace(url, originalQueryString, queryString, RegexOptions.IgnoreCase);
             }
