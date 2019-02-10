@@ -120,8 +120,8 @@ namespace ImageProcessor.Configuration
                         .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
                         .ToList();
 
-                // There's more than one so load the first that is not our default.
-                if (availableTypes.Count > 1)
+                // Load the first that is not our default.
+                if (availableTypes.Count > 0)
                 {
                     this.Logger = availableTypes.Where(l => l != typeof(DefaultLogger))
                                                 .Select(f => (Activator.CreateInstance(f) as ILogger))
