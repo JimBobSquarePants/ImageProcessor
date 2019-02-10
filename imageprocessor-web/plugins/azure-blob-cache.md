@@ -57,9 +57,10 @@ configuration files.
 
       folderDepth (Optional - Added v1.3.0) sets the maximum number folder levels to nest the cached images. Defaults to 6.
       trimCache (Optional - Added v1.3.0) whether to perform a cleanup of the cache when a new file is created. Defaults to true.
+      memoryMaxMinutes (Optional - Added v1.4.2) how long to store a cached file reference in-memory to reduce IO. Defaults to 1 minute.
   -->
     <cache name="AzureBlobCache" type="ImageProcessor.Web.Plugins.AzureBlobCache.AzureBlobCache, ImageProcessor.Web.Plugins.AzureBlobCache" 
-           maxDays="365" browserMaxDays="7" folderDepth="6" trimCache="true">
+           maxDays="365" browserMaxDays="7" folderDepth="6" trimCache="true" memoryMaxMinutes="1">
       <settings>
         <!-- The Account, Container and CDN details -->
         <setting key="CachedStorageAccount" value="DefaultEndpointsProtocol=https;AccountName=[CacheAccountName];AccountKey=[CacheAccountKey]"/>
