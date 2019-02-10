@@ -15,24 +15,23 @@
     <title>{% if page.title %} {{ page.title }} :: {% endif %}{% if page.group == "imageprocessor-web" %}{{site.altname}} {% else %}{{site.name}}{% endif %}</title>
     <meta name="description" content="{% if page.subheading %} {{ page.subheading }} {% else %} {{ site.description }} {% endif %}" />
 
-    <link href="{{ site.baseurl }}/assets/css/responsive.min.css" rel="stylesheet" />
-    <link href="{{ site.baseurl }}/assets/css/vendor/pygments.monokai.css" rel="stylesheet" />
-    <link href="{{ site.baseurl }}/assets/css/vendor/font-awesome-4.2.0/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="{{ site.baseurl }}/assets/css/docs.css" rel="stylesheet" />
-
-    <link rel="shortcut icon" href="{{ site.baseurl }}/favicon.ico?v=1" />
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ site.baseurl }}/assets/ico/apple-touch-icon-144x144.png" />
+    <link href="{{ "/assets/css/responsive.min.css" | relative_url }}" rel="stylesheet" />
+    <link href="{{ "/assets/css/vendor/pygments.monokai.css" | relative_url }}" rel="stylesheet" />
+    <link href="{{ "/assets/css/vendor/font-awesome-4.2.0/css/font-awesome.min.css" | relative_url }}" rel="stylesheet" />
+    <link href="{{ "/assets/css/docs.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="{{ "/favicon.ico" | relative_url }}?v=1" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ "/assets/ico/apple-touch-icon-144x144.png" | relative_url }}" />
 </head>
 <body class="{{page.navgroup}}">
     <nav role="navigation" class="shadow">
         <div class="container">
             <div class="row">
-                <a href="{{ site.baseurl }}/" rel="home">ImageProcessor</a>
+                <a href="{{ "/" rel="home">ImageProcessor</a>
                 <button data-dropdown-target="#navigation" class="visible-xxs visible-xs"><span class="visuallyhidden">Toggle Navigation</span></button>
                 <div id="navigation" class="collapse">
-                    <a href="{{ site.baseurl }}/getting-started/" {% if page.navgroup == "gettingstarted" %} class="active" {% endif %}>Getting Started</a>
-                    <a href="{{ site.baseurl }}/imageprocessor/" {% if page.navgroup == "imageprocessor" %} class="active" {% endif %}>ImageProcessor</a>
-                    <a href="{{ site.baseurl }}/imageprocessor-web/" {% if page.navgroup == "imageprocessor-web" %} class="active" {% endif %}>ImageProcessor.Web</a>
+                    <a href="{{ "/getting-started/" | relative_url }}" {% if page.navgroup == "gettingstarted" %} class="active" {% endif %}>Getting Started</a>
+                    <a href="{{ "/imageprocessor/" | relative_url }}" {% if page.navgroup == "imageprocessor" %} class="active" {% endif %}>ImageProcessor</a>
+                    <a href="{{ "/imageprocessor-web/" | relative_url }}" {% if page.navgroup == "imageprocessor-web" %} class="active" {% endif %}>ImageProcessor.Web</a>
                 </div>
             </div>
         </div>
@@ -74,9 +73,9 @@
             </div>
         </div>
     </footer>
-    <script src="{{ site.baseurl }}/assets/js/vendor/jquery-2.1.3.min.js"></script>
-    <script src="{{ site.baseurl }}/assets/js/vendor/responsive.min.js"></script>
-    <script src="{{ site.baseurl }}/assets/js/site.js"></script>
+    <script src="{{ "/assets/js/vendor/jquery-2.1.3.min.js" | relative_url }}"></script>
+    <script src="{{ "/assets/js/vendor/responsive.min.js" | relative_url }}"></script>
+    <script src="{{ "/assets/js/site.js"></script>
 
     <!-- Google Analytics: -->
     <script>
@@ -92,6 +91,6 @@
 
     </script>
 
-    <script src="{{ site.baseurl }}/assets/js/vendor/ga-event-tracking.js"></script>
+    <script src="{{ "/assets/js/vendor/ga-event-tracking.js" | relative_url }}"></script>
 </body>
 </html>

@@ -30,10 +30,10 @@ http://your-image?contrast=-25
 
 ### Original
 
-![Original image]({{ site.baseurl }}/assets/img/originals/blackforrest.jpg)
+![Original image]({{ /assets/img/originals/blackforrest.jpg | relative_url }})
 
 ### 25% Contrast
 
-![Image with contrast adjusted]({{ site.baseurl }}/assets/img/contrast/blackforrest.jpg)
+![Image with contrast adjusted]({{ /assets/img/contrast/blackforrest.jpg | relative_url }})
 
 </section>

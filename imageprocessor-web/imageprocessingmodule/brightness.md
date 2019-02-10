@@ -29,10 +29,10 @@ http://your-image?brightness=-25
 
 ### Original
 
-![Original image]({{ site.baseurl }}/assets/img/originals/lock.jpg)
+![Original image]({{ /assets/img/originals/lock.jpg | relative_url }})
 
 ### 25% Brightness
 
-![Image with brightness adjusted]({{ site.baseurl }}/assets/img/brightness/lock.jpg)
+![Image with brightness adjusted]({{ /assets/img/brightness/lock.jpg | relative_url }})
 
 </section>

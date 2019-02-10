@@ -24,9 +24,9 @@ description: "A C# library for the dynamic processing of image files with .NET. 
 # Your name, as you want it to appear underneath each post and in the footer
 author: "James South"
 
-version: "2.5.5"
-webversion: "4.8.6"
-configversion: "2.3.0"
+version: "2.6.2"
+webversion: "4.9.3"
+configversion: "2.4.1"
 
 dynamicimageroot: "http://jamessouth.me/images/imageprocessor/samples/"
 

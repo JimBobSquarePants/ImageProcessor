@@ -37,10 +37,10 @@ http://your-image?crop=left,top,right,bottom&cropmode=percentage
 
 ### Original
 
-![Original image]({{ site.baseurl }}/assets/img/originals/coffee.jpg)
+![Original image]({{ /assets/img/originals/coffee.jpg | relative_url }})
 
 ### Cropped
 
-![Image with contrast adjusted]({{ site.baseurl }}/assets/img/crop/coffee.jpg)
+![Image with contrast adjusted]({{ /assets/img/crop/coffee.jpg | relative_url }})
 
 </section>
