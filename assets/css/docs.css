@@ -164,7 +164,7 @@ nav[role="navigation"] {
     left: 0;
     right: 0;
     z-index: 1030;
-    padding: .2rem 0;
+    padding: .5rem 0;
 }
 
 
@@ -250,7 +250,7 @@ nav[role="navigation"] [data-dropdown-target] {
 
 .breadcrumb {
     background-color: #eee;
-    padding: 0 0 1rem;
+    padding: 1rem 0 1rem;
     margin-bottom: 1rem;
 }
 
