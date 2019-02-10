@@ -488,7 +488,14 @@ namespace ImageProcessor.Web.HttpModules
 
             // Re-assign based on event handlers
             queryString = validatingArgs.QueryString;
-            url = Regex.Replace(url, originalQueryString, queryString, RegexOptions.IgnoreCase);
+            if (string.IsNullOrWhiteSpace(originalQueryString) && !string.IsNullOrWhiteSpace(queryString))
+            {
+                url = url + "?" + queryString;
+            }
+            else
+            {
+                url = Regex.Replace(url, originalQueryString, queryString, RegexOptions.IgnoreCase);
+            }
 
             // Map the request path if file local.
             bool isFileLocal = currentService.IsFileLocalService;
