@@ -23,12 +23,8 @@ namespace ImageProcessor.Imaging.Colors
         /// <summary>
         /// Adds colors together using the RGBA color format.
         /// </summary>
-        /// <param name="color">
-        /// The color to add to.
-        /// </param>
-        /// <param name="colors">
-        /// The colors to add to the initial one.
-        /// </param>
+        /// <param name="color">The color to add to.</param>
+        /// <param name="colors">The colors to add to the initial one.</param>
         /// <returns>
         /// The combined <see cref="Color"/>.
         /// </returns>
@@ -44,7 +40,7 @@ namespace ImageProcessor.Imaging.Colors
             {
                 if (addColor.A > 0)
                 {
-                    counter += 1;
+                    counter++;
                     red += addColor.R;
                     green += addColor.G;
                     blue += addColor.B;

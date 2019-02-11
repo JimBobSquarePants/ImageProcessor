@@ -32,7 +32,6 @@ namespace ImageProcessor.Imaging.Helpers
     [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1204:StaticElementsMustAppearBeforeInstanceElements", Justification = "Reviewed. Suppression is OK here. Better readability.")]
     internal abstract class EndianBitConverter
     {
-        #region Endianness of this converter
         /// <summary>
         /// Indicates the byte order ("endianness") in which data is converted using this class.
         /// </summary>
@@ -48,9 +47,6 @@ namespace ImageProcessor.Imaging.Helpers
         /// Gets the byte order ("endianness") in which data is converted using this class.
         /// </summary>
         public abstract Endianness Endianness { get; }
-        #endregion
-
-        #region Factory properties
 
         /// <summary>
         /// Gets a little-endian bit converter instance. The same instance is
@@ -64,9 +60,6 @@ namespace ImageProcessor.Imaging.Helpers
         /// </summary>
         public static BigEndianBitConverter Big { get; } = new BigEndianBitConverter();
 
-        #endregion
-
-        #region Double/primitive conversions
         /// <summary>
         /// Converts the specified double-precision floating point number to a 
         /// 64-bit signed integer. Note: the endianness of this converter does not
@@ -74,10 +67,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// </summary>
         /// <param name="value">The number to convert. </param>
         /// <returns>A 64-bit signed integer whose value is equivalent to value.</returns>
-        public long DoubleToInt64Bits(double value)
-        {
-            return BitConverter.DoubleToInt64Bits(value);
-        }
+        public long DoubleToInt64Bits(double value) => BitConverter.DoubleToInt64Bits(value);
 
         /// <summary>
         /// Converts the specified 64-bit signed integer to a double-precision 
@@ -86,10 +76,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// </summary>
         /// <param name="value">The number to convert. </param>
         /// <returns>A double-precision floating point number whose value is equivalent to value.</returns>
-        public double Int64BitsToDouble(long value)
-        {
-            return BitConverter.Int64BitsToDouble(value);
-        }
+        public double Int64BitsToDouble(long value) => BitConverter.Int64BitsToDouble(value);
 
         /// <summary>
         /// Converts the specified single-precision floating point number to a 
@@ -98,10 +85,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// </summary>
         /// <param name="value">The number to convert. </param>
         /// <returns>A 32-bit signed integer whose value is equivalent to value.</returns>
-        public int SingleToInt32Bits(float value)
-        {
-            return new Int32SingleUnion(value).AsInt32;
-        }
+        public int SingleToInt32Bits(float value) => new Int32SingleUnion(value).AsInt32;
 
         /// <summary>
         /// Converts the specified 32-bit signed integer to a single-precision floating point 
@@ -110,13 +94,8 @@ namespace ImageProcessor.Imaging.Helpers
         /// </summary>
         /// <param name="value">The number to convert. </param>
         /// <returns>A single-precision floating point number whose value is equivalent to value.</returns>
-        public float Int32BitsToSingle(int value)
-        {
-            return new Int32SingleUnion(value).AsSingle;
-        }
-        #endregion
+        public float Int32BitsToSingle(int value) => new Int32SingleUnion(value).AsSingle;
 
-        #region To(PrimitiveType) conversions
         /// <summary>
         /// Returns a Boolean value converted from one byte at a specified position in a byte array.
         /// </summary>
@@ -135,10 +114,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A character formed by two bytes beginning at startIndex.</returns>
-        public char ToChar(byte[] value, int startIndex)
-        {
-            return unchecked((char)this.CheckedFromBytes(value, startIndex, 2));
-        }
+        public char ToChar(byte[] value, int startIndex) => unchecked((char)this.CheckedFromBytes(value, startIndex, 2));
 
         /// <summary>
         /// Returns a double-precision floating point number converted from eight bytes 
@@ -147,10 +123,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A double precision floating point number formed by eight bytes beginning at startIndex.</returns>
-        public double ToDouble(byte[] value, int startIndex)
-        {
-            return this.Int64BitsToDouble(this.ToInt64(value, startIndex));
-        }
+        public double ToDouble(byte[] value, int startIndex) => this.Int64BitsToDouble(this.ToInt64(value, startIndex));
 
         /// <summary>
         /// Returns a single-precision floating point number converted from four bytes 
@@ -159,10 +132,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A single precision floating point number formed by four bytes beginning at startIndex.</returns>
-        public float ToSingle(byte[] value, int startIndex)
-        {
-            return this.Int32BitsToSingle(this.ToInt32(value, startIndex));
-        }
+        public float ToSingle(byte[] value, int startIndex) => this.Int32BitsToSingle(this.ToInt32(value, startIndex));
 
         /// <summary>
         /// Returns a 16-bit signed integer converted from two bytes at a specified position in a byte array.
@@ -170,10 +140,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A 16-bit signed integer formed by two bytes beginning at startIndex.</returns>
-        public short ToInt16(byte[] value, int startIndex)
-        {
-            return unchecked((short)this.CheckedFromBytes(value, startIndex, 2));
-        }
+        public short ToInt16(byte[] value, int startIndex) => unchecked((short)this.CheckedFromBytes(value, startIndex, 2));
 
         /// <summary>
         /// Returns a 32-bit signed integer converted from four bytes at a specified position in a byte array.
@@ -181,10 +148,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A 32-bit signed integer formed by four bytes beginning at startIndex.</returns>
-        public int ToInt32(byte[] value, int startIndex)
-        {
-            return unchecked((int)this.CheckedFromBytes(value, startIndex, 4));
-        }
+        public int ToInt32(byte[] value, int startIndex) => unchecked((int)this.CheckedFromBytes(value, startIndex, 4));
 
         /// <summary>
         /// Returns a 64-bit signed integer converted from eight bytes at a specified position in a byte array.
@@ -192,10 +156,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A 64-bit signed integer formed by eight bytes beginning at startIndex.</returns>
-        public long ToInt64(byte[] value, int startIndex)
-        {
-            return this.CheckedFromBytes(value, startIndex, 8);
-        }
+        public long ToInt64(byte[] value, int startIndex) => this.CheckedFromBytes(value, startIndex, 8);
 
         /// <summary>
         /// Returns a 16-bit unsigned integer converted from two bytes at a specified position in a byte array.
@@ -203,10 +164,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A 16-bit unsigned integer formed by two bytes beginning at startIndex.</returns>
-        public ushort ToUInt16(byte[] value, int startIndex)
-        {
-            return unchecked((ushort)this.CheckedFromBytes(value, startIndex, 2));
-        }
+        public ushort ToUInt16(byte[] value, int startIndex) => unchecked((ushort)this.CheckedFromBytes(value, startIndex, 2));
 
         /// <summary>
         /// Returns a 32-bit unsigned integer converted from four bytes at a specified position in a byte array.
@@ -214,10 +172,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A 32-bit unsigned integer formed by four bytes beginning at startIndex.</returns>
-        public uint ToUInt32(byte[] value, int startIndex)
-        {
-            return unchecked((uint)this.CheckedFromBytes(value, startIndex, 4));
-        }
+        public uint ToUInt32(byte[] value, int startIndex) => unchecked((uint)this.CheckedFromBytes(value, startIndex, 4));
 
         /// <summary>
         /// Returns a 64-bit unsigned integer converted from eight bytes at a specified position in a byte array.
@@ -225,10 +180,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">An array of bytes.</param>
         /// <param name="startIndex">The starting position within value.</param>
         /// <returns>A 64-bit unsigned integer formed by eight bytes beginning at startIndex.</returns>
-        public ulong ToUInt64(byte[] value, int startIndex)
-        {
-            return unchecked((ulong)this.CheckedFromBytes(value, startIndex, 8));
-        }
+        public ulong ToUInt64(byte[] value, int startIndex) => unchecked((ulong)this.CheckedFromBytes(value, startIndex, 8));
 
         /// <summary>
         /// Convert the given number of bytes from the given array, from the given start
@@ -278,9 +230,7 @@ namespace ImageProcessor.Imaging.Helpers
             CheckByteArgument(value, startIndex, bytesToConvert);
             return this.FromBytes(value, startIndex, bytesToConvert);
         }
-        #endregion
 
-        #region ToString conversions
         /// <summary>
         /// Returns a String converted from the elements of a byte array.
         /// </summary>
@@ -290,10 +240,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// A String of hexadecimal pairs separated by hyphens, where each pair 
         /// represents the corresponding element in value; for example, "7F-2C-4A".
         /// </returns>
-        public static string ToString(byte[] value)
-        {
-            return BitConverter.ToString(value);
-        }
+        public static string ToString(byte[] value) => BitConverter.ToString(value);
 
         /// <summary>
         /// Returns a String converted from the elements of a byte array starting at a specified array position.
@@ -305,10 +252,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// A String of hexadecimal pairs separated by hyphens, where each pair 
         /// represents the corresponding element in value; for example, "7F-2C-4A".
         /// </returns>
-        public static string ToString(byte[] value, int startIndex)
-        {
-            return BitConverter.ToString(value, startIndex);
-        }
+        public static string ToString(byte[] value, int startIndex) => BitConverter.ToString(value, startIndex);
 
         /// <summary>
         /// Returns a String converted from a specified number of bytes at a specified position in a byte array.
@@ -321,13 +265,8 @@ namespace ImageProcessor.Imaging.Helpers
         /// A String of hexadecimal pairs separated by hyphens, where each pair 
         /// represents the corresponding element in value; for example, "7F-2C-4A".
         /// </returns>
-        public static string ToString(byte[] value, int startIndex, int length)
-        {
-            return BitConverter.ToString(value, startIndex, length);
-        }
-        #endregion
+        public static string ToString(byte[] value, int startIndex, int length) => BitConverter.ToString(value, startIndex, length);
 
-        #region	Decimal conversions
         /// <summary>
         /// Returns a decimal value converted from sixteen bytes 
         /// at a specified position in a byte array.
@@ -381,9 +320,7 @@ namespace ImageProcessor.Imaging.Helpers
                 this.CopyBytesImpl(parts[i], 4, buffer, (i * 4) + index);
             }
         }
-        #endregion
 
-        #region GetBytes conversions
         /// <summary>
         /// Returns an array with the given number of bytes formed
         /// from the least significant bytes of the specified value.
@@ -409,10 +346,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <returns>
         /// The <see cref="T:byte[]"/>.
         /// </returns>
-        public byte[] GetBytes(bool value)
-        {
-            return BitConverter.GetBytes(value);
-        }
+        public byte[] GetBytes(bool value) => BitConverter.GetBytes(value);
 
         /// <summary>
         /// Returns the specified Unicode character value as an array of bytes.
@@ -422,94 +356,64 @@ namespace ImageProcessor.Imaging.Helpers
         /// <returns>
         /// The <see cref="T:byte[]"/>.
         /// </returns>
-        public byte[] GetBytes(char value)
-        {
-            return this.GetBytes(value, 2);
-        }
+        public byte[] GetBytes(char value) => this.GetBytes(value, 2);
 
         /// <summary>
         /// Returns the specified double-precision floating point value as an array of bytes.
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 8.</returns>
-        public byte[] GetBytes(double value)
-        {
-            return this.GetBytes(this.DoubleToInt64Bits(value), 8);
-        }
+        public byte[] GetBytes(double value) => this.GetBytes(this.DoubleToInt64Bits(value), 8);
 
         /// <summary>
         /// Returns the specified 16-bit signed integer value as an array of bytes.
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 2.</returns>
-        public byte[] GetBytes(short value)
-        {
-            return this.GetBytes(value, 2);
-        }
+        public byte[] GetBytes(short value) => this.GetBytes(value, 2);
 
         /// <summary>
         /// Returns the specified 32-bit signed integer value as an array of bytes.
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 4.</returns>
-        public byte[] GetBytes(int value)
-        {
-            return this.GetBytes(value, 4);
-        }
+        public byte[] GetBytes(int value) => this.GetBytes(value, 4);
 
         /// <summary>
         /// Returns the specified 64-bit signed integer value as an array of bytes.
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 8.</returns>
-        public byte[] GetBytes(long value)
-        {
-            return this.GetBytes(value, 8);
-        }
+        public byte[] GetBytes(long value) => this.GetBytes(value, 8);
 
         /// <summary>
         /// Returns the specified single-precision floating point value as an array of bytes.
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 4.</returns>
-        public byte[] GetBytes(float value)
-        {
-            return this.GetBytes(this.SingleToInt32Bits(value), 4);
-        }
+        public byte[] GetBytes(float value) => this.GetBytes(this.SingleToInt32Bits(value), 4);
 
         /// <summary>
         /// Returns the specified 16-bit unsigned integer value as an array of bytes.
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 2.</returns>
-        public byte[] GetBytes(ushort value)
-        {
-            return this.GetBytes(value, 2);
-        }
+        public byte[] GetBytes(ushort value) => this.GetBytes(value, 2);
 
         /// <summary>
         /// Returns the specified 32-bit unsigned integer value as an array of bytes.
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 4.</returns>
-        public byte[] GetBytes(uint value)
-        {
-            return this.GetBytes(value, 4);
-        }
+        public byte[] GetBytes(uint value) => this.GetBytes(value, 4);
 
         /// <summary>
         /// Returns the specified 64-bit unsigned integer value as an array of bytes.
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 8.</returns>
-        public byte[] GetBytes(ulong value)
-        {
-            return this.GetBytes(unchecked((long)value), 8);
-        }
+        public byte[] GetBytes(ulong value) => this.GetBytes(unchecked((long)value), 8);
 
-        #endregion
-
-        #region CopyBytes conversions
         /// <summary>
         /// Copies the given number of bytes from the least-specific
         /// end of the specified value into the specified byte array, beginning
@@ -555,10 +459,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">A Boolean value.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(bool value, byte[] buffer, int index)
-        {
-            this.CopyBytes(value ? 1 : 0, 1, buffer, index);
-        }
+        public void CopyBytes(bool value, byte[] buffer, int index) => this.CopyBytes(value ? 1 : 0, 1, buffer, index);
 
         /// <summary>
         /// Copies the specified Unicode character value into the specified byte array,
@@ -567,10 +468,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">A character to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(char value, byte[] buffer, int index)
-        {
-            this.CopyBytes(value, 2, buffer, index);
-        }
+        public void CopyBytes(char value, byte[] buffer, int index) => this.CopyBytes(value, 2, buffer, index);
 
         /// <summary>
         /// Copies the specified double-precision floating point value into the specified byte array,
@@ -579,10 +477,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">The number to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(double value, byte[] buffer, int index)
-        {
-            this.CopyBytes(this.DoubleToInt64Bits(value), 8, buffer, index);
-        }
+        public void CopyBytes(double value, byte[] buffer, int index) => this.CopyBytes(this.DoubleToInt64Bits(value), 8, buffer, index);
 
         /// <summary>
         /// Copies the specified 16-bit signed integer value into the specified byte array,
@@ -591,10 +486,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">The number to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(short value, byte[] buffer, int index)
-        {
-            this.CopyBytes(value, 2, buffer, index);
-        }
+        public void CopyBytes(short value, byte[] buffer, int index) => this.CopyBytes(value, 2, buffer, index);
 
         /// <summary>
         /// Copies the specified 32-bit signed integer value into the specified byte array,
@@ -603,10 +495,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">The number to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(int value, byte[] buffer, int index)
-        {
-            this.CopyBytes(value, 4, buffer, index);
-        }
+        public void CopyBytes(int value, byte[] buffer, int index) => this.CopyBytes(value, 4, buffer, index);
 
         /// <summary>
         /// Copies the specified 64-bit signed integer value into the specified byte array,
@@ -615,10 +504,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">The number to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(long value, byte[] buffer, int index)
-        {
-            this.CopyBytes(value, 8, buffer, index);
-        }
+        public void CopyBytes(long value, byte[] buffer, int index) => this.CopyBytes(value, 8, buffer, index);
 
         /// <summary>
         /// Copies the specified single-precision floating point value into the specified byte array,
@@ -627,10 +513,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">The number to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(float value, byte[] buffer, int index)
-        {
-            this.CopyBytes(this.SingleToInt32Bits(value), 4, buffer, index);
-        }
+        public void CopyBytes(float value, byte[] buffer, int index) => this.CopyBytes(this.SingleToInt32Bits(value), 4, buffer, index);
 
         /// <summary>
         /// Copies the specified 16-bit unsigned integer value into the specified byte array,
@@ -639,10 +522,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">The number to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(ushort value, byte[] buffer, int index)
-        {
-            this.CopyBytes(value, 2, buffer, index);
-        }
+        public void CopyBytes(ushort value, byte[] buffer, int index) => this.CopyBytes(value, 2, buffer, index);
 
         /// <summary>
         /// Copies the specified 32-bit unsigned integer value into the specified byte array,
@@ -651,10 +531,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">The number to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(uint value, byte[] buffer, int index)
-        {
-            this.CopyBytes(value, 4, buffer, index);
-        }
+        public void CopyBytes(uint value, byte[] buffer, int index) => this.CopyBytes(value, 4, buffer, index);
 
         /// <summary>
         /// Copies the specified 64-bit unsigned integer value into the specified byte array,
@@ -663,19 +540,13 @@ namespace ImageProcessor.Imaging.Helpers
         /// <param name="value">The number to convert.</param>
         /// <param name="buffer">The byte array to copy the bytes into</param>
         /// <param name="index">The first index into the array to copy the bytes into</param>
-        public void CopyBytes(ulong value, byte[] buffer, int index)
-        {
-            this.CopyBytes(unchecked((long)value), 8, buffer, index);
-        }
+        public void CopyBytes(ulong value, byte[] buffer, int index) => this.CopyBytes(unchecked((long)value), 8, buffer, index);
 
-        #endregion
-
-        #region Private struct used for Single/Int32 conversions
         /// <summary>
         /// Union used solely for the equivalent of DoubleToInt64Bits and vice versa.
         /// </summary>
         [StructLayout(LayoutKind.Explicit)]
-        private struct Int32SingleUnion
+        private readonly struct Int32SingleUnion
         {
             /// <summary>
             /// Int32 version of the value.
@@ -721,6 +592,5 @@ namespace ImageProcessor.Imaging.Helpers
             /// </summary>
             internal float AsSingle => this.f;
         }
-        #endregion
     }
 }

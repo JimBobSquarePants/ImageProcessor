@@ -27,10 +27,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Overlay"/> class.
         /// </summary>
-        public Overlay()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Overlay() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -85,16 +82,16 @@ namespace ImageProcessor.Processors
                 if (image.Size != overlay.Size || image.Size != new Size(overlayWidth, overlayHeight))
                 {
                     // Find the maximum possible dimensions and resize the image.
-                    ResizeLayer layer = new ResizeLayer(new Size(overlayWidth, overlayHeight), ResizeMode.Max);
-                    Resizer resizer = new Resizer(layer) { AnimationProcessMode = factory.AnimationProcessMode };
+                    var layer = new ResizeLayer(new Size(overlayWidth, overlayHeight), ResizeMode.Max);
+                    var resizer = new Resizer(layer) { AnimationProcessMode = factory.AnimationProcessMode };
                     overlay = resizer.ResizeImage(overlay, factory.FixGamma);
                     overlayWidth = overlay.Width;
                     overlayHeight = overlay.Height;
                 }
 
                 // Figure out bounds.
-                Rectangle parent = new Rectangle(0, 0, width, height);
-                Rectangle child = new Rectangle(0, 0, overlayWidth, overlayHeight);
+                var parent = new Rectangle(0, 0, width, height);
+                var child = new Rectangle(0, 0, overlayWidth, overlayHeight);
 
                 // Apply opacity.
                 if (opacity < 100)
@@ -102,7 +99,7 @@ namespace ImageProcessor.Processors
                     overlay = Adjustments.Alpha(overlay, opacity);
                 }
 
-                using (Graphics graphics = Graphics.FromImage(image))
+                using (var graphics = Graphics.FromImage(image))
                 {
                     GraphicsHelper.SetGraphicsOptions(graphics, true);
 

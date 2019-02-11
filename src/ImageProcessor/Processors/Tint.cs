@@ -26,10 +26,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Tint"/> class.
         /// </summary>
-        public Tint()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Tint() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.
@@ -68,15 +65,15 @@ namespace ImageProcessor.Processors
                         new float[] { 0, 0, 0, 0, 1 }
                     };
 
-                ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+                var colorMatrix = new ColorMatrix(colorMatrixElements);
                 newImage = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppPArgb);
                 newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-                using (Graphics graphics = Graphics.FromImage(newImage))
+                using (var graphics = Graphics.FromImage(newImage))
                 {
                     GraphicsHelper.SetGraphicsOptions(graphics);
 
-                    using (ImageAttributes attributes = new ImageAttributes())
+                    using (var attributes = new ImageAttributes())
                     {
                         attributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
                         graphics.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);

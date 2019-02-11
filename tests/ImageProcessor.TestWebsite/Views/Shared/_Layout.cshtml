@@ -58,7 +58,7 @@
                                            null,
                                            null,
                                            null);
-    
+
 }
 <!DOCTYPE html>
 <html>
@@ -92,6 +92,7 @@
                 <li>@Html.ActionLink("Bmp", "Bmp")</li>
                 <li>@Html.ActionLink("Tiff", "Tiff")</li>
                 <li>@Html.ActionLink("WebP", "WebP")</li>
+                <li>@Html.ActionLink("Database", "Database")</li>
                 <li>@Html.ActionLink("External", "External")</li>
             </ul>
         </nav>
@@ -177,6 +178,55 @@
                 <li>_dirMonSubdirs._dirMonCompletion = @dirMonSubdirsDirMonCompletion</li>
             </ul>
             
+
+
+            <h3>Current settings</h3>
+            You can override the default values in the appSettings section of web.config. This also allows the values to be configured per deployment slot in Microsoft Azure
+            <table class="table-bordered">
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+
+                @{
+
+                    //show the value used for a specific setting
+                    ImageProcessor.Web.Configuration.ImageProcessorConfiguration ipc = ImageProcessor.Web.Configuration.ImageProcessorConfiguration.Instance;
+                                        
+                    foreach (var service in ipc.ImageServices)
+                    {
+                        foreach (var key in service.Settings.Keys) {
+                            <tr>
+                                <td>@service.GetType().ToString().@key</td>
+                                <td>@service.Settings[key]</td>
+                            </tr>
+                        }
+                    }
+                                        
+                    foreach (var processors in ipc.AvailableWebGraphicsProcessors)
+                    {
+                        foreach (var key in processors.Value.Keys)
+                        {
+                            <tr>
+                                <td>@processors.Key.@key</td>
+                                <td>@processors.Value[key]</td>
+                            </tr>
+                        }
+
+                    }
+                    
+                    foreach (var cacheSettingKey in ipc.ImageCacheSettings.Keys)
+                    {
+                            <tr>
+                                <td>@cacheSettingKey</td>
+                                <td>@ipc.ImageCacheSettings[cacheSettingKey]</td>
+                            </tr>
+
+                    }
+                }
+            </table>
         </div>
     </div>
 </body>

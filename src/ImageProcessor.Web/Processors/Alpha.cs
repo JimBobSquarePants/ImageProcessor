@@ -31,10 +31,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Alpha"/> class.
         /// </summary>
-        public Alpha()
-        {
-            this.Processor = new ImageProcessor.Processors.Alpha();
-        }
+        public Alpha() => this.Processor = new ImageProcessor.Processors.Alpha();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

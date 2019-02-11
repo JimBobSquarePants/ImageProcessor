@@ -31,7 +31,7 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
             string name = string.Format("ImageProcessor.Plugins.WebP.Resources.Unmanaged.{0}.libwebp.dll", folder);
             using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name))
             {
-                using (MemoryStream memoryStream = new MemoryStream())
+                using (var memoryStream = new MemoryStream())
                 {
                     if (stream != null)
                     {
@@ -42,7 +42,6 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
             }
         }
 
-        #region WebP
         /// <summary>
         /// Validate the WebP image header and retrieve the image height and width. Pointers *width and *height can be passed NULL if deemed irrelevant
         /// </summary>
@@ -150,6 +149,5 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         /// </returns>
         [DllImport("libwebp", CallingConvention = CallingConvention.Cdecl, EntryPoint = "WebPFree")]
         public static extern int WebPFree(IntPtr pointer);
-        #endregion
     }
 }

@@ -20,7 +20,7 @@ namespace ImageProcessor.Web.Caching
     using System.Web;
     using System.Web.Hosting;
 
-    using ImageProcessor.Web.Configuration;
+    using Configuration;
 
     /// <summary>
     /// The image cache base provides methods for implementing the <see cref="IImageCacheExtended"/> interface.
@@ -29,6 +29,8 @@ namespace ImageProcessor.Web.Caching
     public abstract class ImageCacheBase : IImageCacheExtended
     {
         private static readonly CacheTrimmer Trimmer = new CacheTrimmer();
+
+        private static readonly object SyncLock = new object();
 
         /// <summary>
         /// The request path for the image.
@@ -65,7 +67,9 @@ namespace ImageProcessor.Web.Caching
 
             ImageProcessorConfiguration config = ImageProcessorConfiguration.Instance;
             this.Settings = this.AugmentSettingsCore(config.ImageCacheSettings);
+            this.CachedPathExpiry = config.ImageCacheRewritePathExpiry;
             this.MaxDays = config.ImageCacheMaxDays;
+            this.ImageCacheMaxMinutes = config.ImageCacheMaxMinutes;
             this.BrowserMaxDays = config.BrowserCacheMaxDays;
             this.TrimCache = config.TrimCache;
             this.FolderDepth = config.FolderDepth;
@@ -82,9 +86,19 @@ namespace ImageProcessor.Web.Caching
         public string CachedPath { get; set; }
 
         /// <summary>
+        /// Gets or sets the expiry of the cached path to the cached image.
+        /// </summary>
+        public TimeSpan CachedPathExpiry { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum number of days to store the image.
         /// </summary>
         public int MaxDays { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of minutes to store a cached image reference in memory.
+        /// </summary>
+        public int ImageCacheMaxMinutes { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of days to cache the image in the browser.
@@ -138,10 +152,7 @@ namespace ImageProcessor.Web.Caching
         /// <returns>
         /// The asynchronous <see cref="Task"/> returning the value.
         /// </returns>
-        public virtual async Task<string> CreateCachedFileNameAsync()
-        {
-            return await Task.FromResult(CachedImageHelper.GetCachedImageFileName(this.FullPath, this.Querystring));
-        }
+        public virtual Task<string> CreateCachedFileNameAsync() => Task.FromResult(CachedImageHelper.GetCachedImageFileName(this.FullPath, this.Querystring));
 
         /// <summary>
         /// Rewrites the path to point to the cached image.
@@ -159,10 +170,7 @@ namespace ImageProcessor.Web.Caching
         /// <returns>
         /// The true if the date is out with the limit, otherwise; false.
         /// </returns>
-        protected virtual bool IsExpired(DateTime creationDate)
-        {
-            return creationDate < DateTime.UtcNow.AddDays(-this.MaxDays);
-        }
+        protected virtual bool IsExpired(DateTime creationDate) => creationDate < DateTime.UtcNow.AddDays(-this.MaxDays);
 
         /// <summary>
         /// Provides a means to augment the cache settings taken from the configuration in derived classes.
@@ -184,7 +192,7 @@ namespace ImageProcessor.Web.Caching
         protected virtual Task DebounceTrimmerAsync(Func<Task> trimmer)
         {
             // Wrap new method
-            this.ScheduleCacheTrimmer(token => trimmer());
+            this.ScheduleCacheTrimmer(_ => trimmer());
             return Task.FromResult(0);
         }
 
@@ -193,10 +201,7 @@ namespace ImageProcessor.Web.Caching
         /// and that it is a quiet time to do so.
         /// </summary>
         /// <param name="trimmer">The cache trimming method.</param>
-        protected void ScheduleCacheTrimmer(Func<CancellationToken, Task> trimmer)
-        {
-            Trimmer.ScheduleTrimCache(trimmer);
-        }
+        protected void ScheduleCacheTrimmer(Func<CancellationToken, Task> trimmer) => Trimmer.ScheduleTrimCache(trimmer);
 
         /// <summary>
         /// Provides an entry point to augmentation of the <see cref="Settings"/> dictionary
@@ -205,8 +210,11 @@ namespace ImageProcessor.Web.Caching
         /// <returns>augmented dictionary of settings</returns>
         private Dictionary<string, string> AugmentSettingsCore(Dictionary<string, string> settings)
         {
-            this.AugmentSettings(settings);
-            return settings;
+            lock (SyncLock)
+            {
+                this.AugmentSettings(settings);
+                return settings;
+            }
         }
 
         /// <summary>
@@ -244,10 +252,7 @@ namespace ImageProcessor.Web.Caching
             /// <summary>
             /// Initializes a new instance of the <see cref="CacheTrimmer"/> class.
             /// </summary>
-            public CacheTrimmer()
-            {
-                HostingEnvironment.RegisterObject(this);
-            }
+            public CacheTrimmer() => HostingEnvironment.RegisterObject(this);
 
             /// <summary>
             /// The sliding delay time
@@ -288,8 +293,8 @@ namespace ImageProcessor.Web.Caching
                         }
                         else if (
                             // Must be less than the max and less than the delay
-                            DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(MaxWaitMilliseconds) &&
-                            DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(WaitMilliseconds))
+                            DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(MaxWaitMilliseconds)
+                            && DateTime.Now - this.timestamp < TimeSpan.FromMilliseconds(WaitMilliseconds))
                         {
                             // Delay
                             this.timer.Change(WaitMilliseconds, 0);
@@ -315,7 +320,7 @@ namespace ImageProcessor.Web.Caching
                 }
 
                 trim = true;
-                await trimmer(tokenSource.Token);
+                await trimmer(tokenSource.Token).ConfigureAwait(false);
                 trim = false;
             }
 

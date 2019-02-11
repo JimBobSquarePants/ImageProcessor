@@ -35,8 +35,7 @@ namespace ImageProcessor.Web.Caching
         public static CachedImage Get(string cachedPath)
         {
             string key = Path.GetFileNameWithoutExtension(cachedPath);
-            CachedImage cachedImage = (CachedImage)MemCache.GetItem(key);
-            return cachedImage;
+            return (CachedImage)MemCache.GetItem(key);
         }
 
         /// <summary>
@@ -56,18 +55,24 @@ namespace ImageProcessor.Web.Caching
         }
 
         /// <summary>
-        /// Adds the specified key and value to the dictionary or returns the value if it exists.
+        /// Adds a <see cref="CachedImage"/> to the cache.
         /// </summary>
         /// <param name="cachedImage">
         /// The cached image to add.
         /// </param>
+        /// <param name="expiration">
+        /// A <see cref="TimeSpan"/> defining the sliding expiration duration, defaults to zero
+        /// </param>
         /// <returns>
         /// The value of the item to add or get.
         /// </returns>
-        public static CachedImage Add(CachedImage cachedImage)
+        public static CachedImage Add(CachedImage cachedImage, TimeSpan expiration = default(TimeSpan))
         {
-            // Add the CachedImage with a sliding expiration of 1 minutes.
-            CacheItemPolicy policy = new CacheItemPolicy { SlidingExpiration = new TimeSpan(0, 1, 0) };
+            if (expiration == default(TimeSpan) || expiration == TimeSpan.Zero)
+            { expiration = new TimeSpan(0, 1, 0); }
+
+            // Add the CachedImage with a sliding expiration of `expiry` minutes.
+            var policy = new CacheItemPolicy { SlidingExpiration = expiration };
 
             if (new Uri(cachedImage.Path).IsFile)
             {
@@ -101,5 +106,19 @@ namespace ImageProcessor.Web.Caching
 
             return cachedImage;
         }
+
+        /// <summary>
+        /// Adds a <see cref="CachedImage"/> to the cache.
+        /// </summary>
+        /// <param name="cachedImage">
+        /// The cached image to add.
+        /// </param>
+        /// <param name="expiry">
+        /// The number of minutes to cache the image, defaults to 1.
+        /// </param>
+        /// <returns>
+        /// The value of the item to add or get.
+        /// </returns>
+        public static CachedImage Add(CachedImage cachedImage, int expiry) => Add(cachedImage, new TimeSpan(0, expiry, 0));
     }
 }

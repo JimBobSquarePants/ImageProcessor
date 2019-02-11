@@ -82,6 +82,9 @@ ipch/
 *.psess
 *.vsp
 
+# Rider
+.idea/**
+
 # ReSharper is a .NET coding add-in
 _ReSharper*
 
@@ -172,3 +175,6 @@ build/TestResult.xml
 *.db
 
 _site/
+
+**/[Cc]ache/
+**/[Cc]ache1/

@@ -15,7 +15,7 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
     /// Represents a cube cut.
     /// Adapted from <see href="https://github.com/drewnoakes"/>
     /// </summary>
-    internal struct CubeCut
+    internal readonly struct CubeCut
     {
         /// <summary>
         /// The position.

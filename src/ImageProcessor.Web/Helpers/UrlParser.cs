@@ -20,7 +20,7 @@ namespace ImageProcessor.Web.Helpers
     /// <summary>
     /// A helper class for decoding and parsing request URLs.
     /// </summary>
-    public class UrlParser
+    public static class UrlParser
     {
         /// <summary>
         /// Parses the given URL adjusting the request path to a value that can then be interpreted by an  image service.
@@ -34,8 +34,16 @@ namespace ImageProcessor.Web.Helpers
             // Remove any service identifier prefixes from the url.
             if (!string.IsNullOrWhiteSpace(servicePrefix))
             {
+                // Handle when prefix is contained in filename.
                 string[] split = Regex.Split(url, servicePrefix, RegexOptions.IgnoreCase);
-                url = split.Length > 1 ? split[1].TrimStart("?") : split[0].TrimStart("?");
+                if (split.Length > 1)
+                {
+                    url = string.Join(servicePrefix, split.Skip(1).ToArray()).TrimStart("?");
+                }
+                else
+                {
+                    url = split[0].TrimStart("?");
+                }
             }
 
             // Workaround for handling entirely encoded path for https://github.com/JimBobSquarePants/ImageProcessor/issues/478
@@ -62,7 +70,7 @@ namespace ImageProcessor.Web.Helpers
             // Certain Facebook requests require ony the first part to be decoded.
             if (hasMultiParams)
             {
-                StringBuilder sb = new StringBuilder(requestPath);
+                var sb = new StringBuilder(requestPath);
                 for (int i = 1; i < splitPath.Length - 1; i++)
                 {
                     sb.AppendFormat("?{0}", splitPath[i]);

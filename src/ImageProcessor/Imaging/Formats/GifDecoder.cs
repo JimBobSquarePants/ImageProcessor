@@ -100,7 +100,7 @@ namespace ImageProcessor.Imaging.Formats
         {
             // Find the frame
             image.SelectActiveFrame(FrameDimension.Time, index);
-            Bitmap frame = new Bitmap(image);
+            var frame = new Bitmap(image);
             frame.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             // Reset the image
@@ -113,7 +113,7 @@ namespace ImageProcessor.Imaging.Formats
 
             // Convert each 4-byte chunk into an integer.
             // GDI returns a single array with all delays, while Mono returns a different array for each frame.
-            TimeSpan delay = TimeSpan.FromMilliseconds(BitConverter.ToInt32(times, (4 * index) % times.Length) * 10);
+            var delay = TimeSpan.FromMilliseconds(BitConverter.ToInt32(times, (4 * index) % times.Length) * 10);
 
             return new GifFrame { Delay = delay, Image = frame };
         }

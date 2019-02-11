@@ -35,9 +35,8 @@ namespace ImageProcessor.Web.Helpers
         public override object ConvertFrom(CultureInfo culture, object value, Type propertyType)
         {
             object result = base.ConvertFrom(culture, value, propertyType);
-            
-            int[] list = result as int[];
-            return list != null ? new Size(list[0], list[1]) : result;
+
+            return result is int[] list ? new Size(list[0], list[1]) : result;
         }
     }
 }

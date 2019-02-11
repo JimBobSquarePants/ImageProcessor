@@ -13,7 +13,7 @@ namespace ImageProcessor.Imaging.Formats
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
-
+    using ImageProcessor.Common.Extensions;
     using ImageProcessor.Imaging.Quantizers;
     using ImageProcessor.Imaging.Quantizers.WuQuantizer;
 
@@ -53,52 +53,55 @@ namespace ImageProcessor.Imaging.Formats
         /// </summary>
         public IQuantizer Quantizer { get; set; } = new WuQuantizer();
 
-        /// <summary>
-        /// Saves the current image to the specified output stream.
-        /// </summary>
-        /// <param name="stream">
-        /// The <see cref="T:System.IO.Stream"/> to save the image information to.
-        /// </param>
-        /// <param name="image">
-        /// The <see cref="T:System.Drawing.Image"/> to save.
-        /// </param>
-        /// <param name="bitDepth">
-        /// The color depth in number of bits per pixel to save the image with.
-        /// </param>
-        /// <returns>
-        /// The <see cref="T:System.Drawing.Image"/>.
-        /// </returns>
+        /// <inheritdoc/>
         public override Image Save(Stream stream, Image image, long bitDepth)
         {
             if (this.IsIndexed)
             {
                 image = this.Quantizer.Quantize(image);
+
+                return base.Save(stream, image, bitDepth);
             }
 
-            return base.Save(stream, image, bitDepth);
+            PixelFormat pixelFormat = PixelFormat.Format32bppPArgb;
+            switch (bitDepth)
+            {
+                case 24L:
+                    pixelFormat = PixelFormat.Format24bppRgb;
+                    break;
+            }
+
+            using (Image clone = image.Copy(pixelFormat))
+            {
+                clone.Save(stream, this.ImageFormat);
+            }
+
+            return image;
         }
 
-        /// <summary>
-        /// Saves the current image to the specified file path.
-        /// </summary>
-        /// <param name="path">The path to save the image to.</param>
-        /// <param name="image">
-        /// The <see cref="T:System.Drawing.Image"/> to save.
-        /// </param>
-        /// <param name="bitDepth">
-        /// The color depth in number of bits per pixel to save the image with.
-        /// </param>
-        /// <returns>
-        /// The <see cref="T:System.Drawing.Image"/>.
-        /// </returns>
+        /// <inheritdoc/>
         public override Image Save(string path, Image image, long bitDepth)
         {
             if (this.IsIndexed)
             {
                 image = this.Quantizer.Quantize(image);
+                return base.Save(path, image, bitDepth);
             }
 
-            return base.Save(path, image, bitDepth);
+            PixelFormat pixelFormat = PixelFormat.Format32bppPArgb;
+            switch (bitDepth)
+            {
+                case 24L:
+                    pixelFormat = PixelFormat.Format24bppRgb;
+                    break;
+            }
+
+            using (Image clone = image.Copy(pixelFormat))
+            {
+                clone.Save(path, this.ImageFormat);
+            }
+
+            return image;
         }
     }
 }

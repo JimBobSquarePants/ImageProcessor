@@ -14,7 +14,6 @@ namespace ImageProcessor.Processors
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
-    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.Helpers;
@@ -57,7 +56,7 @@ namespace ImageProcessor.Processors
                 // Create a rotated image.
                 image = this.RotateImage(image, rotateParams.Item1, rotateParams.Item2);
 
-                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Count > 0)
                 {
                     // Set the width EXIF data.
                     factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);
@@ -100,7 +99,7 @@ namespace ImageProcessor.Processors
         /// </returns>
         private Bitmap RotateImage(Image image, float angleInDegrees, bool keepSize)
         {
-            Size newSize = new Size(image.Width, image.Height);
+            var newSize = new Size(image.Width, image.Height);
 
             float zoom = ImageMaths.ZoomAfterRotation(image.Width, image.Height, angleInDegrees);
 
@@ -116,11 +115,11 @@ namespace ImageProcessor.Processors
             float rotateAtY = Math.Abs(image.Height / 2);
 
             // Create a new empty bitmap to hold rotated image
-            Bitmap newImage = new Bitmap(newSize.Width, newSize.Height, PixelFormat.Format32bppPArgb);
+            var newImage = new Bitmap(newSize.Width, newSize.Height, PixelFormat.Format32bppPArgb);
             newImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             // Make a graphics object from the empty bitmap
-            using (Graphics graphics = Graphics.FromImage(newImage))
+            using (var graphics = Graphics.FromImage(newImage))
             {
                 GraphicsHelper.SetGraphicsOptions(graphics);
 

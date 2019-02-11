@@ -131,7 +131,7 @@ namespace ImageProcessor.Web.UnitTests.Extensions
         [TestCase(".", true)]
         [TestCase("_", true)]
         [TestCase("~", true)]
-        [TestCase(":", true)]
+        // [TestCase(":", true)]
         [TestCase("/", true)]
         [TestCase("?", true)]
         [TestCase("#", false)]

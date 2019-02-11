@@ -13,7 +13,6 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.MetaData;
@@ -26,10 +25,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Resolution"/> class.
         /// </summary>
-        public Resolution()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Resolution() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -82,14 +78,14 @@ namespace ImageProcessor.Processors
                     ((Bitmap)image).SetResolution(resolution.Item1, resolution.Item2);
                 }
 
-                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Count > 0)
                 {
                     // Set the horizontal EXIF data.
-                    Rational<uint> horizontalRational = new Rational<uint>((uint)resolution.Item1, 1);
+                    var horizontalRational = new Rational<uint>((uint)resolution.Item1, 1);
                     factory.SetPropertyItem(ExifPropertyTag.XResolution, horizontalRational);
 
                     // Set the vertical EXIF data.
-                    Rational<uint> verticalRational = new Rational<uint>((uint)resolution.Item2, 1);
+                    var verticalRational = new Rational<uint>((uint)resolution.Item2, 1);
                     factory.SetPropertyItem(ExifPropertyTag.YResolution, verticalRational);
 
                     // Set the unit EXIF data

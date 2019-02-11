@@ -37,10 +37,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Overlay"/> class.
         /// </summary>
-        public Overlay()
-        {
-            this.Processor = new ImageProcessor.Processors.Overlay();
-        }
+        public Overlay() => this.Processor = new ImageProcessor.Processors.Overlay();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -77,8 +74,8 @@ namespace ImageProcessor.Web.Processors
 
                 Point? position = queryCollection["overlay.position"] != null
                       ? QueryParamParser.Instance.ParseValue<Point>(queryCollection["overlay.position"])
-                      : (Point?)null; 
-                
+                      : (Point?)null;
+
                 int opacity = queryCollection["overlay.opacity"] != null
                                   ? QueryParamParser.Instance.ParseValue<int>(queryCollection["overlay.opacity"])
                                   : 100;
@@ -110,8 +107,7 @@ namespace ImageProcessor.Web.Processors
             Image image = null;
 
             // Correctly parse the path.
-            string path;
-            this.Processor.Settings.TryGetValue("VirtualPath", out path);
+            this.Processor.Settings.TryGetValue("VirtualPath", out string path);
 
             if (!string.IsNullOrWhiteSpace(path) && path.StartsWith("~/"))
             {
@@ -121,7 +117,7 @@ namespace ImageProcessor.Web.Processors
                     imagePath = Path.Combine(imagePath, input);
                     try
                     {
-                        using (ImageFactory factory = new ImageFactory())
+                        using (var factory = new ImageFactory())
                         {
                             factory.Load(imagePath);
                             image = new Bitmap(factory.Image);

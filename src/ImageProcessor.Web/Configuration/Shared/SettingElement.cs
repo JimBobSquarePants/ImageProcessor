@@ -24,15 +24,9 @@ namespace ImageProcessor.Web.Configuration
         [ConfigurationProperty("key", IsRequired = true, IsKey = true)]
         public string Key
         {
-            get
-            {
-                return this["key"] as string;
-            }
+            get => this["key"] as string;
 
-            set
-            {
-                this["key"] = value;
-            }
+            set => this["key"] = value;
         }
 
         /// <summary>
@@ -42,15 +36,9 @@ namespace ImageProcessor.Web.Configuration
         [ConfigurationProperty("value", IsRequired = true)]
         public string Value
         {
-            get
-            {
-                return (string)this["value"];
-            }
+            get => (string)this["value"];
 
-            set
-            {
-                this["value"] = value;
-            }
+            set => this["value"] = value;
         }
     }
 }

@@ -41,12 +41,8 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Adds an item to the cache.
         /// </summary>
-        /// <param name="key">
-        /// A unique identifier for the cache entry.
-        /// </param>
-        /// <param name="value">
-        /// The object to insert.
-        /// </param>
+        /// <param name="key">A unique identifier for the cache entry.</param>
+        /// <param name="value">The object to insert.</param>
         /// <param name="policy">
         /// Optional. An <see cref="T:System.Runtime.Caching.CacheItemPolicy"/> object that contains eviction details for the cache entry. This object
         /// provides more options for eviction than a simple absolute expiration. The default value for the optional parameter
@@ -94,9 +90,7 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Fetches an item matching the given key from the cache.
         /// </summary>
-        /// <param name="key">
-        /// A unique identifier for the cache entry.
-        /// </param>
+        /// <param name="key">A unique identifier for the cache entry.</param>
         /// <param name="regionName">
         /// Optional. A named region in the cache to which the cache entry can be added,
         /// if regions are implemented. The default value for the optional parameter
@@ -116,12 +110,8 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Updates an item to the cache.
         /// </summary>
-        /// <param name="key">
-        /// A unique identifier for the cache entry.
-        /// </param>
-        /// <param name="value">
-        /// The object to insert.
-        /// </param>
+        /// <param name="key">A unique identifier for the cache entry.</param>
+        /// <param name="value">The object to insert.</param>
         /// <param name="policy">
         /// Optional. An <see cref="T:System.Runtime.Caching.CacheItemPolicy"/> object that contains eviction details for the cache entry. This object
         /// provides more options for eviction than a simple absolute expiration. The default value for the optional parameter
@@ -164,9 +154,7 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Removes an item matching the given key from the cache.
         /// </summary>
-        /// <param name="key">
-        /// A unique identifier for the cache entry.
-        /// </param>
+        /// <param name="key">A unique identifier for the cache entry.</param>
         /// <param name="regionName">
         /// Optional. A named region in the cache to which the cache entry can be added,
         /// if regions are implemented. The default value for the optional parameter
@@ -186,8 +174,7 @@ namespace ImageProcessor.Web.Caching
 
                 if (isRemoved)
                 {
-                    string removedValue;
-                    CacheItems.TryRemove(key, out removedValue);
+                    CacheItems.TryRemove(key, out string removedValue);
                 }
             }
 
@@ -197,9 +184,7 @@ namespace ImageProcessor.Web.Caching
         /// <summary>
         /// Clears the cache.
         /// </summary>
-        /// <param name="regionName">
-        /// The region name.
-        /// </param>
+        /// <param name="regionName">The region name.</param>
         /// <returns>
         /// The <see cref="bool"/>.
         /// </returns>
@@ -211,20 +196,19 @@ namespace ImageProcessor.Web.Caching
             {
                 // You can't remove items from a collection whilst you are iterating over it so you need to
                 // create a collection to store the items to remove.
-                Dictionary<string, string> tempDictionary = new Dictionary<string, string>();
+                var tempDictionary = new Dictionary<string, string>();
 
                 foreach (KeyValuePair<string, string> cacheItem in CacheItems)
                 {
                     // Does the cached key come with a region.
-                    if ((cacheItem.Value == null) || (cacheItem.Value != null && cacheItem.Value.Equals(regionName, StringComparison.OrdinalIgnoreCase)))
+                    if ((cacheItem.Value == null) || (cacheItem.Value?.Equals(regionName, StringComparison.OrdinalIgnoreCase) == true))
                     {
                         isCleared = RemoveItem(cacheItem.Key, cacheItem.Value);
 
                         if (isCleared)
                         {
                             string key = cacheItem.Key;
-                            string value = cacheItem.Value;
-                            tempDictionary[key] = value;
+                            tempDictionary[key] = cacheItem.Value;
                         }
                     }
                 }
@@ -234,8 +218,7 @@ namespace ImageProcessor.Web.Caching
                     // Loop through and clear out the dictionary of cache keys.
                     foreach (KeyValuePair<string, string> cacheItem in tempDictionary)
                     {
-                        string removedValue;
-                        CacheItems.TryRemove(cacheItem.Key, out removedValue);
+                        CacheItems.TryRemove(cacheItem.Key, out string removedValue);
                     }
                 }
             }

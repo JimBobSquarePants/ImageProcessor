@@ -10,8 +10,11 @@
 
 namespace ImageProcessor.Imaging.Formats
 {
+    using System.Drawing;
     using System.Drawing.Imaging;
+    using System.IO;
     using System.Text;
+    using ImageProcessor.Common.Extensions;
 
     /// <summary>
     /// Provides the necessary information to support bitmap images.
@@ -43,5 +46,52 @@ namespace ImageProcessor.Imaging.Formats
         /// Gets the <see cref="ImageFormat" />.
         /// </summary>
         public override ImageFormat ImageFormat => ImageFormat.Bmp;
+
+        /// <inheritdoc/>
+        public override Image Save(Stream stream, Image image, long bitDepth)
+        {
+            PixelFormat pixelFormat = PixelFormat.Format32bppPArgb;
+            switch (bitDepth)
+            {
+                case 24L:
+                    pixelFormat = PixelFormat.Format24bppRgb;
+                    break;
+
+                case 8L:
+                    pixelFormat = PixelFormat.Format8bppIndexed;
+                    break;
+            }
+
+            using (Image clone = image.Copy(pixelFormat))
+            {
+                clone.Save(stream, this.ImageFormat);
+            }
+
+            return image;
+        }
+
+        /// <inheritdoc/>
+        public override Image Save(string path, Image image, long bitDepth)
+        {
+            // Bmps can be saved with different bit depths.
+            PixelFormat pixelFormat = PixelFormat.Format32bppPArgb;
+            switch (bitDepth)
+            {
+                case 24L:
+                    pixelFormat = PixelFormat.Format24bppRgb;
+                    break;
+
+                case 8L:
+                    pixelFormat = PixelFormat.Format8bppIndexed;
+                    break;
+            }
+
+            using (Image clone = image.Copy(pixelFormat))
+            {
+                clone.Save(path, this.ImageFormat);
+            }
+
+            return image;
+        }
     }
 }

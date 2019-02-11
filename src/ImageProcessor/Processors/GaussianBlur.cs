@@ -25,10 +25,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="GaussianBlur"/> class.
         /// </summary>
-        public GaussianBlur()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public GaussianBlur() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the DynamicParameter.
@@ -50,12 +47,12 @@ namespace ImageProcessor.Processors
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
-            Bitmap image = (Bitmap)factory.Image;
+            var image = (Bitmap)factory.Image;
 
             try
             {
                 GaussianLayer gaussianLayer = this.DynamicParameter;
-                Convolution convolution = new Convolution(gaussianLayer.Sigma) { Threshold = gaussianLayer.Threshold };
+                var convolution = new Convolution(gaussianLayer.Sigma) { Threshold = gaussianLayer.Threshold };
                 double[,] kernel = convolution.CreateGuassianBlurFilter(gaussianLayer.Size);
 
                 return convolution.ProcessKernel(image, kernel, factory.FixGamma);

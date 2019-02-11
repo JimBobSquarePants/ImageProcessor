@@ -31,10 +31,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Contrast"/> class.
         /// </summary>
-        public Contrast()
-        {
-            this.Processor = new ImageProcessor.Processors.Contrast();
-        }
+        public Contrast() => this.Processor = new ImageProcessor.Processors.Contrast();
 
         /// <summary>
         /// Gets the regular expression to search strings for.

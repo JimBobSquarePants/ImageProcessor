@@ -13,7 +13,6 @@ namespace ImageProcessor.Processors
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Linq;
 
     using ImageProcessor.Common.Exceptions;
     using ImageProcessor.Imaging.MetaData;
@@ -26,10 +25,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Flip"/> class.
         /// </summary>
-        public Flip()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Flip() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets DynamicParameter.
@@ -70,7 +66,7 @@ namespace ImageProcessor.Processors
                 // Flip
                 image.RotateFlip(rotateFlipType);
 
-                if (factory.PreserveExifData && factory.ExifPropertyItems.Any())
+                if (factory.PreserveExifData && factory.ExifPropertyItems.Count > 0)
                 {
                     // Set the width EXIF data.
                     factory.SetPropertyItem(ExifPropertyTag.ImageWidth, (ushort)image.Width);

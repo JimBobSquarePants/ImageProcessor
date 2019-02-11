@@ -38,10 +38,7 @@ namespace ImageProcessor.Imaging.Quantizers
         /// only call the 'QuantizeImage' function. If two passes are required, the code will call 'InitialQuantizeImage'
         /// and then 'QuantizeImage'.
         /// </remarks>
-        protected Quantizer(bool singlePass)
-        {
-            this.singlePass = singlePass;
-        }
+        protected Quantizer(bool singlePass) => this.singlePass = singlePass;
 
         /// <summary>
         /// Quantize an image and return the resulting output bitmap.
@@ -59,18 +56,18 @@ namespace ImageProcessor.Imaging.Quantizers
             int width = source.Width;
 
             // And construct a rectangle from these dimensions
-            Rectangle bounds = new Rectangle(0, 0, width, height);
+            var bounds = new Rectangle(0, 0, width, height);
 
             // First off take a 32bpp copy of the image
-            Bitmap copy = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            var copy = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
             copy.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             // And construct an 8bpp version
-            Bitmap output = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
+            var output = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
             output.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             // Now lock the bitmap into memory
-            using (Graphics g = Graphics.FromImage(copy))
+            using (var g = Graphics.FromImage(copy))
             {
                 g.PageUnit = GraphicsUnit.Pixel;
 

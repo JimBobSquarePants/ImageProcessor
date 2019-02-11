@@ -24,6 +24,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -122,7 +123,10 @@
     <Content Include="config\imageprocessor\processing.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="config\imageprocessor\security.config" />
+    <Content Include="config\imageprocessor\security.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\Home\Database.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -138,6 +142,10 @@
     <ProjectReference Include="..\..\src\ImageProcessor.Plugins.WebP\ImageProcessor.Plugins.WebP.csproj">
       <Project>{2cf69699-959a-44dc-a281-4e2596c25043}</Project>
       <Name>ImageProcessor.Plugins.WebP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\ImageProcessor.Web.Plugins.AmazonS3Cache\ImageProcessor.Web.Plugins.AmazonS3Cache.csproj">
+      <Project>{06b29b8b-41b2-40f0-a2be-99156ff5f68b}</Project>
+      <Name>ImageProcessor.Web.Plugins.AmazonS3Cache</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ImageProcessor.Web.Plugins.AzureBlobCache\ImageProcessor.Web.Plugins.AzureBlobCache.csproj">
       <Project>{3c805e4c-d679-43f8-8c43-8909cdb4d4d7}</Project>
@@ -163,7 +171,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>61655</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

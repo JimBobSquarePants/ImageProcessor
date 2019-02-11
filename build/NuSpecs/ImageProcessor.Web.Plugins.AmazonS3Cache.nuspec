@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>ImageProcessor.Web.Plugins.AmazonS3Cache</id>
+    <version>$version$</version>
+    <title>ImageProcessor.Web.Plugins.AmazonS3Cache</title>
+    <authors>James Jackson-South</authors>
+    <owners>James Jackson-South</owners>
+    <projectUrl>http://imageprocessor.org</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/JimBobSquarePants/ImageProcessor/develop/build/icons/imageprocessor-logo-128.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      Adds a self cleaning cache to ImageProcessor.Web that uses Amazon S3 Buckets to store processed images.
+
+      If you use ImageProcessor.Web please get in touch via my twitter @james_m_south
+
+      Feedback is always welcome
+    </description>
+    <summary>ImageProcessor.Web AmazonS3Cache for ASP.NET websites.</summary>
+    <releaseNotes />
+    <copyright>James Jackson-South</copyright>
+    <language>en-GB</language>
+    <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff Amazon S3 Cache Asp</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.2">
+        <dependency id="ImageProcessor.Web" version="4.10.0.0" />
+        <dependency id="ImageProcessor.Web.Config" version="2.5.0.0" />
+        <dependency id="AWSSDK.Core" version="3.3.23.1" />
+        <dependency id="AWSSDK.S3" version="3.3.18.3" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\content\ImageProcessor.Web.Plugins.AmazonS3Cache\config\imageprocessor\cache.config.transform" target="content\config\imageprocessor\cache.config.transform" />
+    <file src="..\_BuildOutput\ImageProcessor.Web.Plugins.AmazonS3Cache\lib\net452\ImageProcessor.Web.Plugins.AmazonS3Cache.dll" target="lib\net452" />
+    <file src="..\_BuildOutput\ImageProcessor.Web.Plugins.AmazonS3Cache\lib\net452\ImageProcessor.Web.Plugins.AmazonS3Cache.xml" target="lib\net452" />
+  </files>
+</package>

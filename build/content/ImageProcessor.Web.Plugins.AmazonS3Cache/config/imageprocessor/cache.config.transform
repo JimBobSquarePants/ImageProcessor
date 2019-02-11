@@ -1,12 +1,17 @@
-<caching currentCache="AzureBlobCache">
+<caching currentCache="AmazonS3Cache">
   <caches>
     <cache name="AmazonS3Cache" type="ImageProcessor.Web.Plugins.AmazonS3Cache.AmazonS3Cache, ImageProcessor.Web.Plugins.AmazonS3Cache" maxDays="365">
       <settings>
         <setting key="AwsAccessKey" value="" />
         <setting key="AwsSecretKey" value="" />
-        <setting key="AwsBucketName" value="" />
-        <setting key="CachedCDNRoot" value="" />
-        <setting key="RegionEndpoint" value="EUWest1" />
+        <setting key="AwsBucketName" value="[BucketName]"/>
+        <setting key="AwsCacheKeyPrefix" value="cache" />
+        <setting key="RegionEndpoint" value="[RegionEndPoint]" />
+        <setting key="SourceRegionEndpoint" value="" />
+        <setting key="CachedCDNRoot" value="[CdnRootUrl]" />
+        <setting key="CloudSourceURI" value="https://s3.[SourceRegionEndPoint].amazonaws.com/[BucketName]/" />
+        <setting key="CachedCDNTimeout" value="2000" />
+        <setting key="StreamCachedImage" value="false" />
       </settings>
     </cache>
   </caches>

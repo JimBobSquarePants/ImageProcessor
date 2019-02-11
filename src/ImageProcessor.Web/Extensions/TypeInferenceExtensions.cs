@@ -40,20 +40,14 @@ namespace ImageProcessor.Web.Extensions
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>True if the type is a collection type otherwise; false.</returns>
-        public static bool IsCollectionType(this Type type)
-        {
-            return type.TryGetElementType(typeof(ICollection<>)) != null;
-        }
+        public static bool IsCollectionType(this Type type) => type.TryGetElementType(typeof(ICollection<>)) != null;
 
         /// <summary>
         /// Determines whether the specified type is an enumerable type.
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>True if the type is an enumerable type otherwise; false.</returns>
-        public static bool IsEnumerableType(this Type type)
-        {
-            return type.TryGetElementType(typeof(IEnumerable<>)) != null;
-        }
+        public static bool IsEnumerableType(this Type type) => type.TryGetElementType(typeof(IEnumerable<>)) != null;
 
         /// <summary>
         /// Determines whether the specified type is an enumerable type containing a 
@@ -69,10 +63,10 @@ namespace ImageProcessor.Web.Extensions
         /// pair otherwise; false.</returns>
         public static bool IsEnumerableOfKeyValueType(this Type type)
         {
-            return type.TryGetElementType(typeof(IDictionary<,>)) != null ||
-                (type.IsEnumerableType() && type.IsGenericType && type.GenericTypeArguments.Any()
-                 && type.GenericTypeArguments[0].IsGenericType
-                 && type.GenericTypeArguments[0].GetGenericTypeDefinition() == typeof(KeyValuePair<,>));
+            return type.TryGetElementType(typeof(IDictionary<,>)) != null
+                || (type.IsEnumerableType() && type.IsGenericType && type.GenericTypeArguments.Length > 0
+                && type.GenericTypeArguments[0].IsGenericType
+                && type.GenericTypeArguments[0].GetGenericTypeDefinition() == typeof(KeyValuePair<,>));
         }
 
         /// <summary>
@@ -89,7 +83,7 @@ namespace ImageProcessor.Web.Extensions
             // String, though enumerable have no generic arguments.
             // Types with more than one generic argument cnnot be cast. 
             // Dictionary, though enumerable, requires linq to convert and shouldn't be attempted anyway.
-            return type.IsEnumerableType() && type.GenericTypeArguments.Any()
+            return type.IsEnumerableType() && type.GenericTypeArguments.Length > 0
                     && type.GenericTypeArguments.Length == 1
                     && type.TryGetElementType(typeof(IDictionary<,>)) == null;
         }
@@ -161,7 +155,7 @@ namespace ImageProcessor.Web.Extensions
         /// <returns>The type of the enumerable.</returns>
         public static Type GetEnumerableType(this Type type)
         {
-            List<Type> interfaces = type.GetInterfaces().ToList();
+            var interfaces = type.GetInterfaces().ToList();
             if (type.IsInterface && interfaces.All(i => i != type))
             {
                 interfaces.Add(type);

@@ -33,6 +33,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
     /// </summary>
     public class AzureBlobCache : ImageCacheBase
     {
+        private static readonly object SyncLock = new object();
+
         /// <summary>
         /// The regular expression for parsing a remote uri.
         /// </summary>
@@ -62,17 +64,22 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <summary>
         /// The cached root url for a content delivery network.
         /// </summary>
-        private readonly string cachedCdnRoot;
+        private static string cachedCdnRoot;
 
         /// <summary>
         /// Determines if the CDN request is redirected or rewritten
         /// </summary>
-        private readonly bool streamCachedImage;
+        private static bool streamCachedImage;
 
         /// <summary>
         /// The timeout length for requesting the CDN url.
         /// </summary>
-        private readonly int timeout = 1000;
+        private static int timeout = 1000;
+
+        /// <summary>
+        /// Whether to use the cached container name in the Url.
+        /// </summary>
+        private static bool useCachedContainerInUrl;
 
         /// <summary>
         /// The cached rewrite path.
@@ -94,23 +101,32 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         public AzureBlobCache(string requestPath, string fullPath, string querystring)
             : base(requestPath, fullPath, querystring)
         {
-            if (cloudCachedBlobClient == null)
+            if (!(cloudCachedBlobContainer is null))
             {
+                return;
+            }
+
+            lock (SyncLock)
+            {
+                if (!(cloudCachedBlobContainer is null))
+                {
+                    return;
+                }
+
                 // Retrieve storage accounts from connection string.
-                CloudStorageAccount cloudCachedStorageAccount = CloudStorageAccount.Parse(this.Settings["CachedStorageAccount"]);
+                var cloudCachedStorageAccount = CloudStorageAccount.Parse(this.Settings["CachedStorageAccount"]);
 
                 // Create the blob clients.
                 cloudCachedBlobClient = cloudCachedStorageAccount.CreateCloudBlobClient();
-            }
 
-            if (cloudCachedBlobContainer == null)
-            {
-                // Retrieve references to a container.
-                cloudCachedBlobContainer = CreateContainer(cloudCachedBlobClient, this.Settings["CachedBlobContainer"], BlobContainerPublicAccessType.Blob);
-            }
+                // Set cloud cache container.
+                BlobContainerPublicAccessType accessType = this.Settings.ContainsKey("AccessType")
+                ? (BlobContainerPublicAccessType)Enum.Parse(typeof(BlobContainerPublicAccessType), this.Settings["AccessType"])
+                : BlobContainerPublicAccessType.Blob;
 
-            if (cloudSourceBlobContainer == null)
-            {
+                cloudCachedBlobContainer = CreateContainer(cloudCachedBlobClient, this.Settings["CachedBlobContainer"], accessType);
+
+                // Set cloud source container.
                 string sourceAccount = this.Settings.ContainsKey("SourceStorageAccount")
                                            ? this.Settings["SourceStorageAccount"]
                                            : string.Empty;
@@ -118,27 +134,31 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 // Repeat for source if it exists
                 if (!string.IsNullOrWhiteSpace(sourceAccount))
                 {
-                    CloudStorageAccount cloudSourceStorageAccount = CloudStorageAccount.Parse(this.Settings["SourceStorageAccount"]);
+                    var cloudSourceStorageAccount = CloudStorageAccount.Parse(this.Settings["SourceStorageAccount"]);
                     CloudBlobClient cloudSourceBlobClient = cloudSourceStorageAccount.CreateCloudBlobClient();
                     cloudSourceBlobContainer = cloudSourceBlobClient.GetContainerReference(this.Settings["SourceBlobContainer"]);
                 }
+
+                // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
+                // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site.
+                // See: https://github.com/JimBobSquarePants/ImageProcessor/issues/161
+                // If it's private, we also stream the response rather than redirect.
+                streamCachedImage = accessType.Equals(BlobContainerPublicAccessType.Off) || (this.Settings.ContainsKey("StreamCachedImage") && string.Equals(this.Settings["StreamCachedImage"], "true", StringComparison.OrdinalIgnoreCase));
+
+                cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
+                     ? this.Settings["CachedCDNRoot"]
+                     : cloudCachedBlobContainer.Uri.ToString().TrimEnd(cloudCachedBlobContainer.Name.ToCharArray());
+
+                if (this.Settings.ContainsKey("CachedCDNTimeout"))
+                {
+                    int.TryParse(this.Settings["CachedCDNTimeout"], out int t);
+                    timeout = t;
+                }
+
+                // Do we insert the cache container? This seems to break some setups.
+                useCachedContainerInUrl = this.Settings.ContainsKey("UseCachedContainerInUrl")
+                        && !string.Equals(this.Settings["UseCachedContainerInUrl"], "false", StringComparison.OrdinalIgnoreCase);
             }
-
-            this.cachedCdnRoot = this.Settings.ContainsKey("CachedCDNRoot")
-                                     ? this.Settings["CachedCDNRoot"]
-                                     : cloudCachedBlobContainer.Uri.ToString().TrimEnd(cloudCachedBlobContainer.Name.ToCharArray());
-
-            if (this.Settings.ContainsKey("CachedCDNTimeout"))
-            {
-                int t;
-                int.TryParse(this.Settings["CachedCDNTimeout"], out t);
-                this.timeout = t;
-            }
-
-            // This setting was added to facilitate streaming of the blob resource directly instead of a redirect. This is beneficial for CDN purposes
-            // but caution should be taken if not used with a CDN as it will add quite a bit of overhead to the site.
-            // See: https://github.com/JimBobSquarePants/ImageProcessor/issues/161
-            this.streamCachedImage = this.Settings.ContainsKey("StreamCachedImage") && this.Settings["StreamCachedImage"].ToLower() == "true";
         }
 
         /// <summary>
@@ -152,41 +172,37 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             // TODO: Before this check is performed it should be throttled. For example, only perform this check
             // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
-            string cachedFileName = await this.CreateCachedFileNameAsync();
+            string cachedFileName = await this.CreateCachedFileNameAsync().ConfigureAwait(false);
             this.CachedPath = CachedImageHelper.GetCachedPath(cloudCachedBlobContainer.Uri.ToString(), cachedFileName, true, this.FolderDepth);
 
-            // Do we insert the cache container? This seems to break some setups.
-            bool useCachedContainerInUrl = this.Settings.ContainsKey("UseCachedContainerInUrl") && this.Settings["UseCachedContainerInUrl"].ToLower() != "false";
-
-            this.cachedRewritePath = CachedImageHelper.GetCachedPath(useCachedContainerInUrl ? Path.Combine(this.cachedCdnRoot, cloudCachedBlobContainer.Name) : this.cachedCdnRoot, cachedFileName, true, this.FolderDepth);
+            this.cachedRewritePath = CachedImageHelper.GetCachedPath(useCachedContainerInUrl
+                ? Path.Combine(cachedCdnRoot, cloudCachedBlobContainer.Name)
+                : cachedCdnRoot, cachedFileName, true, this.FolderDepth);
 
             bool isUpdated = false;
             CachedImage cachedImage = CacheIndexer.Get(this.CachedPath);
 
-            if (new Uri(this.CachedPath).IsFile)
+            if (new Uri(this.CachedPath).IsFile && File.Exists(this.CachedPath))
             {
-                if (File.Exists(this.CachedPath))
+                cachedImage = new CachedImage
                 {
-                    cachedImage = new CachedImage
-                    {
-                        Key = Path.GetFileNameWithoutExtension(this.CachedPath),
-                        Path = this.CachedPath,
-                        CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
-                    };
+                    Key = Path.GetFileNameWithoutExtension(this.CachedPath),
+                    Path = this.CachedPath,
+                    CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
+                };
 
-                    CacheIndexer.Add(cachedImage);
-                }
+                CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
             }
 
-            if (cachedImage == null)
+            if (cachedImage is null)
             {
                 string blobPath = this.CachedPath.Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
                 CloudBlockBlob blockBlob = cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
 
-                if (await blockBlob.ExistsAsync())
+                if (await blockBlob.ExistsAsync().ConfigureAwait(false))
                 {
                     // Pull the latest info.
-                    await blockBlob.FetchAttributesAsync();
+                    await blockBlob.FetchAttributesAsync().ConfigureAwait(false);
 
                     if (blockBlob.Properties.LastModified.HasValue)
                     {
@@ -197,12 +213,12 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                             CreationTimeUtc = blockBlob.Properties.LastModified.Value.UtcDateTime
                         };
 
-                        CacheIndexer.Add(cachedImage);
+                        CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                     }
                 }
             }
 
-            if (cachedImage == null)
+            if (cachedImage is null)
             {
                 // Nothing in the cache so we should return true.
                 isUpdated = true;
@@ -211,7 +227,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             {
                 // Check to see if the cached image is set to expire
                 // or a new file with the same name has replaced our current image
-                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
+                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc).ConfigureAwait(false))
                 {
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
@@ -238,14 +254,14 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
             string blobPath = this.CachedPath.Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
             CloudBlockBlob blockBlob = cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
 
-            await blockBlob.UploadFromStreamAsync(stream);
+            await blockBlob.UploadFromStreamAsync(stream).ConfigureAwait(false);
 
             blockBlob.Properties.ContentType = contentType;
             blockBlob.Properties.CacheControl = $"public, max-age={this.BrowserMaxDays * 86400}";
-            await blockBlob.SetPropertiesAsync();
+            await blockBlob.SetPropertiesAsync().ConfigureAwait(false);
 
             blockBlob.Metadata.Add("ImageProcessedBy", "ImageProcessor.Web/" + AssemblyVersion);
-            await blockBlob.SetMetadataAsync();
+            await blockBlob.SetMetadataAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -268,28 +284,27 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
                 if (this.FolderDepth > 0)
                 {
-                    Uri uri = new Uri(this.CachedPath);
+                    var uri = new Uri(this.CachedPath);
                     string path = uri.GetLeftPart(UriPartial.Path).Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
                     parent = path.Substring(0, 2);
                 }
 
                 BlobContinuationToken continuationToken = null;
-                List<IListBlobItem> results = new List<IListBlobItem>();
+                var results = new List<IListBlobItem>();
 
                 // Loop through the all the files in a non blocking fashion.
                 do
                 {
-                    BlobResultSegment response = await cloudCachedBlobContainer.ListBlobsSegmentedAsync(parent, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null, token);
+                    BlobResultSegment response = await cloudCachedBlobContainer.ListBlobsSegmentedAsync(parent, true, BlobListingDetails.Metadata, 5000, continuationToken, null, null, token).ConfigureAwait(false);
                     continuationToken = response.ContinuationToken;
                     results.AddRange(response.Results);
                 }
-                while (token.IsCancellationRequested == false && continuationToken != null);
+                while (!token.IsCancellationRequested && continuationToken != null);
 
                 // Now leap through and delete.
                 foreach (
                     CloudBlockBlob blob in
-                    results.Where((blobItem, type) => blobItem is CloudBlockBlob)
-                           .Cast<CloudBlockBlob>()
+                    results.OfType<CloudBlockBlob>()
                            .OrderBy(b => b.Properties.LastModified?.UtcDateTime ?? new DateTime()))
                 {
                     if (token.IsCancellationRequested || (blob.Properties.LastModified.HasValue && !this.IsExpired(blob.Properties.LastModified.Value.UtcDateTime)))
@@ -299,68 +314,11 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
 
                     // Remove from the cache and delete each CachedImage.
                     CacheIndexer.Remove(blob.Name);
-                    await blob.DeleteAsync(token);
+                    await blob.DeleteAsync(token).ConfigureAwait(false);
                 }
             });
 
             return Task.FromResult(0);
-        }
-
-        /// <summary>
-        /// Returns a value indicating whether the requested image has been updated.
-        /// </summary>
-        /// <param name="creationDate">The creation date.</param>
-        /// <returns>The <see cref="bool"/></returns>
-        private async Task<bool> IsUpdatedAsync(DateTime creationDate)
-        {
-            bool isUpdated = false;
-
-            try
-            {
-                if (new Uri(this.RequestPath).IsFile)
-                {
-                    if (File.Exists(this.RequestPath))
-                    {
-                        // If it's newer than the cached file then it must be an update.
-                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
-                    }
-                }
-                else if (cloudSourceBlobContainer != null)
-                {
-                    string container = RemoteRegex.Replace(cloudSourceBlobContainer.Uri.ToString(), string.Empty);
-                    string blobPath = RemoteRegex.Replace(this.RequestPath, string.Empty);
-                    blobPath = blobPath.Replace(container, string.Empty).TrimStart('/');
-                    CloudBlockBlob blockBlob = cloudSourceBlobContainer.GetBlockBlobReference(blobPath);
-
-                    if (await blockBlob.ExistsAsync())
-                    {
-                        // Pull the latest info.
-                        await blockBlob.FetchAttributesAsync();
-
-                        if (blockBlob.Properties.LastModified.HasValue)
-                        {
-                            isUpdated = blockBlob.Properties.LastModified.Value.UtcDateTime > creationDate;
-                        }
-                    }
-                }
-                else
-                {
-                    // Try and get the headers for the file, this should allow cache busting for remote files.
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
-                    request.Method = "HEAD";
-
-                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-                    {
-                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
-                    }
-                }
-            }
-            catch
-            {
-                isUpdated = false;
-            }
-
-            return isUpdated;
         }
 
         /// <summary>
@@ -371,89 +329,93 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// </param>
         public override void RewritePath(HttpContext context)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.cachedRewritePath);
-
-            if (this.streamCachedImage)
+            if (streamCachedImage)
             {
-                // Map headers to enable 304s to pass through
-                if (context.Request.Headers["If-Modified-Since"] != null)
-                {
-                    TrySetIfModifiedSinceDate(context, request);
-                }
+                string blobPath = this.CachedPath.Substring(cloudCachedBlobContainer.Uri.ToString().Length + 1);
+                CloudBlockBlob blockBlob = cloudCachedBlobContainer.GetBlockBlobReference(blobPath);
 
-                string[] mapRequestHeaders = { "Cache-Control", "If-None-Match" };
-                foreach (string h in mapRequestHeaders)
+                if (blockBlob.Exists())
                 {
-                    if (context.Request.Headers[h] != null)
+                    using (MemoryStream cachedStream = MemoryStreamPool.Shared.GetStream())
                     {
-                        request.Headers.Add(h, context.Request.Headers[h]);
+                        // Map headers to enable 304s to pass through
+                        TrySetIfModifiedSinceDate(context, out AccessCondition accessCondition);
+                        const string IfNoneMatch = "If-None-Match";
+
+                        // TODO: Cache-Control?
+                        if (context.Request.Headers[IfNoneMatch] != null)
+                        {
+                            accessCondition.IfNoneMatchETag = context.Request.Headers[IfNoneMatch];
+                        }
+
+                        bool is304 = false;
+                        try
+                        {
+                            blockBlob.DownloadToStream(cachedStream, accessCondition);
+                            cachedStream.Position = 0;
+                        }
+                        catch (StorageException ex)
+                        {
+                            // A 304 is not a true error, we still need to feed back.
+                            var webException = ex.InnerException as WebException;
+                            if (!(webException is null))
+                            {
+                                if (webException.Response != null && (((HttpWebResponse)webException.Response).StatusCode == HttpStatusCode.NotModified))
+                                {
+                                    is304 = true;
+                                }
+                                else
+                                {
+                                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
+                                    return;
+                                }
+                            }
+                        }
+
+                        BlobProperties properties = blockBlob.Properties;
+                        HttpResponse contextResponse = context.Response;
+
+                        if (!string.IsNullOrWhiteSpace(properties.ETag))
+                        {
+                            contextResponse.Headers.Add("ETag", properties.ETag);
+                        }
+
+                        if (properties.LastModified.HasValue)
+                        {
+                            contextResponse.Headers.Add("Last-Modified", properties.LastModified.Value.UtcDateTime.ToString("R"));
+                        }
+
+                        cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
+
+                        if (contextResponse.OutputStream.CanSeek)
+                        {
+                            contextResponse.OutputStream.Position = 0;
+                        }
+
+                        ImageProcessingModule.SetHeaders(
+                            context,
+                            !is304 ? properties.ContentType : null,
+                            null,
+                            this.BrowserMaxDays,
+                            !is304 ? HttpStatusCode.OK : HttpStatusCode.NotModified);
                     }
                 }
-
-                // Write the blob storage directly to the stream
-                request.Method = "GET";
-                request.Timeout = this.timeout;
-
-                HttpWebResponse response = null;
-                try
-                {
-                    response = (HttpWebResponse)request.GetResponse();
-                }
-                catch (WebException ex)
-                {
-                    // A 304 is not an error
-                    // It appears that some CDN's on Azure (Akamai) do not work properly when making head requests.
-                    // They will return a response url and other headers but a 500 status code.
-                    if (ex.Response != null && (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified
-                        || ex.Response.ResponseUri.AbsoluteUri.Equals(this.cachedRewritePath, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        response = (HttpWebResponse)ex.Response;
-                    }
-                    else
-                    {
-                        response?.Dispose();
-                        ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
-                        return;
-                    }
-                }
-
-                Stream cachedStream = response.GetResponseStream();
-
-                if (cachedStream != null)
-                {
-                    HttpResponse contextResponse = context.Response;
-
-                    // If streaming but not using a CDN the headers will be null.
-                    // See https://github.com/JimBobSquarePants/ImageProcessor/pull/466
-                    string etagHeader = response.Headers["ETag"];
-                    if (!string.IsNullOrWhiteSpace(etagHeader))
-                    {
-                        contextResponse.Headers.Add("ETag", etagHeader);
-                    }
-
-                    string lastModifiedHeader = response.Headers["Last-Modified"];
-                    if (!string.IsNullOrWhiteSpace(lastModifiedHeader))
-                    {
-                        contextResponse.Headers.Add("Last-Modified", lastModifiedHeader);
-                    }
-
-                    cachedStream.CopyTo(contextResponse.OutputStream); // Will be empty on 304s
-                    ImageProcessingModule.SetHeaders(
-                        context,
-                        response.StatusCode == HttpStatusCode.NotModified ? null : response.ContentType,
-                        null,
-                        this.BrowserMaxDays,
-                        response.StatusCode);
-                }
-
-                cachedStream?.Dispose();
-                response.Dispose();
             }
             else
             {
+                // Prevent redundant metadata request if paths match.
+                if (this.CachedPath == this.cachedRewritePath)
+                {
+                    ImageProcessingModule.AddCorsRequestHeaders(context);
+                    context.Response.Redirect(this.CachedPath, false);
+                    return;
+                }
+
+                var request = (HttpWebRequest)WebRequest.Create(this.cachedRewritePath);
+
                 // Redirect the request to the blob URL
                 request.Method = "HEAD";
-                request.Timeout = this.timeout;
+                request.Timeout = timeout;
 
                 HttpWebResponse response;
                 try
@@ -498,36 +460,100 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         }
 
         /// <summary>
-        /// Tries to set IfModifiedSince header however this crashes when context.Request.Headers["If-Modified-Since"] exists,
+        /// Returns a value indicating whether the requested image has been updated.
+        /// </summary>
+        /// <param name="creationDate">The creation date.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        protected virtual async Task<bool> IsUpdatedAsync(DateTime creationDate)
+        {
+            bool isUpdated = false;
+
+            try
+            {
+                if (new Uri(this.RequestPath).IsFile)
+                {
+                    if (File.Exists(this.RequestPath))
+                    {
+                        // If it's newer than the cached file then it must be an update.
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
+                    }
+                }
+                else if (cloudSourceBlobContainer != null)
+                {
+                    string container = RemoteRegex.Replace(cloudSourceBlobContainer.Uri.ToString(), string.Empty);
+                    string blobPath = RemoteRegex.Replace(this.RequestPath, string.Empty);
+                    blobPath = blobPath.Replace(container, string.Empty).TrimStart('/');
+                    CloudBlockBlob blockBlob = cloudSourceBlobContainer.GetBlockBlobReference(blobPath);
+
+                    if (await blockBlob.ExistsAsync().ConfigureAwait(false))
+                    {
+                        // Pull the latest info.
+                        await blockBlob.FetchAttributesAsync().ConfigureAwait(false);
+
+                        if (blockBlob.Properties.LastModified.HasValue)
+                        {
+                            isUpdated = blockBlob.Properties.LastModified.Value.UtcDateTime > creationDate;
+                        }
+                    }
+                }
+                else if (Uri.IsWellFormedUriString(this.RequestPath, UriKind.Absolute))
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    var request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (var response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+            }
+            catch
+            {
+                isUpdated = false;
+            }
+
+            return isUpdated;
+        }
+
+        /// <summary>
+        /// Tries to set If-Modified-Since header however this crashes when context.Request.Headers["If-Modified-Since"] exists,
         /// but cannot be parsed. It cannot be parsed when it comes from Google Bot as UTC <example>Sun, 27 Nov 2016 20:01:45 UTC</example>
         /// so DateTime.TryParse. If it returns false, then log the error.
         /// </summary>
         /// <param name="context">The current context</param>
-        /// <param name="request">The current request</param>
-        private static void TrySetIfModifiedSinceDate(HttpContext context, HttpWebRequest request)
+        /// <param name="accessCondition">The access condition.</param>
+        private static void TrySetIfModifiedSinceDate(HttpContext context, out AccessCondition accessCondition)
         {
-            DateTime ifModifiedDate;
+            accessCondition = new AccessCondition();
+            const string IfModifiedSince = "If-Modified-Since";
 
-            string ifModifiedFromRequest = context.Request.Headers["If-Modified-Since"];
-
-            if (DateTime.TryParse(ifModifiedFromRequest, out ifModifiedDate))
+            if (context.Request.Headers[IfModifiedSince] is null)
             {
-                request.IfModifiedSince = ifModifiedDate;
+                return;
+            }
+
+            string ifModifiedFromRequest = context.Request.Headers[IfModifiedSince];
+
+            if (DateTime.TryParse(ifModifiedFromRequest, out DateTime ifModifiedDate))
+            {
+                accessCondition.IfModifiedSinceTime = ifModifiedDate;
             }
             else
             {
-                if (ifModifiedFromRequest.ToLower().Contains("utc"))
+                const string Utc = "utc";
+                if (ifModifiedFromRequest.IndexOf(Utc, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    ifModifiedFromRequest = ifModifiedFromRequest.ToLower().Replace("utc", string.Empty);
+                    ifModifiedFromRequest = ifModifiedFromRequest.ToLower().Replace(Utc, string.Empty);
 
                     if (DateTime.TryParse(ifModifiedFromRequest, out ifModifiedDate))
                     {
-                        request.IfModifiedSince = ifModifiedDate;
+                        accessCondition.IfModifiedSinceTime = ifModifiedDate;
                     }
                 }
                 else
                 {
-                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>($"Unable to parse date {context.Request.Headers["If-Modified-Since"]} for {context.Request.Url}");
+                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>($"Unable to parse date {context.Request.Headers[IfModifiedSince]} for {context.Request.Url}");
                 }
             }
         }

@@ -32,7 +32,7 @@ namespace ImageProcessor.Imaging.MetaData
     /// </typeparam>
     [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:ElementsMustBeOrderedByAccess", Justification = "Reviewed. Suppression is OK here. Better readability.")]
     [Serializable]
-    public struct Rational<T> :
+    public readonly struct Rational<T> :
         IConvertible,
         IComparable,
         IComparable<T>
@@ -42,8 +42,6 @@ namespace ImageProcessor.Imaging.MetaData
         /// Represents an empty instance of <see cref="Rational{T}"/>.
         /// </summary>
         public static readonly Rational<T> Empty = new Rational<T>();
-
-        #region Constants
 
         /// <summary>
         /// The delimiter.
@@ -55,10 +53,6 @@ namespace ImageProcessor.Imaging.MetaData
         /// </summary>
         // ReSharper disable once StaticMemberInGenericType
         private static readonly char[] DelimSet = { Delim };
-
-        #endregion Constants
-
-        #region Fields
 
         /// <summary>
         /// The parser delegate method.
@@ -85,9 +79,6 @@ namespace ImageProcessor.Imaging.MetaData
         /// The denominator.
         /// </summary>
         private readonly T denominator;
-        #endregion Fields
-
-        #region Init
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Rational{T}"/> struct. 
@@ -138,10 +129,6 @@ namespace ImageProcessor.Imaging.MetaData
         /// </returns>
         private delegate bool TryParseDelegate(string value, out T rational);
 
-        #endregion Init
-
-        #region Properties
-
         /// <summary>
         /// Gets and sets the numerator of the rational number
         /// </summary>
@@ -164,7 +151,7 @@ namespace ImageProcessor.Imaging.MetaData
         {
             get
             {
-                if (maxValue == default(decimal))
+                if (maxValue == default)
                 {
                     FieldInfo max = typeof(T).GetField("MaxValue", BindingFlags.Static | BindingFlags.Public);
                     if (max != null)
@@ -188,10 +175,6 @@ namespace ImageProcessor.Imaging.MetaData
             }
         }
 
-        #endregion Properties
-
-        #region Parse Methods
-
         /// <summary>
         /// Approximate the decimal value accurate to a precision of 0.000001m
         /// </summary>
@@ -200,10 +183,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <remarks>
         /// <see href="http://stackoverflow.com/questions/95727"/>
         /// </remarks>
-        public static Rational<T> Approximate(decimal value)
-        {
-            return Approximate(value, 0.000001m);
-        }
+        public static Rational<T> Approximate(decimal value) => Approximate(value, 0.000001m);
 
         /// <summary>
         /// Approximate the decimal value accurate to a certain precision
@@ -273,7 +253,7 @@ namespace ImageProcessor.Imaging.MetaData
 
             string[] parts = value.Split(DelimSet, 2, StringSplitOptions.RemoveEmptyEntries);
             T numerator = parser(parts[0]);
-            T denominator = parts.Length > 1 ? parser(parts[1]) : default(T);
+            T denominator = parts.Length > 1 ? parser(parts[1]) : default;
 
             return new Rational<T>(numerator, denominator);
         }
@@ -300,9 +280,9 @@ namespace ImageProcessor.Imaging.MetaData
                 tryParser = BuildTryParser();
             }
 
-            T numerator, denominator;
+            T denominator;
             string[] parts = value.Split(DelimSet, 2, StringSplitOptions.RemoveEmptyEntries);
-            if (!tryParser(parts[0], out numerator))
+            if (!tryParser(parts[0], out T numerator))
             {
                 rational = Empty;
                 return false;
@@ -318,7 +298,7 @@ namespace ImageProcessor.Imaging.MetaData
             }
             else
             {
-                denominator = default(T);
+                denominator = default;
             }
 
             rational = new Rational<T>(numerator, denominator);
@@ -416,10 +396,6 @@ namespace ImageProcessor.Imaging.MetaData
                     }
                 };
         }
-
-        #endregion Parse Methods
-
-        #region Math Methods
 
         /// <summary>
         /// Finds the greatest common divisor and reduces the fraction by this amount.
@@ -530,10 +506,6 @@ namespace ImageProcessor.Imaging.MetaData
             return a;
         }
 
-        #endregion Math Methods
-
-        #region IConvertible Members
-
         /// <summary>
         /// Converts the value of this instance to an equivalent <see cref="T:System.String"/> using the specified 
         /// culture-specific formatting information.
@@ -584,8 +556,8 @@ namespace ImageProcessor.Imaging.MetaData
                     return 0L;
                 }
 
-                return ((IConvertible)this.numerator.ToInt64(provider)).ToDecimal(provider) /
-                    ((IConvertible)d).ToDecimal(provider);
+                return ((IConvertible)this.numerator.ToInt64(provider)).ToDecimal(provider)
+                    / ((IConvertible)d).ToDecimal(provider);
             }
         }
 
@@ -644,10 +616,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        bool IConvertible.ToBoolean(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToBoolean(provider);
-        }
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToBoolean(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 8-bit unsigned integer using the specified 
@@ -660,10 +629,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that 
         /// supplies culture-specific formatting information. 
         /// </param>
-        byte IConvertible.ToByte(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToByte(provider);
-        }
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToByte(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent Unicode character using the specified 
@@ -676,10 +642,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        char IConvertible.ToChar(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToChar(provider);
-        }
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToChar(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 16-bit signed integer using the specified 
@@ -692,10 +655,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        short IConvertible.ToInt16(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToInt16(provider);
-        }
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToInt16(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 32-bit signed integer using the specified 
@@ -708,10 +668,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        int IConvertible.ToInt32(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToInt32(provider);
-        }
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToInt32(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 64-bit signed integer using the specified 
@@ -724,10 +681,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        long IConvertible.ToInt64(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToInt64(provider);
-        }
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToInt64(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 8-bit signed integer using the specified 
@@ -740,10 +694,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        sbyte IConvertible.ToSByte(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToSByte(provider);
-        }
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToSByte(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 16-bit unsigned integer using the specified 
@@ -756,10 +707,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        ushort IConvertible.ToUInt16(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToUInt16(provider);
-        }
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToUInt16(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 32-bit unsigned integer using the specified 
@@ -772,10 +720,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        uint IConvertible.ToUInt32(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToUInt32(provider);
-        }
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToUInt32(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 64-bit unsigned integer using the specified 
@@ -788,10 +733,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that 
         /// supplies culture-specific formatting information. 
         /// </param>
-        ulong IConvertible.ToUInt64(IFormatProvider provider)
-        {
-            return ((IConvertible)this.ToDecimal(provider)).ToUInt64(provider);
-        }
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)this.ToDecimal(provider)).ToUInt64(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent <see cref="T:System.DateTime"/> using the specified 
@@ -804,10 +746,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// An <see cref="T:System.IFormatProvider"/> interface implementation that supplies culture-specific 
         /// formatting information. 
         /// </param>
-        DateTime IConvertible.ToDateTime(IFormatProvider provider)
-        {
-            return new DateTime(((IConvertible)this).ToInt64(provider));
-        }
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => new DateTime(((IConvertible)this).ToInt64(provider));
 
         /// <summary>
         /// Returns the <see cref="T:System.TypeCode"/> for this instance.
@@ -816,10 +755,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// The enumerated constant that is the <see cref="T:System.TypeCode"/> of the class or value type that 
         /// implements this interface.
         /// </returns>
-        TypeCode IConvertible.GetTypeCode()
-        {
-            return this.numerator.GetTypeCode();
-        }
+        TypeCode IConvertible.GetTypeCode() => this.numerator.GetTypeCode();
 
         /// <summary>
         /// Converts the value of this instance to an <see cref="T:System.Object"/> of the specified 
@@ -851,8 +787,8 @@ namespace ImageProcessor.Imaging.MetaData
                 return this;
             }
 
-            if (!conversionType.IsGenericType ||
-                typeof(Rational<>) != conversionType.GetGenericTypeDefinition())
+            if (!conversionType.IsGenericType
+                || typeof(Rational<>) != conversionType.GetGenericTypeDefinition())
             {
                 // fall back to basic conversion
                 return Convert.ChangeType(this, conversionType, provider);
@@ -875,10 +811,6 @@ namespace ImageProcessor.Imaging.MetaData
             return ctor.Invoke(ctorArgs);
         }
 
-        #endregion IConvertible Members
-
-        #region IComparable Members
-
         /// <summary>
         /// Compares the current instance with another object of the same type and returns an integer that indicates 
         /// whether the current instance precedes, follows, or occurs in the same position in the sort order as the 
@@ -896,11 +828,11 @@ namespace ImageProcessor.Imaging.MetaData
         /// </exception>
         public int CompareTo(object obj)
         {
-            if (obj is Rational<T>)
+            if (obj is Rational<T> rational)
             {
                 // Differentiate between a real zero and a divide by zero
                 // work around divide by zero value to get meaningful comparisons
-                Rational<T> other = (Rational<T>)obj;
+                var other = rational;
                 if (Convert.ToDecimal(this.denominator) == 0m)
                 {
                     if (Convert.ToDecimal(other.denominator) == 0m)
@@ -925,10 +857,6 @@ namespace ImageProcessor.Imaging.MetaData
             return Convert.ToDecimal(this).CompareTo(Convert.ToDecimal(obj));
         }
 
-        #endregion IComparable Members
-
-        #region IComparable<T> Members
-
         /// <summary>
         /// Compares the current instance with another object of the same type and returns an integer that indicates 
         /// whether the current instance precedes, follows, or occurs in the same position in the sort order as the 
@@ -941,14 +869,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// zero This instance follows <paramref name="other"/> in the sort order. 
         /// </returns>
         /// <param name="other">An object to compare with this instance. </param>
-        public int CompareTo(T other)
-        {
-            return decimal.Compare(Convert.ToDecimal(this), Convert.ToDecimal(other));
-        }
-
-        #endregion IComparable<T> Members
-
-        #region Operators
+        public int CompareTo(T other) => decimal.Compare(Convert.ToDecimal(this), Convert.ToDecimal(other));
 
         /// <summary>
         /// Performs a numeric negation of the operand.
@@ -959,7 +880,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// </returns>
         public static Rational<T> operator -(Rational<T> rational)
         {
-            T numerator = (T)Convert.ChangeType(-Convert.ToDecimal(rational.numerator), typeof(T));
+            var numerator = (T)Convert.ChangeType(-Convert.ToDecimal(rational.numerator), typeof(T));
             return new Rational<T>(numerator, rational.denominator);
         }
 
@@ -998,10 +919,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="r1">The first rational operand.</param>
         /// <param name="r2">The second rational operand.</param>
         /// <returns>The computed result.</returns>
-        public static Rational<T> operator -(Rational<T> r1, Rational<T> r2)
-        {
-            return r1 + (-r2);
-        }
+        public static Rational<T> operator -(Rational<T> r1, Rational<T> r2) => r1 + (-r2);
 
         /// <summary>
         /// Computes the product of multiplying two rational instances.
@@ -1023,10 +941,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="r1">The first rational operand.</param>
         /// <param name="r2">The second rational operand.</param>
         /// <returns>The computed product.</returns>
-        public static Rational<T> operator /(Rational<T> r1, Rational<T> r2)
-        {
-            return r1 * new Rational<T>(r2.denominator, r2.numerator);
-        }
+        public static Rational<T> operator /(Rational<T> r1, Rational<T> r2) => r1 * new Rational<T>(r2.denominator, r2.numerator);
 
         /// <summary>
         /// Determines whether the first rational operand is less than the second.
@@ -1034,10 +949,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="r1">The first rational operand.</param>
         /// <param name="r2">The second rational operand.</param>
         /// <returns>The computed result.</returns>
-        public static bool operator <(Rational<T> r1, Rational<T> r2)
-        {
-            return r1.CompareTo(r2) < 0;
-        }
+        public static bool operator <(Rational<T> r1, Rational<T> r2) => r1.CompareTo(r2) < 0;
 
         /// <summary>
         /// Determines whether the first rational operand is less than or equal to the second.
@@ -1045,10 +957,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="r1">The first rational operand.</param>
         /// <param name="r2">The second rational operand.</param>
         /// <returns>The computed result.</returns>
-        public static bool operator <=(Rational<T> r1, Rational<T> r2)
-        {
-            return r1.CompareTo(r2) <= 0;
-        }
+        public static bool operator <=(Rational<T> r1, Rational<T> r2) => r1.CompareTo(r2) <= 0;
 
         /// <summary>
         /// Determines whether the first rational operand is greater than the second.
@@ -1056,10 +965,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="r1">The first rational operand.</param>
         /// <param name="r2">The second rational operand.</param>
         /// <returns>The computed result.</returns>
-        public static bool operator >(Rational<T> r1, Rational<T> r2)
-        {
-            return r1.CompareTo(r2) > 0;
-        }
+        public static bool operator >(Rational<T> r1, Rational<T> r2) => r1.CompareTo(r2) > 0;
 
         /// <summary>
         /// Determines whether the first rational operand is greater than or equal to the second.
@@ -1067,10 +973,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="r1">The first rational operand.</param>
         /// <param name="r2">The second rational operand.</param>
         /// <returns>The computed result.</returns>
-        public static bool operator >=(Rational<T> r1, Rational<T> r2)
-        {
-            return r1.CompareTo(r2) >= 0;
-        }
+        public static bool operator >=(Rational<T> r1, Rational<T> r2) => r1.CompareTo(r2) >= 0;
 
         /// <summary>
         /// Determines whether the first rational operand is equal to the second.
@@ -1078,10 +981,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="r1">The first rational operand.</param>
         /// <param name="r2">The second rational operand.</param>
         /// <returns>The computed result.</returns>
-        public static bool operator ==(Rational<T> r1, Rational<T> r2)
-        {
-            return r1.CompareTo(r2) == 0;
-        }
+        public static bool operator ==(Rational<T> r1, Rational<T> r2) => r1.CompareTo(r2) == 0;
 
         /// <summary>
         /// Determines whether the first rational operand is not equal to the second.
@@ -1089,14 +989,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <param name="r1">The first rational operand.</param>
         /// <param name="r2">The second rational operand.</param>
         /// <returns>The computed result.</returns>
-        public static bool operator !=(Rational<T> r1, Rational<T> r2)
-        {
-            return r1.CompareTo(r2) != 0;
-        }
-
-        #endregion Operators
-
-        #region Object Overrides
+        public static bool operator !=(Rational<T> r1, Rational<T> r2) => r1.CompareTo(r2) != 0;
 
         /// <summary>
         /// Returns the fully qualified type name of this instance.
@@ -1104,10 +997,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// <returns>
         /// A <see cref="T:System.String"/> containing a fully qualified type name.
         /// </returns>
-        public override string ToString()
-        {
-            return Convert.ToString(this, CultureInfo.InvariantCulture);
-        }
+        public override string ToString() => Convert.ToString(this, CultureInfo.InvariantCulture);
 
         /// <summary>
         /// Indicates whether this instance and a specified object are equal.
@@ -1117,10 +1007,7 @@ namespace ImageProcessor.Imaging.MetaData
         /// otherwise, false. 
         /// </returns>
         /// <param name="obj">The object to compare with the current instance. </param>
-        public override bool Equals(object obj)
-        {
-            return this.CompareTo(obj) == 0;
-        }
+        public override bool Equals(object obj) => this.CompareTo(obj) == 0;
 
         /// <summary>
         /// Returns the hash code for this instance.
@@ -1135,7 +1022,5 @@ namespace ImageProcessor.Imaging.MetaData
             num = (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.numerator);
             return (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.denominator);
         }
-
-        #endregion Object Overrides
     }
 }

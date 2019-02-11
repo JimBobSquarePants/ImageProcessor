@@ -33,7 +33,7 @@ namespace ImageProcessor.Common.Extensions
         /// <returns>
         /// The <see cref="IEnumerable{Int32}"/> that contains a range of sequential integral numbers.
         /// </returns>
-        public static IEnumerable<int> SteppedRange(int fromInclusive, int toExclusive, int step)
+        public static IEnumerable<int> SteppedRange(this int fromInclusive, int toExclusive, int step)
         {
             // Borrowed from Enumerable.Range
             long num = (fromInclusive + toExclusive) - 1L;
@@ -60,10 +60,7 @@ namespace ImageProcessor.Common.Extensions
         /// <returns>
         /// The <see cref="IEnumerable{Int32}"/> that contains a range of sequential integral numbers.
         /// </returns>
-        public static IEnumerable<int> SteppedRange(int fromInclusive, Func<int, bool> toDelegate, int step)
-        {
-            return RangeIterator(fromInclusive, toDelegate, step);
-        }
+        public static IEnumerable<int> SteppedRange(this int fromInclusive, Func<int, bool> toDelegate, int step) => RangeIterator(fromInclusive, toDelegate, step);
 
         /// <summary>
         /// Generates a sequence of integral numbers within a specified range.

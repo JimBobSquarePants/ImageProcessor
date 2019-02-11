@@ -29,10 +29,7 @@ namespace ImageProcessor.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Mask"/> class.
         /// </summary>
-        public Mask()
-        {
-            this.Settings = new Dictionary<string, string>();
-        }
+        public Mask() => this.Settings = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the dynamic parameter.
@@ -81,13 +78,13 @@ namespace ImageProcessor.Processors
 
                 if (mask.Size != image.Size)
                 {
-                    Rectangle parent = new Rectangle(0, 0, width, height);
+                    var parent = new Rectangle(0, 0, width, height);
                     Rectangle child = ImageMaths.GetFilteredBoundingRectangle(mask, 0, RgbaComponent.A);
                     maskCropped = new Bitmap(child.Width, child.Height, PixelFormat.Format32bppPArgb);
                     maskCropped.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                     // First crop any bounding transparency.
-                    using (Graphics graphics = Graphics.FromImage(maskCropped))
+                    using (var graphics = Graphics.FromImage(maskCropped))
                     {
                         GraphicsHelper.SetGraphicsOptions(graphics);
 
@@ -105,7 +102,7 @@ namespace ImageProcessor.Processors
                     // Now position the mask in an image of the same dimensions as the original.
                     maskPositioned = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
                     maskPositioned.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-                    using (Graphics graphics = Graphics.FromImage(maskPositioned))
+                    using (var graphics = Graphics.FromImage(maskPositioned))
                     {
                         GraphicsHelper.SetGraphicsOptions(graphics, true);
                         graphics.Clear(Color.Transparent);

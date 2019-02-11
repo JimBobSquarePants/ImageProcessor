@@ -105,10 +105,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <returns>
         /// The <see cref="double"/> representing the degree as radians.
         /// </returns>
-        public static double DegreesToRadians(double angleInDegrees)
-        {
-            return angleInDegrees * (Math.PI / 180);
-        }
+        public static double DegreesToRadians(double angleInDegrees) => angleInDegrees * (Math.PI / 180);
 
         /// <summary>
         /// Gets the bounding <see cref="Rectangle"/> from the given points.
@@ -122,10 +119,7 @@ namespace ImageProcessor.Imaging.Helpers
         /// <returns>
         /// The bounding <see cref="Rectangle"/>.
         /// </returns>
-        public static Rectangle GetBoundingRectangle(Point topLeft, Point bottomRight)
-        {
-            return new Rectangle(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
-        }
+        public static Rectangle GetBoundingRectangle(Point topLeft, Point bottomRight) => new Rectangle(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
 
         /// <summary>
         /// Calculates the new size after rotation.
@@ -150,7 +144,7 @@ namespace ImageProcessor.Imaging.Helpers
             double height2 = (width * radiansSin) + (height * radiansCos);
 
             // Get the external vertex for the rotation
-            Rectangle result = new Rectangle(
+            var result = new Rectangle(
                 0,
                 0,
                 Convert.ToInt32(Math.Max(Math.Abs(width1), Math.Abs(width2))),
@@ -179,8 +173,8 @@ namespace ImageProcessor.Imaging.Helpers
         {
             int width = bitmap.Width;
             int height = bitmap.Height;
-            Point topLeft = new Point();
-            Point bottomRight = new Point();
+            var topLeft = new Point();
+            var bottomRight = new Point();
 
             Func<FastBitmap, int, int, byte, bool> delegateFunc;
 
@@ -204,7 +198,7 @@ namespace ImageProcessor.Imaging.Helpers
                     break;
             }
 
-            Func<FastBitmap, int> getMinY = fastBitmap =>
+            int getMinY(FastBitmap fastBitmap)
             {
                 for (int y = 0; y < height; y++)
                 {
@@ -218,9 +212,9 @@ namespace ImageProcessor.Imaging.Helpers
                 }
 
                 return 0;
-            };
+            }
 
-            Func<FastBitmap, int> getMaxY = fastBitmap =>
+            int getMaxY(FastBitmap fastBitmap)
             {
                 for (int y = height - 1; y > -1; y--)
                 {
@@ -234,9 +228,9 @@ namespace ImageProcessor.Imaging.Helpers
                 }
 
                 return height;
-            };
+            }
 
-            Func<FastBitmap, int> getMinX = fastBitmap =>
+            int getMinX(FastBitmap fastBitmap)
             {
                 for (int x = 0; x < width; x++)
                 {
@@ -250,9 +244,9 @@ namespace ImageProcessor.Imaging.Helpers
                 }
 
                 return 0;
-            };
+            }
 
-            Func<FastBitmap, int> getMaxX = fastBitmap =>
+            int getMaxX(FastBitmap fastBitmap)
             {
                 for (int x = width - 1; x > -1; x--)
                 {
@@ -266,9 +260,9 @@ namespace ImageProcessor.Imaging.Helpers
                 }
 
                 return height;
-            };
+            }
 
-            using (FastBitmap fastBitmap = new FastBitmap(bitmap))
+            using (var fastBitmap = new FastBitmap(bitmap))
             {
                 topLeft.Y = getMinY(fastBitmap);
                 topLeft.X = getMinX(fastBitmap);
@@ -300,12 +294,12 @@ namespace ImageProcessor.Imaging.Helpers
             {
                 X =
                     (int)
-                    (cosTheta * (pointToRotate.X - center.X) -
-                    sinTheta * (pointToRotate.Y - center.Y) + center.X),
+                    ((cosTheta * (pointToRotate.X - center.X))
+                    - (sinTheta * (pointToRotate.Y - center.Y)) + center.X),
                 Y =
                     (int)
-                    (sinTheta * (pointToRotate.X - center.X) +
-                    cosTheta * (pointToRotate.Y - center.Y) + center.Y)
+                    ((sinTheta * (pointToRotate.X - center.X))
+                    + (cosTheta * (pointToRotate.Y - center.Y)) + center.Y)
             };
         }
 

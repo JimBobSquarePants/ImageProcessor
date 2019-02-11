@@ -68,7 +68,7 @@ namespace ImageProcessor.Common.Extensions
         {
             encoding = encoding ?? Encoding.UTF8;
 
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 using (Stream manifestResourceStream = assembly.GetManifestResourceStream(resource))
                 {
@@ -89,7 +89,7 @@ namespace ImageProcessor.Common.Extensions
         public static FileInfo GetAssemblyFile(this Assembly assembly)
         {
             string codeBase = assembly.CodeBase;
-            Uri uri = new Uri(codeBase);
+            var uri = new Uri(codeBase);
             string path = uri.LocalPath;
             return new FileInfo(path);
         }
@@ -104,7 +104,7 @@ namespace ImageProcessor.Common.Extensions
         public static FileInfo GetAssemblyFile(this AssemblyName assemblyName)
         {
             string codeBase = assemblyName.CodeBase;
-            Uri uri = new Uri(codeBase);
+            var uri = new Uri(codeBase);
             string path = uri.LocalPath;
             return new FileInfo(path);
         }

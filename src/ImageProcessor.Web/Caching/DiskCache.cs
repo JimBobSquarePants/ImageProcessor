@@ -100,8 +100,7 @@ namespace ImageProcessor.Web.Caching
         {
             string configuredPath = this.Settings["VirtualCachePath"];
 
-            string virtualPath;
-            this.absoluteCachePath = GetValidatedAbsolutePath(configuredPath, out virtualPath);
+            this.absoluteCachePath = GetValidatedAbsolutePath(configuredPath, out string virtualPath);
             this.virtualCachePath = virtualPath;
         }
 
@@ -116,7 +115,7 @@ namespace ImageProcessor.Web.Caching
             // TODO: Before this check is performed it should be throttled. For example, only perform this check
             // if the last time it was checked is greater than 5 seconds. This would be much better for perf
             // if there is a high throughput of image requests.
-            string cachedFileName = await this.CreateCachedFileNameAsync();
+            string cachedFileName = await this.CreateCachedFileNameAsync().ConfigureAwait(false);
             this.CachedPath = CachedImageHelper.GetCachedPath(this.absoluteCachePath, cachedFileName, false, this.FolderDepth);
             this.virtualCachedFilePath = CachedImageHelper.GetCachedPath(this.virtualCachePath, cachedFileName, true, this.FolderDepth);
 
@@ -131,10 +130,10 @@ namespace ImageProcessor.Web.Caching
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
-                        CreationTimeUtc = File.GetCreationTimeUtc(this.CachedPath)
+                        CreationTimeUtc = File.GetLastWriteTimeUtc(this.CachedPath)
                     };
 
-                    CacheIndexer.Add(cachedImage);
+                    CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
                 }
             }
 
@@ -147,7 +146,7 @@ namespace ImageProcessor.Web.Caching
             {
                 // Check to see if the cached image is set to expire
                 // or a new file with the same name has replaced our current image
-                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc))
+                if (this.IsExpired(cachedImage.CreationTimeUtc) || await this.IsUpdatedAsync(cachedImage.CreationTimeUtc).ConfigureAwait(false))
                 {
                     CacheIndexer.Remove(this.CachedPath);
                     isUpdated = true;
@@ -173,15 +172,26 @@ namespace ImageProcessor.Web.Caching
         public override async Task AddImageToCacheAsync(Stream stream, string contentType)
         {
             // ReSharper disable once AssignNullToNotNullAttribute
-            DirectoryInfo directoryInfo = new DirectoryInfo(Path.GetDirectoryName(this.CachedPath));
+            var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(this.CachedPath));
             if (!directoryInfo.Exists)
             {
                 directoryInfo.Create();
             }
 
-            using (FileStream fileStream = File.Create(this.CachedPath))
+            // This is a hack. I don't know why there would ever be double access to the file but there is
+            // and it's causing errors to be thrown.
+            // Ensure that an attempt at overwrite is still made, so cached images can be updated
+            // https://github.com/JimBobSquarePants/ImageProcessor/issues/629
+            try
             {
-                await stream.CopyToAsync(fileStream);
+                using (FileStream fileStream = File.Create(this.CachedPath, (int)stream.Length))
+                {
+                    await stream.CopyToAsync(fileStream).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to write to file: {this.CachedPath}, {ex.Message}");
             }
         }
 
@@ -245,9 +255,8 @@ namespace ImageProcessor.Web.Caching
                                 // Remove from the cache and delete each CachedImage.
                                 CacheIndexer.Remove(fileInfo.Name);
                                 fileInfo.Delete();
-                                count -= 1;
+                                count--;
                             }
-
                             catch (Exception ex)
                             {
                                 // Log it but skip to the next file.
@@ -320,7 +329,7 @@ namespace ImageProcessor.Web.Caching
                     // Since we are going to call Response.End(), we need to go ahead and set the headers
                     HttpModules.ImageProcessingModule.SetHeaders(context, this.BrowserMaxDays);
                     this.SetETagHeader(context);
-                    var length = new FileInfo(this.CachedPath).Length;
+                    long length = new FileInfo(this.CachedPath).Length;
                     context.Response.AddHeader("Content-Length", length.ToString());
 
                     context.Response.TransmitFile(this.CachedPath, 0, length);
@@ -343,6 +352,45 @@ namespace ImageProcessor.Web.Caching
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the requested image has been updated.
+        /// </summary>
+        /// <param name="creationDate">The creation date.</param>
+        /// <returns>The <see cref="bool"/></returns>
+        protected virtual async Task<bool> IsUpdatedAsync(DateTime creationDate)
+        {
+            bool isUpdated = false;
+
+            try
+            {
+                if (new Uri(this.RequestPath).IsFile)
+                {
+                    if (File.Exists(this.RequestPath))
+                    {
+                        // If it's newer than the cached file then it must be an update.
+                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
+                    }
+                }
+                else
+                {
+                    // Try and get the headers for the file, this should allow cache busting for remote files.
+                    var request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
+                    request.Method = "HEAD";
+
+                    using (var response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false))
+                    {
+                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
+                    }
+                }
+            }
+            catch
+            {
+                isUpdated = false;
+            }
+
+            return isUpdated;
         }
 
         /// <summary>
@@ -447,12 +495,11 @@ namespace ImageProcessor.Web.Caching
                         };
                     }
 
-                    string virtualCacheFolderPath;
                     string result = GetValidatedCachePathsImpl(
                         originalPath,
                         mapPath,
                         s => new DirectoryInfo(s),
-                        out virtualCacheFolderPath);
+                        out string virtualCacheFolderPath);
 
                     validatedVirtualCachePath = virtualCacheFolderPath;
                     return result;
@@ -508,45 +555,6 @@ namespace ImageProcessor.Web.Caching
         }
 
         /// <summary>
-        /// Returns a value indicating whether the requested image has been updated.
-        /// </summary>
-        /// <param name="creationDate">The creation date.</param>
-        /// <returns>The <see cref="bool"/></returns>
-        private async Task<bool> IsUpdatedAsync(DateTime creationDate)
-        {
-            bool isUpdated = false;
-
-            try
-            {
-                if (new Uri(this.RequestPath).IsFile)
-                {
-                    if (File.Exists(this.RequestPath))
-                    {
-                        // If it's newer than the cached file then it must be an update.
-                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
-                    }
-                }
-                else
-                {
-                    // Try and get the headers for the file, this should allow cache busting for remote files.
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.RequestPath);
-                    request.Method = "HEAD";
-
-                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-                    {
-                        isUpdated = response.LastModified.ToUniversalTime() > creationDate;
-                    }
-                }
-            }
-            catch
-            {
-                isUpdated = false;
-            }
-
-            return isUpdated;
-        }
-
-        /// <summary>
         /// Recursively delete the directories in the folder.
         /// </summary>
         /// <param name="directory">The current directory.</param>
@@ -567,7 +575,8 @@ namespace ImageProcessor.Web.Caching
                 }
 
                 // If the directory is empty of files delete it to remove the FCN.
-                if (!Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly).Any() && !Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly).Any())
+                if (Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly).Length == 0
+                    && Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly).Length == 0)
                 {
                     Directory.Delete(directory);
                 }
@@ -578,7 +587,6 @@ namespace ImageProcessor.Web.Caching
             {
                 // Log it but skip to the next directory.
                 ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory}, {ex.Message}");
-
             }
         }
 
@@ -604,8 +612,7 @@ namespace ImageProcessor.Web.Caching
             if (this.cachedImageCreationTimeUtc != DateTime.MinValue)
             {
                 long lastModFileTime = this.cachedImageCreationTimeUtc.ToFileTime();
-                DateTime utcNow = DateTime.UtcNow;
-                long nowFileTime = utcNow.ToFileTime();
+                long nowFileTime = DateTime.UtcNow.ToFileTime();
                 string hexFileTime = lastModFileTime.ToString("X8", System.Globalization.CultureInfo.InvariantCulture);
                 if ((nowFileTime - lastModFileTime) <= 30000000)
                 {

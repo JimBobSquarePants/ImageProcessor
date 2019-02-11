@@ -36,10 +36,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Initializes a new instance of the <see cref="Resize"/> class.
         /// </summary>
-        public Resize()
-        {
-            this.Processor = new ImageProcessor.Processors.Resize();
-        }
+        public Resize() => this.Processor = new ImageProcessor.Processors.Resize();
 
         /// <summary>
         /// Gets the regular expression to search strings for.
@@ -82,7 +79,7 @@ namespace ImageProcessor.Web.Processors
                                     ? QueryParamParser.Instance.ParseValue<float[]>(queryCollection["center"]) :
                                     new float[] { };
 
-                ResizeLayer resizeLayer = new ResizeLayer(size)
+                this.Processor.DynamicParameter = (ResizeLayer)new ResizeLayer(size)
                 {
                     ResizeMode = mode,
                     AnchorPosition = position,
@@ -90,15 +87,12 @@ namespace ImageProcessor.Web.Processors
                     CenterCoordinates = center
                 };
 
-                this.Processor.DynamicParameter = resizeLayer;
-
                 // Correctly parse any restrictions.
-                string restrictions;
-                this.Processor.Settings.TryGetValue("RestrictTo", out restrictions);
+                this.Processor.Settings.TryGetValue("RestrictTo", out string restrictions);
 
                 List<Size> restrictedSizes = this.ParseRestrictions(restrictions);
 
-                if (restrictedSizes != null && restrictedSizes.Any())
+                if (restrictedSizes?.Count > 0)
                 {
                     bool reject = true;
                     foreach (Size restrictedSize in restrictedSizes)
@@ -143,7 +137,7 @@ namespace ImageProcessor.Web.Processors
             string height = queryCollection["height"];
             string widthRatio = queryCollection["widthratio"];
             string heightRatio = queryCollection["heightratio"];
-            Size size = new Size();
+            var size = new Size();
 
             // Umbraco calls the API incorrectly so we have to deal with floats.
             // We round up so that single pixel lines are not produced.
@@ -202,7 +196,7 @@ namespace ImageProcessor.Web.Processors
         /// </returns>
         private List<Size> ParseRestrictions(string input)
         {
-            List<Size> sizes = new List<Size>();
+            var sizes = new List<Size>();
 
             if (!string.IsNullOrWhiteSpace(input))
             {

@@ -1,67 +1,18 @@
-# http://www.appveyor.com/docs/appveyor-yml
+image: Visual Studio 2017
 
-#---------------------------------#
-#      general configuration      #
-#---------------------------------#
+# Prevent the double build when a branch has an active PR
+skip_branch_with_pr: true
 
-# branches to build
-branches:
+cache:
+- packages -> **\packages.config
 
-  # blacklist
-  except:
-    - gh-pages
-
-#---------------------------------#
-#    environment configuration    #
-#---------------------------------#
-
-# Operating system (build VM template)
-os: Visual Studio 2015
-
-# this is how to allow failing jobs in the matrix
-matrix:
-  fast_finish: true     # set this flag to immediately finish build once one of the jobs fails.
-
-environment:
-  COVERALLS_REPO_TOKEN:
-    secure: 1hvfHFO3qtGTcwB+AnCGYsn0az0j9MzAux5hee5CFeyRJ+lWut0LjnyqvsI/5Pfa
-  MYGET_API_KEY:
-    secure: fz0rUrt3B1HczUC1ZehwVsrFSWX9WZGDQoueDztLte9/+yQG+BBU7UrO+coE8lUf
-  MYGET_SOURCE: https://www.myget.org/F/imageprocessor/api/v2/package
-
-#---------------------------------#
-#       build configuration       #
-#---------------------------------#
-
-# to run your custom scripts instead of automatic MSBuild
+# Update any submodules we might add
 before_build:
-  - ps: Import-Module .\build\psake.psm1
+- git submodule -q update --init
 
+# Custom build script
 build_script:
-  - ps: Invoke-Psake .\build\build.ps1 -properties @{"BuildNumber"=$env:APPVEYOR_BUILD_NUMBER;"AppVeyor"=$env:APPVEYOR;"CoverallsRepoToken"=$env:COVERALLS_REPO_TOKEN}
- 
- #---------------------------------#
-#       tests configuration       #
-#---------------------------------#
-
-# to disable automatic tests (they're included in the build process)
-test: off
-
-#---------------------------------#
-#      artifacts configuration    #
-#---------------------------------#
+- cmd: .\build\build.cmd
 
 artifacts:
-  - path: build\_BuildOutput\NuGets\*.nupkg
-
-#---------------------------------#
-#        global handlers          #
-#---------------------------------#
-
-# on successful build
-on_success:
-  - ps: Import-Module .\build\psake.psm1
-  - ps: Invoke-Psake .\build\build.ps1 Publish-Myget -properties @{"MygetApiKey"=$env:MYGET_API_KEY;"MygetSource"=$env:MYGET_SOURCE;"AppVeyorPullRequestNumber"=$env:APPVEYOR_PULL_REQUEST_NUMBER}
-  - ps: Invoke-Psake .\build\build.ps1 Publish-Nuget -properties @{"NugetApiKey"=$env:APIKEY;"NugetSource"=$env:SOURCE;"AppVeyorPullRequestNumber"=$env:APPVEYOR_PULL_REQUEST_NUMBER}
-    on: 
-      branch: master
+- path: '.\build\**\*.nupkg'

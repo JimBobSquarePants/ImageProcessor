@@ -35,11 +35,15 @@ namespace ImageProcessor
     /// </summary>
     public class ImageFactory : IDisposable
     {
-        #region Fields
         /// <summary>
         /// The default quality for image files.
         /// </summary>
         private const int DefaultQuality = 90;
+
+        /// <summary>
+        /// Whether to preserve exif metadata
+        /// </summary>
+        private bool preserveExifData;
 
         /// <summary>
         /// The backup supported image format.
@@ -63,9 +67,7 @@ namespace ImageProcessor
         /// life in the Garbage Collector.
         /// </remarks>
         private bool isDisposed;
-        #endregion
 
-        #region Constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageFactory"/> class.
         /// </summary>
@@ -84,20 +86,40 @@ namespace ImageProcessor
         /// Whether to preserve exif metadata. Defaults to false.
         /// </param>
         /// <param name="fixGamma">
-        /// Whether to fix the gamma component of the image. Defaults to true.
+        /// Whether to fix the gamma component of the image.
         /// </param>
         public ImageFactory(bool preserveExifData, bool fixGamma)
+            : this(!preserveExifData ? MetaDataMode.None : MetaDataMode.All, fixGamma)
         {
-            this.PreserveExifData = preserveExifData;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageFactory"/> class.
+        /// </summary>
+        /// <param name="metaDataMode">The metadata mode to use</param>
+        public ImageFactory(MetaDataMode metaDataMode)
+           : this(metaDataMode, false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageFactory"/> class.
+        /// </summary>
+        /// <param name="metaDataMode">The metadata mode to use</param>
+        /// <param name="fixGamma">Whether to fix the gamma component of the image.</param>
+        public ImageFactory(MetaDataMode metaDataMode, bool fixGamma)
+        {
+            // Note the order here. 
+            // We need to set MetaDataMode after PreserveExifData as the first option doesn't allow the granular control allowed by the constructor.
+            this.PreserveExifData = metaDataMode != MetaDataMode.None;
+            this.MetaDataMode = metaDataMode;
             this.ExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
             this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>();
             this.FixGamma = fixGamma;
         }
-        #endregion
 
-        #region Destructors
         /// <summary>
-        /// Finalizes an instance of the <see cref="T:ImageProcessor.ImageFactory">ImageFactory</see> class.
+        /// Finalizes an instance of the <see cref="ImageFactory">ImageFactory</see> class.
         /// </summary>
         /// <remarks>
         /// Use C# destructor syntax for finalization code.
@@ -113,9 +135,7 @@ namespace ImageProcessor
             // readability and maintainability.
             this.Dispose(false);
         }
-        #endregion
 
-        #region Properties
         /// <summary>
         /// Gets the color depth in number of bits per pixel to save the image with.
         /// This can be used to change the bit depth of images that can be saved with different
@@ -139,9 +159,23 @@ namespace ImageProcessor
         public ISupportedImageFormat CurrentImageFormat { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to preserve exif metadata.
+        /// Gets the metadata mode.
         /// </summary>
-        public bool PreserveExifData { get; set; }
+        public MetaDataMode MetaDataMode { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to preserve exif metadata.
+        /// This property is only settable for backwards compatibility. Set <see cref="MetaDataMode"/> via the constructor instead.
+        /// </summary>
+        public bool PreserveExifData
+        {
+            get => this.preserveExifData;
+            set
+            {
+                this.preserveExifData = value;
+                this.MetaDataMode = this.preserveExifData ? MetaDataMode.All : MetaDataMode.None;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether to fix the gamma component of the current image.
@@ -172,9 +206,7 @@ namespace ImageProcessor
         /// Gets or sets the stream for storing any input stream to prevent disposal.
         /// </summary>
         internal Stream InputStream { get; set; }
-        #endregion
 
-        #region Methods
         /// <summary>
         /// Loads the image to process. Always call this method first.
         /// </summary>
@@ -186,13 +218,13 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(Stream stream)
         {
-            MemoryStream memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
 
             // Copy the stream. Disposal of the input stream is the responsibility
             // of the user.
             stream.CopyTo(memoryStream);
 
-            // Set the position to 0 afterwards.
+            // Set the position to 0 afterward.
             if (stream.CanSeek)
             {
                 stream.Position = 0;
@@ -227,15 +259,14 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
-            IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
-            if (imageFormat != null)
+            if (this.CurrentImageFormat is IAnimatedImageFormat imageFormat)
             {
                 imageFormat.AnimationProcessMode = this.AnimationProcessMode;
             }
 
-            this.backupExifPropertyItems = this.ExifPropertyItems;
+            this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>(this.ExifPropertyItems);
 
-            // Ensure the image is in the most efficient format.
+            // Ensure the image is in the most efficient format but don't reserve exif data.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
             this.Image.Dispose();
@@ -255,13 +286,13 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(string imagePath)
         {
-            FileInfo fileInfo = new FileInfo(imagePath);
+            var fileInfo = new FileInfo(imagePath);
             if (fileInfo.Exists)
             {
                 this.ImagePath = imagePath;
 
                 // Open a file stream to prevent the need for lock.
-                using (FileStream fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
+                using (var fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
                 {
                     ISupportedImageFormat format = FormatUtilities.GetFormat(fileStream);
 
@@ -270,12 +301,12 @@ namespace ImageProcessor
                         throw new ImageFormatException("Input stream is not a supported format.");
                     }
 
-                    MemoryStream memoryStream = new MemoryStream();
+                    var memoryStream = new MemoryStream();
 
                     // Copy the stream.
                     fileStream.CopyTo(memoryStream);
 
-                    // Set the position to 0 afterwards.
+                    // Set the position to 0 afterward.
                     memoryStream.Position = 0;
 
                     // Set our image as the memory stream value.
@@ -300,15 +331,14 @@ namespace ImageProcessor
                         this.ExifPropertyItems[propertyItem.Id] = propertyItem;
                     }
 
-                    this.backupExifPropertyItems = this.ExifPropertyItems;
+                    this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>(this.ExifPropertyItems);
 
-                    IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
-                    if (imageFormat != null)
+                    if (this.CurrentImageFormat is IAnimatedImageFormat imageFormat)
                     {
                         imageFormat.AnimationProcessMode = this.AnimationProcessMode;
                     }
 
-                    // Ensure the image is in the most efficient format.
+                    // Ensure the image is in the most efficient format but don't reserve exif data.
                     Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
                     this.Image.Dispose();
@@ -336,7 +366,7 @@ namespace ImageProcessor
         /// </returns>
         public ImageFactory Load(byte[] bytes)
         {
-            MemoryStream memoryStream = new MemoryStream(bytes);
+            var memoryStream = new MemoryStream(bytes);
 
             ISupportedImageFormat format = FormatUtilities.GetFormat(memoryStream);
 
@@ -367,13 +397,12 @@ namespace ImageProcessor
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
             }
 
-            IAnimatedImageFormat imageFormat = this.CurrentImageFormat as IAnimatedImageFormat;
-            if (imageFormat != null)
+            if (this.CurrentImageFormat is IAnimatedImageFormat imageFormat)
             {
                 imageFormat.AnimationProcessMode = this.AnimationProcessMode;
             }
 
-            // Ensure the image is in the most efficient format.
+            // Ensure the image is in the most efficient format but don't reserve exif data.
             Image formatted = this.Image.Copy(this.AnimationProcessMode);
 
             this.Image.Dispose();
@@ -399,7 +428,7 @@ namespace ImageProcessor
             // Try saving with the raw format. This might not be possible if the image was created
             // in-memory so we fall back to BMP to keep in line with the default in System.Drawing
             // if no format found.
-            MemoryStream memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
             ISupportedImageFormat format = new BitmapFormat();
             try
             {
@@ -412,8 +441,7 @@ namespace ImageProcessor
                 image.Save(memoryStream, ImageFormat.Bmp);
             }
 
-            IAnimatedImageFormat imageFormat = format as IAnimatedImageFormat;
-            if (imageFormat != null)
+            if (format is IAnimatedImageFormat imageFormat)
             {
                 imageFormat.AnimationProcessMode = this.AnimationProcessMode;
             }
@@ -464,7 +492,7 @@ namespace ImageProcessor
 
                 // Reset properties.
                 this.CurrentImageFormat = this.backupFormat;
-                this.ExifPropertyItems = this.backupExifPropertyItems;
+                this.ExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>(this.backupExifPropertyItems);
                 this.CurrentImageFormat.Quality = DefaultQuality;
 
                 Image newImage = this.backupFormat.Load(this.InputStream);
@@ -481,7 +509,6 @@ namespace ImageProcessor
             return this;
         }
 
-        #region Manipulation
         /// <summary>
         /// Changes the opacity of the current image.
         /// </summary>
@@ -503,7 +530,7 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Alpha alpha = new Alpha { DynamicParameter = percentage };
+                var alpha = new Alpha { DynamicParameter = percentage };
                 this.backupFormat.ApplyProcessor(alpha.ProcessImage, this);
             }
 
@@ -521,7 +548,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                AutoRotate autoRotate = new AutoRotate();
+                var autoRotate = new AutoRotate();
                 this.backupFormat.ApplyProcessor(autoRotate.ProcessImage, this);
             }
 
@@ -569,7 +596,7 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Brightness brightness = new Brightness { DynamicParameter = percentage };
+                var brightness = new Brightness { DynamicParameter = percentage };
                 this.backupFormat.ApplyProcessor(brightness.ProcessImage, this);
             }
 
@@ -589,7 +616,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                BackgroundColor backgroundColor = new BackgroundColor { DynamicParameter = color };
+                var backgroundColor = new BackgroundColor { DynamicParameter = color };
                 this.backupFormat.ApplyProcessor(backgroundColor.ProcessImage, this);
             }
 
@@ -609,7 +636,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                ResizeLayer layer = new ResizeLayer(size, ResizeMode.Max);
+                var layer = new ResizeLayer(size, ResizeMode.Max);
 
                 return this.Resize(layer);
             }
@@ -637,7 +664,7 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Contrast contrast = new Contrast { DynamicParameter = percentage };
+                var contrast = new Contrast { DynamicParameter = percentage };
                 this.backupFormat.ApplyProcessor(contrast.ProcessImage, this);
             }
 
@@ -657,7 +684,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                CropLayer cropLayer = new CropLayer(rectangle.Left, rectangle.Top, rectangle.Width, rectangle.Height, CropMode.Pixels);
+                var cropLayer = new CropLayer(rectangle.Left, rectangle.Top, rectangle.Width, rectangle.Height, CropMode.Pixels);
                 return this.Crop(cropLayer);
             }
 
@@ -677,7 +704,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Crop crop = new Crop { DynamicParameter = cropLayer };
+                var crop = new Crop { DynamicParameter = cropLayer };
                 this.backupFormat.ApplyProcessor(crop.ProcessImage, this);
             }
 
@@ -700,7 +727,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                DetectEdges detectEdges = new DetectEdges { DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale) };
+                var detectEdges = new DetectEdges { DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale) };
                 this.backupFormat.ApplyProcessor(detectEdges.ProcessImage, this);
             }
 
@@ -732,10 +759,10 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Tuple<int, int, PropertyTagResolutionUnit> resolution =
+                var resolution =
                     new Tuple<int, int, PropertyTagResolutionUnit>(horizontal, vertical, unit);
 
-                Resolution dpi = new Resolution { DynamicParameter = resolution };
+                var dpi = new Resolution { DynamicParameter = resolution };
                 this.backupFormat.ApplyProcessor(dpi.ProcessImage, this);
             }
 
@@ -765,7 +792,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                EntropyCrop autoCrop = new EntropyCrop { DynamicParameter = threshold };
+                var autoCrop = new EntropyCrop { DynamicParameter = threshold };
                 this.backupFormat.ApplyProcessor(autoCrop.ProcessImage, this);
             }
 
@@ -786,7 +813,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Filter filter = new Filter { DynamicParameter = matrixFilter };
+                var filter = new Filter { DynamicParameter = matrixFilter };
                 this.backupFormat.ApplyProcessor(filter.ProcessImage, this);
             }
 
@@ -821,7 +848,7 @@ namespace ImageProcessor
                         : RotateFlipType.RotateNoneFlipX;
                 }
 
-                Flip flip = new Flip { DynamicParameter = rotateFlipType };
+                var flip = new Flip { DynamicParameter = rotateFlipType };
                 this.backupFormat.ApplyProcessor(flip.ProcessImage, this);
             }
 
@@ -868,7 +895,7 @@ namespace ImageProcessor
                 }
 
                 this.CurrentGamma = value;
-                Gamma gamma = new Gamma { DynamicParameter = value };
+                var gamma = new Gamma { DynamicParameter = value };
                 this.backupFormat.ApplyProcessor(gamma.ProcessImage, this);
             }
 
@@ -894,7 +921,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess && size > 0)
             {
-                GaussianLayer layer = new GaussianLayer(size);
+                var layer = new GaussianLayer(size);
                 return this.GaussianBlur(layer);
             }
 
@@ -915,7 +942,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                GaussianBlur gaussianBlur = new GaussianBlur { DynamicParameter = gaussianLayer };
+                var gaussianBlur = new GaussianBlur { DynamicParameter = gaussianLayer };
                 this.backupFormat.ApplyProcessor(gaussianBlur.ProcessImage, this);
             }
 
@@ -941,7 +968,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess && size > 0)
             {
-                GaussianLayer layer = new GaussianLayer(size);
+                var layer = new GaussianLayer(size);
                 return this.GaussianSharpen(layer);
             }
 
@@ -962,7 +989,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                GaussianSharpen gaussianSharpen = new GaussianSharpen { DynamicParameter = gaussianLayer };
+                var gaussianSharpen = new GaussianSharpen { DynamicParameter = gaussianLayer };
                 this.backupFormat.ApplyProcessor(gaussianSharpen.ProcessImage, this);
             }
 
@@ -985,14 +1012,14 @@ namespace ImageProcessor
         public ImageFactory Hue(int degrees, bool rotate = false)
         {
             // Sanitize the input.
-            if (degrees > 360 || degrees < 0 || degrees == 0)
+            if (degrees > 360 || degrees < 0 || (degrees == 0 && rotate))
             {
                 return this;
             }
 
             if (this.ShouldProcess)
             {
-                Hue hue = new Hue { DynamicParameter = new Tuple<int, bool>(degrees, rotate) };
+                var hue = new Hue { DynamicParameter = new Tuple<int, bool>(degrees, rotate) };
                 this.backupFormat.ApplyProcessor(hue.ProcessImage, this);
             }
 
@@ -1012,7 +1039,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Halftone halftone = new Halftone { DynamicParameter = comicMode };
+                var halftone = new Halftone { DynamicParameter = comicMode };
                 this.backupFormat.ApplyProcessor(halftone.ProcessImage, this);
             }
 
@@ -1037,7 +1064,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Mask mask = new Mask { DynamicParameter = imageLayer };
+                var mask = new Mask { DynamicParameter = imageLayer };
                 this.backupFormat.ApplyProcessor(mask.ProcessImage, this);
             }
 
@@ -1058,7 +1085,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Overlay watermark = new Overlay { DynamicParameter = imageLayer };
+                var watermark = new Overlay { DynamicParameter = imageLayer };
                 this.backupFormat.ApplyProcessor(watermark.ProcessImage, this);
             }
 
@@ -1080,7 +1107,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess && pixelSize > 0)
             {
-                Pixelate pixelate = new Pixelate { DynamicParameter = new Tuple<int, Rectangle?>(pixelSize, rectangle) };
+                var pixelate = new Pixelate { DynamicParameter = new Tuple<int, Rectangle?>(pixelSize, rectangle) };
                 this.backupFormat.ApplyProcessor(pixelate.ProcessImage, this);
             }
 
@@ -1132,7 +1159,7 @@ namespace ImageProcessor
 
             if (this.ShouldProcess && target != Color.Empty && replacement != Color.Empty)
             {
-                ReplaceColor replaceColor = new ReplaceColor
+                var replaceColor = new ReplaceColor
                 {
                     DynamicParameter = new Tuple<Color, Color, int>(target, replacement, fuzziness)
                 };
@@ -1158,7 +1185,7 @@ namespace ImageProcessor
                 int width = size.Width;
                 int height = size.Height;
 
-                ResizeLayer resizeLayer = new ResizeLayer(new Size(width, height));
+                var resizeLayer = new ResizeLayer(new Size(width, height));
                 return this.Resize(resizeLayer);
             }
 
@@ -1178,13 +1205,13 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Dictionary<string, string> resizeSettings = new Dictionary<string, string>
+                var resizeSettings = new Dictionary<string, string>
                 {
                     { "MaxWidth", resizeLayer.Size.Width.ToString("G") },
                     { "MaxHeight", resizeLayer.Size.Height.ToString("G") }
                 };
 
-                Resize resize = new Resize { DynamicParameter = resizeLayer, Settings = resizeSettings };
+                var resize = new Resize { DynamicParameter = resizeLayer, Settings = resizeSettings };
                 this.backupFormat.ApplyProcessor(resize.ProcessImage, this);
             }
 
@@ -1204,7 +1231,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Rotate rotate = new Rotate { DynamicParameter = degrees };
+                var rotate = new Rotate { DynamicParameter = degrees };
                 this.backupFormat.ApplyProcessor(rotate.ProcessImage, this);
             }
 
@@ -1233,7 +1260,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                RotateBounded rotate = new RotateBounded { DynamicParameter = new Tuple<float, bool>(degrees, keepSize) };
+                var rotate = new RotateBounded { DynamicParameter = new Tuple<float, bool>(degrees, keepSize) };
                 this.backupFormat.ApplyProcessor(rotate.ProcessImage, this);
             }
 
@@ -1258,9 +1285,9 @@ namespace ImageProcessor
                     radius = 0;
                 }
 
-                RoundedCornerLayer roundedCornerLayer = new RoundedCornerLayer(radius);
+                var roundedCornerLayer = new RoundedCornerLayer(radius);
 
-                RoundedCorners roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
+                var roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
                 this.backupFormat.ApplyProcessor(roundedCorners.ProcessImage, this);
             }
 
@@ -1285,7 +1312,7 @@ namespace ImageProcessor
                     roundedCornerLayer.Radius = 0;
                 }
 
-                RoundedCorners roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
+                var roundedCorners = new RoundedCorners { DynamicParameter = roundedCornerLayer };
                 this.backupFormat.ApplyProcessor(roundedCorners.ProcessImage, this);
             }
 
@@ -1312,7 +1339,7 @@ namespace ImageProcessor
                     return this;
                 }
 
-                Saturation saturate = new Saturation { DynamicParameter = percentage };
+                var saturate = new Saturation { DynamicParameter = percentage };
                 this.backupFormat.ApplyProcessor(saturate.ProcessImage, this);
             }
 
@@ -1332,7 +1359,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Tint tint = new Tint { DynamicParameter = color };
+                var tint = new Tint { DynamicParameter = color };
                 this.backupFormat.ApplyProcessor(tint.ProcessImage, this);
             }
 
@@ -1352,7 +1379,7 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Vignette vignette = new Vignette
+                var vignette = new Vignette
                 {
                     DynamicParameter = color.HasValue && !color.Equals(Color.Transparent)
                                         ? color.Value
@@ -1379,13 +1406,12 @@ namespace ImageProcessor
         {
             if (this.ShouldProcess)
             {
-                Watermark watermark = new Watermark { DynamicParameter = textLayer };
+                var watermark = new Watermark { DynamicParameter = textLayer };
                 this.backupFormat.ApplyProcessor(watermark.ProcessImage, this);
             }
 
             return this;
         }
-        #endregion
 
         /// <summary>
         /// Saves the current image to the specified file path. If the extension does not
@@ -1401,34 +1427,13 @@ namespace ImageProcessor
             if (this.ShouldProcess)
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                DirectoryInfo directoryInfo = new DirectoryInfo(Path.GetDirectoryName(filePath));
+                var directoryInfo = new DirectoryInfo(Path.GetDirectoryName(filePath));
                 if (!directoryInfo.Exists)
                 {
                     directoryInfo.Create();
                 }
 
-                // Clear property items.
-                if (!this.PreserveExifData)
-                {
-                    this.ClearExif(this.Image);
-                }
-                else
-                {
-                    foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
-                    {
-                        // Nasty fix but should handle issue 
-                        // https://github.com/JimBobSquarePants/ImageProcessor/issues/571
-                        try
-                        {
-                            this.Image.SetPropertyItem(propertItem.Value);
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                    }
-                }
-
+                this.SetMetaData();
                 this.Image = this.CurrentImageFormat.Save(filePath, this.Image, this.CurrentBitDepth);
             }
 
@@ -1454,28 +1459,7 @@ namespace ImageProcessor
                     stream.SetLength(0);
                 }
 
-                // Clear property items.
-                if (!this.PreserveExifData)
-                {
-                    this.ClearExif(this.Image);
-                }
-                else
-                {
-                    foreach (KeyValuePair<int, PropertyItem> propertItem in this.ExifPropertyItems)
-                    {
-                        // Nasty fix but should handle issue 
-                        // https://github.com/JimBobSquarePants/ImageProcessor/issues/571
-                        try
-                        {
-                            this.Image.SetPropertyItem(propertItem.Value);
-                        }
-                        catch 
-                        {
-                            continue;
-                        }
-                    }
-                }
-
+                this.SetMetaData();
                 this.Image = this.CurrentImageFormat.Save(stream, this.Image, this.CurrentBitDepth);
                 if (stream.CanSeek)
                 {
@@ -1486,7 +1470,6 @@ namespace ImageProcessor
             return this;
         }
 
-        #region IDisposable Members
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.
         /// </summary>
@@ -1535,29 +1518,56 @@ namespace ImageProcessor
             // Note disposing is done.
             this.isDisposed = true;
         }
-        #endregion
-        #endregion
 
         /// <summary>
-        /// Clears any EXIF metadata from the image
+        /// Sets the metadata based on the the current <see cref="MetaDataMode"/>
+        /// The image 
         /// </summary>
-        /// <param name="image">The current image.</param>
-        private void ClearExif(Image image)
+        private void SetMetaData()
         {
-            if (image.PropertyItems.Any())
+            if (this.MetaDataMode == MetaDataMode.All)
             {
                 foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
                 {
-                    // Ensure that we do not try to remove any stripped out properties
-                    // e.g gif comments.
-                    if (image.PropertyIdList.Contains(item.Key))
+                    // Handle issue https://github.com/JimBobSquarePants/ImageProcessor/issues/571
+                    // SetPropertyItem throws a native error if the property item is invalid for that format
+                    // but there's no way to handle individual formats so we do a dumb try...catch...
+                    try
                     {
-                        // The Gif decoder specifically requires these properties so we must not delete them.
-                        if (item.Key != (int)ExifPropertyTag.LoopCount && item.Key != (int)ExifPropertyTag.FrameDelay)
-                        {
-                            image.RemovePropertyItem(item.Key);
-                        }
+                        this.Image.SetPropertyItem(item.Value);
                     }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+
+                return;
+            }
+
+            ExifPropertyTag[] tags = ExifPropertyTagConstants.RequiredPropertyItems;
+            switch (this.MetaDataMode)
+            {
+                case MetaDataMode.Copyright:
+                    tags = ExifPropertyTagConstants.CopyrightPropertyItems;
+                    break;
+                case MetaDataMode.CopyrightAndGeolocation:
+                    tags = ExifPropertyTagConstants.CopyrightAndGeolocationPropertyItems;
+                    break;
+            }
+
+            foreach (KeyValuePair<int, PropertyItem> item in this.ExifPropertyItems)
+            {
+                try
+                {
+                    if (tags.Contains((ExifPropertyTag)item.Key))
+                    {
+                        this.Image.SetPropertyItem(item.Value);
+                    }
+                }
+                catch
+                {
+                    continue;
                 }
             }
         }
