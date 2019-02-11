@@ -16,6 +16,10 @@ It's fast, extensible, easy to use, comes bundled with some great features and i
 
 For full documentation please see [http://imageprocessor.org/](http://imageprocessor.org/)
 
+## Contributing to ImageProcessor
+### ImageProcessor is in Soft Archive Mode. 
+Focus for the ImageProcessor libraries has switched to a new library [**ImageSharp**](https://github.com/SixLabors/ImageSharp). 
+As such, no new features will be added to this library. Bug fixes will continue to be added and only via PR. 
 
 ### Latest Releases
 | Library                                       | Version                                                                                                                                                       |
@@ -27,11 +31,6 @@ For full documentation please see [http://imageprocessor.org/](http://imageproce
 | **ImageProcessor.Web.Config**                 | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.Config)](https://www.nuget.org/packages/ImageProcessor.Web.Config)                                 |
 | **ImageProcessor.Web.Plugins.AzureBlobCache** | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.Plugins.AzureBlobCache)](https://www.nuget.org/packages/ImageProcessor.Web.Plugins.AzureBlobCache) |
 | **ImageProcessor.Web.PostProcessor**          | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.PostProcessor)](https://www.nuget.org/packages/ImageProcessor.Web.PostProcessor)                   |
-
-
-## Contributing to ImageProcessor
-**ImageProcessor is in maintainance mode only**. Focus for the ImageProcessor libraries has switched to a new library [**ImageSharp**](https://github.com/SixLabors/ImageSharp). 
-As such, no new features will be added to this library. Bug fixes will continue to be added. 
 
 ## Documentation
 
