@@ -789,17 +789,13 @@ namespace ImageProcessor.Web.HttpModules
         {
             if (!string.IsNullOrWhiteSpace(queryString))
             {
-                foreach (Match match in PresetRegex.Matches(queryString))
+                queryString = PresetRegex.Replace(queryString, (match) =>
                 {
-                    if (match.Success)
-                    {
-                        string preset = match.Value.Split('=')[1];
+                    string preset = match.Value.Split('=')[1];
 
-                        // We use the processor config system to store the preset values.
-                        string replacements = ImageProcessorConfiguration.Instance.GetPresetSettings(preset);
-                        queryString = Regex.Replace(queryString, match.Value, replacements ?? string.Empty);
-                    }
-                }
+                    // We use the processor config system to store the preset values.
+                    return ImageProcessorConfiguration.Instance.GetPresetSettings(preset);
+                });
             }
 
             return queryString;
