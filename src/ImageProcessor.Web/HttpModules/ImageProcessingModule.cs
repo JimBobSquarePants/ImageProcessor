@@ -494,7 +494,7 @@ namespace ImageProcessor.Web.HttpModules
             }
             else if (!string.IsNullOrWhiteSpace(queryString))
             {
-                url = Regex.Replace(url, originalQueryString, queryString, RegexOptions.IgnoreCase);
+                url = Regex.Replace(url, Regex.Escape(originalQueryString), queryString, RegexOptions.IgnoreCase);
             }
 
             // Map the request path if file local.
