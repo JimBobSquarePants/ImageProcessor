@@ -35,7 +35,7 @@ namespace ImageProcessor.Web.Helpers
             if (!string.IsNullOrWhiteSpace(servicePrefix))
             {
                 // Handle when prefix is contained in filename.
-                string[] split = Regex.Split(url, servicePrefix, RegexOptions.IgnoreCase);
+                string[] split = Regex.Split(url, Regex.Escape(servicePrefix), RegexOptions.IgnoreCase);
                 if (split.Length > 1)
                 {
                     url = string.Join(servicePrefix, split.Skip(1).ToArray()).TrimStart("?");
