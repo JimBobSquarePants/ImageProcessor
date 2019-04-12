@@ -239,7 +239,7 @@ namespace ImageProcessor.Web.HttpModules
             }
 
             // Now we check to see if the the url is from a whitelisted location.
-            if (!Uri.TryCreate(origin, UriKind.RelativeOrAbsolute, out Uri url))
+            if (!Uri.TryCreate(origin, UriKind.Absolute, out Uri url))
             {
                 return;
             }
