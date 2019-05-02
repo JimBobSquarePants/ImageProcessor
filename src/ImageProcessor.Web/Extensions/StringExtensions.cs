@@ -48,8 +48,8 @@ namespace ImageProcessor.Web.Extensions
                 // Concatenate the hash bytes into one long String.
                 return hash.Aggregate(
                     new StringBuilder(32),
-                    (sb, b) => sb.Append(b.ToString("X2", CultureInfo.InvariantCulture)))
-                    .ToString().ToLowerInvariant();
+                    (sb, b) => sb.Append(b.ToString("x2", CultureInfo.InvariantCulture)))
+                    .ToString();
             }
         }
 
@@ -69,8 +69,8 @@ namespace ImageProcessor.Web.Extensions
                 // Concatenate the hash bytes into one long String.
                 return hash.Aggregate(
                     new StringBuilder(40),
-                    (sb, b) => sb.Append(b.ToString("X2", CultureInfo.InvariantCulture)))
-                    .ToString().ToLowerInvariant();
+                    (sb, b) => sb.Append(b.ToString("x2", CultureInfo.InvariantCulture)))
+                    .ToString();
             }
         }
 
