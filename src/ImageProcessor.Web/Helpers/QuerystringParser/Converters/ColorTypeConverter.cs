@@ -26,12 +26,12 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// The web color regex.
         /// </summary>
-        private static readonly Regex HexColorRegex = new Regex("([0-9a-fA-F]{3}){1,2}", RegexOptions.Compiled);
+        private static readonly Regex HexColorRegex = new Regex("([0-9a-fA-F]{3}){1,2}", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
 
         /// <summary>
         /// The number color regex.
         /// </summary>
-        private static readonly Regex NumberRegex = new Regex(@"\d+", RegexOptions.Compiled);
+        private static readonly Regex NumberRegex = new Regex(@"\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
 
         /// <summary>
         /// The system color table map.

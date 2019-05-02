@@ -27,7 +27,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"hue=\d+", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex(@"hue=\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Hue"/> class.
@@ -59,13 +59,13 @@ namespace ImageProcessor.Web.Processors
         public int MatchRegexIndex(string queryString)
         {
             this.SortOrder = int.MaxValue;
-            Match match = this.RegexPattern.Match(queryString);
 
+            Match match = this.RegexPattern.Match(queryString);
             if (match.Success)
             {
                 this.SortOrder = match.Index;
-                NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
 
+                NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
                 int degrees = QueryParamParser.Instance.ParseValue<int>(queryCollection["hue"]);
                 bool rotate = QueryParamParser.Instance.ParseValue<bool>(queryCollection["hue.rotate"]);
                 degrees = ImageMaths.Clamp(degrees, 0, 360);

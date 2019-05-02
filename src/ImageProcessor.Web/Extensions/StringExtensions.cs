@@ -23,6 +23,16 @@ namespace ImageProcessor.Web.Extensions
     public static class StringExtensions
     {
         /// <summary>
+        /// The regular expression to search strings for an array of positive floats.
+        /// </summary>
+        private static readonly Regex PositiveFloatArrayRegex = new Regex(@"[\d+\.]+(?=[,-])|[\d+\.]+(?![,-])", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
+
+        /// <summary>
+        /// The regular expression to search strings for an array of positive integers.
+        /// </summary>
+        private static readonly Regex PositiveIntegerArrayRegex = new Regex(@"[\d+]+(?=[,-])|[\d+]+(?![,-])", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
+
+        /// <summary>
         /// Creates an MD5 fingerprint of the String.
         /// </summary>
         /// <param name="expression">The <see cref="T:System.String">String</see> instance that this method extends.</param>
@@ -76,9 +86,7 @@ namespace ImageProcessor.Web.Extensions
                 throw new ArgumentNullException(nameof(expression));
             }
 
-            var regex = new Regex(@"[\d+]+(?=[,-])|[\d+]+(?![,-])", RegexOptions.Compiled);
-
-            MatchCollection matchCollection = regex.Matches(expression);
+            var matchCollection = PositiveIntegerArrayRegex.Matches(expression);
 
             // Get the collections.
             int count = matchCollection.Count;
@@ -105,9 +113,7 @@ namespace ImageProcessor.Web.Extensions
                 throw new ArgumentNullException(nameof(expression));
             }
 
-            var regex = new Regex(@"[\d+\.]+(?=[,-])|[\d+\.]+(?![,-])", RegexOptions.Compiled);
-
-            MatchCollection matchCollection = regex.Matches(expression);
+            var matchCollection = PositiveFloatArrayRegex.Matches(expression);
 
             // Get the collections.
             int count = matchCollection.Count;

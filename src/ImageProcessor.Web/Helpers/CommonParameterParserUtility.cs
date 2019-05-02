@@ -34,12 +34,12 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// The regular expression to search strings for angles.
         /// </summary>
-        private static readonly Regex AngleRegex = new Regex("(^(rotate(bounded)?|angle)|[^.](&,)?rotate(bounded)?|angle)(=|-)[^&|,]+", RegexOptions.Compiled);
+        private static readonly Regex AngleRegex = new Regex("(^(rotate(bounded)?|angle)|[^.](&,)?rotate(bounded)?|angle)(=|-)[^&|,]+", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The regular expression to search strings for values between 1 and 100.
         /// </summary>
-        private static readonly Regex In100RangeRegex = new Regex("(-?0*(?:100|[1-9][0-9]?))", RegexOptions.Compiled);
+        private static readonly Regex In100RangeRegex = new Regex("(-?0*(?:100|[1-9][0-9]?))", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
 
         /// <summary>
         /// Returns the correct <see cref="T:System.Int32"/> containing the angle for the given string.
@@ -135,23 +135,27 @@ namespace ImageProcessor.Web.Helpers
         private static Regex BuildColorRegex()
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append(@"(\d+,\d+,\d+,\d+|([0-9a-fA-F]{3}){1,2}|(");
+            stringBuilder.Append(@"(\d+,\d+,\d+,\d+|([0-9a-f]{3}){1,2}|(");
 
             var knownColors = (KnownColor[])Enum.GetValues(typeof(KnownColor));
-
-            for (int i = 0; i < knownColors.Length; i++)
+            for (var i = 0; i < knownColors.Length; i++)
             {
-                KnownColor knownColor = knownColors[i];
-                string name = knownColor.ToString().ToLowerInvariant();
+                var knownColor = knownColors[i];
+                var name = knownColor.ToString();
 
                 KnownColors.Add(name, knownColor);
 
-                stringBuilder.Append(i > 0 ? "|" + name : name);
+                if (i > 0)
+                {
+                    stringBuilder.Append('|');
+                }
+
+                stringBuilder.Append(Regex.Escape(name));
             }
 
             stringBuilder.Append("))");
 
-            return new Regex(stringBuilder.ToString(), RegexOptions.IgnoreCase);
+            return new Regex(stringBuilder.ToString(), RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
         }
     }
 }

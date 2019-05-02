@@ -38,7 +38,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The edge detectors.
         /// </summary>
-        private static Dictionary<string, object> detectors;
+        private static Dictionary<string, IEdgeFilter> detectors;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DetectEdges"/> class.
@@ -75,13 +75,13 @@ namespace ImageProcessor.Web.Processors
         public int MatchRegexIndex(string queryString)
         {
             this.SortOrder = int.MaxValue;
-            Match match = this.RegexPattern.Match(queryString);
 
+            Match match = this.RegexPattern.Match(queryString);
             if (match.Success)
             {
                 this.SortOrder = match.Index;
                 NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
-                var filter = (IEdgeFilter)detectors[QueryParamParser.Instance.ParseValue<string>(queryCollection["detectedges"])];
+                var filter = detectors[QueryParamParser.Instance.ParseValue<string>(queryCollection["detectedges"])];
                 bool greyscale = QueryParamParser.Instance.ParseValue<bool>(queryCollection["greyscale"]);
                 this.Processor.DynamicParameter = new Tuple<IEdgeFilter, bool>(filter, greyscale);
             }
@@ -108,13 +108,13 @@ namespace ImageProcessor.Web.Processors
                                     .Cast<Assembly>()
                                     .SelectMany(s => s.GetLoadableTypes())
                                     .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                                    .ToDictionary(t => t.Name.ToLowerInvariant().Replace("edgefilter", string.Empty), Activator.CreateInstance);
+                                    .ToDictionary(t => t.Name.Replace("edgefilter", null), t => (IEdgeFilter)Activator.CreateInstance(t), StringComparer.OrdinalIgnoreCase);
 
-            stringBuilder.Append(string.Join("|", detectors.Keys.ToList()));
+            stringBuilder.Append(string.Join("|", detectors.Keys.Select(Regex.Escape)));
 
-            stringBuilder.Append(")");
+            stringBuilder.Append(')');
 
-            return new Regex(stringBuilder.ToString(), RegexOptions.IgnoreCase);
+            return new Regex(stringBuilder.ToString(), RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
         }
     }
 }

@@ -50,12 +50,12 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// The regular expression to search strings for presets with.
         /// </summary>
-        private static readonly Regex PresetRegex = new Regex("preset=[^&]+", RegexOptions.Compiled);
+        private static readonly Regex PresetRegex = new Regex("preset=[^&]+", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The regular expression to search strings for protocols with.
         /// </summary>
-        private static readonly Regex ProtocolRegex = new Regex("http(s)?://", RegexOptions.Compiled);
+        private static readonly Regex ProtocolRegex = new Regex("http(s)?://", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The base assembly version.
@@ -789,7 +789,7 @@ namespace ImageProcessor.Web.HttpModules
         {
             if (!string.IsNullOrWhiteSpace(queryString))
             {
-                queryString = PresetRegex.Replace(queryString, (match) =>
+                queryString = PresetRegex.Replace(queryString, match =>
                 {
                     string preset = match.Value.Split('=')[1];
 
