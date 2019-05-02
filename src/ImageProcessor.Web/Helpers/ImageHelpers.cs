@@ -132,7 +132,7 @@ namespace ImageProcessor.Web.Helpers
                 }
 
                 // Ah the enigma that is the png file.
-                if (value.EndsWith("png8", StringComparison.InvariantCultureIgnoreCase))
+                if (value.EndsWith("png8", StringComparison.OrdinalIgnoreCase))
                 {
                     return "png";
                 }

@@ -92,7 +92,7 @@ namespace ImageProcessor.Web.Processors
             string finalIdentifier = identifier.Equals("png8") ? "png" : identifier;
             ISupportedImageFormat newFormat = null;
             var formats = ImageProcessorBootstrapper.Instance.SupportedImageFormats.ToList();
-            ISupportedImageFormat format = formats.Find(f => f.FileExtensions.Any(e => e.Equals(finalIdentifier, StringComparison.InvariantCultureIgnoreCase)));
+            ISupportedImageFormat format = formats.Find(f => f.FileExtensions.Any(e => e.Equals(finalIdentifier, StringComparison.OrdinalIgnoreCase)));
 
             if (format != null)
             {

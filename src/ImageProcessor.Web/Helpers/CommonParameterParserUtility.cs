@@ -24,7 +24,7 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// The collection of known colors.
         /// </summary>
-        private static readonly Dictionary<string, KnownColor> KnownColors = new Dictionary<string, KnownColor>();
+        private static readonly Dictionary<string, KnownColor> KnownColors = new Dictionary<string, KnownColor>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// The regular expression to search strings for colors.
@@ -52,15 +52,16 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         public static float ParseAngle(string input)
         {
-            foreach (Match match in AngleRegex.Matches(input))
+            if (AngleRegex.Match(input) is var match && match.Success)
             {
                 // Split on angle
-                string value = match.Value;
-                value = match.Value.IndexOf("ANGLE", StringComparison.InvariantCultureIgnoreCase) >= 0
-                    ? value.Substring(value.IndexOf("-", StringComparison.Ordinal) + 1)
+                var value = match.Value;
+                value = match.Value.IndexOf("angle", StringComparison.OrdinalIgnoreCase) >= 0
+                    ? value.Substring(value.IndexOf('-') + 1)
                     : match.Value.Split('=')[1];
 
-                float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out float angle);
+                float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var angle);
+
                 return angle;
             }
 
@@ -79,22 +80,22 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         public static Color ParseColor(string input)
         {
-            foreach (Match match in ColorRegex.Matches(input))
+            if (ColorRegex.Match(input) is var match && match.Success)
             {
-                string value = match.Value;
+                var value = match.Value;
 
-                if (KnownColors.ContainsKey(value))
+                if (KnownColors.TryGetValue(value, out var knownColor))
                 {
-                    return Color.FromKnownColor(KnownColors[value]);
+                    return Color.FromKnownColor(knownColor);
                 }
 
                 if (value.Contains(","))
                 {
-                    int[] split = value.ToPositiveIntegerArray();
-                    byte red = split[0].ToByte();
-                    byte green = split[1].ToByte();
-                    byte blue = split[2].ToByte();
-                    byte alpha = split[3].ToByte();
+                    var split = value.ToPositiveIntegerArray();
+                    var red = split[0].ToByte();
+                    var green = split[1].ToByte();
+                    var blue = split[2].ToByte();
+                    var alpha = split[3].ToByte();
 
                     return Color.FromArgb(alpha, red, green, blue);
                 }
@@ -117,7 +118,7 @@ namespace ImageProcessor.Web.Helpers
         /// </returns>
         public static int ParseIn100Range(string input)
         {
-            int value = 0;
+            var value = 0;
             foreach (Match match in In100RangeRegex.Matches(input))
             {
                 value = int.Parse(match.Value, CultureInfo.InvariantCulture);

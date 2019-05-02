@@ -230,34 +230,31 @@ namespace ImageProcessor.Web.Helpers
                 throw new ArgumentNullException(nameof(destinationType));
             }
 
-            if (destinationType == typeof(string))
+            if (destinationType == typeof(string) && value != null)
             {
-                if (value != null)
+                var color = (Color)value;
+
+                if (color == Color.Empty)
                 {
-                    var color = (Color)value;
-
-                    if (color == Color.Empty)
-                    {
-                        return string.Empty;
-                    }
-
-                    if (color.IsKnownColor)
-                    {
-                        return color.Name;
-                    }
-
-                    if (color.IsNamedColor)
-                    {
-                        return "'" + color.Name + "'";
-                    }
-
-                    // In the Web scenario, colors should be formatted in #RRGGBB notation 
-                    var sb = new StringBuilder("#", 7);
-                    sb.Append(color.R.ToString("X2", CultureInfo.InvariantCulture));
-                    sb.Append(color.G.ToString("X2", CultureInfo.InvariantCulture));
-                    sb.Append(color.B.ToString("X2", CultureInfo.InvariantCulture));
-                    return sb.ToString();
+                    return string.Empty;
                 }
+
+                if (color.IsKnownColor)
+                {
+                    return color.Name;
+                }
+
+                if (color.IsNamedColor)
+                {
+                    return "'" + color.Name + "'";
+                }
+
+                // In the Web scenario, colors should be formatted in #RRGGBB notation 
+                var sb = new StringBuilder("#", 7);
+                sb.Append(color.R.ToString("X2", CultureInfo.InvariantCulture));
+                sb.Append(color.G.ToString("X2", CultureInfo.InvariantCulture));
+                sb.Append(color.B.ToString("X2", CultureInfo.InvariantCulture));
+                return sb.ToString();
             }
 
             return base.ConvertTo(culture, value, destinationType);

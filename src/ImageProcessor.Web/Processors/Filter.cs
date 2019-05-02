@@ -124,7 +124,7 @@ namespace ImageProcessor.Web.Processors
                     PropertyInfo filter =
                         type.GetProperties(Flags)
                             .Where(p => p.PropertyType.IsAssignableFrom(typeof(IMatrixFilter)))
-                            .First(p => p.Name.Equals(f, StringComparison.InvariantCultureIgnoreCase));
+                            .First(p => p.Name.Equals(f, StringComparison.OrdinalIgnoreCase));
 
                     return filter.GetValue(null, null) as IMatrixFilter;
                 });
