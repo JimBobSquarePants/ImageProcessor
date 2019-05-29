@@ -19,8 +19,9 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Web;
+    using System.Configuration;
 
-	using ImageProcessor.Configuration;
+    using ImageProcessor.Configuration;
 
 	/// <summary>
 	/// The image post processor.
@@ -161,12 +162,19 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 		/// </returns>
 		private static IEnumerable<ProcessStartInfo> GetProcessStartInfos(string extension, long length, string sourceFile, string destinationFile)
 		{
-			// Make sure the commands overwrite the destination file (in case multiple are executed)
-			switch (extension.ToLowerInvariant())
+            // allow optional disabling of TruePng as some systems (such as Azure WebApps) don't support it's execution
+            string disableTruePngKeyName = "ImageProcessor.Web.PostProcessor.DisableTruePNG";
+            var disableTruePngValue = ConfigurationManager.AppSettings[disableTruePngKeyName];
+            bool.TryParse(disableTruePngValue, out var disableTruePng);
+
+            // Make sure the commands overwrite the destination file (in case multiple are executed)
+            switch (extension.ToLowerInvariant())
 			{
 				case ".png":
 					yield return new ProcessStartInfo("pngquant.exe", $"--quality=90-99 --output \"{destinationFile}\" \"{sourceFile}\"");
-					yield return new ProcessStartInfo("truepng.exe", $"-o4 -y -out \"{destinationFile}\" \"{sourceFile}\"");
+                    if (!disableTruePng) { 
+					    yield return new ProcessStartInfo("truepng.exe", $"-o4 -y -out \"{destinationFile}\" \"{sourceFile}\"");
+                    }
 					break;
 				case ".jpg":
 				case ".jpeg":
