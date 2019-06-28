@@ -153,7 +153,7 @@ namespace ImageProcessor.Web.Services
                         }
                     }
                 }
-            });
+            }).ConfigureAwait(false);
 
             return buffer;
         }
