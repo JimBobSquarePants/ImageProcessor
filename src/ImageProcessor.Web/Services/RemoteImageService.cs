@@ -15,6 +15,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using ImageProcessor.Web.Caching;
 using ImageProcessor.Web.Helpers;
+using Polly;
 
 namespace ImageProcessor.Web.Services
 {
@@ -32,7 +33,9 @@ namespace ImageProcessor.Web.Services
             { "MaxBytes", "4194304" },
             { "Timeout", "30000" },
             { "Protocol", "http" },
-            { "UserAgent", string.Empty }
+            { "UserAgent", string.Empty },
+            { "MaxRetryAttempts", "3" },
+            { "PauseBetweenFailures", "3" }
         };
 
         /// <summary>
@@ -114,34 +117,43 @@ namespace ImageProcessor.Web.Services
         /// </returns>
         public virtual async Task<byte[]> GetImage(object id)
         {
-            byte[] buffer;
+            byte[] buffer = new byte[0];
 
             if (this.remoteFile == null)
             {
                 this.InitRemoteFile();
             }
 
-            HttpResponseMessage httpResponse = await this.remoteFile.GetResponseAsync(new Uri(id.ToString())).ConfigureAwait(false);
+            var retryPolicy = Policy
+                    .Handle<HttpRequestException>()
+                    .WaitAndRetryAsync(int.Parse(this.Settings["MaxRetryAttempts"]), i => TimeSpan.FromSeconds(int.Parse(this.Settings["PauseBetweenFailures"])));
 
-            if (httpResponse == null)
+            await retryPolicy.ExecuteAsync(async () =>
             {
-                return null;
-            }
+                HttpResponseMessage httpResponse = await this.remoteFile.GetResponseAsync(new Uri(id.ToString())).ConfigureAwait(false);
 
-            using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
-            {
-                using (HttpResponseMessage response = httpResponse)
+                if (httpResponse == null)
                 {
-                    using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                    buffer = null;
+                }
+                else
+                {
+                    using (MemoryStream memoryStream = MemoryStreamPool.Shared.GetStream())
                     {
-                        await responseStream.CopyToAsync(memoryStream).ConfigureAwait(false);
+                        using (HttpResponseMessage response = httpResponse)
+                        {
+                            using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                            {
+                                await responseStream.CopyToAsync(memoryStream).ConfigureAwait(false);
 
-                        // Reset the position of the stream to ensure we're reading the correct part.
-                        memoryStream.Position = 0;
-                        buffer = memoryStream.ToArray();
+                                // Reset the position of the stream to ensure we're reading the correct part.
+                                memoryStream.Position = 0;
+                                buffer = memoryStream.ToArray();
+                            }
+                        }
                     }
                 }
-            }
+            });
 
             return buffer;
         }
