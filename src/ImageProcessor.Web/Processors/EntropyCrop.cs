@@ -67,7 +67,7 @@ namespace ImageProcessor.Web.Processors
                 byte threshold = QueryParamParser.Instance.ParseValue<byte>(queryCollection["entropycrop"]);
 
                 // Fallback to the default if 0.
-                this.Processor.DynamicParameter = threshold > 0 ? threshold : 128;
+                this.Processor.DynamicParameter = threshold > 0 ? threshold : (byte)128;
             }
 
             return this.SortOrder;
