@@ -103,7 +103,7 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
         /// <returns>
         /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        public override Image Save(Stream stream, Image image, long bitDepth)
+        public override Image Save(Stream stream, Image image, BitDepth bitDepth)
         {
             // Encode in webP format.
             // If Quality is 100, encode losslessly instead of lossily
@@ -118,31 +118,6 @@ namespace ImageProcessor.Plugins.WebP.Imaging.Formats
             else
             {
                 throw new ImageFormatException("Unable to encode WebP image.");
-            }
-
-            return image;
-        }
-
-        /// <summary>
-        /// Saves the current image to the specified file path.
-        /// </summary>
-        /// <param name="path">The path to save the image to.</param>
-        /// <param name="image"> 
-        /// The <see cref="T:System.Drawing.Image"/> to save.
-        /// </param>
-        /// <param name="bitDepth">
-        /// The color depth in number of bits per pixel to save the image with.
-        /// </param>
-        /// <returns>
-        /// The <see cref="T:System.Drawing.Image"/>.
-        /// </returns>
-        public override Image Save(string path, Image image, long bitDepth)
-        {
-            // Encode in webP format.
-            // If Quality is 100, encode losslessly instead of lossily
-            if (this.Quality == 100 ? EncodeLosslessly((Bitmap)image, out byte[] bytes) : EncodeLossly((Bitmap)image, this.Quality, out bytes))
-            {
-                File.WriteAllBytes(path, bytes);
             }
 
             return image;
