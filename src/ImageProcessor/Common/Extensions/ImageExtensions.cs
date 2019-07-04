@@ -63,6 +63,8 @@ namespace ImageProcessor.Common.Extensions
             copy.SetResolution(source.HorizontalResolution, source.VerticalResolution);
             using (var graphics = Graphics.FromImage(copy))
             {
+                graphics.PageUnit = GraphicsUnit.Pixel;
+                graphics.Clear(Color.Transparent);
                 graphics.DrawImageUnscaled(source, 0, 0);
             }
 

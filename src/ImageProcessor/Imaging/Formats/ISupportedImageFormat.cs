@@ -46,11 +46,6 @@ namespace ImageProcessor.Imaging.Formats
         ImageFormat ImageFormat { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the image format is indexed.
-        /// </summary>
-        bool IsIndexed { get; set; }
-
-        /// <summary>
         /// Gets or sets the quality of output for images.
         /// </summary>
         int Quality { get; set; }
@@ -92,21 +87,6 @@ namespace ImageProcessor.Imaging.Formats
         /// <returns>
         /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        Image Save(Stream stream, Image image, long bitDepth);
-
-        /// <summary>
-        /// Saves the current image to the specified file path.
-        /// </summary>
-        /// <param name="path">The path to save the image to.</param>
-        /// <param name="image"> 
-        /// The <see cref="T:System.Drawing.Image"/> to save.
-        /// </param>
-        /// <param name="bitDepth">
-        /// The color depth in number of bits per pixel to save the image with.
-        /// </param>
-        /// <returns>
-        /// The <see cref="T:System.Drawing.Image"/>.
-        /// </returns>
-        Image Save(string path, Image image, long bitDepth);
+        Image Save(Stream stream, Image image, BitDepth bitDepth);
     }
 }

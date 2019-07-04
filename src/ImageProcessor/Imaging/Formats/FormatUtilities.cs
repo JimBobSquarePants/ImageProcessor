@@ -56,10 +56,8 @@ namespace ImageProcessor.Imaging.Formats
             // ReSharper disable once PossibleMultipleEnumeration
             foreach (ISupportedImageFormat supportedImageFormat in supportedImageFormats)
             {
-                byte[][] headers = supportedImageFormat.FileHeaders;
-
                 // ReSharper disable once LoopCanBeConvertedToQuery
-                foreach (byte[] header in headers)
+                foreach (byte[] header in supportedImageFormat.FileHeaders)
                 {
                     if (header.SequenceEqual(buffer.Take(header.Length)))
                     {
@@ -83,21 +81,29 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// Returns a value indicating whether the given image is indexed.
+        /// Gets the color depth in bits per pixel for the given pixel format.
         /// </summary>
-        /// <param name="image">
-        /// The <see cref="System.Drawing.Image"/> to test.
-        /// </param>
-        /// <returns>
-        /// The true if the image is indexed; otherwise, false.
-        /// </returns>
-        public static bool IsIndexed(Image image)
+        /// <param name="pixelFormat"></param>
+        /// <returns>The <see cref="BitDepth"/>.</returns>
+        public static BitDepth GetBitDepth(PixelFormat pixelFormat)
         {
-            // Test value of flags using bitwise AND.
-            // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
-#pragma warning disable RCS1130 // Bitwise operation on enum without Flags attribute.
-            return (image.PixelFormat & PixelFormat.Indexed) != 0;
-#pragma warning restore RCS1130 // Bitwise operation on enum without Flags attribute.
+            switch ((long)Image.GetPixelFormatSize(pixelFormat))
+            {
+                case 1L:
+                    return BitDepth.Bit1;
+                case 2L:
+                    return BitDepth.Bit2;
+                case 4L:
+                    return BitDepth.Bit4;
+                case 8L:
+                    return BitDepth.Bit8;
+                case 16L:
+                    return BitDepth.Bit16;
+                case 24L:
+                    return BitDepth.Bit24;
+                default:
+                    return BitDepth.Bit32;
+            }
         }
 
         /// <summary>
