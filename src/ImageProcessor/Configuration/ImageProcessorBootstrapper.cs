@@ -77,6 +77,8 @@ namespace ImageProcessor.Configuration
         /// <param name="logger"></param>
         public void SetLogger(ILogger logger) => this.Logger = logger;
 
+        
+        public static bool DefaultLoadAssembilies = true;
         /// <summary>
         /// Creates a list, using reflection, of supported image formats that ImageProcessor can run.
         /// </summary>
