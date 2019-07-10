@@ -76,7 +76,7 @@ namespace ImageProcessor.Configuration
         /// </summary>
         /// <param name="logger"></param>
         public void SetLogger(ILogger logger) => this.Logger = logger;
-
+        public static bool DefaultLoadAssembilies=true;
         /// <summary>
         /// Creates a list, using reflection, of supported image formats that ImageProcessor can run.
         /// </summary>
@@ -94,6 +94,8 @@ namespace ImageProcessor.Configuration
             Type type = typeof(ISupportedImageFormat);
             if (this.SupportedImageFormats == null)
             {
+                if(DefaultLoadAssembilies)
+                {
                 var availableTypes =
                     TypeFinder.GetAssembliesWithKnownExclusions()
                         .SelectMany(a => a.GetLoadableTypes())
@@ -101,7 +103,7 @@ namespace ImageProcessor.Configuration
                         .ToList();
 
                 formats.AddRange(availableTypes.Select(f => Activator.CreateInstance(f) as ISupportedImageFormat).ToList());
-
+                }
                 this.SupportedImageFormats = formats;
             }
         }
