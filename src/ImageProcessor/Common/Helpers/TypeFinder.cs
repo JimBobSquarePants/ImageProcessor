@@ -240,12 +240,13 @@ namespace ImageProcessor.Common.Helpers
                 }
 
                 locker.UpgradeToWriteLock();
-
+if (Configuration.ImageProcessorBootstrapper.DefaultLoadAssembilies)
+                {
                 foreach (Assembly assembly in GetFilteredAssemblies(excludeFromResults, KnownAssemblyExclusionFilter))
                 {
                     LocalFilteredAssemblyCache.Add(assembly);
                 }
-
+}
                 return LocalFilteredAssemblyCache;
             }
         }
