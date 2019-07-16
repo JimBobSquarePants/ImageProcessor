@@ -24,8 +24,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.HttpModules;
 
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Blob;
+    using Microsoft.Azure.Storage;
+    using Microsoft.Azure.Storage.Blob;
 
     /// <summary>
     /// Provides an <see cref="IImageCache"/> implementation that uses Azure blob storage.

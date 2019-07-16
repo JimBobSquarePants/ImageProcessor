@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using ImageProcessor.Web.Caching;
 using ImageProcessor.Web.Helpers;
 using ImageProcessor.Web.Services;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
 
 namespace ImageProcessor.Web.Plugins.AzureBlobCache
 {
