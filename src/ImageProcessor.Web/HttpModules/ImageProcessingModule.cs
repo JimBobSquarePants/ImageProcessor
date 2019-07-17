@@ -50,12 +50,12 @@ namespace ImageProcessor.Web.HttpModules
         /// <summary>
         /// The regular expression to search strings for presets with.
         /// </summary>
-        private static readonly Regex PresetRegex = new Regex("preset=[^&]+", RegexOptions.Compiled);
+        private static readonly Regex PresetRegex = new Regex("preset=[^&]+", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The regular expression to search strings for protocols with.
         /// </summary>
-        private static readonly Regex ProtocolRegex = new Regex("http(s)?://", RegexOptions.Compiled);
+        private static readonly Regex ProtocolRegex = new Regex("http(s)?://", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The base assembly version.
@@ -251,8 +251,6 @@ namespace ImageProcessor.Web.HttpModules
                 return;
             }
 
-            string upper = url.Host.ToUpperInvariant();
-
             // Check for root or sub domain.
             bool validUrl = false;
             foreach (ImageSecuritySection.SafeUrl safeUrl in origins.WhiteList)
@@ -268,11 +266,11 @@ namespace ImageProcessor.Web.HttpModules
                 if (!uri.IsAbsoluteUri)
                 {
                     var rebaseUri = new Uri($"http://{uri.ToString().TrimStart('.', '/')}");
-                    validUrl = upper.StartsWith(rebaseUri.Host.ToUpperInvariant()) || upper.EndsWith(rebaseUri.Host.ToUpperInvariant());
+                    validUrl = url.Host.StartsWith(rebaseUri.Host, StringComparison.OrdinalIgnoreCase) || url.Host.EndsWith(rebaseUri.Host, StringComparison.OrdinalIgnoreCase);
                 }
                 else
                 {
-                    validUrl = upper.StartsWith(uri.Host.ToUpperInvariant()) || upper.EndsWith(uri.Host.ToUpperInvariant());
+                    validUrl = url.Host.StartsWith(uri.Host, StringComparison.OrdinalIgnoreCase) || url.Host.EndsWith(uri.Host, StringComparison.OrdinalIgnoreCase);
                 }
 
                 if (validUrl)
@@ -447,7 +445,7 @@ namespace ImageProcessor.Web.HttpModules
             string rawUrl = this.GetRequestUrl(request);
 
             // Should we ignore this request?
-            if (string.IsNullOrWhiteSpace(rawUrl) || rawUrl.IndexOf("IPIGNORE=TRUE", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            if (string.IsNullOrWhiteSpace(rawUrl) || rawUrl.IndexOf("ipignore=true", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return;
             }
@@ -490,9 +488,10 @@ namespace ImageProcessor.Web.HttpModules
             queryString = validatingArgs.QueryString;
             if (string.IsNullOrWhiteSpace(originalQueryString) && !string.IsNullOrWhiteSpace(queryString))
             {
+                // Add new query string to URL
                 url = url + "?" + queryString;
             }
-            else if (!string.IsNullOrWhiteSpace(queryString))
+            else if (!string.IsNullOrWhiteSpace(queryString) && !string.Equals(originalQueryString, queryString))
             {
                 url = Regex.Replace(url, Regex.Escape(originalQueryString), queryString, RegexOptions.IgnoreCase);
             }
@@ -510,10 +509,10 @@ namespace ImageProcessor.Web.HttpModules
             }
 
             // Parse any protocol values from settings if no protocol is present.
-            if (currentService.Settings.ContainsKey("Protocol") && (ProtocolRegex.Matches(requestPath).Count == 0 || ProtocolRegex.Matches(requestPath)[0].Index > 0))
+            if (currentService.Settings.TryGetValue("Protocol", out var protocol) && (ProtocolRegex.Matches(requestPath) is var matches && (matches.Count == 0 || matches[0].Index > 0)))
             {
                 // ReSharper disable once PossibleNullReferenceException
-                requestPath = currentService.Settings["Protocol"] + "://" + requestPath.TrimStart('/');
+                requestPath = protocol + "://" + requestPath.TrimStart('/');
             }
 
             // Break out if we don't meet critera.
@@ -741,8 +740,8 @@ namespace ImageProcessor.Web.HttpModules
         private static bool ParseCacheBuster(NameValueCollection queryString)
         {
             return allowCacheBuster != null && allowCacheBuster.Value
-                && (queryString.AllKeys.Contains("v", StringComparer.InvariantCultureIgnoreCase)
-                || queryString.AllKeys.Contains("rnd", StringComparer.InvariantCultureIgnoreCase));
+                && (queryString.AllKeys.Contains("v", StringComparer.OrdinalIgnoreCase)
+                || queryString.AllKeys.Contains("rnd", StringComparer.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -764,9 +763,9 @@ namespace ImageProcessor.Web.HttpModules
             NameValueCollection queryCollection = HttpUtility.ParseQueryString(decoded);
             process = false;
 
-            if (queryCollection.AllKeys.Contains("animationprocessmode", StringComparer.InvariantCultureIgnoreCase))
+            if (queryCollection["animationprocessmode"] is string animationProcessMode)
             {
-                mode = QueryParamParser.Instance.ParseValue<AnimationProcessMode>(queryCollection["animationprocessmode"]);
+                mode = QueryParamParser.Instance.ParseValue<AnimationProcessMode>(animationProcessMode);
 
                 // Common sense would dictate that requesting AnimationProcessMode.All is a pointless request
                 // since that is the default behaviour and shouldn't be requested on its own.
@@ -789,7 +788,7 @@ namespace ImageProcessor.Web.HttpModules
         {
             if (!string.IsNullOrWhiteSpace(queryString))
             {
-                queryString = PresetRegex.Replace(queryString, (match) =>
+                queryString = PresetRegex.Replace(queryString, match =>
                 {
                     string preset = match.Value.Split('=')[1];
 
@@ -824,8 +823,8 @@ namespace ImageProcessor.Web.HttpModules
             string path = url.Split('?')[0].TrimStart(applicationPath).TrimStart('/');
             foreach (IImageService service in services)
             {
-                string key = service.Prefix;
-                if (!string.IsNullOrWhiteSpace(key) && path.StartsWith(key, StringComparison.InvariantCultureIgnoreCase))
+                var key = service.Prefix;
+                if (!string.IsNullOrWhiteSpace(key) && path.StartsWith(key, StringComparison.OrdinalIgnoreCase))
                 {
                     return service;
                 }

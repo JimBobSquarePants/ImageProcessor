@@ -66,12 +66,12 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// The image format regex.
         /// </summary>
-        private static readonly Regex FormatRegex = new Regex(@"(\.?)(png8|" + ExtensionRegexPattern + ")", RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
+        private static readonly Regex FormatRegex = new Regex(@"(\.?)(png8|" + ExtensionRegexPattern + ")", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
 
         /// <summary>
         /// The image format regex for matching the file format at the end of a string.
         /// </summary>
-        private static readonly Regex EndFormatRegex = new Regex(@"(\.)" + ExtensionRegexPattern + "$", RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
+        private static readonly Regex EndFormatRegex = new Regex(@"(\.)" + ExtensionRegexPattern + "$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
 
         /// <summary>
         /// Checks a given string to check whether the value contains a valid image extension.
@@ -132,7 +132,7 @@ namespace ImageProcessor.Web.Helpers
                 }
 
                 // Ah the enigma that is the png file.
-                if (value.EndsWith("png8", StringComparison.InvariantCultureIgnoreCase))
+                if (value.EndsWith("png8", StringComparison.OrdinalIgnoreCase))
                 {
                     return "png";
                 }
@@ -180,26 +180,10 @@ namespace ImageProcessor.Web.Helpers
         private static string BuildExtensionRegexPattern()
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append("(");
-            int counter = 0;
-            foreach (ISupportedImageFormat imageFormat in ImageProcessorBootstrapper.Instance.SupportedImageFormats)
-            {
-                foreach (string fileExtension in imageFormat.FileExtensions)
-                {
-                    if (counter == 0)
-                    {
-                        stringBuilder.Append(fileExtension.ToLowerInvariant());
-                    }
-                    else
-                    {
-                        stringBuilder.AppendFormat("|{0}", fileExtension.ToLowerInvariant());
-                    }
-                }
+            stringBuilder.Append('(');
+            stringBuilder.Append(string.Join("|", ImageProcessorBootstrapper.Instance.SupportedImageFormats.SelectMany(f => f.FileExtensions).Select(Regex.Escape)));
+            stringBuilder.Append(')');
 
-                counter++;
-            }
-
-            stringBuilder.Append(")");
             return stringBuilder.ToString();
         }
     }

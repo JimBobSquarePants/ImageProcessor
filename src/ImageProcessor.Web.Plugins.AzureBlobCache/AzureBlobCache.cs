@@ -38,7 +38,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <summary>
         /// The regular expression for parsing a remote uri.
         /// </summary>
-        private static readonly Regex RemoteRegex = new Regex("^http(s)?://", RegexOptions.Compiled);
+        private static readonly Regex RemoteRegex = new Regex("^http(s)?://", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The assembly version.

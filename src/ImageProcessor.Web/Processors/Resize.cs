@@ -31,7 +31,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"(width|height)=((.)?\d+|\d+(.\d+)?)+(px)?", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex(@"(width|height)=((.)?\d+|\d+(.\d+)?)+(px)?", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Resize"/> class.
@@ -65,8 +65,8 @@ namespace ImageProcessor.Web.Processors
         public int MatchRegexIndex(string queryString)
         {
             this.SortOrder = int.MaxValue;
-            Match match = this.RegexPattern.Match(queryString);
 
+            Match match = this.RegexPattern.Match(queryString);
             if (match.Success)
             {
                 this.SortOrder = match.Index;
@@ -79,7 +79,7 @@ namespace ImageProcessor.Web.Processors
                                     ? QueryParamParser.Instance.ParseValue<float[]>(queryCollection["center"]) :
                                     new float[] { };
 
-                this.Processor.DynamicParameter = (ResizeLayer)new ResizeLayer(size)
+                this.Processor.DynamicParameter = new ResizeLayer(size)
                 {
                     ResizeMode = mode,
                     AnchorPosition = position,
