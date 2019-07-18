@@ -118,7 +118,7 @@ foreach ($project in $projects) {
         continue;
     }
 
-    $assemblyVersion = "${version}.${buildNumber}";
+    $assemblyVersion = "$($project.version).$buildNumber";
     Write-Host "Building Project $($project.name) at version $($assemblyVersion)" -ForegroundColor Yellow;
     Update-AssemblyInfo -file (Join-Path $project.folder "Properties\AssemblyInfo.cs") -version $assemblyVersion;
 
