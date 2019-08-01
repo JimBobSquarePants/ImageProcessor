@@ -1,23 +1,16 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DefaultLogger.cs" company="James Jackson-South">
-//   Copyright (c) James Jackson-South.
-//   Licensed under the Apache License, Version 2.0.
-// </copyright>
-// <summary>
-//   The default logger which logs messages to the trace listeners.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+﻿// Copyright (c) James Jackson-South and contributors.
+// Licensed under the Apache License, Version 2.0.
 
-namespace ImageProcessor.Common.Exceptions
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
+namespace ImageProcessor
 {
-    using System;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-
     /// <summary>
     /// The default logger which logs messages to the trace listeners.
     /// </summary>
-    /// <seealso cref="ImageProcessor.Common.Exceptions.ILogger" />
+    /// <seealso cref="ILogger" />
     public class DefaultLogger : ILogger
     {
         /// <summary>

@@ -1,40 +1,31 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyExtensions.cs" company="James Jackson-South">
-//   Copyright (c) James Jackson-South.
-//   Licensed under the Apache License, Version 2.0.
-// </copyright>
-// <summary>
-//   Encapsulates a series of time saving extension methods to the <see cref="T:System.Reflection.Assembly" /> class.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) James Jackson-South and contributors.
+// Licensed under the Apache License, Version 2.0.
 
-namespace ImageProcessor.Common.Extensions
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+
+namespace ImageProcessor
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text;
-
     /// <summary>
-    /// Encapsulates a series of time saving extension methods to the <see cref="T:System.Reflection.Assembly"/> class.
+    /// Encapsulates a series of time saving extension methods to the <see cref="Assembly"/> class.
     /// </summary>
     public static class AssemblyExtensions
     {
         /// <summary>
         /// Gets a collection of loadable types from the given assembly.
-        /// Adapted from <see href="http://stackoverflow.com/questions/7889228/how-to-prevent-reflectiontypeloadexception-when-calling-assembly-gettypes"/>
+        /// Adapted from <see href="http://stackoverflow.com/questions/7889228/how-to-prevent-reflectiontypeloadexception-when-calling-assembly-gettypes"/>.
         /// </summary>
-        /// <param name="assembly">
-        /// The <see cref="System.Reflection.Assembly"/> to load the types from.
-        /// </param>
+        /// <param name="assembly">The <see cref="Assembly"/> to load the types from.</param>
         /// <returns>
         /// The loadable <see cref="System.Collections.Generic.IEnumerable{Type}"/>.
         /// </returns>
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
-            if (assembly == null)
+            if (assembly is null)
             {
                 throw new ArgumentNullException(nameof(assembly));
             }
@@ -52,15 +43,9 @@ namespace ImageProcessor.Common.Extensions
         /// <summary>
         /// Converts an assembly resource into a string.
         /// </summary>
-        /// <param name="assembly">
-        /// The <see cref="System.Reflection.Assembly"/> to load the strings from.
-        /// </param>
-        /// <param name="resource">
-        /// The resource.
-        /// </param>
-        /// <param name="encoding">
-        /// The character encoding to return the resource in.
-        /// </param>
+        /// <param name="assembly">The <see cref="Assembly"/> to load the strings from.</param>
+        /// <param name="resource">The resource.</param>
+        /// <param name="encoding">The character encoding to return the resource in.</param>
         /// <returns>
         /// The <see cref="string"/>.
         /// </returns>
@@ -80,12 +65,10 @@ namespace ImageProcessor.Common.Extensions
         }
 
         /// <summary>
-        /// Returns the <see cref="FileInfo"/> identifying the file used to load the assembly
+        /// Returns the <see cref="FileInfo"/> identifying the file used to load the assembly.
         /// </summary>
-        /// <param name="assembly">
-        /// The <see cref="Assembly"/> to get the name from.
-        /// </param>
-        /// <returns>The <see cref="FileInfo"/></returns>
+        /// <param name="assembly">The <see cref="Assembly"/> to get the name from.</param>
+        /// <returns>The <see cref="FileInfo"/>.</returns>
         public static FileInfo GetAssemblyFile(this Assembly assembly)
         {
             string codeBase = assembly.CodeBase;
@@ -95,12 +78,10 @@ namespace ImageProcessor.Common.Extensions
         }
 
         /// <summary>
-        /// Returns the <see cref="FileInfo"/> identifying the file used to load the assembly
+        /// Returns the <see cref="FileInfo"/> identifying the file used to load the assembly.
         /// </summary>
-        /// <param name="assemblyName">
-        /// The <see cref="AssemblyName"/> to get the name from.
-        /// </param>
-        /// <returns>The <see cref="FileInfo"/></returns>
+        /// <param name="assemblyName">The <see cref="AssemblyName"/> to get the name from.</param>
+        /// <returns>The <see cref="FileInfo"/>.</returns>
         public static FileInfo GetAssemblyFile(this AssemblyName assemblyName)
         {
             string codeBase = assemblyName.CodeBase;

@@ -1,26 +1,15 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ImageProcessorBootstrapper.cs" company="James Jackson-South">
-//   Copyright (c) James Jackson-South.
-//   Licensed under the Apache License, Version 2.0.
-// </copyright>
-// <summary>
-//   The ImageProcessor bootstrapper containing initialization code for extending ImageProcessor.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) James Jackson-South and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using ImageProcessor.Formats;
 
 namespace ImageProcessor.Configuration
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
-    using ImageProcessor.Common.Exceptions;
-    using ImageProcessor.Common.Extensions;
-    using ImageProcessor.Common.Helpers;
-    using ImageProcessor.Imaging.Formats;
-
     /// <summary>
-    /// The ImageProcessor bootstrapper containing initialization code for extending ImageProcessor.
+    /// The bootstrapper containing initialization code for extending ImageProcessor.
     /// </summary>
     public sealed class ImageProcessorBootstrapper
     {
@@ -34,12 +23,7 @@ namespace ImageProcessor.Configuration
         /// <summary>
         /// Prevents a default instance of the <see cref="ImageProcessorBootstrapper"/> class from being created.
         /// </summary>
-        private ImageProcessorBootstrapper()
-        {
-            this.NativeBinaryFactory = new NativeBinaryFactory();
-            this.LoadSupportedImageFormats();
-            this.LoadLogger();
-        }
+        private ImageProcessorBootstrapper() => this.LoadSupportedImageFormats();
 
         /// <summary>
         /// Gets the current instance of the <see cref="ImageProcessorBootstrapper"/> class.
@@ -49,32 +33,42 @@ namespace ImageProcessor.Configuration
         /// <summary>
         /// Gets the supported image formats.
         /// </summary>
-        public IEnumerable<ISupportedImageFormat> SupportedImageFormats { get; private set; }
+        public IReadOnlyCollection<IImageFormat> ImageFormats { get; private set; }
 
         /// <summary>
         /// Gets the currently installed logger.
         /// </summary>
-        public ILogger Logger { get; private set; }
+        public ILogger Logger { get; private set; } = new DefaultLogger();
 
         /// <summary>
         /// Gets the native binary factory for registering embedded (unmanaged) binaries.
         /// </summary>
-        public NativeBinaryFactory NativeBinaryFactory { get; }
+        public NativeBinaryFactory NativeBinaryFactory { get; } = new NativeBinaryFactory();
 
         /// <summary>
-        /// Adds the given image formats to the supported format list. Useful for when 
-        /// the type finder fails to dynamically add the supported formats.
+        /// Adds the given image formats to the supported format collection.
         /// </summary>
-        /// <param name="format">
-        /// The <see cref="ISupportedImageFormat"/> instance to add.
-        /// </param>
-        public void AddImageFormats(params ISupportedImageFormat[] format) => ((List<ISupportedImageFormat>)this.SupportedImageFormats).AddRange(format);
+        /// <param name="formats">The <see cref="IImageFormat"/> instances to add.</param>
+        public void AddImageFormats(params IImageFormat[] formats)
+        {
+            var currentFormats = (List<IImageFormat>)this.ImageFormats;
+
+            foreach (IImageFormat format in formats)
+            {
+                if (currentFormats.Any(x => x.Equals(format)))
+                {
+                    continue;
+                }
+
+                currentFormats.Add(format);
+            }
+        }
 
         /// <summary>
-        /// Allows the setting of the default logger. Useful for when 
+        /// Allows the setting of the default logger. Useful for when
         /// the type finder fails to dynamically add the custom logger implementation.
         /// </summary>
-        /// <param name="logger"></param>
+        /// <param name="logger">The logger to use.</param>
         public void SetLogger(ILogger logger) => this.Logger = logger;
 
         /// <summary>
@@ -82,7 +76,7 @@ namespace ImageProcessor.Configuration
         /// </summary>
         private void LoadSupportedImageFormats()
         {
-            var formats = new List<ISupportedImageFormat>
+            this.ImageFormats = new List<IImageFormat>
             {
                 new BitmapFormat(),
                 new GifFormat(),
@@ -90,48 +84,6 @@ namespace ImageProcessor.Configuration
                 new PngFormat(),
                 new TiffFormat()
             };
-
-            Type type = typeof(ISupportedImageFormat);
-            if (this.SupportedImageFormats == null)
-            {
-                var availableTypes =
-                    TypeFinder.GetAssembliesWithKnownExclusions()
-                        .SelectMany(a => a.GetLoadableTypes())
-                        .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                        .ToList();
-
-                formats.AddRange(availableTypes.Select(f => Activator.CreateInstance(f) as ISupportedImageFormat).ToList());
-
-                this.SupportedImageFormats = formats;
-            }
-        }
-
-        /// <summary>
-        /// Loads the logger.
-        /// </summary>
-        private void LoadLogger()
-        {
-            Type type = typeof(ILogger);
-            if (this.Logger == null)
-            {
-                var availableTypes =
-                    TypeFinder.GetAssembliesWithKnownExclusions()
-                        .SelectMany(a => a.GetLoadableTypes())
-                        .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                        .ToList();
-
-                // Load the first that is not our default.
-                if (availableTypes.Count > 0)
-                {
-                    this.Logger = availableTypes.Where(l => l != typeof(DefaultLogger))
-                                                .Select(f => (Activator.CreateInstance(f) as ILogger))
-                                                .First();
-                }
-                else
-                {
-                    this.Logger = new DefaultLogger();
-                }
-            }
         }
     }
 }

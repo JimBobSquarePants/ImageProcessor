@@ -1,4 +1,0 @@
-# Cached images and test image copies
-**/cache/
-**/images/
-!**/ImageProcessor.UnitTests/images/

@@ -25,12 +25,8 @@ As such, no new features will be added to this library. Bug fixes will continue 
 | Library                                       | Version                                                                                                                                                       |
 | :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **ImageProcessor**                            | [![NuGet](https://buildstats.info/nuget/ImageProcessor)](https://www.nuget.org/packages/ImageProcessor)                                                       |
-| **ImageProcessor.Plugins.Cair**               | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Plugins.Cair)](https://www.nuget.org/packages/ImageProcessor.Plugins.Cair)                             |
 | **ImageProcessor.Plugins.WebP**               | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Plugins.WebP)](https://www.nuget.org/packages/ImageProcessor.Plugins.WebP)                             |
-| **ImageProcessor.Web**                        | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Web)](https://www.nuget.org/packages/ImageProcessor.Web)                                               |
-| **ImageProcessor.Web.Config**                 | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.Config)](https://www.nuget.org/packages/ImageProcessor.Web.Config)                                 |
-| **ImageProcessor.Web.Plugins.AzureBlobCache** | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.Plugins.AzureBlobCache)](https://www.nuget.org/packages/ImageProcessor.Web.Plugins.AzureBlobCache) |
-| **ImageProcessor.Web.PostProcessor**          | [![NuGet](https://buildstats.info/nuget/ImageProcessor.Web.PostProcessor)](https://www.nuget.org/packages/ImageProcessor.Web.PostProcessor)                   |
+
 
 ## Documentation
 

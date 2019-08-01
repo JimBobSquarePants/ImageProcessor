@@ -1,18 +1,11 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ILogger.cs" company="James Jackson-South">
-//   Copyright (c) James Jackson-South.
-//   Licensed under the Apache License, Version 2.0.
-// </copyright>
-// <summary>
-//   Encapsulates properties and methods for logging messages.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+﻿// Copyright (c) James Jackson-South and contributors.
+// Licensed under the Apache License, Version 2.0.
 
-namespace ImageProcessor.Common.Exceptions
+using System;
+using System.Runtime.CompilerServices;
+
+namespace ImageProcessor
 {
-    using System;
-    using System.Runtime.CompilerServices;
-
     /// <summary>
     /// Encapsulates properties and methods for logging messages.
     /// </summary>

@@ -1,22 +1,15 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="NativeBinaryFactory.cs" company="James Jackson-South">
-//   Copyright (c) James Jackson-South.
-//   Licensed under the Apache License, Version 2.0.
-// </copyright>
-// <summary>
-//   Controls the loading and unloading of any native binaries required by ImageProcessor.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) James Jackson-South and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace ImageProcessor.Configuration
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-
     /// <summary>
     /// Controls the loading and unloading of any native binaries required by ImageProcessor.
     /// </summary>
@@ -35,14 +28,6 @@ namespace ImageProcessor.Configuration
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
         /// </summary>
-        /// <value><see langword="true"/> if this instance has been disposed; otherwise, <see langword="false"/>.</value>
-        /// <remarks>
-        /// If the entity is disposed, it must not be disposed a second
-        /// time. The isDisposed field is set the first time the entity
-        /// is disposed. If the isDisposed field is true, then the Dispose()
-        /// method will not dispose again. This help not to prolong the entity's
-        /// life in the Garbage Collector.
-        /// </remarks>
         private bool isDisposed;
 
         /// <summary>
@@ -51,15 +36,8 @@ namespace ImageProcessor.Configuration
         public NativeBinaryFactory() => nativeBinaries = new ConcurrentDictionary<string, IntPtr>();
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="T:ImageProcessor.Configuration.NativeBinaryFactory">ImageFactory</see> class. 
+        /// Finalizes an instance of the <see cref="NativeBinaryFactory"/> class.
         /// </summary>
-        /// <remarks>
-        /// Use C# destructor syntax for finalization code.
-        /// This destructor will run only if the Dispose method 
-        /// does not get called.
-        /// It gives your base class the opportunity to finalize.
-        /// Do not provide destructors in types derived from this class.
-        /// </remarks>
         ~NativeBinaryFactory()
         {
             // Do not re-create Dispose clean-up code here.
@@ -76,12 +54,8 @@ namespace ImageProcessor.Configuration
         /// <summary>
         /// Registers any embedded native (unmanaged) binaries required by ImageProcessor.
         /// </summary>
-        /// <param name="name">
-        /// The name of the native binary.
-        /// </param>
-        /// <param name="resourceBytes">
-        /// The resource bytes containing the native binary.
-        /// </param>
+        /// <param name="name">The name of the native binary.</param>
+        /// <param name="resourceBytes">The resource bytes containing the native binary.</param>
         /// <exception cref="ApplicationException">
         /// Thrown if the binary cannot be registered.
         /// </exception>
@@ -150,7 +124,7 @@ namespace ImageProcessor.Configuration
 
             // This object will be cleaned up by the Dispose method.
             // Therefore, you should call GC.SuppressFinalize to
-            // take this object off the finalization queue 
+            // take this object off the finalization queue
             // and prevent finalization code for this object
             // from executing a second time.
             GC.SuppressFinalize(this);
