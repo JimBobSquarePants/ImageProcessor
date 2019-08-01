@@ -1,11 +1,11 @@
-﻿// Copyright (c) James Jackson-South and contributors.
+// Copyright (c) James Jackson-South and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 namespace ImageProcessor.Processing
 {
     /// <summary>
     /// Detects edges within an image using Scharr operators.
-    /// <see href="http://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators".
+    /// <see href="http://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators"/>.
     /// </summary>
     public class Scharr : EdgeDetection2DProcessor
     {
