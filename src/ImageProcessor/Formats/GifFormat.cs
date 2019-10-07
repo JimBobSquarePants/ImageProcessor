@@ -12,7 +12,7 @@ namespace ImageProcessor.Formats
     /// <summary>
     /// Provides the necessary information to support gif images.
     /// </summary>
-    public class GifFormat : FormatBase
+    public sealed class GifFormat : FormatBase
     {
         /// <inheritdoc/>
         public override byte[][] FileHeaders { get; } = new[] { Encoding.ASCII.GetBytes("GIF") };

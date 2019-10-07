@@ -6,7 +6,7 @@ namespace ImageProcessor.Tests.Processing
 {
     public class SaturationTests
     {
-        private const string Category = "Saturation";
+        private const string category = "Saturation";
 
         public static IEnumerable<object[]> SaturationFiles = new[]
         {
@@ -43,7 +43,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .Saturation(percentage)
-                       .SaveAndCompare(file, Category, percentage);
+                       .SaveAndCompare(file, category, percentage);
             }
         }
     }

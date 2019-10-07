@@ -233,16 +233,26 @@ namespace ImageProcessor
         /// <inheritdoc/>
         public void Dispose()
         {
+            this.Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
             if (this.isDisposed)
             {
                 return;
             }
 
-            this.Image?.Dispose();
-            this.Image = null;
+            if (disposing)
+            {
+                this.Image?.Dispose();
+                this.Image = null;
 
-            this.memoryStream?.Dispose();
-            this.memoryStream = null;
+                this.memoryStream?.Dispose();
+                this.memoryStream = null;
+            }
 
             this.isDisposed = true;
         }

@@ -6,7 +6,7 @@ namespace ImageProcessor.Tests.Processing
 {
     public class HueTests
     {
-        private const string Category = "Hue";
+        private const string category = "Hue";
 
         public static IEnumerable<object[]> HueFiles = new[]
         {
@@ -35,7 +35,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .Hue(percentage)
-                       .SaveAndCompare(file, Category, percentage);
+                       .SaveAndCompare(file, category, percentage);
             }
         }
     }

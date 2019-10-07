@@ -6,7 +6,7 @@ namespace ImageProcessor.Tests.Processing
 {
     public class ContrastTests
     {
-        private const string Category = "Contrast";
+        private const string category = "Contrast";
 
         public static IEnumerable<object[]> ContrastFiles = new[]
         {
@@ -43,7 +43,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .Contrast(percentage)
-                       .SaveAndCompare(file, Category, percentage);
+                       .SaveAndCompare(file, category, percentage);
             }
         }
     }

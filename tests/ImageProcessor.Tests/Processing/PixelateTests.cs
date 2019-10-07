@@ -6,7 +6,7 @@ namespace ImageProcessor.Tests.Processing
 {
     public class PixelateTests
     {
-        private const string Category = "Pixelate";
+        private const string category = "Pixelate";
 
         [Fact]
         public void PixelateSettingsConstructorSetsOptions()
@@ -46,7 +46,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .Pixelate(4)
-                       .SaveAndCompare(file, Category);
+                       .SaveAndCompare(file, category);
             }
         }
 
@@ -64,7 +64,7 @@ namespace ImageProcessor.Tests.Processing
                 var options = new PixelateOptions(4, bounds);
 
                 factory.Pixelate(options)
-                       .SaveAndCompare(file, Category, bounds);
+                       .SaveAndCompare(file, category, bounds);
             }
         }
     }

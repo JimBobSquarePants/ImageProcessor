@@ -6,7 +6,7 @@ namespace ImageProcessor.Tests.Processing
 {
     public class BrightnessTests
     {
-        private const string Category = "Brightness";
+        private const string category = "Brightness";
 
         public static IEnumerable<object[]> BrightnessFiles = new[]
         {
@@ -42,7 +42,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .Brightness(percentage)
-                       .SaveAndCompare(file, Category, percentage);
+                       .SaveAndCompare(file, category, percentage);
             }
         }
     }

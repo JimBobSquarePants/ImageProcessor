@@ -5,7 +5,7 @@ namespace ImageProcessor.Tests.Processing
 {
     public class DetectEdgesTests
     {
-        private const string Category = "DetectEdges";
+        private const string category = "DetectEdges";
 
         // TODO: Test all operators.
         [Theory]
@@ -19,7 +19,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .DetectEdges(mode)
-                       .SaveAndCompare(file, Category, mode);
+                       .SaveAndCompare(file, category, mode);
             }
         }
     }

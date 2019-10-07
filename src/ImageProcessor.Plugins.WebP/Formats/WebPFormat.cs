@@ -17,7 +17,7 @@ namespace ImageProcessor.Formats
     /// Adapted from <see href="http://groups.google.com/a/webmproject.org/forum/#!topic/webp-discuss/1coeidT0rQU"/>
     /// by Jose M. Piñeiro.
     /// </summary>
-    public class WebPFormat : FormatBase
+    public sealed class WebPFormat : FormatBase
     {
         private static readonly ImageFormat WebP = new ImageFormat(new Guid("{2500426f-ed67-4a31-8523-e304537dd9a7}"));
 

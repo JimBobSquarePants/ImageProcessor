@@ -5,7 +5,7 @@ namespace ImageProcessor.Tests.Processing
 {
     public class ResizeTests
     {
-        private const string Category = "Resize";
+        private const string category = "Resize";
 
         [Theory]
         [InlineData(ResizeMode.Crop)]
@@ -21,7 +21,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .Resize(factory.Image.Width / 2, (factory.Image.Height / 2) + 40, mode)
-                       .SaveAndCompare(file, Category, mode);
+                       .SaveAndCompare(file, category, mode);
             }
         }
     }

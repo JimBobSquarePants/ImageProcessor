@@ -11,7 +11,7 @@ namespace ImageProcessor.Formats
     /// <summary>
     /// Provides the necessary information to support png images.
     /// </summary>
-    public class PngFormat : FormatBase
+    public sealed class PngFormat : FormatBase
     {
         private static readonly byte[][] Identifier = new[]
         {

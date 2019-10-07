@@ -12,7 +12,7 @@ namespace ImageProcessor.Formats
     /// <summary>
     /// Provides the necessary information to support tiff images.
     /// </summary>
-    public class TiffFormat : FormatBase
+    public sealed class TiffFormat : FormatBase
     {
         private ImageCodecInfo imageCodecInfo;
 

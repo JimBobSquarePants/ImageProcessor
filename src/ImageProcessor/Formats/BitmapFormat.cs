@@ -11,7 +11,7 @@ namespace ImageProcessor.Formats
     /// <summary>
     /// Provides the necessary information to support bitmap images.
     /// </summary>
-    public class BitmapFormat : FormatBase
+    public sealed class BitmapFormat : FormatBase
     {
         /// <inheritdoc/>
         public override byte[][] FileHeaders { get; } = new[]

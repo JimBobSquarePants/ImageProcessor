@@ -6,7 +6,7 @@ namespace ImageProcessor.Tests.Processing
 {
     public class CropTests
     {
-        private const string Category = "Crop";
+        private const string category = "Crop";
 
         [Fact]
         public void CropSettingsConstructorSetsOptions()
@@ -52,7 +52,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .Crop(bounds)
-                       .SaveAndCompare(file, Category, bounds);
+                       .SaveAndCompare(file, category, bounds);
             }
         }
 
@@ -66,7 +66,7 @@ namespace ImageProcessor.Tests.Processing
             {
                 factory.Load(file.FullName)
                        .Crop(settings)
-                       .SaveAndCompare(file, Category, settings);
+                       .SaveAndCompare(file, category, settings);
             }
         }
     }
