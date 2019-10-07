@@ -72,7 +72,7 @@ namespace ImageProcessor.Configuration
         public void SetLogger(ILogger logger) => this.Logger = logger;
 
         /// <summary>
-        /// Creates a list, using reflection, of supported image formats that ImageProcessor can run.
+        /// Creates a collection of supported image formats that ImageProcessor can run.
         /// </summary>
         private void LoadSupportedImageFormats()
         {
