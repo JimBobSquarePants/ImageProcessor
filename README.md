@@ -16,10 +16,8 @@ It's fast, extensible, easy to use, comes bundled with some great features and i
 
 For full documentation please see [http://imageprocessor.org/](http://imageprocessor.org/)
 
-## Contributing to ImageProcessor
-### ImageProcessor is in Soft Archive Mode. 
-Focus for the ImageProcessor libraries has switched to a new library [**ImageSharp**](https://github.com/SixLabors/ImageSharp). 
-As such, no new features will be added to this library. Bug fixes will continue to be added and only via PR. 
+## Roadmap
+Focus for the ImageProcessor libraries has switched to desktop only due to the [lack of support for System.Drawing on Windows Services and ASP.NET](https://docs.microsoft.com/en-us/dotnet/api/system.drawing?view=netframework-4.8#remarks). As such, the `ImageProcessor.Web`and accompanying libraries will not be further developed. For an alternative please use [`ImageSharp.Web`](https://github.com/SixLabors/ImageSharp.Web).
 
 ### Latest Releases
 | Library                                       | Version                                                                                                                                                       |
