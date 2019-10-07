@@ -218,3 +218,6 @@ artifacts/
 # Tests TODO: Remove Expected when tests are complete
 **/Images/Actual
 **/Images/Expected
+
+!**/Resources/Unmanaged/x64/
+!**/Resources/Unmanaged/x86/
