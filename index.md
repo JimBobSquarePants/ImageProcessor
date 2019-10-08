@@ -19,7 +19,7 @@ It's lighting fast, extensible, easy to use, comes bundled with some great featu
 
 ---
 
-# Buy me a beer?
+# Sponsor Imageprocessor?
 
 **ImageProcessor** is free and open source but developing it has taken thousands of hours of my time and a
 large part of my sanity. If you feel like dropping me a few precious pounds (there's no obligation) it would go a great way to ensuring that I can
