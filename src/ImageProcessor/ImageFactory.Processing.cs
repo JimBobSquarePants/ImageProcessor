@@ -127,22 +127,23 @@ namespace ImageProcessor
             switch (filter)
             {
                 case EdgeDetectionOperators.Kayyali:
-                    throw new NotImplementedException();
-                case EdgeDetectionOperators.Kirsch:
-                    throw new NotImplementedException();
+                    processor = new Kayyali(grayscale);
+                    break;
                 case EdgeDetectionOperators.Laplacian3x3:
                     processor = new Laplacian3x3(grayscale);
                     break;
                 case EdgeDetectionOperators.Laplacian5x5:
-                    throw new NotImplementedException();
+                    processor = new Laplacian5x5(grayscale);
+                    break;
                 case EdgeDetectionOperators.LaplacianOfGaussian:
-                    throw new NotImplementedException();
+                    processor = new LaplacianOfGaussian(grayscale);
+                    break;
                 case EdgeDetectionOperators.Prewitt:
-                    throw new NotImplementedException();
+                    processor = new Prewitt(grayscale);
+                    break;
                 case EdgeDetectionOperators.RobertsCross:
-                    throw new NotImplementedException();
-                case EdgeDetectionOperators.Robinson:
-                    throw new NotImplementedException();
+                    processor = new RobertsCross(grayscale);
+                    break;
                 case EdgeDetectionOperators.Scharr:
                     processor = new Scharr(grayscale);
                     break;
@@ -161,7 +162,7 @@ namespace ImageProcessor
         /// </summary>
         /// <param name="degrees">The rotation angle in degrees to adjust the hue.</param>
         /// <returns>The <see cref="ImageFactory"/>.</returns>
-        public ImageFactory Hue(int degrees)
+        public ImageFactory Hue(float degrees)
         {
             this.CheckLoaded();
 

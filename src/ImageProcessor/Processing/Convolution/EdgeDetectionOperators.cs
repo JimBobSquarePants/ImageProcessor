@@ -14,11 +14,6 @@ namespace ImageProcessor.Processing
         Kayyali,
 
         /// <summary>
-        /// The Kirsch operator filter.
-        /// </summary>
-        Kirsch,
-
-        /// <summary>
         /// The Laplacian3X3 operator filter.
         /// </summary>
         Laplacian3x3,
@@ -42,11 +37,6 @@ namespace ImageProcessor.Processing
         /// The RobertsCross operator filter.
         /// </summary>
         RobertsCross,
-
-        /// <summary>
-        /// The Robinson operator filter.
-        /// </summary>
-        Robinson,
 
         /// <summary>
         /// The Scharr operator filter.
