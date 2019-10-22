@@ -3,7 +3,6 @@
 
 using System;
 using System.Drawing;
-using System.Linq;
 
 namespace ImageProcessor.Processing
 {
@@ -29,6 +28,11 @@ namespace ImageProcessor.Processing
             int width,
             int height)
         {
+            if (width <= 0 && height <= 0)
+            {
+                ThrowInvalid($"Target width {width} and height {height} must be greater than zero.");
+            }
+
             switch (options.Mode)
             {
                 case ResizeMode.Crop:
@@ -38,7 +42,7 @@ namespace ImageProcessor.Processing
                 case ResizeMode.BoxPad:
                     return CalculateBoxPadRectangle(sourceSize, options, width, height);
                 case ResizeMode.Max:
-                    return CalculateMaxRectangle(sourceSize, options, width, height);
+                    return CalculateMaxRectangle(sourceSize, width, height);
                 case ResizeMode.Min:
                     return CalculateMinRectangle(sourceSize, width, height);
 
@@ -133,19 +137,14 @@ namespace ImageProcessor.Processing
             int width,
             int height)
         {
-            if (width <= 0 || height <= 0)
-            {
-                return (new Size(source.Width, source.Height), new Rectangle(0, 0, source.Width, source.Height));
-            }
-
             float ratio;
             int sourceWidth = source.Width;
             int sourceHeight = source.Height;
 
-            int destinationX = 0;
-            int destinationY = 0;
-            int destinationWidth = width;
-            int destinationHeight = height;
+            int targetX = 0;
+            int targetY = 0;
+            int targetWidth = width;
+            int targetHeight = height;
 
             // Fractional variants for preserving aspect ratio.
             float percentHeight = Math.Abs(height / (float)sourceHeight);
@@ -155,19 +154,19 @@ namespace ImageProcessor.Processing
             {
                 ratio = percentWidth;
 
-                if (options.CenterCoordinates.Any())
+                if (options.CenterCoordinates.HasValue)
                 {
-                    float center = -(ratio * sourceHeight) * options.CenterCoordinates.ToArray()[1];
-                    destinationY = (int)Math.Round(center + (height / 2F));
+                    float center = -(ratio * sourceHeight) * options.CenterCoordinates.Value.Y;
+                    targetY = (int)Math.Round(center + (height / 2F));
 
-                    if (destinationY > 0)
+                    if (targetY > 0)
                     {
-                        destinationY = 0;
+                        targetY = 0;
                     }
 
-                    if (destinationY < (int)Math.Round(height - (sourceHeight * ratio)))
+                    if (targetY < (int)Math.Round(height - (sourceHeight * ratio)))
                     {
-                        destinationY = (int)Math.Round(height - (sourceHeight * ratio));
+                        targetY = (int)Math.Round(height - (sourceHeight * ratio));
                     }
                 }
                 else
@@ -177,38 +176,38 @@ namespace ImageProcessor.Processing
                         case AnchorPositionMode.Top:
                         case AnchorPositionMode.TopLeft:
                         case AnchorPositionMode.TopRight:
-                            destinationY = 0;
+                            targetY = 0;
                             break;
                         case AnchorPositionMode.Bottom:
                         case AnchorPositionMode.BottomLeft:
                         case AnchorPositionMode.BottomRight:
-                            destinationY = (int)Math.Round(height - (sourceHeight * ratio));
+                            targetY = (int)Math.Round(height - (sourceHeight * ratio));
                             break;
                         default:
-                            destinationY = (int)Math.Round((height - (sourceHeight * ratio)) / 2F);
+                            targetY = (int)Math.Round((height - (sourceHeight * ratio)) / 2F);
                             break;
                     }
                 }
 
-                destinationHeight = (int)Math.Ceiling(sourceHeight * percentWidth);
+                targetHeight = (int)Math.Ceiling(sourceHeight * percentWidth);
             }
             else
             {
                 ratio = percentHeight;
 
-                if (options.CenterCoordinates.Any())
+                if (options.CenterCoordinates.HasValue)
                 {
-                    float center = -(ratio * sourceWidth) * options.CenterCoordinates.First();
-                    destinationX = (int)Math.Round(center + (width / 2F));
+                    float center = -(ratio * sourceWidth) * options.CenterCoordinates.Value.X;
+                    targetX = (int)Math.Round(center + (width / 2F));
 
-                    if (destinationX > 0)
+                    if (targetX > 0)
                     {
-                        destinationX = 0;
+                        targetX = 0;
                     }
 
-                    if (destinationX < (int)Math.Round(width - (sourceWidth * ratio)))
+                    if (targetX < (int)Math.Round(width - (sourceWidth * ratio)))
                     {
-                        destinationX = (int)Math.Round(width - (sourceWidth * ratio));
+                        targetX = (int)Math.Round(width - (sourceWidth * ratio));
                     }
                 }
                 else
@@ -218,56 +217,53 @@ namespace ImageProcessor.Processing
                         case AnchorPositionMode.Left:
                         case AnchorPositionMode.TopLeft:
                         case AnchorPositionMode.BottomLeft:
-                            destinationX = 0;
+                            targetX = 0;
                             break;
                         case AnchorPositionMode.Right:
                         case AnchorPositionMode.TopRight:
                         case AnchorPositionMode.BottomRight:
-                            destinationX = (int)Math.Round(width - (sourceWidth * ratio));
+                            targetX = (int)Math.Round(width - (sourceWidth * ratio));
                             break;
                         default:
-                            destinationX = (int)Math.Round((width - (sourceWidth * ratio)) / 2F);
+                            targetX = (int)Math.Round((width - (sourceWidth * ratio)) / 2F);
                             break;
                     }
                 }
 
-                destinationWidth = (int)Math.Ceiling(sourceWidth * percentHeight);
+                targetWidth = (int)Math.Ceiling(sourceWidth * percentHeight);
             }
 
-            return (new Size(width, height),
-                       new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight));
+            // Target image width and height can be different to the rectangle width and height.
+            return (new Size(width, height), new Rectangle(targetX, targetY, targetWidth, targetHeight));
         }
 
         private static (Size, Rectangle) CalculateMaxRectangle(
             Size source,
-            ResizeOptions options,
             int width,
             int height)
         {
-            int destinationWidth = width;
-            int destinationHeight = height;
+            int targetWidth = width;
+            int targetHeight = height;
 
             // Fractional variants for preserving aspect ratio.
             float percentHeight = Math.Abs(height / (float)source.Height);
             float percentWidth = Math.Abs(width / (float)source.Width);
 
             // Integers must be cast to floats to get needed precision
-            float ratio = options.Size.Height / (float)options.Size.Width;
+            float ratio = height / (float)width;
             float sourceRatio = source.Height / (float)source.Width;
 
             if (sourceRatio < ratio)
             {
-                destinationHeight = (int)Math.Round(source.Height * percentWidth);
-                height = destinationHeight;
+                targetHeight = (int)Math.Round(source.Height * percentWidth);
             }
             else
             {
-                destinationWidth = (int)Math.Round(source.Width * percentHeight);
-                width = destinationWidth;
+                targetWidth = (int)Math.Round(source.Width * percentHeight);
             }
 
             // Replace the size to match the rectangle.
-            return (new Size(width, height), new Rectangle(0, 0, destinationWidth, destinationHeight));
+            return (new Size(targetWidth, targetHeight), new Rectangle(0, 0, targetWidth, targetHeight));
         }
 
         private static (Size, Rectangle) CalculateMinRectangle(
@@ -277,8 +273,8 @@ namespace ImageProcessor.Processing
         {
             int sourceWidth = source.Width;
             int sourceHeight = source.Height;
-            int destinationWidth;
-            int destinationHeight;
+            int targetWidth = width;
+            int targetHeight = height;
 
             // Don't upscale
             if (width > sourceWidth || height > sourceHeight)
@@ -293,58 +289,45 @@ namespace ImageProcessor.Processing
             if (widthDiff < heightDiff)
             {
                 float sourceRatio = (float)sourceHeight / sourceWidth;
-                destinationHeight = (int)Math.Round(width * sourceRatio);
-                height = destinationHeight;
-                destinationWidth = width;
+                targetHeight = (int)Math.Round(width * sourceRatio);
             }
             else if (widthDiff > heightDiff)
             {
                 float sourceRatioInverse = (float)sourceWidth / sourceHeight;
-                destinationWidth = (int)Math.Round(height * sourceRatioInverse);
-                destinationHeight = height;
-                width = destinationWidth;
+                targetWidth = (int)Math.Round(height * sourceRatioInverse);
             }
             else
             {
                 if (height > width)
                 {
-                    destinationWidth = width;
                     float percentWidth = Math.Abs(width / (float)sourceWidth);
-                    destinationHeight = (int)Math.Round(sourceHeight * percentWidth);
-                    height = destinationHeight;
+                    targetHeight = (int)Math.Round(sourceHeight * percentWidth);
                 }
                 else
                 {
-                    destinationHeight = height;
                     float percentHeight = Math.Abs(height / (float)sourceHeight);
-                    destinationWidth = (int)Math.Round(sourceWidth * percentHeight);
-                    width = destinationWidth;
+                    targetWidth = (int)Math.Round(sourceWidth * percentHeight);
                 }
             }
 
             // Replace the size to match the rectangle.
-            return (new Size(width, height), new Rectangle(0, 0, destinationWidth, destinationHeight));
+            return (new Size(targetWidth, targetHeight), new Rectangle(0, 0, targetWidth, targetHeight));
         }
 
         private static (Size, Rectangle) CalculatePadRectangle(
-            Size source,
+            Size sourceSize,
             ResizeOptions options,
             int width,
             int height)
         {
-            if (width <= 0 || height <= 0)
-            {
-                return (new Size(source.Width, source.Height), new Rectangle(0, 0, source.Width, source.Height));
-            }
-
             float ratio;
-            int sourceWidth = source.Width;
-            int sourceHeight = source.Height;
+            int sourceWidth = sourceSize.Width;
+            int sourceHeight = sourceSize.Height;
 
-            int destinationX = 0;
-            int destinationY = 0;
-            int destinationWidth = width;
-            int destinationHeight = height;
+            int targetX = 0;
+            int targetY = 0;
+            int targetWidth = width;
+            int targetHeight = height;
 
             // Fractional variants for preserving aspect ratio.
             float percentHeight = Math.Abs(height / (float)sourceHeight);
@@ -353,50 +336,52 @@ namespace ImageProcessor.Processing
             if (percentHeight < percentWidth)
             {
                 ratio = percentHeight;
-                destinationWidth = (int)Math.Round(sourceWidth * percentHeight);
+                targetWidth = (int)Math.Round(sourceWidth * percentHeight);
 
                 switch (options.Position)
                 {
                     case AnchorPositionMode.Left:
                     case AnchorPositionMode.TopLeft:
                     case AnchorPositionMode.BottomLeft:
-                        destinationX = 0;
+                        targetX = 0;
                         break;
                     case AnchorPositionMode.Right:
                     case AnchorPositionMode.TopRight:
                     case AnchorPositionMode.BottomRight:
-                        destinationX = (int)Math.Round(width - (sourceWidth * ratio));
+                        targetX = (int)Math.Round(width - (sourceWidth * ratio));
                         break;
                     default:
-                        destinationX = (int)Math.Round((width - (sourceWidth * ratio)) / 2F);
+                        targetX = (int)Math.Round((width - (sourceWidth * ratio)) / 2F);
                         break;
                 }
             }
             else
             {
                 ratio = percentWidth;
-                destinationHeight = (int)Math.Round(sourceHeight * percentWidth);
+                targetHeight = (int)Math.Round(sourceHeight * percentWidth);
 
                 switch (options.Position)
                 {
                     case AnchorPositionMode.Top:
                     case AnchorPositionMode.TopLeft:
                     case AnchorPositionMode.TopRight:
-                        destinationY = 0;
+                        targetY = 0;
                         break;
                     case AnchorPositionMode.Bottom:
                     case AnchorPositionMode.BottomLeft:
                     case AnchorPositionMode.BottomRight:
-                        destinationY = (int)Math.Round(height - (sourceHeight * ratio));
+                        targetY = (int)Math.Round(height - (sourceHeight * ratio));
                         break;
                     default:
-                        destinationY = (int)Math.Round((height - (sourceHeight * ratio)) / 2F);
+                        targetY = (int)Math.Round((height - (sourceHeight * ratio)) / 2F);
                         break;
                 }
             }
 
-            return (new Size(width, height),
-                    new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight));
+            // Target image width and height can be different to the rectangle width and height.
+            return (new Size(width, height), new Rectangle(targetX, targetY, targetWidth, targetHeight));
         }
+
+        private static void ThrowInvalid(string message) => throw new InvalidOperationException(message);
     }
 }

@@ -2,11 +2,9 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Linq;
 
 namespace ImageProcessor.Processing
 {
@@ -188,7 +186,7 @@ namespace ImageProcessor.Processing
         /// <summary>
         /// Gets or sets the center coordinates.
         /// </summary>
-        public IEnumerable<float> CenterCoordinates { get; set; } = Enumerable.Empty<float>();
+        public PointF? CenterCoordinates { get; set; }
 
         /// <summary>
         /// Gets or sets the target size.
