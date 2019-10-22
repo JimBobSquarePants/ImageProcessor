@@ -51,7 +51,7 @@ namespace ImageProcessor.Formats
                     // TODO: Consider allowing 1 and 4 bit quantization.
                     using (Bitmap quantized = this.Quantizer.Quantize(image))
                     {
-                        this.CopyMetadata(image, quantized);
+                        CopyMetadata(image, quantized);
                         base.Save(stream, quantized, bitDepth, quality);
                     }
 

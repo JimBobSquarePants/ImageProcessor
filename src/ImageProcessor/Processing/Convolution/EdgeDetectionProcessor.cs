@@ -15,7 +15,7 @@ namespace ImageProcessor.Processing
         /// </summary>
         /// <param name="kernel">The kernel operator.</param>
         /// <param name="grayscale">Whether to convert the image to grascale before processing.</param>
-        public EdgeDetectionProcessor(double[,] kernel, bool grayscale)
+        protected EdgeDetectionProcessor(double[,] kernel, bool grayscale)
         {
             this.Kernel = kernel;
             this.Grayscale = grayscale;

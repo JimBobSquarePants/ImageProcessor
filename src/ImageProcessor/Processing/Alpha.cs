@@ -27,7 +27,7 @@ namespace ImageProcessor.Processing
         {
             float amount = this.Options / 100;
             ColorMatrix colorMatrix = KnownColorMatrices.CreateOpacityFilter(amount);
-            this.ApplyMatrix(frame, colorMatrix);
+            ApplyMatrix(frame, colorMatrix);
 
             return frame;
         }

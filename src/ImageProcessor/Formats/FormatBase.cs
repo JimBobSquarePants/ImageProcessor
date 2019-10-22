@@ -52,17 +52,17 @@ namespace ImageProcessor.Formats
                 // Always use premultiplied 32 bit to avoid oddities during operations.
                 copy = this.DeepClone(factory.Image, PixelFormat.Format32bppArgb, factory.FrameProcessingMode, false);
 
-                bool rotate = this.ShouldRotate(factory, out int orientation);
+                bool rotate = ShouldRotate(factory, out int orientation);
                 if (rotate)
                 {
-                    this.ForwardRotateFlip(orientation, copy);
+                    ForwardRotateFlip(orientation, copy);
                 }
 
                 Image result = processor.ProcessImageFrame(factory, copy);
 
                 if (rotate)
                 {
-                    this.ReverseRotateFlip(orientation, result);
+                    ReverseRotateFlip(orientation, result);
                 }
 
                 return result;
@@ -87,7 +87,7 @@ namespace ImageProcessor.Formats
 
             if (preserveMetaData)
             {
-                this.CopyMetadata(source, copy);
+                CopyMetadata(source, copy);
             }
 
             return copy;
@@ -126,7 +126,7 @@ namespace ImageProcessor.Formats
         /// </summary>
         /// <param name="source">The source image.</param>
         /// <param name="target">The target image.</param>
-        protected void CopyMetadata(Image source, Image target)
+        protected static void CopyMetadata(Image source, Image target)
         {
             foreach (PropertyItem item in source.PropertyItems)
             {
@@ -151,7 +151,7 @@ namespace ImageProcessor.Formats
         /// <param name="factory">The image factory.</param>
         /// <param name="orientation">The EXIF orientation value.</param>
         /// <returns>The <see cref="bool"/>.</returns>
-        protected bool ShouldRotate(ImageFactory factory, out int orientation)
+        protected static bool ShouldRotate(ImageFactory factory, out int orientation)
         {
             orientation = 0;
             const int Orientation = (int)ExifPropertyTag.Orientation;
@@ -170,7 +170,7 @@ namespace ImageProcessor.Formats
         /// </summary>
         /// <param name="orientation">The EXIF orientation value.</param>
         /// <param name="image">The image to rotate.</param>
-        protected void ForwardRotateFlip(int orientation, Image image)
+        protected static void ForwardRotateFlip(int orientation, Image image)
         {
             switch (orientation)
             {
@@ -206,7 +206,7 @@ namespace ImageProcessor.Formats
         /// </summary>
         /// <param name="orientation">The EXIF orientation value.</param>
         /// <param name="image">The image to rotate.</param>
-        protected void ReverseRotateFlip(int orientation, Image image)
+        protected static void ReverseRotateFlip(int orientation, Image image)
         {
             switch (orientation)
             {

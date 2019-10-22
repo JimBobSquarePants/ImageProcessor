@@ -20,7 +20,7 @@ namespace ImageProcessor.Processing
         /// </summary>
         /// <param name="frame">The image frame.</param>
         /// <param name="colorMatrix">The color matrix.</param>
-        protected void ApplyMatrix(Image frame, ColorMatrix colorMatrix)
+        protected static void ApplyMatrix(Image frame, ColorMatrix colorMatrix)
         {
             using (var graphics = Graphics.FromImage(frame))
             {

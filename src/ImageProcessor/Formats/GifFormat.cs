@@ -73,7 +73,7 @@ namespace ImageProcessor.Formats
 
             if (preserveMetaData)
             {
-                this.CopyMetadata(source, copy);
+                CopyMetadata(source, copy);
             }
 
             return (Bitmap)copy;

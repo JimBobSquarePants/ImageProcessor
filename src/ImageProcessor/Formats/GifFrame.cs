@@ -10,7 +10,7 @@ namespace ImageProcessor.Formats
     /// <summary>
     /// A single gif frame.
     /// </summary>
-    public class GifFrame : IDisposable
+    public sealed class GifFrame : IDisposable
     {
         private bool isDisposed;
 
@@ -71,6 +71,7 @@ namespace ImageProcessor.Formats
             this.Image?.Dispose();
             this.Image = null;
             this.isDisposed = true;
+            GC.SuppressFinalize(this);
         }
     }
 }

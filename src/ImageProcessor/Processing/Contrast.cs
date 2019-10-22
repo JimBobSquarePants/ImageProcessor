@@ -27,7 +27,7 @@ namespace ImageProcessor.Processing
         {
             float amount = (this.Options + 100) / 100;
             ColorMatrix colorMatrix = KnownColorMatrices.CreateContrastFilter(amount);
-            this.ApplyMatrix(frame, colorMatrix);
+            ApplyMatrix(frame, colorMatrix);
 
             return frame;
         }

@@ -56,7 +56,7 @@ namespace ImageProcessor.Formats
                         // Save as 8 bit quantized image.
                         using (Bitmap quantized = this.Quantizer.Quantize(image))
                         {
-                            this.CopyMetadata(image, quantized);
+                            CopyMetadata(image, quantized);
                             quantized.Save(stream, this.GetCodecInfo(), encoderParameters);
                         }
 

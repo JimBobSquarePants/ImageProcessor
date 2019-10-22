@@ -71,6 +71,22 @@ namespace ImageProcessor
         /// </summary>
         public Color Color => Color.FromArgb(this.A, this.R, this.G, this.B);
 
+        /// <summary>
+        /// Indicates whether this instance and a specified <see cref="Bgra32"/> are equal.
+        /// </summary>
+        /// <param name="left">The instance on the left hand of the operator.</param>
+        /// <param name="right">The instance on the right hand of the operator.</param>
+        /// <returns>The <see cref="bool"/>.</returns>
+        public static bool operator ==(Bgra32 left, Bgra32 right) => left.Equals(right);
+
+        /// <summary>
+        /// Indicates whether this instance and a specified <see cref="Bgra32"/> are not equal.
+        /// </summary>
+        /// <param name="left">The instance on the left hand of the operator.</param>
+        /// <param name="right">The instance on the right hand of the operator.</param>
+        /// <returns>The <see cref="bool"/>.</returns>
+        public static bool operator !=(Bgra32 left, Bgra32 right) => !(left == right);
+
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Bgra32 color && this.Equals(color);
 

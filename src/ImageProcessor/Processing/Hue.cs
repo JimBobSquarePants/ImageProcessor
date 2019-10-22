@@ -24,7 +24,7 @@ namespace ImageProcessor.Processing
         public override Image ProcessImageFrame(ImageFactory factory, Image frame)
         {
             ColorMatrix colorMatrix = KnownColorMatrices.CreateHueFilter(this.Options);
-            this.ApplyMatrix(frame, colorMatrix);
+            ApplyMatrix(frame, colorMatrix);
 
             return frame;
         }
