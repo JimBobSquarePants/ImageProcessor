@@ -4,37 +4,45 @@ using Xunit;
 
 namespace ImageProcessor.Tests.Processing
 {
-    public class HueTests
+    public class ContrastTests
     {
-        private const string category = "Hue";
+        private const string category = "Contrast";
 
-        public static IEnumerable<object[]> HueFiles = new[]
+        public static IEnumerable<object[]> ContrastFiles = new[]
         {
-            new object[]{ TestFiles.Gif.AnimatedPattern, 45 },
-            new object[]{ TestFiles.Gif.AnimatedPattern, 90 },
-            new object[]{ TestFiles.Bmp.Penguins, 135 },
-            new object[]{ TestFiles.Gif.Penguins, 180 },
-            new object[]{ TestFiles.Jpeg.Penguins, 225 },
-            new object[]{ TestFiles.Png.Penguins, 270 }
+            new object[]{ TestFiles.Gif.AnimatedPattern, 75 },
+            new object[]{ TestFiles.Gif.AnimatedPattern, -25 },
+            new object[]{ TestFiles.Bmp.Penguins, -25 },
+            new object[]{ TestFiles.Gif.Penguins, 75 },
+            new object[]{ TestFiles.Jpeg.Penguins, -25 },
+            new object[]{ TestFiles.Png.Penguins, 75 }
         };
 
         [Fact]
-        public void HueConstructorSetsOptions()
+        public void ContrastConstructorSetsOptions()
         {
             const int Expected = 50;
-            var processor = new Hue(Expected);
+            var processor = new Contrast(Expected);
 
             Assert.Equal(Expected, processor.Options);
         }
 
         [Theory]
-        [MemberData(nameof(HueFiles))]
-        public void FactoryCanSetHue(TestFile file, int percentage)
+        [InlineData(-101)]
+        [InlineData(101)]
+        public void ContrastConstructorChecksInput(int percentage)
+        {
+            Assert.Throws<ImageProcessingException>(() => new Contrast(percentage));
+        }
+
+        [Theory]
+        [MemberData(nameof(ContrastFiles))]
+        public void FactoryCanSetContrast(TestFile file, int percentage)
         {
             using (var factory = new ImageFactory())
             {
                 factory.Load(file.FullName)
-                       .Hue(percentage)
+                       .Contrast(percentage)
                        .SaveAndCompare(file, category, percentage);
             }
         }
