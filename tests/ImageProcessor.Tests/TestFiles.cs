@@ -8,6 +8,7 @@ namespace ImageProcessor.Tests
         {
             public static TestFile EXIFCropIssue559 = TestUtils.GetTestFileByName("exif-crop-issue-559.jfif");
             public static TestFile Penguins = TestUtils.GetTestFileByName("format-Penguins.jpg");
+            public static TestFile AutoRtotate = TestUtils.GetTestFileByName("autorotate-landscape-2.jpg");
         }
 
         public static class Png

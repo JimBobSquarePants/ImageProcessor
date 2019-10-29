@@ -30,6 +30,21 @@ namespace ImageProcessor
         }
 
         /// <summary>
+        /// Performs auto-rotation to ensure that EXIF defined rotation is reflected in
+        /// the final image.
+        /// </summary>
+        /// <returns>The <see cref="ImageFactory"/>.</returns>
+        public ImageFactory AutoRotate()
+        {
+            this.CheckLoaded();
+
+            var processor = new AutoRotate();
+            this.ApplyProcessor(processor);
+
+            return this;
+        }
+
+        /// <summary>
         /// Changes the background color of the current image.
         /// </summary>
         /// <param name="color">The <see cref="Color"/> to paint the image with.</param>

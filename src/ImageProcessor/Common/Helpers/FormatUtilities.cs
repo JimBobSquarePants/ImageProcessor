@@ -19,6 +19,8 @@ namespace ImageProcessor
     /// </summary>
     public static class FormatUtilities
     {
+        private static readonly ConstructorInfo PropertyItemConstructor = typeof(PropertyItem).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public, null, new Type[] { }, null);
+
         /// <summary>
         /// Gets the correct <see cref="IImageFormat"/> from the given stream.
         /// <see href="http://stackoverflow.com/questions/55869/determine-file-type-of-an-image"/>.
@@ -204,15 +206,9 @@ namespace ImageProcessor
         }
 
         /// <summary>
-        /// Uses reflection to allow the creation of an instance of <see cref="PropertyItem"/>.
+        /// Initializes a new instance of the <see cref="PropertyItem"/> class.
         /// </summary>
         /// <returns>The <see cref="PropertyItem"/>.</returns>
-        public static PropertyItem CreatePropertyItem()
-        {
-            Type type = typeof(PropertyItem);
-            ConstructorInfo constructor = type.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public, null, new Type[] { }, null);
-
-            return (PropertyItem)constructor.Invoke(null);
-        }
+        public static PropertyItem CreatePropertyItem() => (PropertyItem)PropertyItemConstructor.Invoke(null);
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using ImageProcessor.Configuration;
 using ImageProcessor.Formats;
+using ImageProcessor.Metadata;
 using Xunit;
 
 namespace ImageProcessor.Tests

@@ -36,6 +36,24 @@ namespace ImageProcessor
         /// Initializes a new instance of the <see cref="ImageFactory"/> class.
         /// </summary>
         /// <param name="frameProcessingMode">The frame processing mode to use.</param>
+        public ImageFactory(FrameProcessingMode frameProcessingMode)
+            : this(frameProcessingMode, MetadataMode.All)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageFactory"/> class.
+        /// </summary>
+        /// <param name="metadataMode">The metadata mode to use.</param>
+        public ImageFactory(MetadataMode metadataMode)
+            : this(FrameProcessingMode.All, metadataMode)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageFactory"/> class.
+        /// </summary>
+        /// <param name="frameProcessingMode">The frame processing mode to use.</param>
         /// <param name="metadataMode">The metadata mode to use.</param>
         public ImageFactory(FrameProcessingMode frameProcessingMode, MetadataMode metadataMode)
         {
@@ -71,7 +89,7 @@ namespace ImageProcessor
         /// <summary>
         /// Gets the collection of property items containing metadata.
         /// </summary>
-        internal ConcurrentDictionary<int, PropertyItem> PropertyItems { get; }
+        public ConcurrentDictionary<int, PropertyItem> PropertyItems { get; }
 
         /// <summary>
         /// Loads the image to process.

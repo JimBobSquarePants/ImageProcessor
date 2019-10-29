@@ -52,15 +52,15 @@ namespace ImageProcessor.Formats
                 // Always use premultiplied 32 bit to avoid oddities during operations.
                 copy = this.DeepClone(factory.Image, PixelFormat.Format32bppArgb, factory.FrameProcessingMode, false);
 
-                bool rotate = ShouldRotate(factory, out int orientation);
-                if (rotate)
+                if (ShouldRotateOnProcess(factory, out int orientation))
                 {
                     ForwardRotateFlip(orientation, copy);
                 }
 
                 Image result = processor.ProcessImageFrame(factory, copy);
 
-                if (rotate)
+                // Check again, we might have auto orientated during processing.
+                if (ShouldRotateOnProcess(factory, out orientation))
                 {
                     ReverseRotateFlip(orientation, result);
                 }
@@ -151,11 +151,11 @@ namespace ImageProcessor.Formats
         /// <param name="factory">The image factory.</param>
         /// <param name="orientation">The EXIF orientation value.</param>
         /// <returns>The <see cref="bool"/>.</returns>
-        protected static bool ShouldRotate(ImageFactory factory, out int orientation)
+        protected static bool ShouldRotateOnProcess(ImageFactory factory, out int orientation)
         {
             orientation = 0;
             const int Orientation = (int)ExifPropertyTag.Orientation;
-            bool rotate = factory.MetadataMode != MetadataMode.None && factory.PropertyItems.ContainsKey(Orientation);
+            bool rotate = factory.PropertyItems.ContainsKey(Orientation);
 
             if (rotate)
             {
