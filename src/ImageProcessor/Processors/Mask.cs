@@ -130,6 +130,7 @@ namespace ImageProcessor.Processors
                     mask.Dispose();
                 }
 
+                factory.CurrentBitDepth = (long)BitDepth.Bit32;
                 image.Dispose();
                 image = newImage;
             }

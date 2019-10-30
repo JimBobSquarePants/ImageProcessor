@@ -72,6 +72,7 @@ namespace ImageProcessor.Processors
                 bool bottomRight = roundedCornerLayer.BottomRight;
 
                 // Create a rounded image.
+                factory.CurrentBitDepth = (long)BitDepth.Bit32;
                 return this.RoundCornerImage(image, radius, topLeft, topRight, bottomLeft, bottomRight);
             }
             catch (Exception ex)
