@@ -37,7 +37,7 @@
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ImageProcessor.ruleset</CodeAnalysisRuleSet>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>3.0.0</Version>
+    <Version>3.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
