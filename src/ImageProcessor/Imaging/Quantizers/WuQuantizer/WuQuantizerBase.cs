@@ -173,10 +173,6 @@ namespace ImageProcessor.Imaging.Quantizers.WuQuantizer
             {
                 throw new QuantizationException(ex.Message, ex);
             }
-            finally
-            {
-
-            }
         }
 
         /// <summary>

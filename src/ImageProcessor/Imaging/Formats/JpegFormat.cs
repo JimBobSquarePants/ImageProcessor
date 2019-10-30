@@ -21,9 +21,9 @@ namespace ImageProcessor.Imaging.Formats
     /// </summary>
     public sealed class JpegFormat : FormatBase
     {
-        private ImageCodecInfo imageCodecInfo;
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the file headers.
+        /// </summary>
         public override byte[][] FileHeaders => new[]
         {
             new byte[] { 255, 216, 255 },
@@ -31,36 +31,86 @@ namespace ImageProcessor.Imaging.Formats
             Encoding.ASCII.GetBytes("ÿØÿà..EXIF")
         };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the list of file extensions.
+        /// </summary>
         public override string[] FileExtensions => new[]
         {
             "jpeg", "jpg"
         };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains.
+        /// </summary>
         public override string MimeType => "image/jpeg";
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the <see cref="ImageFormat" />.
+        /// </summary>
         public override ImageFormat ImageFormat => ImageFormat.Jpeg;
 
-        /// <inheritdoc/>
-        public override Image Save(Stream stream, Image image, BitDepth bitDepth)
+        /// <summary>
+        /// Saves the current image to the specified output stream.
+        /// </summary>
+        /// <param name="stream">
+        /// The <see cref="T:System.IO.Stream"/> to save the image information to.
+        /// </param>
+        /// <param name="image">
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Drawing.Image"/>.
+        /// </returns>
+        public override Image Save(Stream stream, Image image, long bitDepth)
         {
             // Jpegs can be saved with different settings to include a quality setting for the JPEG compression.
             // This improves output compression and quality.
             using (EncoderParameters encoderParameters = FormatUtilities.GetEncodingParameters(this.Quality))
             {
-                image.Save(stream, GetCodecInfo(), encoderParameters);
+                ImageCodecInfo imageCodecInfo =
+                    Array.Find(ImageCodecInfo.GetImageEncoders(), ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+
+                if (imageCodecInfo != null)
+                {
+                    image.Save(stream, imageCodecInfo, encoderParameters);
+                }
             }
 
             return image;
         }
 
-        private ImageCodecInfo GetCodecInfo()
+        /// <summary>
+        /// Saves the current image to the specified file path.
+        /// </summary>
+        /// <param name="path">The path to save the image to.</param>
+        /// <param name="image">
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Drawing.Image"/>.
+        /// </returns>
+        public override Image Save(string path, Image image, long bitDepth)
         {
-            return this.imageCodecInfo ?? (this.imageCodecInfo = Array.Find(
-                ImageCodecInfo.GetImageEncoders(),
-                ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase)));
+            // Jpegs can be saved with different settings to include a quality setting for the JPEG compression.
+            // This improves output compression and quality.
+            using (EncoderParameters encoderParameters = FormatUtilities.GetEncodingParameters(this.Quality))
+            {
+                ImageCodecInfo imageCodecInfo =
+                    Array.Find(ImageCodecInfo.GetImageEncoders(), ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+
+                if (imageCodecInfo != null)
+                {
+                    image.Save(path, imageCodecInfo, encoderParameters);
+                }
+            }
+
+            return image;
         }
     }
 }

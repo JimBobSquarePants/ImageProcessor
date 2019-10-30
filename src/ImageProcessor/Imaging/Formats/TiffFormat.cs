@@ -21,8 +21,6 @@ namespace ImageProcessor.Imaging.Formats
     /// </summary>
     public class TiffFormat : FormatBase
     {
-        private ImageCodecInfo imageCodecInfo;
-
         /// <summary>
         /// Gets the file headers.
         /// </summary>
@@ -86,41 +84,57 @@ namespace ImageProcessor.Imaging.Formats
         /// <returns>
         /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        public override Image Save(Stream stream, Image image, BitDepth bitDepth)
+        public override Image Save(Stream stream, Image image, long bitDepth)
         {
             // Tiffs can be saved with different bit depths.
-            using (var encoderParameters = GetEncoderParameters(bitDepth))
+            using (var encoderParameters = new EncoderParameters(2))
             {
-                image.Save(stream, GetCodecInfo(), encoderParameters);
+                encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, (long)(bitDepth == 1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW));
+                encoderParameters.Param[1] = new EncoderParameter(Encoder.ColorDepth, Math.Min(32, bitDepth));
+
+                ImageCodecInfo imageCodecInfo =
+                    Array.Find(ImageCodecInfo.GetImageEncoders(), ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+
+                if (imageCodecInfo != null)
+                {
+                    image.Save(stream, imageCodecInfo, encoderParameters);
+                }
             }
 
             return image;
         }
 
-        private ImageCodecInfo GetCodecInfo()
+        /// <summary>
+        /// Saves the current image to the specified file path.
+        /// </summary>
+        /// <param name="path">The path to save the image to.</param>
+        /// <param name="image">
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Drawing.Image"/>.
+        /// </returns>
+        public override Image Save(string path, Image image, long bitDepth)
         {
-            return this.imageCodecInfo ?? (this.imageCodecInfo = Array.Find(
-                ImageCodecInfo.GetImageEncoders(),
-                ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase)));
-        }
-
-        // TODO: Jpeg uses FormatUtilities.GetEncodingParameters
-        private EncoderParameters GetEncoderParameters(BitDepth bitDepth)
-        {
-            long colorDepth = (long)bitDepth;
-            if (colorDepth == (long)BitDepth.Bit2)
+            // Tiffs can be saved with different bit depths.
+            using (var encoderParameters = new EncoderParameters(2))
             {
-                // No pixel formats actually support 2 bits per pixel so choose the next one up.
-                colorDepth = (long)BitDepth.Bit4;
+                encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, (long)(bitDepth == 1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW));
+                encoderParameters.Param[1] = new EncoderParameter(Encoder.ColorDepth, Math.Min(32, bitDepth));
+
+                ImageCodecInfo imageCodecInfo =
+                    Array.Find(ImageCodecInfo.GetImageEncoders(), ici => ici.MimeType.Equals(this.MimeType, StringComparison.OrdinalIgnoreCase));
+
+                if (imageCodecInfo != null)
+                {
+                    image.Save(path, imageCodecInfo, encoderParameters);
+                }
             }
 
-            long compression = (long)(colorDepth == (long)BitDepth.Bit1 ? EncoderValue.CompressionCCITT4 : EncoderValue.CompressionLZW);
-
-            var encoderParameters = new EncoderParameters(2);
-            encoderParameters.Param[0] = new EncoderParameter(Encoder.Compression, compression);
-            encoderParameters.Param[1] = new EncoderParameter(Encoder.ColorDepth, colorDepth);
-
-            return encoderParameters;
+            return image;
         }
     }
 }

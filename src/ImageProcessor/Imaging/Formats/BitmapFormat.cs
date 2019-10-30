@@ -15,65 +15,83 @@ namespace ImageProcessor.Imaging.Formats
     using System.IO;
     using System.Text;
     using ImageProcessor.Common.Extensions;
-    using ImageProcessor.Imaging.Quantizers;
 
     /// <summary>
     /// Provides the necessary information to support bitmap images.
     /// </summary>
-    public class BitmapFormat : FormatBase, IQuantizableImageFormat
+    public class BitmapFormat : FormatBase
     {
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the file headers.
+        /// </summary>
         public override byte[][] FileHeaders => new[]
         {
             Encoding.ASCII.GetBytes("BM")
         };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the list of file extensions.
+        /// </summary>
         public override string[] FileExtensions => new[]
         {
             "bmp"
         };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains.
+        /// </summary>
         public override string MimeType => "image/bmp";
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the <see cref="ImageFormat" />.
+        /// </summary>
         public override ImageFormat ImageFormat => ImageFormat.Bmp;
 
         /// <inheritdoc/>
-        public IQuantizer Quantizer { get; set; } = new OctreeQuantizer();
-
-        /// <inheritdoc/>
-        public override Image Save(Stream stream, Image image, BitDepth bitDepth)
+        public override Image Save(Stream stream, Image image, long bitDepth)
         {
+            PixelFormat pixelFormat = PixelFormat.Format32bppPArgb;
             switch (bitDepth)
             {
-                case BitDepth.Bit1:
-                case BitDepth.Bit2:
-                case BitDepth.Bit4:
-                case BitDepth.Bit8:
+                case 24L:
+                    pixelFormat = PixelFormat.Format24bppRgb;
+                    break;
 
-                    // Save as 8 bit quantized image.
-                    image = this.Quantizer.Quantize(image);
-                    return base.Save(stream, image, bitDepth);
-
-                default:
-
-                    // Use 24 or 32 bit.
-                    var pixelFormat = bitDepth != BitDepth.Bit32 ? PixelFormat.Format24bppRgb : PixelFormat.Format32bppPArgb;
-                    if (pixelFormat != image.PixelFormat)
-                    {
-                        using (Image clone = image.Copy(PixelFormat.Format24bppRgb))
-                        {
-                            clone.Save(stream, this.ImageFormat);
-                            return image;
-                        }
-                    }
-                    else
-                    {
-                        return base.Save(stream, image, bitDepth);
-                    }
+                case 8L:
+                    pixelFormat = PixelFormat.Format8bppIndexed;
+                    break;
             }
+
+            using (Image clone = image.Copy(pixelFormat))
+            {
+                clone.Save(stream, this.ImageFormat);
+            }
+
+            return image;
+        }
+
+        /// <inheritdoc/>
+        public override Image Save(string path, Image image, long bitDepth)
+        {
+            // Bmps can be saved with different bit depths.
+            PixelFormat pixelFormat = PixelFormat.Format32bppPArgb;
+            switch (bitDepth)
+            {
+                case 24L:
+                    pixelFormat = PixelFormat.Format24bppRgb;
+                    break;
+
+                case 8L:
+                    pixelFormat = PixelFormat.Format8bppIndexed;
+                    break;
+            }
+
+            using (Image clone = image.Copy(pixelFormat))
+            {
+                clone.Save(path, this.ImageFormat);
+            }
+
+            return image;
         }
     }
 }

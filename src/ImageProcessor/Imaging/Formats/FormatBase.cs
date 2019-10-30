@@ -51,9 +51,14 @@ namespace ImageProcessor.Imaging.Formats
         public abstract ImageFormat ImageFormat { get; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the image format is indexed.
+        /// </summary>
+        public bool IsIndexed { get; set; }
+
+        /// <summary>
         /// Gets or sets the quality of output for images.
         /// </summary>
-        public int Quality { get; set; } = 100;
+        public int Quality { get; set; }
 
         /// <summary>
         /// Applies the given processor the current image.
@@ -92,9 +97,28 @@ namespace ImageProcessor.Imaging.Formats
         /// <returns>
         /// The <see cref="T:System.Drawing.Image"/>.
         /// </returns>
-        public virtual Image Save(Stream stream, Image image, BitDepth bitDepth)
+        public virtual Image Save(Stream stream, Image image, long bitDepth)
         {
             image.Save(stream, this.ImageFormat);
+            return image;
+        }
+
+        /// <summary>
+        /// Saves the current image to the specified file path.
+        /// </summary>
+        /// <param name="path">The path to save the image to.</param>
+        /// <param name="image"> 
+        /// The <see cref="T:System.Drawing.Image"/> to save.
+        /// </param>
+        /// <param name="bitDepth">
+        /// The color depth in number of bits per pixel to save the image with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.Drawing.Image"/>.
+        /// </returns>
+        public virtual Image Save(string path, Image image, long bitDepth)
+        {
+            image.Save(path, this.ImageFormat);
             return image;
         }
 
@@ -112,7 +136,7 @@ namespace ImageProcessor.Imaging.Formats
                 return false;
             }
 
-            return this.MimeType.Equals(format.MimeType) && this.Quality.Equals(format.Quality);
+            return this.MimeType.Equals(format.MimeType) && this.IsIndexed.Equals(format.IsIndexed);
         }
 
         /// <summary>
@@ -126,7 +150,8 @@ namespace ImageProcessor.Imaging.Formats
             unchecked
             {
                 int hashCode = this.MimeType.GetHashCode();
-                return (hashCode * 397) ^ this.Quality.GetHashCode();
+                hashCode = (hashCode * 397) ^ this.IsIndexed.GetHashCode();
+                return (hashCode * 397) ^ this.Quality;
             }
         }
     }

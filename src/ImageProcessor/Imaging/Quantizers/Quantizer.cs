@@ -103,7 +103,6 @@ namespace ImageProcessor.Imaging.Quantizers
             {
                 // Ensure that the bits are unlocked
                 copy.UnlockBits(sourceData);
-                copy.Dispose();
             }
 
             // Last but not least, return the output bitmap

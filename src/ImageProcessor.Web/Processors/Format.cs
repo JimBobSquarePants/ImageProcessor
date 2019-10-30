@@ -105,12 +105,11 @@ namespace ImageProcessor.Web.Processors
                     // find to preserve the palette.
                     if (identifier.Equals("png8"))
                     {
-                        // TODO: Fix me.
-                        //newFormat.IsIndexed = true;
+                        newFormat.IsIndexed = true;
                     }
                     else if (identifier.Equals("png"))
                     {
-                        //newFormat.IsIndexed = false;
+                        newFormat.IsIndexed = false;
                     }
                 }
             }

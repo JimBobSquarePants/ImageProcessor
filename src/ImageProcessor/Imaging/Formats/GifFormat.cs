@@ -23,25 +23,41 @@ namespace ImageProcessor.Imaging.Formats
     /// </summary>
     public class GifFormat : FormatBase, IQuantizableImageFormat, IAnimatedImageFormat
     {
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets or sets the process mode for frames in animated images.
+        /// </summary>
         public AnimationProcessMode AnimationProcessMode { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the file headers.
+        /// </summary>
         public override byte[][] FileHeaders => new[] { Encoding.ASCII.GetBytes("GIF") };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the list of file extensions.
+        /// </summary>
         public override string[] FileExtensions => new[] { "gif" };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the standard identifier used on the Internet to indicate the type of data that a file contains. 
+        /// </summary>
         public override string MimeType => "image/gif";
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the <see cref="ImageFormat" />.
+        /// </summary>
         public override ImageFormat ImageFormat => ImageFormat.Gif;
 
-        /// <inheritdoc/>
-        public IQuantizer Quantizer { get; set; } = new OctreeQuantizer();
+        /// <summary>
+        /// Gets or sets the quantizer for reducing the image palette.
+        /// </summary>
+        public IQuantizer Quantizer { get; set; } = new OctreeQuantizer(255, 8);
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Applies the given processor the current image.
+        /// </summary>
+        /// <param name="processor">The processor delegate.</param>
+        /// <param name="factory">The <see cref="ImageFactory" />.</param>
         public override void ApplyProcessor(Func<ImageFactory, Image> processor, ImageFactory factory)
         {
             var decoder = new GifDecoder(factory.Image, factory.AnimationProcessMode);
@@ -61,10 +77,9 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <inheritdoc />
-        public override Image Save(Stream stream, Image image, BitDepth bitDepth)
+        public override Image Save(Stream stream, Image image, long bitDepth)
         {
             // Never use default save for gifs. It's terrible.
-            // BitDepth is ignored here since we always produce 8 bit images.
             var decoder = new GifDecoder(image, AnimationProcessMode.All);
             var encoder = new GifEncoder(null, null, decoder.LoopCount);
 
@@ -77,6 +92,27 @@ namespace ImageProcessor.Imaging.Formats
 
             encoder.Save(stream);
             return encoder.Save();
+        }
+
+        /// <inheritdoc />
+        public override Image Save(string path, Image image, long bitDepth)
+        {
+            // Never use default save for gifs. It's terrible.
+            using (FileStream fs = File.OpenWrite(path))
+            {
+                var decoder = new GifDecoder(image, AnimationProcessMode.All);
+                var encoder = new GifEncoder(null, null, decoder.LoopCount);
+
+                for (int i = 0; i < decoder.FrameCount; i++)
+                {
+                    GifFrame frame = decoder.GetFrame(image, i);
+                    frame.Image = this.Quantizer.Quantize(frame.Image);
+                    encoder.AddFrame(frame);
+                }
+
+                encoder.Save(fs);
+                return encoder.Save();
+            }
         }
     }
 }
