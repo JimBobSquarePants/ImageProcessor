@@ -8,7 +8,7 @@ $nugetOutput = Join-Path $binPath "NuGets";
 # Projects (NuGet dependencies are handled in the nuspec files themselves)
 $imageprocessor = @{
     name    = "ImageProcessor"
-    version = "2.7.0"
+    version = "2.8.0"
     folder  = Join-Path $buildPath "src\ImageProcessor"
     output  = Join-Path $binPath "ImageProcessor\lib\net452"
     csproj  = "ImageProcessor.csproj"
@@ -35,7 +35,7 @@ $imageProcessorPluginsWebP = @{
 
 $imageprocessorWeb = @{
     name    = "ImageProcessor.Web"
-    version = "4.10.0"
+    version = "4.11.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web"
     output  = Join-Path $binPath "ImageProcessor.Web\lib\net452"
     csproj  = "ImageProcessor.Web.csproj"
@@ -67,7 +67,7 @@ $imageProcessorWebPluginsAmazonS3Cache = @{
 
 $imageProcessorWebPluginsPostProcessor = @{
     name    = "ImageProcessor.Web.Plugins.PostProcessor"
-    version = "1.4.0"
+    version = "1.5.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.PostProcessor"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.PostProcessor\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.PostProcessor.csproj"
