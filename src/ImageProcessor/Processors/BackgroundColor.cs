@@ -73,6 +73,11 @@ namespace ImageProcessor.Processors
                     graphics.DrawImage(image, 0, 0, width, height);
                 }
 
+                if (backgroundColor.A < byte.MaxValue)
+                {
+                    factory.CurrentBitDepth = (long)BitDepth.Bit32;
+                }
+
                 image.Dispose();
                 image = newImage;
             }
