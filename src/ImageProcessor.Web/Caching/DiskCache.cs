@@ -124,13 +124,14 @@ namespace ImageProcessor.Web.Caching
 
             if (cachedImage == null)
             {
-                if (File.Exists(this.CachedPath))
+                var info = new FileInfo(this.CachedPath);
+                if (info.Exists)
                 {
                     cachedImage = new CachedImage
                     {
                         Key = Path.GetFileNameWithoutExtension(this.CachedPath),
                         Path = this.CachedPath,
-                        CreationTimeUtc = File.GetLastWriteTimeUtc(this.CachedPath)
+                        CreationTimeUtc = info.LastWriteTimeUtc
                     };
 
                     CacheIndexer.Add(cachedImage, this.ImageCacheMaxMinutes);
@@ -367,10 +368,11 @@ namespace ImageProcessor.Web.Caching
             {
                 if (new Uri(this.RequestPath).IsFile)
                 {
-                    if (File.Exists(this.RequestPath))
+                    var info = new FileInfo(this.RequestPath);
+                    if (info.Exists)
                     {
                         // If it's newer than the cached file then it must be an update.
-                        isUpdated = File.GetLastWriteTimeUtc(this.RequestPath) > creationDate;
+                        isUpdated = info.LastWriteTimeUtc > creationDate;
                     }
                 }
                 else
