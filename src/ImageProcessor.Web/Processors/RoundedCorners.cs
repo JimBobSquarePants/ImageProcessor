@@ -26,7 +26,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"roundedcorners=\d+", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex(@"roundedcorners=\d+", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoundedCorners"/> class.
@@ -58,14 +58,14 @@ namespace ImageProcessor.Web.Processors
         public int MatchRegexIndex(string queryString)
         {
             this.SortOrder = int.MaxValue;
-            Match match = this.RegexPattern.Match(queryString);
 
+            Match match = this.RegexPattern.Match(queryString);
             if (match.Success)
             {
                 this.SortOrder = match.Index;
                 NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
 
-                this.Processor.DynamicParameter = (RoundedCornerLayer)new RoundedCornerLayer(
+                this.Processor.DynamicParameter = new RoundedCornerLayer(
                     QueryParamParser.Instance.ParseValue<int>(queryCollection["roundedcorners"]),
                     this.ParseCorner(queryCollection, "tl"),
                     this.ParseCorner(queryCollection, "tr"),

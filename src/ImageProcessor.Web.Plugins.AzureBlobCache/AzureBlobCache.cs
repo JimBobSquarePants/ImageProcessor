@@ -24,8 +24,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
     using ImageProcessor.Web.Caching;
     using ImageProcessor.Web.HttpModules;
 
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Blob;
+    using Microsoft.Azure.Storage;
+    using Microsoft.Azure.Storage.Blob;
 
     /// <summary>
     /// Provides an <see cref="IImageCache"/> implementation that uses Azure blob storage.
@@ -38,7 +38,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
         /// <summary>
         /// The regular expression for parsing a remote uri.
         /// </summary>
-        private static readonly Regex RemoteRegex = new Regex("^http(s)?://", RegexOptions.Compiled);
+        private static readonly Regex RemoteRegex = new Regex("^http(s)?://", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The assembly version.

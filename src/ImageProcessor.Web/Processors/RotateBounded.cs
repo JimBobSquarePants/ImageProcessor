@@ -26,12 +26,12 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex("rotatebounded=[^&]", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex("rotatebounded=[^&]", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The regular expression to search for.
         /// </summary>
-        private static readonly Regex BoundRegex = new Regex("rotatebounded.keepsize=true", RegexOptions.Compiled);
+        private static readonly Regex BoundRegex = new Regex("rotatebounded.keepsize=true", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RotateBounded"/> class.
@@ -46,11 +46,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// Gets the order in which this processor is to be used in a chain.
         /// </summary>
-        public int SortOrder
-        {
-            get;
-            private set;
-        }
+        public int SortOrder { get; private set; }
 
         /// <summary>
         /// Gets the associated graphics processor.
@@ -69,14 +65,14 @@ namespace ImageProcessor.Web.Processors
         public int MatchRegexIndex(string queryString)
         {
             this.SortOrder = int.MaxValue;
-            Match match = this.RegexPattern.Match(queryString);
 
+            Match match = this.RegexPattern.Match(queryString);
             if (match.Success)
             {
                 this.SortOrder = match.Index;
                 NameValueCollection queryCollection = HttpUtility.ParseQueryString(queryString);
                 float angle = QueryParamParser.Instance.ParseValue<float>(queryCollection["rotatebounded"]);
-                bool keepSize = BoundRegex.Match(queryString).Success;
+                bool keepSize = BoundRegex.IsMatch(queryString);
 
                 this.Processor.DynamicParameter = new Tuple<float, bool>(angle, keepSize);
             }

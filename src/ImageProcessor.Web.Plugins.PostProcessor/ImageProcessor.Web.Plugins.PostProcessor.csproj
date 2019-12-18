@@ -58,13 +58,13 @@
     <EmbeddedResource Include="Resources\Unmanaged\x64\gifsicle.exe" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Unmanaged\x64\pingo.exe" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Resources\Unmanaged\x86\gifsicle.exe" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Unmanaged\x86\jpegtran.exe" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Unmanaged\x86\pngquant.exe" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ImageProcessor.Web\ImageProcessor.Web.csproj">
@@ -81,9 +81,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Unmanaged\x86\cjpeg.exe" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Unmanaged\x86\TruePNG.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -18,6 +18,7 @@ namespace ImageProcessor.Web.Processors
     using ImageProcessor.Configuration;
     using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Processors;
+    using ImageProcessor.Web.Helpers;
 
     /// <summary>
     /// Sets the output of the image to a specific format.
@@ -27,7 +28,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = BuildRegex();
+        private static readonly Regex QueryRegex = new Regex("format=(png8|" + ImageHelpers.ExtensionRegexPattern + ")", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Format"/> class.
@@ -61,8 +62,8 @@ namespace ImageProcessor.Web.Processors
         public int MatchRegexIndex(string queryString)
         {
             this.SortOrder = int.MaxValue;
-            Match match = this.RegexPattern.Match(queryString);
 
+            Match match = this.RegexPattern.Match(queryString);
             if (match.Success)
             {
                 ISupportedImageFormat format = this.ParseFormat(match.Value.Split('=')[1]);
@@ -74,31 +75,6 @@ namespace ImageProcessor.Web.Processors
             }
 
             return this.SortOrder;
-        }
-
-        /// <summary>
-        /// Builds a regular expression from the <see cref="T:ImageProcessor.Imaging.Formats.ISupportedImageFormat"/> type, this allows extensibility.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="Regex"/> to match matrix filters.
-        /// </returns>
-        private static Regex BuildRegex()
-        {
-            var stringBuilder = new StringBuilder();
-
-            // png8 is a special case for determining indexed png's.
-            stringBuilder.Append("format=(png8");
-            foreach (ISupportedImageFormat imageFormat in ImageProcessorBootstrapper.Instance.SupportedImageFormats)
-            {
-                foreach (string fileExtension in imageFormat.FileExtensions)
-                {
-                    stringBuilder.AppendFormat("|{0}", fileExtension.ToLowerInvariant());
-                }
-            }
-
-            stringBuilder.Append(")");
-
-            return new Regex(stringBuilder.ToString(), RegexOptions.IgnoreCase);
         }
 
         /// <summary>
@@ -116,7 +92,7 @@ namespace ImageProcessor.Web.Processors
             string finalIdentifier = identifier.Equals("png8") ? "png" : identifier;
             ISupportedImageFormat newFormat = null;
             var formats = ImageProcessorBootstrapper.Instance.SupportedImageFormats.ToList();
-            ISupportedImageFormat format = formats.Find(f => f.FileExtensions.Any(e => e.Equals(finalIdentifier, StringComparison.InvariantCultureIgnoreCase)));
+            ISupportedImageFormat format = formats.Find(f => f.FileExtensions.Any(e => e.Equals(finalIdentifier, StringComparison.OrdinalIgnoreCase)));
 
             if (format != null)
             {

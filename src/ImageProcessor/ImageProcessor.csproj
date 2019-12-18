@@ -50,6 +50,7 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitDepth.cs" />
     <Compile Include="Common\Exceptions\Logging\DefaultLogger.cs" />
     <Compile Include="Common\Exceptions\Logging\ILogger.cs" />
     <Compile Include="Common\Extensions\AssemblyExtensions.cs" />

@@ -81,6 +81,7 @@ namespace ImageProcessor.Processors
                     factory.SetPropertyItem(ExifPropertyTag.ImageHeight, (ushort)image.Height);
                 }
 
+                factory.CurrentBitDepth = (long)BitDepth.Bit32;
                 return image;
             }
             catch (Exception ex)

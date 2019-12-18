@@ -5,10 +5,10 @@ $testsPath = Join-Path $buildPath "tests";
 $nuspecsPath = Join-Path $buildPath "build\nuspecs";
 $nugetOutput = Join-Path $binPath "NuGets";
 
-# Projects. Nuget Dependencies are handled in the nuspec files themselves and depend on the Major.Minor.Build number only.
+# Projects (NuGet dependencies are handled in the nuspec files themselves)
 $imageprocessor = @{
     name    = "ImageProcessor"
-    version = "2.7.0.${buildNumber}"
+    version = "2.8.0"
     folder  = Join-Path $buildPath "src\ImageProcessor"
     output  = Join-Path $binPath "ImageProcessor\lib\net452"
     csproj  = "ImageProcessor.csproj"
@@ -17,7 +17,7 @@ $imageprocessor = @{
 
 $imageProcessorPluginsCair = @{
     name    = "ImageProcessor.Plugins.Cair"
-    version = "1.2.0.${buildNumber}"
+    version = "1.3.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Plugins.Cair"
     output  = Join-Path $binPath "ImageProcessor.Plugins.Cair\lib\net452"
     csproj  = "ImageProcessor.Plugins.Cair.csproj"
@@ -26,7 +26,7 @@ $imageProcessorPluginsCair = @{
 
 $imageProcessorPluginsWebP = @{
     name    = "ImageProcessor.Plugins.WebP"
-    version = "1.2.0.${buildNumber}"
+    version = "1.3.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Plugins.WebP"
     output  = Join-Path $binPath "ImageProcessor.Plugins.WebP\lib\net452"
     csproj  = "ImageProcessor.Plugins.WebP.csproj"
@@ -35,7 +35,7 @@ $imageProcessorPluginsWebP = @{
 
 $imageprocessorWeb = @{
     name    = "ImageProcessor.Web"
-    version = "4.10.0.${buildNumber}"
+    version = "4.11.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web"
     output  = Join-Path $binPath "ImageProcessor.Web\lib\net452"
     csproj  = "ImageProcessor.Web.csproj"
@@ -43,13 +43,13 @@ $imageprocessorWeb = @{
 };
 
 $imageprocessorWebConfig = @{
-    version = "2.5.0.${buildNumber}"
+    version = "2.6.0"
     nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.Config.nuspec"
 };
 
 $imageProcessorWebPluginsAzureBlobCache = @{
     name    = "ImageProcessor.Web.Plugins.AzureBlobCache"
-    version = "1.5.0.${buildNumber}"
+    version = "1.6.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.AzureBlobCache"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.AzureBlobCache\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.AzureBlobCache.csproj"
@@ -58,7 +58,7 @@ $imageProcessorWebPluginsAzureBlobCache = @{
 
 $imageProcessorWebPluginsAmazonS3Cache = @{
     name    = "ImageProcessor.Web.Plugins.AmazonS3Cache"
-    version = "1.0.0.${buildNumber}"
+    version = "1.1.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.AmazonS3Cache"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.AmazonS3Cache\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.AmazonS3Cache.csproj"
@@ -67,7 +67,7 @@ $imageProcessorWebPluginsAmazonS3Cache = @{
 
 $imageProcessorWebPluginsPostProcessor = @{
     name    = "ImageProcessor.Web.Plugins.PostProcessor"
-    version = "1.4.0.${buildNumber}"
+    version = "1.5.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.PostProcessor"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.PostProcessor\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.PostProcessor.csproj"
@@ -118,8 +118,9 @@ foreach ($project in $projects) {
         continue;
     }
 
-    Write-Host "Building project $($project.name) at version $($project.version)" -ForegroundColor Yellow;
-    Update-AssemblyInfo -file (Join-Path $project.folder "Properties\AssemblyInfo.cs") -version $project.version;
+    $assemblyVersion = "$($project.version).$buildNumber";
+    Write-Host "Building Project $($project.name) at version $($assemblyVersion)" -ForegroundColor Yellow;
+    Update-AssemblyInfo -file (Join-Path $project.folder "Properties\AssemblyInfo.cs") -version $assemblyVersion;
 
     $buildCommand = "msbuild $(Join-Path $project.folder $project.csproj) /t:Build /p:Warnings=true /p:Configuration=Release /p:Platform=AnyCPU /p:PipelineDependsOnBuild=False /p:OutDir=$($project.output) /clp:WarningsOnly /clp:ErrorsOnly /clp:Summary /clp:PerformanceSummary /v:Normal /nologo";
     Write-Host $buildCommand -ForegroundColor Yellow;

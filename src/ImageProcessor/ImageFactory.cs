@@ -141,7 +141,7 @@ namespace ImageProcessor
         /// This can be used to change the bit depth of images that can be saved with different
         /// bit depths such as TIFF.
         /// </summary>
-        public long CurrentBitDepth { get; private set; }
+        public long CurrentBitDepth { get; internal set; }
 
         /// <summary>
         /// Gets the path to the local image for manipulation.

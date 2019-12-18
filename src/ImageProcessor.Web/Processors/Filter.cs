@@ -93,30 +93,15 @@ namespace ImageProcessor.Web.Processors
             const BindingFlags Flags = BindingFlags.Public | BindingFlags.Static;
             Type type = typeof(MatrixFilters);
             IEnumerable<PropertyInfo> filters = type.GetProperties(Flags)
-                              .Where(p => p.PropertyType.IsAssignableFrom(typeof(IMatrixFilter)))
-                              .ToList();
+                .Where(p => p.PropertyType.IsAssignableFrom(typeof(IMatrixFilter)))
+                .ToList();
 
             var stringBuilder = new StringBuilder();
             stringBuilder.Append("filter=(");
-            int counter = 0;
+            stringBuilder.Append(string.Join("|", filters.Select(f => Regex.Escape(f.Name))));
+            stringBuilder.Append(')');
 
-            foreach (PropertyInfo filter in filters)
-            {
-                if (counter == 0)
-                {
-                    stringBuilder.Append(filter.Name.ToLowerInvariant());
-                }
-                else
-                {
-                    stringBuilder.AppendFormat("|{0}", filter.Name.ToLowerInvariant());
-                }
-
-                counter++;
-            }
-
-            stringBuilder.Append(")");
-
-            return new Regex(stringBuilder.ToString(), RegexOptions.IgnoreCase);
+            return new Regex(stringBuilder.ToString(), RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
         }
 
         /// <summary>
@@ -139,7 +124,7 @@ namespace ImageProcessor.Web.Processors
                     PropertyInfo filter =
                         type.GetProperties(Flags)
                             .Where(p => p.PropertyType.IsAssignableFrom(typeof(IMatrixFilter)))
-                            .First(p => p.Name.Equals(f, StringComparison.InvariantCultureIgnoreCase));
+                            .First(p => p.Name.Equals(f, StringComparison.OrdinalIgnoreCase));
 
                     return filter.GetValue(null, null) as IMatrixFilter;
                 });

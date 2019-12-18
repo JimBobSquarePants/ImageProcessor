@@ -25,7 +25,7 @@ namespace ImageProcessor.Web.Processors
         /// <summary>
         /// The regular expression to search strings for.
         /// </summary>
-        private static readonly Regex QueryRegex = new Regex(@"\b(?!\W+)crop\b[=]", RegexOptions.Compiled);
+        private static readonly Regex QueryRegex = new Regex(@"\b(?!\W+)crop\b[=]", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Crop"/> class.
@@ -59,8 +59,8 @@ namespace ImageProcessor.Web.Processors
         public int MatchRegexIndex(string queryString)
         {
             this.SortOrder = int.MaxValue;
-            var match = this.RegexPattern.Match(queryString);
 
+            var match = this.RegexPattern.Match(queryString);
             if (match.Success)
             {
                 var queryCollection = HttpUtility.ParseQueryString(queryString);
@@ -71,7 +71,7 @@ namespace ImageProcessor.Web.Processors
 
                     // Default CropMode.Pixels will be returned.
                     var cropMode = QueryParamParser.Instance.ParseValue<CropMode>(queryCollection["cropmode"]);
-                    this.Processor.DynamicParameter = (CropLayer)new CropLayer(coordinates[0], coordinates[1], coordinates[2], coordinates[3], cropMode);
+                    this.Processor.DynamicParameter = new CropLayer(coordinates[0], coordinates[1], coordinates[2], coordinates[3], cropMode);
                 }
             }
 

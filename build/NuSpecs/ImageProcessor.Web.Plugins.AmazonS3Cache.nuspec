@@ -23,8 +23,8 @@
     <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff Amazon S3 Cache Asp</tags>
     <dependencies>
       <group targetFramework=".NETFramework4.5.2">
-        <dependency id="ImageProcessor.Web" version="4.10.0.0" />
-        <dependency id="ImageProcessor.Web.Config" version="2.5.0.0" />
+        <dependency id="ImageProcessor.Web" version="4.11.0" />
+        <dependency id="ImageProcessor.Web.Config" version="2.6.0" />
         <dependency id="AWSSDK.Core" version="3.3.23.1" />
         <dependency id="AWSSDK.S3" version="3.3.18.3" />
       </group>

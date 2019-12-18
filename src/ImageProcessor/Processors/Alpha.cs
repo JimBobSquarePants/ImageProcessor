@@ -62,6 +62,7 @@ namespace ImageProcessor.Processors
             try
             {
                 int percentage = this.DynamicParameter;
+                factory.CurrentBitDepth = (long)BitDepth.Bit32;
                 return Adjustments.Alpha(image, percentage);
             }
             catch (Exception ex)
