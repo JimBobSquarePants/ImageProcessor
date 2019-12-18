@@ -17,7 +17,7 @@ $imageprocessor = @{
 
 $imageProcessorPluginsCair = @{
     name    = "ImageProcessor.Plugins.Cair"
-    version = "1.2.0"
+    version = "1.3.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Plugins.Cair"
     output  = Join-Path $binPath "ImageProcessor.Plugins.Cair\lib\net452"
     csproj  = "ImageProcessor.Plugins.Cair.csproj"
@@ -26,7 +26,7 @@ $imageProcessorPluginsCair = @{
 
 $imageProcessorPluginsWebP = @{
     name    = "ImageProcessor.Plugins.WebP"
-    version = "1.2.0"
+    version = "1.3.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Plugins.WebP"
     output  = Join-Path $binPath "ImageProcessor.Plugins.WebP\lib\net452"
     csproj  = "ImageProcessor.Plugins.WebP.csproj"
@@ -43,13 +43,13 @@ $imageprocessorWeb = @{
 };
 
 $imageprocessorWebConfig = @{
-    version = "2.5.0"
+    version = "2.6.0"
     nuspec  = Join-Path $nuspecsPath "ImageProcessor.Web.Config.nuspec"
 };
 
 $imageProcessorWebPluginsAzureBlobCache = @{
     name    = "ImageProcessor.Web.Plugins.AzureBlobCache"
-    version = "1.5.0"
+    version = "1.6.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.AzureBlobCache"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.AzureBlobCache\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.AzureBlobCache.csproj"
@@ -58,7 +58,7 @@ $imageProcessorWebPluginsAzureBlobCache = @{
 
 $imageProcessorWebPluginsAmazonS3Cache = @{
     name    = "ImageProcessor.Web.Plugins.AmazonS3Cache"
-    version = "1.0.0"
+    version = "1.1.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.AmazonS3Cache"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.AmazonS3Cache\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.AmazonS3Cache.csproj"
