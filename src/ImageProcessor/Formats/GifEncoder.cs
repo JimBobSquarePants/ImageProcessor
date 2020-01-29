@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Buffers;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -47,37 +48,37 @@ namespace ImageProcessor.Formats
         /// <summary>
         /// The source color block length.
         /// </summary>
-        private const long SourceColorBlockLength = 768;
+        private const int SourceColorBlockLength = 768;
 
         /// <summary>
         /// The source color block position.
         /// </summary>
-        private const long SourceColorBlockPosition = 13;
+        private const int SourceColorBlockPosition = 13;
 
         /// <summary>
         /// The source global color info position.
         /// </summary>
-        private const long SourceGlobalColorInfoPosition = 10;
+        private const int SourceGlobalColorInfoPosition = 10;
 
         /// <summary>
         /// The source graphic control extension length.
         /// </summary>
-        private const long SourceGraphicControlExtensionLength = 8;
+        private const int SourceGraphicControlExtensionLength = 8;
 
         /// <summary>
         /// The source graphic control extension position.
         /// </summary>
-        private const long SourceGraphicControlExtensionPosition = 781;
+        private const int SourceGraphicControlExtensionPosition = 781;
 
         /// <summary>
         /// The source image block header length.
         /// </summary>
-        private const long SourceImageBlockHeaderLength = 11;
+        private const int SourceImageBlockHeaderLength = 11;
 
         /// <summary>
         /// The source image block position.
         /// </summary>
-        private const long SourceImageBlockPosition = 789;
+        private const int SourceImageBlockPosition = 789;
 
         /// <summary>
         /// The application identification.
@@ -250,9 +251,18 @@ namespace ImageProcessor.Formats
         private void WriteColorTable(Stream sourceGif)
         {
             sourceGif.Position = SourceColorBlockPosition; // Locating the image color table
-            byte[] colorTable = new byte[SourceColorBlockLength];
-            sourceGif.Read(colorTable, 0, colorTable.Length);
-            this.imageStream.Write(colorTable, 0, colorTable.Length);
+
+            byte[] colorTable = ArrayPool<byte>.Shared.Rent(SourceColorBlockLength);
+
+            try
+            {
+                sourceGif.Read(colorTable, 0, SourceColorBlockLength);
+                this.imageStream.Write(colorTable, 0, SourceColorBlockLength);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(colorTable);
+            }
         }
 
         /// <summary>
@@ -263,8 +273,8 @@ namespace ImageProcessor.Formats
         private void WriteGraphicControlBlock(Stream gifStream, int frameDelay)
         {
             gifStream.Position = SourceGraphicControlExtensionPosition; // Locating the source GCE
-            byte[] blockhead = new byte[SourceGraphicControlExtensionLength];
-            gifStream.Read(blockhead, 0, blockhead.Length); // Reading source GCE
+            Span<byte> blockhead = stackalloc byte[SourceGraphicControlExtensionLength];
+            gifStream.Read(blockhead); // Reading source GCE
 
             this.WriteShort(GraphicControlExtensionBlockIdentifier); // Identifier
             this.WriteByte(GraphicControlExtensionBlockSize); // Block Size
@@ -287,8 +297,8 @@ namespace ImageProcessor.Formats
         {
             // Local Image Descriptor
             gifStream.Position = SourceImageBlockPosition; // Locating the image block
-            byte[] header = new byte[SourceImageBlockHeaderLength];
-            gifStream.Read(header, 0, header.Length);
+            Span<byte> header = stackalloc byte[SourceImageBlockHeaderLength];
+            gifStream.Read(header);
             this.WriteByte(header[0]); // Separator
             this.WriteShort(x); // Position X
             this.WriteShort(y); // Position Y
@@ -315,13 +325,20 @@ namespace ImageProcessor.Formats
             int dataLength = gifStream.ReadByte();
             while (dataLength > 0)
             {
-                // TODO: It would be good to use ArrayPool here.
-                byte[] imgData = new byte[dataLength];
-                gifStream.Read(imgData, 0, dataLength);
+                byte[] imgData = ArrayPool<byte>.Shared.Rent(dataLength);
 
-                this.imageStream.WriteByte(Convert.ToByte(dataLength));
-                this.imageStream.Write(imgData, 0, dataLength);
-                dataLength = gifStream.ReadByte();
+                try
+                {
+                    gifStream.Read(imgData, 0, dataLength);
+
+                    this.imageStream.WriteByte(Convert.ToByte(dataLength));
+                    this.imageStream.Write(imgData, 0, dataLength);
+                    dataLength = gifStream.ReadByte();
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(imgData);
+                }
             }
 
             this.imageStream.WriteByte(0); // Terminator

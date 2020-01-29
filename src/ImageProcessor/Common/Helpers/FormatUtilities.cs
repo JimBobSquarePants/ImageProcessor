@@ -40,16 +40,15 @@ namespace ImageProcessor
 
             // Reset the position of the stream to ensure we're reading the correct part.
             stream.Position = 0;
-            byte[] buffer = new byte[numberOfBytesToRead];
-            stream.Read(buffer, 0, buffer.Length);
+            Span<byte> buffer = stackalloc byte[numberOfBytesToRead];
+            stream.Read(buffer);
             stream.Position = 0;
 
             foreach (IImageFormat format in imageFormats)
             {
                 foreach (byte[] header in format.FileHeaders)
                 {
-                    // TODO: Span?
-                    if (header.SequenceEqual(buffer.Take(header.Length)))
+                    if (header.AsSpan().SequenceEqual(buffer.Slice(0, header.Length)))
                     {
                         return format;
                     }

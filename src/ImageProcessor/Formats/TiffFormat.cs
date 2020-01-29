@@ -41,7 +41,7 @@ namespace ImageProcessor.Formats
         /// <inheritdoc/>
         public override void Save(Stream stream, Image image, BitDepth bitDepth, long quality)
         {
-            // Tiffs can be saved with different bit depths but hrows if we use 16 bits.
+            // Tiffs can be saved with different bit depths but throws if we use 16 bits.
             if (bitDepth == BitDepth.Bit16)
             {
                 bitDepth = BitDepth.Bit24;
