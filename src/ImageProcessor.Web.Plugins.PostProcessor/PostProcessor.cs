@@ -53,13 +53,11 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                 // Save source file length
                 var length = stream.Length;
 
-                // Create a temporary source file with the correct extension
-                var tempSourceFile = Path.GetTempFileName();
-                sourceFile = Path.ChangeExtension(tempSourceFile, extension);
-                File.Move(tempSourceFile, sourceFile);
-
-                // Give our destination file a unique name
-                destinationFile = sourceFile.Replace(extension, "-out" + extension);
+                // Get temporary file names
+                var tempPath = Path.GetTempPath();
+                var tempFile = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+                sourceFile = Path.Combine(tempPath, Path.ChangeExtension(tempFile, extension));
+                destinationFile = Path.Combine(tempPath, Path.ChangeExtension(tempFile + "-out", extension));
 
                 // Get processes to start
                 var processStartInfos = GetProcessStartInfos(extension, length, sourceFile, destinationFile).ToList();
@@ -80,6 +78,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                             if (File.Exists(destinationFile))
                             {
                                 File.Copy(destinationFile, sourceFile, true);
+                                File.Delete(destinationFile);
                             }
 
                             // Set default properties
@@ -99,16 +98,17 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                         }
                     }
 
-                    // Save result
+                    // Use source file if no destination file is created
                     if (!File.Exists(destinationFile))
                     {
-                        File.Copy(sourceFile, destinationFile, true);
+                        destinationFile = sourceFile;
                     }
 
+                    // Save result
                     var result = new PostProcessingResultEventArgs(destinationFile, length);
                     if (result.ResultFileSize > 0 && result.Saving > 0)
                     {
-                        using (var fileStream = File.OpenRead(destinationFile))
+                        using (var fileStream = File.OpenRead(result.ResultFileName))
                         {
                             stream.SetLength(0);
                             await fileStream.CopyToAsync(stream).ConfigureAwait(false);
@@ -128,24 +128,21 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
             finally
             {
                 // Always cleanup files
-                try
+                foreach (var fileName in new[] { sourceFile, destinationFile }.Where(f => f != null))
                 {
-                    // Ensure files exist, are not read only, and delete
-                    if (sourceFile != null && File.Exists(sourceFile))
+                    try
                     {
-                        File.SetAttributes(sourceFile, FileAttributes.Normal);
-                        File.Delete(sourceFile);
+                        var fileInfo = new FileInfo(fileName);
+                        if (fileInfo.Exists)
+                        {
+                            fileInfo.IsReadOnly = false;
+                            fileInfo.Delete();
+                        }
                     }
-
-                    if (destinationFile != null && File.Exists(destinationFile))
+                    catch
                     {
-                        File.SetAttributes(destinationFile, FileAttributes.Normal);
-                        File.Delete(destinationFile);
+                        // Normally a no no, but logging would be excessive + temp files get cleaned up eventually.
                     }
-                }
-                catch
-                {
-                    // Normally a no no, but logging would be excessive + temp files get cleaned up eventually.
                 }
             }
 
