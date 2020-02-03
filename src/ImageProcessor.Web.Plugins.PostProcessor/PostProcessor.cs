@@ -68,7 +68,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                         }
 
                         // Create cancellation token with timeout
-                        using (var cancellationTokenSource = new CancellationTokenSource(postProcessorBootstrapper.Timout))
+                        using (var cancellationTokenSource = new CancellationTokenSource(postProcessorBootstrapper.Timeout))
                         {
                             var remainingProcesses = processStartInfos.Count;
                             foreach (var processStartInfo in processStartInfos)
@@ -127,7 +127,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
                 }
                 catch (OperationCanceledException)
                 {
-                    ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url} within {postProcessorBootstrapper.Timout}ms. Original image returned.");
+                    ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url} within {postProcessorBootstrapper.Timeout}ms. Original image returned.");
                 }
                 catch (Exception ex)
                 {
