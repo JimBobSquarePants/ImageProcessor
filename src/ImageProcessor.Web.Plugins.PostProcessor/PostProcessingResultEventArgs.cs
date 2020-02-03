@@ -22,6 +22,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
 	/// <remarks>
 	/// Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs" />.
 	/// </remarks>
+	[Obsolete("This class was never publicly used by this library.")]
 	public class PostProcessingResultEventArgs : EventArgs
 	{
 		/// <summary>
