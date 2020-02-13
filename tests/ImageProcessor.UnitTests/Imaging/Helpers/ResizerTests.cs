@@ -1,9 +1,9 @@
 ﻿namespace ImageProcessor.UnitTests.Imaging.Helpers
 {
-    using NUnit.Framework;
     using System.Drawing;
     using FluentAssertions;
     using ImageProcessor.Imaging;
+    using NUnit.Framework;
 
     internal class ResizerTests
     {

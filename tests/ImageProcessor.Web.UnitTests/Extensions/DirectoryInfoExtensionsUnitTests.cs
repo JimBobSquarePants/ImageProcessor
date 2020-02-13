@@ -10,11 +10,8 @@ namespace ImageProcessor.Web.UnitTests.Extensions
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Threading.Tasks;
-
-    using Web.Extensions;
-
     using NUnit.Framework;
+    using Web.Extensions;
 
     /// <summary>
     /// The directory info extensions unit tests.

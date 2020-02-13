@@ -10,16 +10,10 @@
 
 namespace ImageProcessor.UnitTests.Imaging.Helpers
 {
-    using System;
     using System.Drawing;
-
     using FluentAssertions;
-    using FluentAssertions.Equivalency;
-
     using ImageProcessor.Imaging.Helpers;
-
     using NUnit.Framework;
-    using NUnit.Framework.Constraints;
 
     /// <summary>
     /// Test harness for the image math unit tests

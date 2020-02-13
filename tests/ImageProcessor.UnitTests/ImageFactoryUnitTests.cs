@@ -9,7 +9,6 @@ using ImageProcessor.Common.Extensions;
 
 namespace ImageProcessor.UnitTests
 {
-    using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
