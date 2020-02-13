@@ -45,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PostProcessorApplicationEvents.cs" />
-    <Compile Include="PostProcessingResultEventArgs.cs" />
     <Compile Include="PostProcessor.cs" />
     <Compile Include="PostProcessorBootstrapper.cs" />
     <Compile Include="ProcessEx.cs" />

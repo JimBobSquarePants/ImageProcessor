@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>
 //   The image post processor.
-//   Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs"/>
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -25,9 +24,6 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
     /// <summary>
     /// The image post processor.
     /// </summary>
-    /// <remarks>
-    /// Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs" />.
-    /// </remarks>
     internal static class PostProcessor
     {
         /// <summary>
