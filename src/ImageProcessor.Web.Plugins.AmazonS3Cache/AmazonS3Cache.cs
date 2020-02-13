@@ -331,7 +331,7 @@ namespace ImageProcessor.Web.Plugins.AmazonS3Cache
                 CannedACL = S3CannedACL.PublicRead,
                 Headers =
                 {
-                    CacheControl = string.Format("public, max-age={0}",this.MaxDays* 86400),
+                    CacheControl = $"public, max-age={this.BrowserMaxDays * 86400}",
                     ContentType = contentType
                 }
             };
