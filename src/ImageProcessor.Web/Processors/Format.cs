@@ -12,9 +12,7 @@ namespace ImageProcessor.Web.Processors
 {
     using System;
     using System.Linq;
-    using System.Text;
     using System.Text.RegularExpressions;
-
     using ImageProcessor.Configuration;
     using ImageProcessor.Imaging.Formats;
     using ImageProcessor.Processors;

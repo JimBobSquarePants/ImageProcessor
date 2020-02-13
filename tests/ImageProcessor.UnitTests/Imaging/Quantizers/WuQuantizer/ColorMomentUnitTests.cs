@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using System.Runtime.Remoting.Channels;
-using ImageProcessor.Imaging.Colors;
+﻿using ImageProcessor.Imaging.Colors;
 using ImageProcessor.Imaging.Quantizers.WuQuantizer;
 using NUnit.Framework;
 

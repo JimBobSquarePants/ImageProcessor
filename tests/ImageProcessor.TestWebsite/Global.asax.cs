@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
-using ImageProcessor.Web.HttpModules;
-using ImageProcessor.Web.Plugins.PostProcessor;
 
 namespace ImageProcessor.TestWebsite
 {
