@@ -21,7 +21,7 @@ namespace ImageProcessor
         /// </summary>
         /// <param name="assembly">The <see cref="Assembly"/> to load the types from.</param>
         /// <returns>
-        /// The loadable <see cref="System.Collections.Generic.IEnumerable{Type}"/>.
+        /// The loadable <see cref="IEnumerable{Type}"/>.
         /// </returns>
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
