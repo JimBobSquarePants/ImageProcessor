@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ImageProcessor.Web.Caching;
 using NUnit.Framework;
 
-namespace ImageProcessor.UnitTests.ImageCache
+namespace ImageProcessor.Web.UnitTests.Caching
 {
     [TestFixture]
     public class DiskCacheTests
@@ -15,8 +11,7 @@ namespace ImageProcessor.UnitTests.ImageCache
         [Test]
         public void GetValidatedAbsolutePath_Virtual_In_WebRoot()
         {
-            string virtualCachePath;
-            var absPath = DiskCache.GetValidatedCachePathsImpl("~/App_Data/TEMP/IP", TestMapPath, GetDirectoryInfo, out virtualCachePath);
+            var absPath = DiskCache.GetValidatedCachePathsImpl("~/App_Data/TEMP/IP", this.TestMapPath, this.GetDirectoryInfo, out var virtualCachePath);
 
             Assert.AreEqual(@"X:\Sites\MySite\App_Data\TEMP\IP", absPath);
             Assert.AreEqual("~/App_Data/TEMP/IP", virtualCachePath);
@@ -25,8 +20,7 @@ namespace ImageProcessor.UnitTests.ImageCache
         [Test]
         public void GetValidatedAbsolutePath_Virtual_Outside_WebRoot()
         {
-            string virtualCachePath;
-            var absPath = DiskCache.GetValidatedCachePathsImpl("~/../OUTSIDE", TestMapPath, GetDirectoryInfo, out virtualCachePath);
+            var absPath = DiskCache.GetValidatedCachePathsImpl("~/../OUTSIDE", this.TestMapPath, this.GetDirectoryInfo, out var virtualCachePath);
 
             Assert.AreEqual(@"X:\Sites\OUTSIDE", absPath);
             Assert.AreEqual(null, virtualCachePath);
@@ -35,8 +29,7 @@ namespace ImageProcessor.UnitTests.ImageCache
         [Test]
         public void GetValidatedAbsolutePath_Absolute_In_WebRoot()
         {
-            string virtualCachePath;
-            var absPath = DiskCache.GetValidatedCachePathsImpl(@"X:\Sites\MySite\App_Data\TEMP\IP", TestMapPath, GetDirectoryInfo, out virtualCachePath);
+            var absPath = DiskCache.GetValidatedCachePathsImpl(@"X:\Sites\MySite\App_Data\TEMP\IP", this.TestMapPath, this.GetDirectoryInfo, out var virtualCachePath);
 
             Assert.AreEqual(@"X:\Sites\MySite\App_Data\TEMP\IP", absPath);
             Assert.AreEqual("~/App_Data/TEMP/IP", virtualCachePath);
@@ -45,8 +38,7 @@ namespace ImageProcessor.UnitTests.ImageCache
         [Test]
         public void GetValidatedAbsolutePath_Absolute_Outside_WebRoot()
         {
-            string virtualCachePath;
-            var absPath = DiskCache.GetValidatedCachePathsImpl(@"X:\Sites\OUTSIDE", TestMapPath, GetDirectoryInfo, out virtualCachePath);
+            var absPath = DiskCache.GetValidatedCachePathsImpl(@"X:\Sites\OUTSIDE", this.TestMapPath, this.GetDirectoryInfo, out var virtualCachePath);
 
             Assert.AreEqual(@"X:\Sites\OUTSIDE", absPath);
             Assert.AreEqual(null, virtualCachePath);
@@ -61,19 +53,19 @@ namespace ImageProcessor.UnitTests.ImageCache
         {
             public TestDirectoryInfo(string path)
             {
-                _dirInfo = new DirectoryInfo(path);
+                this._dirInfo = new DirectoryInfo(path);
             }
 
             private readonly DirectoryInfo _dirInfo;
 
-            public override string FullName => _dirInfo.FullName;
+            public override string FullName => this._dirInfo.FullName;
 
             public override void Delete()
             {
                 throw new NotImplementedException();
             }
 
-            public override string Name => _dirInfo.Name;
+            public override string Name => this._dirInfo.Name;
 
             /// <summary>
             /// Always return true for these tests

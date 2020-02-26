@@ -406,7 +406,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 // Prevent redundant metadata request if paths match.
                 if (this.CachedPath == this.cachedRewritePath)
                 {
-                    ImageProcessingModule.AddCorsRequestHeaders(context);
+                    ImageProcessingModule.SetHeaders(context, null, null, this.BrowserMaxDays);
                     context.Response.Redirect(this.CachedPath, false);
                     return;
                 }
@@ -422,7 +422,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                 {
                     response = (HttpWebResponse)request.GetResponse();
                     response.Dispose();
-                    ImageProcessingModule.AddCorsRequestHeaders(context);
+
+                    ImageProcessingModule.SetHeaders(context, null, null, this.BrowserMaxDays);
                     context.Response.Redirect(this.cachedRewritePath, false);
                 }
                 catch (WebException ex)
@@ -440,7 +441,8 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                             || response.ResponseUri.AbsoluteUri.Equals(this.cachedRewritePath, StringComparison.OrdinalIgnoreCase))
                         {
                             response.Dispose();
-                            ImageProcessingModule.AddCorsRequestHeaders(context);
+
+                            ImageProcessingModule.SetHeaders(context, null, null, this.BrowserMaxDays);
                             context.Response.Redirect(this.cachedRewritePath, false);
                         }
                         else
@@ -452,7 +454,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                     else
                     {
                         // It's a 404, we should redirect to the cached path we have just saved to.
-                        ImageProcessingModule.AddCorsRequestHeaders(context);
+                        ImageProcessingModule.SetHeaders(context, null, null, this.BrowserMaxDays);
                         context.Response.Redirect(this.CachedPath, false);
                     }
                 }

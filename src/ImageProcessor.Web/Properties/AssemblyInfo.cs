@@ -44,5 +44,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("4.8.7.0")]
 [assembly: AssemblyFileVersion("4.8.7.0")]
 
-[assembly:InternalsVisibleTo("ImageProcessor.UnitTests")]
 [assembly: InternalsVisibleTo("ImageProcessor.Web.UnitTests")]

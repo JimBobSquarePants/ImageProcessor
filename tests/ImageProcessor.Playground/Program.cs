@@ -17,11 +17,7 @@ namespace ImageProcessor.PlayGround
     using System.Drawing;
     using System.IO;
     using System.Linq;
-
-    using ImageProcessor;
     using ImageProcessor.Imaging;
-    using ImageProcessor.Imaging.Filters.EdgeDetection;
-    using ImageProcessor.Imaging.Formats;
 
     /// <summary>
     /// The program.

@@ -10,9 +10,7 @@
 
 namespace ImageProcessor.Web.UnitTests.Extensions
 {
-    using System;
     using System.Collections.Generic;
-
     using ImageProcessor.Web.Extensions;
     using NUnit.Framework;
 
