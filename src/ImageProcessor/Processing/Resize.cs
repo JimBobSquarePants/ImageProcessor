@@ -151,6 +151,7 @@ namespace ImageProcessor.Processing
             {
                 attributes.SetWrapMode(WrapMode.TileFlipXY);
 
+                graphics.InterpolationMode = this.Options.InterpolationMode;
                 graphics.CompositingMode = CompositingMode.SourceCopy;
                 graphics.DrawImage(
                     frame,
@@ -176,7 +177,12 @@ namespace ImageProcessor.Processing
         /// <summary>
         /// Gets or sets the resize mode.
         /// </summary>
-        public ResizeMode Mode { get; set; } = ResizeMode.Crop;
+        public ResizeMode ResizeMode { get; set; } = ResizeMode.Crop;
+
+        /// <summary>
+        /// Gets or sets the interpolation mode.
+        /// </summary>
+        public InterpolationMode InterpolationMode { get; set; } = InterpolationMode.HighQualityBicubic;
 
         /// <summary>
         /// Gets or sets the anchor position.

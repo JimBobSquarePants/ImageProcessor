@@ -33,7 +33,7 @@ namespace ImageProcessor.Processing
                 ThrowInvalid($"Target width {width} and height {height} must be greater than zero.");
             }
 
-            switch (options.Mode)
+            switch (options.ResizeMode)
             {
                 case ResizeMode.Crop:
                     return CalculateCropRectangle(sourceSize, options, width, height);

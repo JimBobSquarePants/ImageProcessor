@@ -239,7 +239,7 @@ namespace ImageProcessor
         /// <returns>The <see cref="ImageFactory"/>.</returns>
         public ImageFactory Resize(int width, int height, ResizeMode mode)
         {
-            var options = new ResizeOptions { Size = new Size(width, height), Mode = mode };
+            var options = new ResizeOptions { Size = new Size(width, height), ResizeMode = mode };
             return this.Resize(options);
         }
 
