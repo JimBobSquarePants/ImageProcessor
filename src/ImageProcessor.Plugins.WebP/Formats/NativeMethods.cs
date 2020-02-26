@@ -76,6 +76,37 @@ namespace ImageProcessor.Formats
         /// <returns>
         /// Size of WebP Image.
         /// </returns>
+        [DllImport("libwebp", CallingConvention = CallingConvention.Cdecl, EntryPoint = "WebPEncodeBGR")]
+        public static extern int WebPEncodeBGR(IntPtr rgb, int width, int height, int stride, float qualityFactor, out IntPtr output);
+
+        /// <summary>
+        /// Lossless encoding of images pointed to by *data in WebP format.
+        /// </summary>
+        /// <param name="rgb">Pointer to RGB image data.</param>
+        /// <param name="width">The width range is limited currently from 1 to 16383.</param>
+        /// <param name="height">The height range is limited currently from 1 to 16383.</param>
+        /// <param name="stride">The stride.</param>
+        /// <param name="output">output_buffer with WebP image.</param>
+        /// <returns>
+        /// Size of WebP Image.
+        /// </returns>
+        [DllImport("libwebp", CallingConvention = CallingConvention.Cdecl, EntryPoint = "WebPEncodeLosslessBGR")]
+        public static extern int WebPEncodeLosslessBGR(IntPtr rgb, int width, int height, int stride, out IntPtr output);
+
+        /// <summary>
+        /// Lossy encoding images pointed to by *data in WebP format.
+        /// </summary>
+        /// <param name="rgb">Pointer to RGB image data.</param>
+        /// <param name="width">The width range is limited currently from 1 to 16383.</param>
+        /// <param name="height">The height range is limited currently from 1 to 16383.</param>
+        /// <param name="stride">The stride.</param>
+        /// <param name="qualityFactor">
+        /// Ranges from 0 (lower quality) to 100 (highest quality). Controls the loss and quality during compression.
+        /// </param>
+        /// <param name="output">output_buffer with WebP image.</param>
+        /// <returns>
+        /// Size of WebP Image.
+        /// </returns>
         [DllImport("libwebp", CallingConvention = CallingConvention.Cdecl, EntryPoint = "WebPEncodeBGRA")]
         public static extern int WebPEncodeBGRA(IntPtr rgb, int width, int height, int stride, float qualityFactor, out IntPtr output);
 

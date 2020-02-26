@@ -49,8 +49,8 @@ namespace ImageProcessor.Formats
         public override void Save(Stream stream, Image image, BitDepth bitDepth, long quality)
         {
             if (quality == 100L
-                ? EncodeLosslessly((Bitmap)image, out byte[] bytes)
-                : EncodeLossly((Bitmap)image, quality, out bytes))
+                ? EncodeLosslessly((Bitmap)image, bitDepth, out byte[] bytes)
+                : EncodeLossly((Bitmap)image, bitDepth, quality, out bytes))
             {
                 using (var memoryStream = new MemoryStream(bytes))
                 {
@@ -110,17 +110,22 @@ namespace ImageProcessor.Formats
             return bitmap;
         }
 
-        private static bool EncodeLossly(Bitmap bitmap, long quality, out byte[] webpData)
+        private static bool EncodeLossly(Bitmap bitmap, BitDepth bitDepth, long quality, out byte[] webpData)
         {
             webpData = null;
-            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            bool is32Bit = bitDepth == BitDepth.Bit32;
+            PixelFormat pixelFormat = is32Bit ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
+
+            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, pixelFormat);
             IntPtr unmanagedData = IntPtr.Zero;
             bool encoded;
 
             try
             {
                 // Attempt to lossy encode the image.
-                int size = NativeMethods.WebPEncodeBGRA(bmpData.Scan0, bitmap.Width, bitmap.Height, bmpData.Stride, quality, out unmanagedData);
+                int size = is32Bit
+                    ? NativeMethods.WebPEncodeBGRA(bmpData.Scan0, bitmap.Width, bitmap.Height, bmpData.Stride, quality, out unmanagedData)
+                    : NativeMethods.WebPEncodeBGR(bmpData.Scan0, bitmap.Width, bitmap.Height, bmpData.Stride, quality, out unmanagedData);
 
                 // Copy image compress data to output array
                 webpData = new byte[size];
@@ -143,17 +148,22 @@ namespace ImageProcessor.Formats
             return encoded;
         }
 
-        private static bool EncodeLosslessly(Bitmap bitmap, out byte[] webpData)
+        private static bool EncodeLosslessly(Bitmap bitmap, BitDepth bitDepth, out byte[] webpData)
         {
             webpData = null;
-            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            bool is32Bit = bitDepth == BitDepth.Bit32;
+            PixelFormat pixelFormat = is32Bit ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
+
+            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, pixelFormat);
             IntPtr unmanagedData = IntPtr.Zero;
             bool encoded;
 
             try
             {
                 // Attempt to losslessly encode the image.
-                int size = NativeMethods.WebPEncodeLosslessBGRA(bmpData.Scan0, bitmap.Width, bitmap.Height, bmpData.Stride, out unmanagedData);
+                int size = is32Bit
+                    ? NativeMethods.WebPEncodeLosslessBGRA(bmpData.Scan0, bitmap.Width, bitmap.Height, bmpData.Stride, out unmanagedData)
+                    : NativeMethods.WebPEncodeLosslessBGR(bmpData.Scan0, bitmap.Width, bitmap.Height, bmpData.Stride, out unmanagedData);
 
                 // Copy image compress data to output array
                 webpData = new byte[size];

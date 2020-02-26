@@ -1,6 +1,7 @@
-﻿Build instructions for libwebp.dll 
+Build instructions for libwebp.dll 
 ==================================
 
+Current version : 1.0.3
 
 Download libwebp-{version}.tar.gz from the downloads list at http://downloads.webmproject.org/releases/webp 
 and extract its contents.
