@@ -44,7 +44,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         {
             if (milliseconds > 0)
             {
-                PostProcessorBootstrapper.Instance.Timout = milliseconds;
+                PostProcessorBootstrapper.Instance.Timeout = milliseconds;
             }
         }
 

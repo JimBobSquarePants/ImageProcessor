@@ -5,7 +5,6 @@
 // </copyright>
 // <summary>
 //   The image post processor.
-//   Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs"/>
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -25,9 +24,6 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
     /// <summary>
     /// The image post processor.
     /// </summary>
-    /// <remarks>
-    /// Many thanks to Azure Image Optimizer <see href="https://github.com/ligershark/AzureJobs" />.
-    /// </remarks>
     internal static class PostProcessor
     {
         /// <summary>
@@ -41,116 +37,142 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// </returns>
         public static async Task<MemoryStream> PostProcessImageAsync(HttpContext context, MemoryStream stream, string extension)
         {
-            if (!PostProcessorBootstrapper.Instance.IsInstalled)
+            var postProcessorBootstrapper = PostProcessorBootstrapper.Instance;
+            if (postProcessorBootstrapper.IsInstalled && stream.Length is var length && length > 0)
             {
-                return stream;
-            }
-
-            string sourceFile = null, destinationFile = null;
-            var timeout = PostProcessorBootstrapper.Instance.Timout;
-            try
-            {
-                // Save source file length
-                var length = stream.Length;
-
-                // Create a temporary source file with the correct extension
-                var tempSourceFile = Path.GetTempFileName();
-                sourceFile = Path.ChangeExtension(tempSourceFile, extension);
-                File.Move(tempSourceFile, sourceFile);
-
-                // Give our destination file a unique name
-                destinationFile = sourceFile.Replace(extension, "-out" + extension);
-
-                // Get processes to start
-                var processStartInfos = GetProcessStartInfos(extension, length, sourceFile, destinationFile).ToList();
-                if (processStartInfos.Count > 0)
+                string sourceFile = null, destinationFile = null;
+                try
                 {
-                    // Save the input stream to our source temp file for post processing
-                    using (var fileStream = File.Create(sourceFile))
-                    {
-                        await stream.CopyToAsync(fileStream).ConfigureAwait(false);
-                    }
+                    // Get temporary file names
+                    var tempPath = Path.GetTempPath();
+                    var tempFile = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+                    sourceFile = Path.Combine(tempPath, Path.ChangeExtension(tempFile, extension));
+                    destinationFile = Path.Combine(tempPath, Path.ChangeExtension(tempFile + "-out", extension));
 
-                    // Create cancellation token with timeout
-                    using (var cancellationTokenSource = new CancellationTokenSource(timeout))
+                    // Get processes to start
+                    var processStartInfos = GetProcessStartInfos(extension, length, sourceFile, destinationFile).ToList();
+                    if (processStartInfos.Count > 0)
                     {
-                        foreach (var processStartInfo in processStartInfos)
+                        // Save the input stream to our source temp file for post processing
+                        var sourceFileInfo = new FileInfo(sourceFile);
+                        using (var fileStream = sourceFileInfo.Create())
                         {
-                            // Use destination file as new source (if previous process created one).
-                            if (File.Exists(destinationFile))
-                            {
-                                File.Copy(destinationFile, sourceFile, true);
-                            }
+                            // Try to keep the file in memory and ensure it's not indexed
+                            sourceFileInfo.Attributes |= FileAttributes.Temporary | FileAttributes.NotContentIndexed;
 
-                            // Set default properties
-                            processStartInfo.FileName = Path.Combine(PostProcessorBootstrapper.Instance.WorkingPath, processStartInfo.FileName);
-                            processStartInfo.CreateNoWindow = true;
-                            processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                            await stream.CopyToAsync(fileStream).ConfigureAwait(false);
+                        }
 
-                            // Run process
-                            using (var processResults = await ProcessEx.RunAsync(processStartInfo, cancellationTokenSource.Token).ConfigureAwait(false))
+                        // Create cancellation token with timeout
+                        using (var cancellationTokenSource = new CancellationTokenSource(postProcessorBootstrapper.Timeout))
+                        {
+                            var remainingProcesses = processStartInfos.Count;
+                            foreach (var processStartInfo in processStartInfos)
                             {
-                                if (processResults.ExitCode == 1)
+                                // Set default properties
+                                processStartInfo.FileName = Path.Combine(postProcessorBootstrapper.WorkingPath, processStartInfo.FileName);
+                                processStartInfo.CreateNoWindow = true;
+                                processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+                                // Run process
+                                using (var processResults = await ProcessEx.RunAsync(processStartInfo, cancellationTokenSource.Token).ConfigureAwait(false))
                                 {
-                                    ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url}, {processStartInfo.FileName} {processStartInfo.Arguments} exited with error code 1. Original image returned.");
-                                    break;
+                                    if (processResults.ExitCode == 1)
+                                    {
+                                        ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url}, {processStartInfo.FileName} {processStartInfo.Arguments} exited with error code 1. Original image returned.");
+                                        break;
+                                    }
+                                }
+
+                                remainingProcesses--;
+
+                                var destinationFileInfo = new FileInfo(destinationFile);
+                                if (destinationFileInfo.Exists)
+                                {
+                                    // Delete the source file
+                                    sourceFileInfo.IsReadOnly = false;
+                                    sourceFileInfo.Delete();
+
+                                    if (remainingProcesses > 0)
+                                    {
+                                        // Use destination file as new source (for the next process)
+                                        destinationFileInfo.MoveTo(sourceFile);
+                                    }
+
+                                    // Swap source for destination
+                                    sourceFileInfo = destinationFileInfo;
+
+                                    // Try to keep the file in memory and ensure it's not indexed
+                                    sourceFileInfo.Attributes |= FileAttributes.Temporary | FileAttributes.NotContentIndexed;
                                 }
                             }
                         }
-                    }
 
-                    // Save result
-                    if (!File.Exists(destinationFile))
-                    {
-                        File.Copy(sourceFile, destinationFile, true);
-                    }
-
-                    var result = new PostProcessingResultEventArgs(destinationFile, length);
-                    if (result.ResultFileSize > 0 && result.Saving > 0)
-                    {
-                        using (var fileStream = File.OpenRead(destinationFile))
+                        // Refresh source file (because it's changed by external processes)
+                        sourceFileInfo.Refresh();
+                        if (sourceFileInfo.Exists && sourceFileInfo.Length < length)
                         {
-                            stream.SetLength(0);
-                            await fileStream.CopyToAsync(stream).ConfigureAwait(false);
+                            // Save result back to stream
+                            using (var fileStream = sourceFileInfo.OpenRead())
+                            {
+                                stream.SetLength(0);
+                                await fileStream.CopyToAsync(stream).ConfigureAwait(false);
+                            }
                         }
                     }
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url} within {timeout}ms. Original image returned.");
-            }
-            catch (Exception ex)
-            {
-                // Some security policies don't allow execution of programs in this way
-                ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
-            }
-            finally
-            {
-                // Always cleanup files
-                try
+                catch (OperationCanceledException)
                 {
-                    // Ensure files exist, are not read only, and delete
-                    if (sourceFile != null && File.Exists(sourceFile))
+                    ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), $"Unable to post process image for request {context.Request.Unvalidated.Url} within {postProcessorBootstrapper.Timeout}ms. Original image returned.");
+                }
+                catch (Exception ex)
+                {
+                    // Some security policies don't allow execution of programs in this way
+                    ImageProcessorBootstrapper.Instance.Logger.Log(typeof(PostProcessor), ex.Message);
+                }
+                finally
+                {
+                    // Set position back to begin
+                    stream.Position = 0;
+
+                    // Always cleanup files
+                    if (sourceFile != null)
                     {
-                        File.SetAttributes(sourceFile, FileAttributes.Normal);
-                        File.Delete(sourceFile);
+                        try
+                        {
+                            var sourceFileInfo = new FileInfo(sourceFile);
+                            if (sourceFileInfo.Exists)
+                            {
+                                sourceFileInfo.IsReadOnly = false;
+                                sourceFileInfo.Delete();
+                            }
+                        }
+                        catch
+                        {
+                            // Normally a no no, but logging would be excessive + temp files get cleaned up eventually
+                        }
                     }
 
-                    if (destinationFile != null && File.Exists(destinationFile))
+                    if (destinationFile != null)
                     {
-                        File.SetAttributes(destinationFile, FileAttributes.Normal);
-                        File.Delete(destinationFile);
+                        try
+                        {
+                            var destinationFileInfo = new FileInfo(destinationFile);
+                            if (destinationFileInfo.Exists)
+                            {
+                                destinationFileInfo.IsReadOnly = false;
+                                destinationFileInfo.Delete();
+                            }
+                        }
+                        catch
+                        {
+                            // Normally a no no, but logging would be excessive + temp files get cleaned up eventually
+                        }
                     }
-                }
-                catch
-                {
-                    // Normally a no no, but logging would be excessive + temp files get cleaned up eventually.
                 }
             }
 
             // ALways return stream (even if it's not optimized)
-            stream.Position = 0;
             return stream;
         }
 
@@ -166,7 +188,6 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// </returns>
         private static IEnumerable<ProcessStartInfo> GetProcessStartInfos(string extension, long length, string sourceFile, string destinationFile)
         {
-            // Make sure the commands overwrite the destination file (in case multiple are executed)
             switch (extension.ToLowerInvariant())
             {
                 case ".png":

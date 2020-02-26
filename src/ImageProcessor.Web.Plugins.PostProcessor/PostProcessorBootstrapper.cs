@@ -67,7 +67,7 @@ namespace ImageProcessor.Web.Plugins.PostProcessor
         /// <summary>
         /// Gets the allowed time in milliseconds for postprocessing an image file.
         /// </summary>
-        public int Timout { get; internal set; } = 5000;
+        public int Timeout { get; internal set; } = 5000;
 
         /// <summary>
         /// Registers the embedded executables.
