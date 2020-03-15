@@ -92,8 +92,11 @@
 *.exe               binary
 *.gif               binary
 *.jpg               binary
+*.jpeg              binary
 *.png               binary
 *.ttf               binary
+*.tif               binary
+*.tiff              binary
 *.snk               binary
 
 ###############################################################################

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Buffers;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -39,36 +40,50 @@ namespace ImageProcessor.Formats
         /// <inheritdoc/>
         public override Image Load(Stream stream)
         {
-            // TODO: Allocation
-            byte[] bytes = new byte[stream.Length];
-            stream.Read(bytes, 0, bytes.Length);
-            return Decode(bytes);
+            byte[] bytes = null;
+            int length = (int)stream.Length;
+            try
+            {
+                bytes = ArrayPool<byte>.Shared.Rent(length);
+                stream.Read(bytes, 0, length);
+                return Decode(bytes, length);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
+            }
         }
 
         /// <inheritdoc/>
         public override void Save(Stream stream, Image image, BitDepth bitDepth, long quality)
         {
-            if (quality == 100L
-                ? EncodeLosslessly((Bitmap)image, bitDepth, out byte[] bytes)
-                : EncodeLossly((Bitmap)image, bitDepth, quality, out bytes))
+            // Only 24 and 32 bit supported.
+            if (bitDepth != BitDepth.Bit32)
             {
-                using (var memoryStream = new MemoryStream(bytes))
+                bitDepth = BitDepth.Bit24;
+            }
+
+            PixelFormat pixelFormat = FormatUtilities.GetPixelFormatForBitDepth(bitDepth);
+
+            if (pixelFormat != image.PixelFormat)
+            {
+                using (Image copy = this.DeepClone(image, pixelFormat, FrameProcessingMode.All, true))
                 {
-                    memoryStream.CopyTo(stream);
+                    Encode(stream, copy, bitDepth, pixelFormat, quality);
                 }
             }
             else
             {
-                throw new ImageFormatException("Unable to encode WebP image.");
+                Encode(stream, image, bitDepth, pixelFormat, quality);
             }
         }
 
-        private static Bitmap Decode(byte[] webpData)
+        private static Bitmap Decode(byte[] webpData, int length)
         {
             // Get the image width and height
             var pinnedWebP = GCHandle.Alloc(webpData, GCHandleType.Pinned);
             IntPtr ptrData = pinnedWebP.AddrOfPinnedObject();
-            uint dataSize = (uint)webpData.Length;
+            uint dataSize = (uint)length;
 
             Bitmap bitmap = null;
             BitmapData bitmapData = null;
@@ -79,6 +94,7 @@ namespace ImageProcessor.Formats
                 throw new ImageFormatException("WebP image header is corrupted.");
             }
 
+            byte[] buffer = null;
             try
             {
                 // Create a BitmapData and Lock all pixels to be written
@@ -93,12 +109,14 @@ namespace ImageProcessor.Formats
                 outputBuffer = NativeMethods.WebPDecodeBGRAInto(ptrData, dataSize, outputBuffer, outputBufferSize, bitmapData.Stride);
 
                 // Write image to bitmap using Marshal
-                byte[] buffer = new byte[outputBufferSize];
+                buffer = ArrayPool<byte>.Shared.Rent(outputBufferSize);
                 Marshal.Copy(outputBuffer, buffer, 0, outputBufferSize);
                 Marshal.Copy(buffer, 0, bitmapData.Scan0, outputBufferSize);
             }
             finally
             {
+                ArrayPool<byte>.Shared.Return(buffer);
+
                 // Unlock the pixels
                 bitmap?.UnlockBits(bitmapData);
 
@@ -110,12 +128,27 @@ namespace ImageProcessor.Formats
             return bitmap;
         }
 
-        private static bool EncodeLossly(Bitmap bitmap, BitDepth bitDepth, long quality, out byte[] webpData)
+        private static void Encode(Stream stream, Image image, BitDepth bitDepth, PixelFormat pixelFormat, long quality)
+        {
+            if (quality == 100L
+                ? EncodeLosslessly((Bitmap)image, bitDepth, pixelFormat, out byte[] bytes)
+                : EncodeLossly((Bitmap)image, bitDepth, pixelFormat, quality, out bytes))
+            {
+                using (var memoryStream = new MemoryStream(bytes))
+                {
+                    memoryStream.CopyTo(stream);
+                }
+            }
+            else
+            {
+                throw new ImageFormatException("Unable to encode WebP image.");
+            }
+        }
+
+        private static bool EncodeLossly(Bitmap bitmap, BitDepth bitDepth, PixelFormat pixelFormat, long quality, out byte[] webpData)
         {
             webpData = null;
             bool is32Bit = bitDepth == BitDepth.Bit32;
-            PixelFormat pixelFormat = is32Bit ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
-
             BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, pixelFormat);
             IntPtr unmanagedData = IntPtr.Zero;
             bool encoded;
@@ -148,11 +181,10 @@ namespace ImageProcessor.Formats
             return encoded;
         }
 
-        private static bool EncodeLosslessly(Bitmap bitmap, BitDepth bitDepth, out byte[] webpData)
+        private static bool EncodeLosslessly(Bitmap bitmap, BitDepth bitDepth, PixelFormat pixelFormat, out byte[] webpData)
         {
             webpData = null;
             bool is32Bit = bitDepth == BitDepth.Bit32;
-            PixelFormat pixelFormat = is32Bit ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
 
             BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, pixelFormat);
             IntPtr unmanagedData = IntPtr.Zero;
