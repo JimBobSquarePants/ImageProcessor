@@ -95,6 +95,7 @@
 *.exe               binary
 *.gif               binary
 *.jpg               binary
+*.jpeg               binary
 *.ktx               binary
 *.otf               binary
 *.pbm               binary
@@ -107,6 +108,8 @@
 *.tga               binary
 *.ttc               binary
 *.ttf               binary
+*.tif               binary
+*.tiff              binary
 *.woff              binary
 *.woff2             binary
 *.xls               binary
