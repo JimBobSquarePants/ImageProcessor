@@ -211,64 +211,62 @@ namespace ImageProcessor.Web.Caching
 
             this.ScheduleCacheTrimmer(token =>
             {
-                string rootDirectory = Path.GetDirectoryName(this.CachedPath);
-
+                var rootDirectory = Path.GetDirectoryName(this.CachedPath);
                 if (rootDirectory != null)
                 {
-                    // Jump up to the parent branch to clean through the cache.
-                    // UNC folders can throw exceptions if the file doesn't exist.
-                    IEnumerable<string> directories = SafeEnumerateDirectories(validatedAbsoluteCachePath).Reverse();
-
+                    // Jump up to the parent branch to clean through the cache
+                    // UNC folders can throw exceptions if the file doesn't exist
+                    var directories = SafeEnumerateDirectories(validatedAbsoluteCachePath).Reverse().ToList();
                     foreach (string directory in directories)
                     {
-                        if (!Directory.Exists(directory))
-                        {
-                            continue;
-                        }
-
                         if (token.IsCancellationRequested)
                         {
                             break;
                         }
 
-                        IEnumerable<FileInfo> files = Directory.EnumerateFiles(directory)
-                                                               .Select(f => new FileInfo(f))
-                                                               .OrderBy(f => f.CreationTimeUtc);
-                        int count = files.Count();
-
-                        foreach (FileInfo fileInfo in files)
+                        try
                         {
-                            if (token.IsCancellationRequested)
+                            var files = Directory.EnumerateFiles(directory).Select(f => new FileInfo(f)).OrderBy(f => f.CreationTimeUtc).ToList();
+                            var count = files.Count;
+                            foreach (var fileInfo in files)
                             {
-                                break;
-                            }
-
-                            try
-                            {
-                                // If the group count is equal to the max count minus 1 then we know we
-                                // have reduced the number of items below the maximum allowed.
-                                // We'll cleanup any orphaned expired files though.
-                                if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
+                                if (token.IsCancellationRequested)
                                 {
                                     break;
                                 }
 
-                                // Remove from the cache and delete each CachedImage.
-                                CacheIndexer.Remove(fileInfo.Name);
-                                fileInfo.Delete();
-                                count--;
-                            }
-                            catch (Exception ex)
-                            {
-                                // Log it but skip to the next file.
-                                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}, {ex.Message}");
+                                try
+                                {
+                                    // If the group count is equal to the max count minus 1 then we know we have reduced the number of items below the maximum allowed
+                                    // We'll cleanup any orphaned expired files though
+                                    if (!this.IsExpired(fileInfo.CreationTimeUtc) && count <= MaxFilesCount - 1)
+                                    {
+                                        break;
+                                    }
+
+                                    // Remove from the cache and delete each CachedImage
+                                    CacheIndexer.Remove(fileInfo.Name);
+                                    fileInfo.Delete();
+                                    count--;
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Log it but skip to the next file
+                                    ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}, {ex.Message}");
+                                }
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            // Log it but skip to the next directory
+                            ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory}, {ex.Message}");
+                        }
 
-                        // If the directory is empty of files delete it to remove the FCN.
+                        // If the directory is empty of files delete it to remove the FCN
                         this.RecursivelyDeleteEmptyDirectories(directory, validatedAbsoluteCachePath, token);
                     }
                 }
+
                 return Task.FromResult(0);
             });
 
