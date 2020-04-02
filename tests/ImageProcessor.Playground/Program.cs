@@ -68,7 +68,8 @@ namespace ImageProcessor.PlayGround
                         try
                         {
                             imageFactory.Load(inStream)
-                                        .Crop(new Rectangle(0, 0, imageFactory.Image.Width / 2, imageFactory.Image.Height / 2))
+                                        .Resize(new Size(426, 0))
+                                        //.Crop(new Rectangle(0, 0, imageFactory.Image.Width / 2, imageFactory.Image.Height / 2))
                                         .Save(Path.GetFullPath(Path.Combine(outPath, fileInfo.Name)));
                         }
                         catch (Exception ex)

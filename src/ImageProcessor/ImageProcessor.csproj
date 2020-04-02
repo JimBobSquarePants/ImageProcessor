@@ -42,6 +42,9 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -148,6 +151,7 @@
     <Compile Include="Common\Exceptions\QuantizationException.cs" />
     <Compile Include="Imaging\Quantizers\WuQuantizer\WuQuantizer.cs" />
     <Compile Include="Imaging\Quantizers\WuQuantizer\WuQuantizerBase.cs" />
+    <Compile Include="Imaging\ResizeHelper.cs" />
     <Compile Include="Imaging\ResizeLayer.cs" />
     <Compile Include="Imaging\Filters\Photo\BlackWhiteMatrixFilter.cs" />
     <Compile Include="Imaging\Filters\Photo\ColorMatrixes.cs" />
@@ -201,6 +205,9 @@
     <Compile Include="Processors\Vignette.cs" />
     <Compile Include="Processors\Watermark.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

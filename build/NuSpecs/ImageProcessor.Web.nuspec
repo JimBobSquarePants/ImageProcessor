@@ -25,7 +25,7 @@
     <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff ASP Cache EXIF</tags>
     <dependencies>
       <group targetFramework=".NETFramework4.5.2">
-        <dependency id="ImageProcessor" version="2.8.0" />
+        <dependency id="ImageProcessor" version="2.9.0" />
         <dependency id="Microsoft.IO.RecyclableMemoryStream" version="1.2.2" />
       </group>
     </dependencies>

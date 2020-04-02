@@ -108,7 +108,11 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Adds point converters.
         /// </summary>
-        private void AddPointConverters() => this.AddTypeConverter(typeof(Point), typeof(PointConverter));
+        private void AddPointConverters()
+        {
+            this.AddTypeConverter(typeof(Point), typeof(PointConverter));
+            this.AddTypeConverter(typeof(PointF), typeof(PointFConverter));
+        }
 
         /// <summary>
         /// Adds point converters.
