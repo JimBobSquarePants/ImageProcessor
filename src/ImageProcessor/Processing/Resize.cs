@@ -150,9 +150,10 @@ namespace ImageProcessor.Processing
             using (var attributes = new ImageAttributes())
             {
                 attributes.SetWrapMode(WrapMode.TileFlipXY);
-
                 graphics.InterpolationMode = this.Options.InterpolationMode;
+                graphics.CompositingQuality = CompositingQuality.AssumeLinear;
                 graphics.CompositingMode = CompositingMode.SourceCopy;
+
                 graphics.DrawImage(
                     frame,
                     targetRectangle,
