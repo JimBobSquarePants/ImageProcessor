@@ -114,7 +114,7 @@ namespace ImageProcessor.Imaging
         /// <param name="obj">The object to compare with the current object.</param>
         /// <returns>
         ///   <see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
-        public override bool Equals(object obj) 
+        public override bool Equals(object obj)
             => this.Equals(obj as ResizeLayer);
 
         /// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
@@ -122,15 +122,15 @@ namespace ImageProcessor.Imaging
         /// <returns>
         ///   <see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
         public bool Equals(ResizeLayer other)
-            => other != null 
-            && EqualityComparer<Size>.Default.Equals(this.Size, other.Size) 
-            && EqualityComparer<Size?>.Default.Equals(this.MaxSize, other.MaxSize) 
-            && EqualityComparer<List<Size>>.Default.Equals(this.RestrictedSizes, other.RestrictedSizes) 
-            && this.ResizeMode == other.ResizeMode 
-            && this.AnchorPosition == other.AnchorPosition 
+            => other != null
+            && this.Size == other.Size
+            && this.MaxSize == other.MaxSize
+            && this.RestrictedSizes.SequenceEqual(other.RestrictedSizes)
+            && this.ResizeMode == other.ResizeMode
+            && this.AnchorPosition == other.AnchorPosition
             && this.Upscale == other.Upscale
-            && EqualityComparer<PointF?>.Default.Equals(this.CenterCoordinates, other.CenterCoordinates) 
-            && EqualityComparer<Point?>.Default.Equals(this.AnchorPoint, other.AnchorPoint);
+            && this.CenterCoordinates == other.CenterCoordinates
+            && this.AnchorPoint == other.AnchorPoint;
 
         /// <summary>Serves as the default hash function.</summary>
         /// <returns>A hash code for the current object.</returns>
@@ -139,7 +139,7 @@ namespace ImageProcessor.Imaging
             int hashCode = -1040263854;
             hashCode = (hashCode * -1521134295) + this.Size.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.MaxSize.GetHashCode();
-            hashCode = (hashCode * -1521134295) + EqualityComparer<List<Size>>.Default.GetHashCode(this.RestrictedSizes);
+            hashCode = (hashCode * -1521134295) + this.RestrictedSizes.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.ResizeMode.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.AnchorPosition.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.Upscale.GetHashCode();
