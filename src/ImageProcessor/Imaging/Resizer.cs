@@ -99,6 +99,15 @@ namespace ImageProcessor.Imaging
                 int sourceHeight = source.Height;
                 int width = size.Width;
                 int height = size.Height;
+                bool upscale = this.ResizeLayer.Upscale;
+
+                if (ResizeLayer.ResizeMode == ResizeMode.Min)
+                {
+                    // Ensure we can't upscale.
+                    maxHeight = sourceHeight;
+                    maxWidth = sourceWidth;
+                    upscale = false;
+                }
 
                 maxWidth = maxWidth > 0 ? maxWidth : int.MaxValue;
                 maxHeight = maxHeight > 0 ? maxHeight : int.MaxValue;
@@ -133,7 +142,7 @@ namespace ImageProcessor.Imaging
                 {
                     // Exit if upscaling is not allowed.
                     if ((width > sourceWidth || height > sourceHeight)
-                        && !this.ResizeLayer.Upscale
+                        && !upscale
                         && this.ResizeLayer.ResizeMode != ResizeMode.Stretch)
                     {
                         return (Bitmap)source;

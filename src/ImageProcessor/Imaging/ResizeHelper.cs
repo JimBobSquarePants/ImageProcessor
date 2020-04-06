@@ -1,9 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Resize.cs" company="James Jackson-South">
+//   Copyright (c) James Jackson-South.
+//   Licensed under the Apache License, Version 2.0.
+// </copyright>
+// <summary>
+//   Resizes an image to the given dimensions.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ImageProcessor.Imaging
 {

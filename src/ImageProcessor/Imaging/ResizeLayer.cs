@@ -10,6 +10,7 @@
 
 namespace ImageProcessor.Imaging
 {
+    using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
@@ -17,7 +18,7 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to resize an image.
     /// </summary>
-    public class ResizeLayer
+    public class ResizeLayer : IEquatable<ResizeLayer>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResizeLayer"/> class.
@@ -108,5 +109,43 @@ namespace ImageProcessor.Imaging
         /// Gets or sets the anchor point.
         /// </summary>
         public Point? AnchorPoint { get; set; }
+
+        /// <summary>Determines whether the specified object is equal to the current object.</summary>
+        /// <param name="obj">The object to compare with the current object.</param>
+        /// <returns>
+        ///   <see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
+        public override bool Equals(object obj) 
+            => this.Equals(obj as ResizeLayer);
+
+        /// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        ///   <see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
+        public bool Equals(ResizeLayer other)
+            => other != null 
+            && EqualityComparer<Size>.Default.Equals(this.Size, other.Size) 
+            && EqualityComparer<Size?>.Default.Equals(this.MaxSize, other.MaxSize) 
+            && EqualityComparer<List<Size>>.Default.Equals(this.RestrictedSizes, other.RestrictedSizes) 
+            && this.ResizeMode == other.ResizeMode 
+            && this.AnchorPosition == other.AnchorPosition 
+            && this.Upscale == other.Upscale
+            && EqualityComparer<PointF?>.Default.Equals(this.CenterCoordinates, other.CenterCoordinates) 
+            && EqualityComparer<Point?>.Default.Equals(this.AnchorPoint, other.AnchorPoint);
+
+        /// <summary>Serves as the default hash function.</summary>
+        /// <returns>A hash code for the current object.</returns>
+        public override int GetHashCode()
+        {
+            int hashCode = -1040263854;
+            hashCode = (hashCode * -1521134295) + this.Size.GetHashCode();
+            hashCode = (hashCode * -1521134295) + this.MaxSize.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<List<Size>>.Default.GetHashCode(this.RestrictedSizes);
+            hashCode = (hashCode * -1521134295) + this.ResizeMode.GetHashCode();
+            hashCode = (hashCode * -1521134295) + this.AnchorPosition.GetHashCode();
+            hashCode = (hashCode * -1521134295) + this.Upscale.GetHashCode();
+            hashCode = (hashCode * -1521134295) + this.CenterCoordinates.GetHashCode();
+            hashCode = (hashCode * -1521134295) + this.AnchorPoint.GetHashCode();
+            return hashCode;
+        }
     }
 }

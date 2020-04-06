@@ -1008,7 +1008,7 @@ namespace ImageProcessor.UnitTests
                 // Check we min correctly using the shortest size.
                 imageFactory.Resize(minLayer);
                 Assert.AreEqual(imageFactory.Image.Size, new Size(400, 300));
-                imageFactory.Save(OutputPath + "resize-crop-" + i + ".jpg");
+                imageFactory.Save(OutputPath + "resize-min-" + i + ".jpg");
 
                 // Check padding with only a single dimension specified (width)
                 imageFactory.Resize(paddedSingleDimensionWidthLayer);
