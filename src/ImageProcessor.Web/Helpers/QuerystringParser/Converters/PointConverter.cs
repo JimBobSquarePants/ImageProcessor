@@ -36,7 +36,7 @@ namespace ImageProcessor.Web.Helpers
         {
             object result = base.ConvertFrom(culture, value, propertyType);
 
-            return result is int[] list ? new Point(list[0], list[1]) : result;
+            return result is int[] list && list.Length == 2 ? new Point(list[0], list[1]) : result;
         }
     }
 }
