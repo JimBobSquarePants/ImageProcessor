@@ -155,7 +155,7 @@ namespace ImageProcessor.Imaging
             && this.ResizeMode == other.ResizeMode
             && this.AnchorPosition == other.AnchorPosition
             && this.Upscale == other.Upscale
-            && (this.CenterCoordinates == null || other.CenterCoordinates == null ? this.CenterCoordinates == other.CenterCoordinates : this.CenterCoordinates.SequenceEqual(other.CenterCoordinates))
+            && this.Center == other.Center
             && this.AnchorPoint == other.AnchorPoint;
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace ImageProcessor.Imaging
             hashCode = (hashCode * -1521134295) + this.ResizeMode.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.AnchorPosition.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.Upscale.GetHashCode();
-            hashCode = (hashCode * -1521134295) + (this.CenterCoordinates == null ? 0 : this.CenterCoordinates.GetHashCode());
+            hashCode = (hashCode * -1521134295) + (this.Center == null ? 0 : this.Center.GetHashCode());
             hashCode = (hashCode * -1521134295) + (this.AnchorPoint == null ? 0 : this.AnchorPoint.GetHashCode());
             return hashCode;
         }
