@@ -75,15 +75,9 @@ namespace ImageProcessor.Web.Processors
                 ResizeMode mode = QueryParamParser.Instance.ParseValue<ResizeMode>(queryCollection["mode"]);
                 AnchorPosition position = QueryParamParser.Instance.ParseValue<AnchorPosition>(queryCollection["anchor"]);
                 bool upscale = queryCollection["upscale"] == null || QueryParamParser.Instance.ParseValue<bool>(queryCollection["upscale"]);
-                PointF? center;
-                if (queryCollection["center"] != null)
-                {
-                    center = QueryParamParser.Instance.ParseValue<PointF>(queryCollection["center"]);
-                }
-                else
-                {
-                    center = null;
-                }
+                float[] center = queryCollection["center"] != null
+                                    ? QueryParamParser.Instance.ParseValue<float[]>(queryCollection["center"]) :
+                                    null;
 
                 this.Processor.DynamicParameter = new ResizeLayer(size)
                 {

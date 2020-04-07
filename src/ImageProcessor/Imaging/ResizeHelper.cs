@@ -161,10 +161,10 @@ namespace ImageProcessor.Imaging
             {
                 ratio = percentWidth;
 
-                if (options.CenterCoordinates.HasValue)
+                if (options.Center is var center && center.HasValue)
                 {
-                    float center = -(ratio * sourceHeight) * options.CenterCoordinates.Value.Y;
-                    targetY = (int)Math.Round(center + (height / 2F));
+                    float centerRatio = -(ratio * sourceHeight) * center.Value.Y;
+                    targetY = (int)Math.Round(centerRatio + (height / 2F));
 
                     if (targetY > 0)
                     {
@@ -202,10 +202,10 @@ namespace ImageProcessor.Imaging
             {
                 ratio = percentHeight;
 
-                if (options.CenterCoordinates.HasValue)
+                if (options.Center is var center && center.HasValue)
                 {
-                    float center = -(ratio * sourceWidth) * options.CenterCoordinates.Value.X;
-                    targetX = (int)Math.Round(center + (width / 2F));
+                    float centerRatio = -(ratio * sourceWidth) * center.Value.X;
+                    targetX = (int)Math.Round(centerRatio + (width / 2F));
 
                     if (targetX > 0)
                     {
