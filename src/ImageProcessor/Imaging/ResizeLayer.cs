@@ -125,7 +125,7 @@ namespace ImageProcessor.Imaging
             => other != null
             && this.Size == other.Size
             && this.MaxSize == other.MaxSize
-            && this.RestrictedSizes.SequenceEqual(other.RestrictedSizes)
+            && (this.RestrictedSizes == null || other.RestrictedSizes == null ? this.RestrictedSizes == other.RestrictedSizes : this.RestrictedSizes.SequenceEqual(other.RestrictedSizes))
             && this.ResizeMode == other.ResizeMode
             && this.AnchorPosition == other.AnchorPosition
             && this.Upscale == other.Upscale
@@ -138,13 +138,13 @@ namespace ImageProcessor.Imaging
         {
             int hashCode = -1040263854;
             hashCode = (hashCode * -1521134295) + this.Size.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.MaxSize.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.RestrictedSizes.GetHashCode();
+            hashCode = (hashCode * -1521134295) + (this.MaxSize == null ? 0 : this.MaxSize.GetHashCode());
+            hashCode = (hashCode * -1521134295) + (this.RestrictedSizes == null ? 0 : this.RestrictedSizes.GetHashCode());
             hashCode = (hashCode * -1521134295) + this.ResizeMode.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.AnchorPosition.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.Upscale.GetHashCode();
             hashCode = (hashCode * -1521134295) + this.CenterCoordinates.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.AnchorPoint.GetHashCode();
+            hashCode = (hashCode * -1521134295) + (this.AnchorPoint == null ? 0 : this.AnchorPoint.GetHashCode());
             return hashCode;
         }
     }
