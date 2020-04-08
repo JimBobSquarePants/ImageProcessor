@@ -69,6 +69,12 @@ namespace ImageProcessor.Web.Helpers
             Type type = typeof(T);
 
             IQueryParamConverter converter = QueryTypeDescriptor.GetConverter(type);
+            if (converter == null && Nullable.GetUnderlyingType(type) is Type underlyingType)
+            {
+                type = underlyingType;
+                converter = QueryTypeDescriptor.GetConverter(type);
+            }
+
             try
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
