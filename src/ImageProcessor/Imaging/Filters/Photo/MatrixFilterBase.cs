@@ -29,16 +29,16 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <param name="source">The current image to process</param>
         /// <param name="destination">The new image to return</param>
         /// <returns>
-        /// The processed <see cref="System.Drawing.Bitmap"/>.
+        /// The processed <see cref="System.Drawing.Bitmap" />.
         /// </returns>
         public abstract Bitmap TransformImage(Image source, Image destination);
 
         /// <summary>
-        /// Determines whether the specified <see cref="IMatrixFilter" />, is equal to this instance.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="IMatrixFilter" /> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="IMatrixFilter" /> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -47,23 +47,16 @@ namespace ImageProcessor.Imaging.Filters.Photo
                 return false;
             }
 
-            return this.GetType().Name == filter.GetType().Name
-                   && this.Matrix.Equals(filter.Matrix);
+            return this.GetType() == filter.GetType()
+                   && (this.Matrix == null || filter.Matrix == null ? this.Matrix == filter.Matrix : this.Matrix.Equals(filter.Matrix));
         }
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.GetType().Name.GetHashCode();
-                return (hashCode * 397) ^ this.Matrix.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => (this.GetType(), this.Matrix).GetHashCode();
     }
 }

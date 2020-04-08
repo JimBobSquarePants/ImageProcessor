@@ -1000,27 +1000,20 @@ namespace ImageProcessor.Imaging.MetaData
         public override string ToString() => Convert.ToString(this, CultureInfo.InvariantCulture);
 
         /// <summary>
-        /// Indicates whether this instance and a specified object are equal.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; 
-        /// otherwise, false. 
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        /// <param name="obj">The object to compare with the current instance. </param>
         public override bool Equals(object obj) => this.CompareTo(obj) == 0;
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            // Adapted from Anonymous Type: { uint Numerator, uint Denominator }
-            int num = 0x1fb8d67d;
-            num = (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.numerator);
-            return (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.denominator);
-        }
+        public override int GetHashCode() => (this.Numerator, this.Denominator).GetHashCode();
     }
 }

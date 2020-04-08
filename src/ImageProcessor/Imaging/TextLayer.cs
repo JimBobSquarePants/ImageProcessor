@@ -96,16 +96,11 @@ namespace ImageProcessor.Imaging
         public bool RightToLeft { get; set; }
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="TextLayer"/> object that is equivalent to 
-        /// this <see cref="TextLayer"/> object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The object to test.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// True if the given object  is an <see cref="TextLayer"/> object that is equivalent to 
-        /// this <see cref="TextLayer"/> object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -116,38 +111,23 @@ namespace ImageProcessor.Imaging
 
             return this.Text == textLayer.Text
                 && this.FontColor == textLayer.FontColor
-                && this.FontFamily.Equals(textLayer.FontFamily)
+                && (this.FontFamily == null || textLayer.FontFamily == null ? this.FontFamily == textLayer.FontFamily : this.FontFamily.Equals(textLayer.FontFamily))
                 && this.FontSize == textLayer.FontSize
                 && this.Style == textLayer.Style
-                && this.DropShadow == textLayer.DropShadow
                 && this.Opacity == textLayer.Opacity
                 && this.Position == textLayer.Position
+                && this.DropShadow == textLayer.DropShadow
                 && this.Vertical == textLayer.Vertical
                 && this.RightToLeft == textLayer.RightToLeft;
         }
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.Text?.GetHashCode() ?? 0;
-                hashCode = (hashCode * 397) ^ this.DropShadow.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.FontFamily?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ (int)this.Style;
-                hashCode = (hashCode * 397) ^ this.FontColor.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Opacity;
-                hashCode = (hashCode * 397) ^ this.FontSize;
-                hashCode = (hashCode * 397) ^ this.Position.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Vertical.GetHashCode();
-                return (hashCode * 397) ^ this.RightToLeft.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => (this.Text, this.FontColor, this.FontFamily, this.FontSize, this.Style, this.Opacity, this.Position, this.DropShadow, this.Vertical, this.RightToLeft).GetHashCode();
 
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.

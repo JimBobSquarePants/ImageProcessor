@@ -51,16 +51,11 @@ namespace ImageProcessor.Imaging
         public Point? Position { get; set; }
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an
-        /// <see cref="ImageLayer"/> object that is equivalent to
-        /// this <see cref="ImageLayer"/> object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The object to test.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// True if the given object  is an <see cref="ImageLayer"/> object that is equivalent to
-        /// this <see cref="ImageLayer"/> object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -76,21 +71,12 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.Image.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Size.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Opacity;
-                return (hashCode * 397) ^ this.Position.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => (this.Image, this.Size, this.Opacity, this.Position).GetHashCode();
 
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.

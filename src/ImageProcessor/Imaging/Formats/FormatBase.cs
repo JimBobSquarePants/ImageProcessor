@@ -123,11 +123,11 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="object" />, is equal to this instance.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -136,23 +136,16 @@ namespace ImageProcessor.Imaging.Formats
                 return false;
             }
 
-            return this.MimeType.Equals(format.MimeType) && this.IsIndexed.Equals(format.IsIndexed);
+            return (this.MimeType == null || format.MimeType == null ? this.MimeType == format.MimeType : this.MimeType.Equals(format.MimeType))
+                && this.IsIndexed.Equals(format.IsIndexed);
         }
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.MimeType.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.IsIndexed.GetHashCode();
-                return (hashCode * 397) ^ this.Quality;
-            }
-        }
+        public override int GetHashCode() => (this.MimeType, this.IsIndexed, this.Quality).GetHashCode();
     }
 }

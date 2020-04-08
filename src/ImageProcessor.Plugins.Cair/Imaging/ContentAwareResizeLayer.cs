@@ -88,22 +88,15 @@ namespace ImageProcessor.Plugins.Cair.Imaging
         public int Timeout { get; set; } = 60000;
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="ContentAwareResizeLayer"/> object that is equivalent to 
-        /// this <see cref="ContentAwareResizeLayer"/> object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The object to test.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// True if the given object  is an <see cref="ContentAwareResizeLayer"/> object that is equivalent to 
-        /// this <see cref="ContentAwareResizeLayer"/> object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
-            ContentAwareResizeLayer resizeLayer = obj as ContentAwareResizeLayer;
-
-            if (resizeLayer == null)
+            if (!(obj is ContentAwareResizeLayer resizeLayer))
             {
                 return false;
             }
@@ -118,24 +111,11 @@ namespace ImageProcessor.Plugins.Cair.Imaging
         }
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = (int)this.ConvolutionType;
-                hashCode = (hashCode * 397) ^ (int)this.EnergyFunction;
-                hashCode = (hashCode * 397) ^ this.Parallelize.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int)this.OutputType;
-                hashCode = (hashCode * 397) ^ this.Timeout;
-                hashCode = (hashCode * 397) ^ this.Size.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.WeightPath != null ? this.WeightPath.GetHashCode() : 0);
-                return hashCode;
-            }
-        }
+        public override int GetHashCode() => (this.ConvolutionType, this.EnergyFunction, this.Parallelize, this.OutputType, this.Timeout, this.Size, this.WeightPath).GetHashCode();
     }
 }

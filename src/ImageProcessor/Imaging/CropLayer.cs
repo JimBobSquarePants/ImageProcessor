@@ -69,15 +69,11 @@ namespace ImageProcessor.Imaging
         public CropMode CropMode { get; set; }
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is 
-        /// equal to this instance.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The <see cref="System.Object" /> to compare with this instance.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to 
-        ///   this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -95,21 +91,11 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
-        /// Serves as a hash function for a particular type. 
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for the current <see cref="T:System.Object"/>.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.Left.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Top.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Right.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Bottom.GetHashCode();
-                return (hashCode * 397) ^ (int)this.CropMode;
-            }
-        }
+        public override int GetHashCode() => (this.Left, this.Top, this.Right, this.Bottom, this.CropMode).GetHashCode();
     }
 }

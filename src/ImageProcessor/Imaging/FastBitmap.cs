@@ -400,12 +400,12 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// true if the specified object  is equal to the current object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
             if (!(obj is FastBitmap fastBitmap))
@@ -417,10 +417,10 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
-        /// Serves as a hash function for a particular type. 
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for the current <see cref="T:System.Object"/>.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
         public override int GetHashCode() => this.bitmap.GetHashCode();
 

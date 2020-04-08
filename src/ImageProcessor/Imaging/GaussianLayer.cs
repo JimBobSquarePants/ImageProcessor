@@ -131,16 +131,11 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="GaussianLayer"/> object that is equivalent to 
-        /// this <see cref="GaussianLayer"/> object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The object to test.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// True if the given object  is an <see cref="GaussianLayer"/> object that is equivalent to 
-        /// this <see cref="GaussianLayer"/> object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -155,19 +150,11 @@ namespace ImageProcessor.Imaging
         }
 
         /// <summary>
-        /// Serves as a hash function for a particular type. 
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for the current <see cref="T:System.Object"/>.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.Size;
-                hashCode = (hashCode * 397) ^ this.Size.GetHashCode();
-                return (hashCode * 397) ^ this.Threshold;
-            }
-        }
+        public override int GetHashCode() => (this.Size, this.Threshold).GetHashCode();
     }
 }
