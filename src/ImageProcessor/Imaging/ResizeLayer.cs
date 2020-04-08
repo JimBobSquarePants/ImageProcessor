@@ -24,16 +24,14 @@ namespace ImageProcessor.Imaging
         /// <summary>
         /// Initializes a new instance of the <see cref="ResizeLayer" /> class.
         /// </summary>
-        /// <param name="size">The <see cref="T:System.Drawing.Size" /> containing the width and height to set the image to.</param>
-        /// <param name="resizeMode">The resize mode to apply to resized image. (Default ResizeMode.Pad)</param>
-        /// <param name="anchorPosition">The <see cref="AnchorPosition" /> to apply to resized image. (Default AnchorPosition.Center)</param>
-        /// <param name="upscale">Whether to allow up-scaling of images. (Default true)</param>
-        /// <param name="centerCoordinates">The center coordinates (Default null)</param>
-        /// <param name="maxSize">The maximum size to resize an image to.
-        /// Used to restrict resizing based on calculated resizing</param>
-        /// <param name="restrictedSizes">The range of sizes to restrict resizing an image to.
-        /// Used to restrict resizing based on calculated resizing</param>
-        /// <param name="anchorPoint">The anchor point (Default null)</param>
+        /// <param name="size">The <see cref="T:System.Drawing.Size" /> containing the width and height to resize the image to.</param>
+        /// <param name="resizeMode">The resize mode to apply to the resized image.</param>
+        /// <param name="anchorPosition">The anchor position to apply to the resized image.</param>
+        /// <param name="upscale">Whether to allow up-scaling of images.</param>
+        /// <param name="centerCoordinates">The center coordinates (Y,X).</param>
+        /// <param name="maxSize">The maximum size to resize an image to. Used to restrict resizing based on calculated resizing.</param>
+        /// <param name="restrictedSizes">The range of sizes to restrict resizing an image to. Used to restrict resizing based on calculated resizing.</param>
+        /// <param name="anchorPoint">The anchor point.</param>
         public ResizeLayer(
             Size size,
             ResizeMode resizeMode = ResizeMode.Pad,
@@ -48,7 +46,10 @@ namespace ImageProcessor.Imaging
             this.Upscale = upscale;
             this.ResizeMode = resizeMode;
             this.AnchorPosition = anchorPosition;
-            this.CenterCoordinates = centerCoordinates;
+            if (centerCoordinates != null && centerCoordinates.Length == 2)
+            {
+                this.Center = new PointF(centerCoordinates[1], centerCoordinates[0]);
+            }
             this.MaxSize = maxSize;
             this.RestrictedSizes = restrictedSizes;
             this.AnchorPoint = anchorPoint;
@@ -109,7 +110,25 @@ namespace ImageProcessor.Imaging
         /// <value>
         /// The center coordinates (Y,X).
         /// </value>
-        public float[] CenterCoordinates { get; set; }
+        [Obsolete("Use the Center property instead.")]
+        public float[] CenterCoordinates
+        {
+            get
+            {
+                return this.Center is PointF center ? new float[] { center.Y, center.X } : null;
+            }
+            set
+            {
+                if (value != null && value.Length == 2)
+                {
+                    this.Center = new PointF(value[1], value[0]);
+                }
+                else
+                {
+                    this.Center = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the center coordinates as <see cref="Nullable{PointF}" />.
@@ -117,10 +136,7 @@ namespace ImageProcessor.Imaging
         /// <value>
         /// The center coordinates as <see cref="Nullable{PointF}" />.
         /// </value>
-        /// <remarks>
-        /// Use this property instead of <see cref="CenterCoordinates" />, as it's validated and the X/Y positions are unambiguous.
-        /// </remarks>
-        internal PointF? Center => this.CenterCoordinates is float[] center && center.Length == 2 ? (PointF?)new PointF(center[1], center[0]) : null;
+        public PointF? Center { get; set; }
 
         /// <summary>
         /// Gets or sets the anchor point.
