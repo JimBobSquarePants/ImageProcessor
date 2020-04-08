@@ -82,7 +82,7 @@ namespace ImageProcessor.Web.Processors
                     if (center.HasValue)
                     {
                         // Swap X/Y for backwards compatibility
-                        center = new PointF(center.Value.X, center.Value.Y);
+                        center = new PointF(center.Value.Y, center.Value.X);
                     }
                 }
                 else
