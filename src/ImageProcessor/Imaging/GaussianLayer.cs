@@ -158,6 +158,6 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode() => (this.Size, this.Threshold).GetHashCode();
+        public override int GetHashCode() => (this.Size, this.Sigma, this.Threshold).GetHashCode();
     }
 }
