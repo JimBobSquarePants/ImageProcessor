@@ -18,7 +18,7 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to add a layer of text to an image.
     /// </summary>
-    public class TextLayer : IDisposable
+    public class TextLayer : IDisposable, IEquatable<TextLayer>
     {
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -102,24 +102,26 @@ namespace ImageProcessor.Imaging
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is TextLayer textLayer))
-            {
-                return false;
-            }
+        public override bool Equals(object obj) => obj is TextLayer textLayer && this.Equals(textLayer);
 
-            return this.Text == textLayer.Text
-                && this.FontColor == textLayer.FontColor
-                && (this.FontFamily == null || textLayer.FontFamily == null ? this.FontFamily == textLayer.FontFamily : this.FontFamily.Equals(textLayer.FontFamily))
-                && this.FontSize == textLayer.FontSize
-                && this.Style == textLayer.Style
-                && this.Opacity == textLayer.Opacity
-                && this.Position == textLayer.Position
-                && this.DropShadow == textLayer.DropShadow
-                && this.Vertical == textLayer.Vertical
-                && this.RightToLeft == textLayer.RightToLeft;
-        }
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(TextLayer other) => other != null
+            && this.Text == other.Text
+            && this.FontColor == other.FontColor
+            && (this.FontFamily == null || other.FontFamily == null ? this.FontFamily == other.FontFamily : this.FontFamily.Equals(other.FontFamily))
+            && this.FontSize == other.FontSize
+            && this.Style == other.Style
+            && this.Opacity == other.Opacity
+            && this.Position == other.Position
+            && this.DropShadow == other.DropShadow
+            && this.Vertical == other.Vertical
+            && this.RightToLeft == other.RightToLeft;
 
         /// <summary>
         /// Returns a hash code for this instance.

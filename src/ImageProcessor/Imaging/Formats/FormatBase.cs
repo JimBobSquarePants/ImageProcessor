@@ -18,7 +18,7 @@ namespace ImageProcessor.Imaging.Formats
     /// <summary>
     /// The supported format base. Implement this class when building a supported format.
     /// </summary>
-    public abstract class FormatBase : ISupportedImageFormat
+    public abstract class FormatBase : ISupportedImageFormat, IEquatable<ISupportedImageFormat>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FormatBase"/> class.
@@ -129,16 +129,18 @@ namespace ImageProcessor.Imaging.Formats
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is ISupportedImageFormat format))
-            {
-                return false;
-            }
+        public override bool Equals(object obj) => obj is ISupportedImageFormat format && this.Equals(format);
 
-            return (this.MimeType == null || format.MimeType == null ? this.MimeType == format.MimeType : this.MimeType.Equals(format.MimeType))
-                && this.IsIndexed.Equals(format.IsIndexed);
-        }
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(ISupportedImageFormat other) => other != null
+            && this.MimeType == other.MimeType
+            && this.IsIndexed == other.IsIndexed;
 
         /// <summary>
         /// Returns a hash code for this instance.

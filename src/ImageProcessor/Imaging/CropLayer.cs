@@ -15,7 +15,7 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to crop an image.
     /// </summary>
-    public class CropLayer
+    public class CropLayer : IEquatable<CropLayer>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CropLayer"/> class.
@@ -75,20 +75,22 @@ namespace ImageProcessor.Imaging
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is CropLayer cropLayer))
-            {
-                return false;
-            }
+        public override bool Equals(object obj) => obj is CropLayer cropLayer && this.Equals(cropLayer);
 
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(CropLayer other) => other != null
             // Define the tolerance for variation in their values 
-            return Math.Abs(this.Top - cropLayer.Top) <= Math.Abs(this.Top * .0001)
-                   && Math.Abs(this.Right - cropLayer.Right) <= Math.Abs(this.Right * .0001)
-                   && Math.Abs(this.Bottom - cropLayer.Bottom) <= Math.Abs(this.Bottom * .0001)
-                   && Math.Abs(this.Left - cropLayer.Left) <= Math.Abs(this.Left * .0001)
-                   && this.CropMode.Equals(cropLayer.CropMode);
-        }
+            && Math.Abs(this.Left - other.Left) <= Math.Abs(this.Left * .0001)
+            && Math.Abs(this.Top - other.Top) <= Math.Abs(this.Top * .0001)
+            && Math.Abs(this.Right - other.Right) <= Math.Abs(this.Right * .0001)
+            && Math.Abs(this.Bottom - other.Bottom) <= Math.Abs(this.Bottom * .0001)
+            && this.CropMode == other.CropMode;
 
         /// <summary>
         /// Returns a hash code for this instance.

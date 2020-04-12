@@ -15,7 +15,7 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to add an image layer to an image.
     /// </summary>
-    public class ImageLayer : IDisposable
+    public class ImageLayer : IDisposable, IEquatable<ImageLayer>
     {
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -57,18 +57,20 @@ namespace ImageProcessor.Imaging
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is ImageLayer imageLayer))
-            {
-                return false;
-            }
+        public override bool Equals(object obj) => obj is ImageLayer imageLayer && this.Equals(imageLayer);
 
-            return this.Image == imageLayer.Image
-                && this.Size == imageLayer.Size
-                && this.Opacity == imageLayer.Opacity
-                && this.Position == imageLayer.Position;
-        }
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(ImageLayer other) => other != null
+            && this.Image == other.Image
+            && this.Size == other.Size
+            && this.Opacity == other.Opacity
+            && this.Position == other.Position;
 
         /// <summary>
         /// Returns a hash code for this instance.

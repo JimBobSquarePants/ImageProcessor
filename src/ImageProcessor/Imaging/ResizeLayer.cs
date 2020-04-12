@@ -118,8 +118,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-            => this.Equals(obj as ResizeLayer);
+        public override bool Equals(object obj) => obj is ResizeLayer resizeLayer && this.Equals(resizeLayer);
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
@@ -128,8 +127,7 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(ResizeLayer other)
-            => other != null
+        public bool Equals(ResizeLayer other) => other != null
             && this.Size == other.Size
             && this.MaxSize == other.MaxSize
             && (this.RestrictedSizes == null || other.RestrictedSizes == null ? this.RestrictedSizes == other.RestrictedSizes : this.RestrictedSizes.SequenceEqual(other.RestrictedSizes))

@@ -15,7 +15,7 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// A Gaussian layer for applying sharpening and blurring methods to an image.
     /// </summary>
-    public class GaussianLayer
+    public class GaussianLayer : IEquatable<GaussianLayer>
     {
         /// <summary>
         /// The size.
@@ -137,17 +137,20 @@ namespace ImageProcessor.Imaging
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is GaussianLayer gaussianLayer))
-            {
-                return false;
-            }
+        public override bool Equals(object obj) => obj is GaussianLayer gaussianLayer && this.Equals(gaussianLayer);
 
-            return this.Size == gaussianLayer.Size
-                && Math.Abs(this.Sigma - gaussianLayer.Sigma) < 0.0001
-                && this.Threshold == gaussianLayer.Threshold;
-        }
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(GaussianLayer other) => other != null
+            && this.Size == other.Size
+            // Define the tolerance for variation in their values 
+            && Math.Abs(this.Sigma - other.Sigma) < 0.0001
+            && this.Threshold == other.Threshold;
 
         /// <summary>
         /// Returns a hash code for this instance.

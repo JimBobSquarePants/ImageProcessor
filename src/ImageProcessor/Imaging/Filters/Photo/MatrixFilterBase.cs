@@ -10,13 +10,14 @@
 
 namespace ImageProcessor.Imaging.Filters.Photo
 {
+    using System;
     using System.Drawing;
     using System.Drawing.Imaging;
 
     /// <summary>
     /// The matrix filter base contains equality methods.
     /// </summary>
-    public abstract class MatrixFilterBase : IMatrixFilter
+    public abstract class MatrixFilterBase : IMatrixFilter, IEquatable<IMatrixFilter>
     {
         /// <summary>
         /// Gets the <see cref="T:System.Drawing.Imaging.ColorMatrix" /> for this filter instance.
@@ -40,16 +41,18 @@ namespace ImageProcessor.Imaging.Filters.Photo
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is IMatrixFilter filter))
-            {
-                return false;
-            }
+        public override bool Equals(object obj) => obj is IMatrixFilter matrixFilter && this.Equals(matrixFilter);
 
-            return this.GetType() == filter.GetType()
-                   && (this.Matrix == null || filter.Matrix == null ? this.Matrix == filter.Matrix : this.Matrix.Equals(filter.Matrix));
-        }
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(IMatrixFilter other) => other != null
+            && this.GetType() == other.GetType()
+            && this.Matrix == other.Matrix;
 
         /// <summary>
         /// Returns a hash code for this instance.

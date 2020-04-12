@@ -20,7 +20,7 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Allows fast access to <see cref="System.Drawing.Bitmap"/>'s pixel data.
     /// </summary>
-    public unsafe class FastBitmap : IDisposable
+    public unsafe class FastBitmap : IDisposable, IEquatable<FastBitmap>
     {
         /// <summary>
         /// The integral representation of the 8bppIndexed pixel format.
@@ -406,15 +406,17 @@ namespace ImageProcessor.Imaging
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is FastBitmap fastBitmap))
-            {
-                return false;
-            }
+        public override bool Equals(object obj) => obj is FastBitmap fastBitmap && this.Equals(fastBitmap);
 
-            return this.bitmap == fastBitmap.bitmap;
-        }
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(FastBitmap other) => other != null
+            && this.bitmap == other.bitmap;
 
         /// <summary>
         /// Returns a hash code for this instance.
