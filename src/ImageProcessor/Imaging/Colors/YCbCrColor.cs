@@ -183,7 +183,10 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(YCbCrColor other) => ((Color)this).Equals((Color)other);
+        public bool Equals(YCbCrColor other) =>
+            this.Y == other.Y
+            && this.Cb == other.Cb
+            && this.Cr == other.Cr;
 
         /// <summary>
         /// Returns a hash code for this instance.
@@ -191,7 +194,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode() => ((Color)this).GetHashCode();
+        public override int GetHashCode() => (this.Y, this.Cb, this.Cr).GetHashCode();
 
         /// <summary>
         /// Returns a value indicating whether the current instance is empty.

@@ -257,7 +257,11 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(HslaColor other) => ((Color)this).Equals((Color)other);
+        public bool Equals(HslaColor other) =>
+            this.H == other.H
+            && this.S == other.S
+            && this.L == other.L
+            && this.A == other.A;
 
         /// <summary>
         /// Returns a hash code for this instance.
@@ -265,7 +269,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode() => ((Color)this).GetHashCode();
+        public override int GetHashCode() => (this.H, this.S, this.L, this.A).GetHashCode();
 
         /// <summary>
         /// Gets the color component from the given hue values.

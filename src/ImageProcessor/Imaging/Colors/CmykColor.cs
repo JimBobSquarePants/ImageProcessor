@@ -262,7 +262,11 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(CmykColor other) => ((Color)this).Equals((Color)other);
+        public bool Equals(CmykColor other) =>
+            this.C == other.C
+            && this.M == other.M
+            && this.Y == other.Y
+            && this.K == other.K;
 
         /// <summary>
         /// Returns a hash code for this instance.
@@ -270,7 +274,7 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode() => ((Color)this).GetHashCode();
+        public override int GetHashCode() => (this.C, this.M, this.Y, this.K).GetHashCode();
 
         /// <summary>
         /// Checks the range of the given value to ensure that it remains within the acceptable boundaries.

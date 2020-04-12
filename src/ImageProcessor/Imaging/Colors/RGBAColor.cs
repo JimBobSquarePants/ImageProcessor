@@ -205,7 +205,11 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(RgbaColor other) => ((Color)this).Equals((Color)other);
+        public bool Equals(RgbaColor other) =>
+            this.R == other.R
+            && this.G == other.G
+            && this.B == other.B
+            && this.A == other.A;
 
         /// <summary>
         /// Returns a hash code for this instance.
@@ -213,6 +217,6 @@ namespace ImageProcessor.Imaging.Colors
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode() => ((Color)this).GetHashCode();
+        public override int GetHashCode() => (this.R, this.G, this.B, this.A).GetHashCode();
     }
 }
