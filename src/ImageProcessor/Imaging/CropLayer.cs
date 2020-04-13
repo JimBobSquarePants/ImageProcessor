@@ -31,9 +31,24 @@ namespace ImageProcessor.Imaging
         /// </remarks>
         public CropLayer(float left, float top, float right, float bottom, CropMode cropMode = CropMode.Percentage)
         {
-            if (left < 0 || top < 0 || right < 0 || bottom < 0)
+            if (left < 0)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(left));
+            }
+
+            if (top < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(top));
+            }
+
+            if (right < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(right));
+            }
+
+            if (bottom < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bottom));
             }
 
             this.Left = left;
@@ -85,11 +100,10 @@ namespace ImageProcessor.Imaging
         /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
         public bool Equals(CropLayer other) => other != null
-            // Define the tolerance for variation in their values 
-            && Math.Abs(this.Left - other.Left) <= Math.Abs(this.Left * .0001)
-            && Math.Abs(this.Top - other.Top) <= Math.Abs(this.Top * .0001)
-            && Math.Abs(this.Right - other.Right) <= Math.Abs(this.Right * .0001)
-            && Math.Abs(this.Bottom - other.Bottom) <= Math.Abs(this.Bottom * .0001)
+            && this.Left == other.Left
+            && this.Top == other.Top
+            && this.Right == other.Right
+            && this.Bottom == other.Bottom
             && this.CropMode == other.CropMode;
 
         /// <summary>

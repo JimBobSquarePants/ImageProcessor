@@ -148,8 +148,7 @@ namespace ImageProcessor.Imaging
         /// </returns>
         public bool Equals(GaussianLayer other) => other != null
             && this.Size == other.Size
-            // Define the tolerance for variation in their values 
-            && Math.Abs(this.Sigma - other.Sigma) < 0.0001
+            && this.Sigma == other.Sigma
             && this.Threshold == other.Threshold;
 
         /// <summary>
