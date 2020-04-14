@@ -10,6 +10,7 @@
 
 namespace ImageProcessor.Imaging
 {
+    using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
@@ -17,7 +18,8 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to resize an image.
     /// </summary>
-    public class ResizeLayer
+    /// <seealso cref="T:System.IEquatable{ImageProcessor.Imaging.ResizeLayer}" />
+    public class ResizeLayer : IEquatable<ResizeLayer>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ResizeLayer"/> class.
@@ -110,59 +112,37 @@ namespace ImageProcessor.Imaging
         public Point? AnchorPoint { get; set; }
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="ResizeLayer"/> object that is equivalent to 
-        /// this <see cref="ResizeLayer"/> object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The object to test.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// True if the given object  is an <see cref="ResizeLayer"/> object that is equivalent to 
-        /// this <see cref="ResizeLayer"/> object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is ResizeLayer resizeLayer))
-            {
-                return false;
-            }
-
-            return this.Size == resizeLayer.Size
-                && this.ResizeMode == resizeLayer.ResizeMode
-                && this.AnchorPosition == resizeLayer.AnchorPosition
-                && this.Upscale == resizeLayer.Upscale
-                && ((this.CenterCoordinates != null
-                    && resizeLayer.CenterCoordinates != null
-                    && this.CenterCoordinates.SequenceEqual(resizeLayer.CenterCoordinates))
-                    || (this.CenterCoordinates == resizeLayer.CenterCoordinates))
-                && this.MaxSize == resizeLayer.MaxSize
-                && ((this.RestrictedSizes != null
-                    && resizeLayer.RestrictedSizes != null
-                    && this.RestrictedSizes.SequenceEqual(resizeLayer.RestrictedSizes))
-                    || (this.RestrictedSizes == resizeLayer.RestrictedSizes))
-                && this.AnchorPoint == resizeLayer.AnchorPoint;
-        }
+        public override bool Equals(object obj) => obj is ResizeLayer resizeLayer && this.Equals(resizeLayer);
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(ResizeLayer other) => other != null
+            && this.Size == other.Size
+            && this.MaxSize == other.MaxSize
+            && (this.RestrictedSizes == null || other.RestrictedSizes == null ? this.RestrictedSizes == other.RestrictedSizes : this.RestrictedSizes.SequenceEqual(other.RestrictedSizes))
+            && this.ResizeMode == other.ResizeMode
+            && this.AnchorPosition == other.AnchorPosition
+            && this.Upscale == other.Upscale
+            && (this.CenterCoordinates == null || other.CenterCoordinates == null ? this.CenterCoordinates == other.CenterCoordinates : this.CenterCoordinates.SequenceEqual(other.CenterCoordinates))
+            && this.AnchorPoint == other.AnchorPoint;
+
+        /// <summary>
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.Size.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.MaxSize.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.RestrictedSizes?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ (int)this.ResizeMode;
-                hashCode = (hashCode * 397) ^ (int)this.AnchorPosition;
-                hashCode = (hashCode * 397) ^ this.Upscale.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.CenterCoordinates?.GetHashCode() ?? 0);
-                return (hashCode * 397) ^ this.AnchorPoint.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => (this.Size, this.MaxSize, this.ResizeMode, this.AnchorPosition, this.Upscale, this.AnchorPoint).GetHashCode();
     }
 }

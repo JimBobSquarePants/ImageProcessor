@@ -18,7 +18,7 @@ namespace ImageProcessor.Imaging.Formats
     /// <summary>
     /// The supported format base. Implement this class when building a supported format.
     /// </summary>
-    public abstract class FormatBase : ISupportedImageFormat
+    public abstract class FormatBase : ISupportedImageFormat, IEquatable<ISupportedImageFormat>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FormatBase"/> class.
@@ -123,36 +123,31 @@ namespace ImageProcessor.Imaging.Formats
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="object" />, is equal to this instance.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is ISupportedImageFormat format))
-            {
-                return false;
-            }
-
-            return this.MimeType.Equals(format.MimeType) && this.IsIndexed.Equals(format.IsIndexed);
-        }
+        public override bool Equals(object obj) => obj is ISupportedImageFormat format && this.Equals(format);
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(ISupportedImageFormat other) => other != null
+            && this.MimeType == other.MimeType
+            && this.IsIndexed == other.IsIndexed;
+
+        /// <summary>
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.MimeType.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.IsIndexed.GetHashCode();
-                return (hashCode * 397) ^ this.Quality;
-            }
-        }
+        public override int GetHashCode() => (this.MimeType, this.IsIndexed).GetHashCode();
     }
 }

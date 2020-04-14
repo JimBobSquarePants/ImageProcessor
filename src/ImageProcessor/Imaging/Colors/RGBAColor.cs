@@ -190,36 +190,33 @@ namespace ImageProcessor.Imaging.Colors
         }
 
         /// <summary>
-        /// Indicates whether this instance and a specified object are equal.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        /// <param name="obj">Another object to compare to. </param>
         public override bool Equals(object obj) => obj is RgbaColor rgbaColor && this.Equals(rgbaColor);
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
         /// </summary>
         /// <param name="other">An object to compare with this object.</param>
-        /// <returns>true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.</returns>
-        public bool Equals(RgbaColor other)
-        {
-            Color thisColor = this;
-            Color otherColor = other;
-            return thisColor.Equals(otherColor);
-        }
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(RgbaColor other) =>
+            this.R == other.R
+            && this.G == other.G
+            && this.B == other.B
+            && this.A == other.A;
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            Color thisColor = this;
-            return thisColor.GetHashCode();
-        }
+        public override int GetHashCode() => (this.R, this.G, this.B, this.A).GetHashCode();
     }
 }
