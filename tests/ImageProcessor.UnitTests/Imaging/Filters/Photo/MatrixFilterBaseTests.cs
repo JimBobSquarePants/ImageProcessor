@@ -29,7 +29,7 @@ namespace ImageProcessor.UnitTests.Imaging.Filters.Photo
             VariantFilterBase first = new VariantFilterBase();
             VariantFilterBase second = new VariantFilterBase();
 
-            first.Equals(second).Should().BeFalse();
+            first.Equals(second).Should().BeTrue();
         }
 
         internal static ColorMatrix InvariantColorMatrix = new ColorMatrix(new[]
