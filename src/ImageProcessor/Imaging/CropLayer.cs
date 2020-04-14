@@ -15,7 +15,7 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to crop an image.
     /// </summary>
-    public class CropLayer
+    public class CropLayer : IEquatable<CropLayer>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CropLayer"/> class.
@@ -31,9 +31,24 @@ namespace ImageProcessor.Imaging
         /// </remarks>
         public CropLayer(float left, float top, float right, float bottom, CropMode cropMode = CropMode.Percentage)
         {
-            if (left < 0 || top < 0 || right < 0 || bottom < 0)
+            if (left < 0)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(left));
+            }
+
+            if (top < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(top));
+            }
+
+            if (right < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(right));
+            }
+
+            if (bottom < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bottom));
             }
 
             this.Left = left;
@@ -69,47 +84,34 @@ namespace ImageProcessor.Imaging
         public CropMode CropMode { get; set; }
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is 
-        /// equal to this instance.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The <see cref="System.Object" /> to compare with this instance.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to 
-        ///   this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is CropLayer cropLayer))
-            {
-                return false;
-            }
-
-            // Define the tolerance for variation in their values 
-            return Math.Abs(this.Top - cropLayer.Top) <= Math.Abs(this.Top * .0001)
-                   && Math.Abs(this.Right - cropLayer.Right) <= Math.Abs(this.Right * .0001)
-                   && Math.Abs(this.Bottom - cropLayer.Bottom) <= Math.Abs(this.Bottom * .0001)
-                   && Math.Abs(this.Left - cropLayer.Left) <= Math.Abs(this.Left * .0001)
-                   && this.CropMode.Equals(cropLayer.CropMode);
-        }
+        public override bool Equals(object obj) => obj is CropLayer cropLayer && this.Equals(cropLayer);
 
         /// <summary>
-        /// Serves as a hash function for a particular type. 
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(CropLayer other) => other != null
+            && this.Left == other.Left
+            && this.Top == other.Top
+            && this.Right == other.Right
+            && this.Bottom == other.Bottom
+            && this.CropMode == other.CropMode;
+
+        /// <summary>
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for the current <see cref="T:System.Object"/>.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.Left.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Top.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Right.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Bottom.GetHashCode();
-                return (hashCode * 397) ^ (int)this.CropMode;
-            }
-        }
+        public override int GetHashCode() => (this.Left, this.Top, this.Right, this.Bottom, this.CropMode).GetHashCode();
     }
 }

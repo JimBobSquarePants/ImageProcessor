@@ -147,24 +147,22 @@ namespace ImageProcessor.Imaging
         public Point? AnchorPoint { get; set; }
 
         /// <summary>
-        /// Determines whether the specified object is equal to the current object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">The object to compare with the current object.</param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        ///   <see langword="true" /> if the specified object is equal to the current object; otherwise, <see langword="false" />.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-            => this.Equals(obj as ResizeLayer);
+        public override bool Equals(object obj) => obj is ResizeLayer resizeLayer && this.Equals(resizeLayer);
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
         /// </summary>
         /// <param name="other">An object to compare with this object.</param>
         /// <returns>
-        ///   <see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(ResizeLayer other)
-            => other != null
+        public bool Equals(ResizeLayer other) => other != null
             && this.Size == other.Size
             && this.MaxSize == other.MaxSize
             && (this.RestrictedSizes == null || other.RestrictedSizes == null ? this.RestrictedSizes == other.RestrictedSizes : this.RestrictedSizes.SequenceEqual(other.RestrictedSizes))
@@ -175,23 +173,11 @@ namespace ImageProcessor.Imaging
             && this.AnchorPoint == other.AnchorPoint;
 
         /// <summary>
-        /// Serves as the default hash function.
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for the current object.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            int hashCode = -1040263854;
-            hashCode = (hashCode * -1521134295) + this.Size.GetHashCode();
-            hashCode = (hashCode * -1521134295) + (this.MaxSize == null ? 0 : this.MaxSize.GetHashCode());
-            hashCode = (hashCode * -1521134295) + (this.RestrictedSizes == null ? 0 : this.RestrictedSizes.GetHashCode());
-            hashCode = (hashCode * -1521134295) + this.ResizeMode.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.AnchorPosition.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.Upscale.GetHashCode();
-            hashCode = (hashCode * -1521134295) + (this.Center == null ? 0 : this.Center.GetHashCode());
-            hashCode = (hashCode * -1521134295) + (this.AnchorPoint == null ? 0 : this.AnchorPoint.GetHashCode());
-            return hashCode;
-        }
+        public override int GetHashCode() => (this.Size, this.MaxSize, this.ResizeMode, this.AnchorPosition, this.Upscale, this.Center, this.AnchorPoint).GetHashCode();
     }
 }

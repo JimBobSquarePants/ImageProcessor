@@ -18,7 +18,7 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to add a layer of text to an image.
     /// </summary>
-    public class TextLayer : IDisposable
+    public class TextLayer : IDisposable, IEquatable<TextLayer>
     {
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -96,58 +96,40 @@ namespace ImageProcessor.Imaging
         public bool RightToLeft { get; set; }
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="TextLayer"/> object that is equivalent to 
-        /// this <see cref="TextLayer"/> object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The object to test.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// True if the given object  is an <see cref="TextLayer"/> object that is equivalent to 
-        /// this <see cref="TextLayer"/> object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is TextLayer textLayer))
-            {
-                return false;
-            }
-
-            return this.Text == textLayer.Text
-                && this.FontColor == textLayer.FontColor
-                && this.FontFamily.Equals(textLayer.FontFamily)
-                && this.FontSize == textLayer.FontSize
-                && this.Style == textLayer.Style
-                && this.DropShadow == textLayer.DropShadow
-                && this.Opacity == textLayer.Opacity
-                && this.Position == textLayer.Position
-                && this.Vertical == textLayer.Vertical
-                && this.RightToLeft == textLayer.RightToLeft;
-        }
+        public override bool Equals(object obj) => obj is TextLayer textLayer && this.Equals(textLayer);
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(TextLayer other) => other != null
+            && this.Text == other.Text
+            && this.FontColor == other.FontColor
+            && (this.FontFamily == null || other.FontFamily == null ? this.FontFamily == other.FontFamily : this.FontFamily.Equals(other.FontFamily))
+            && this.FontSize == other.FontSize
+            && this.Style == other.Style
+            && this.Opacity == other.Opacity
+            && this.Position == other.Position
+            && this.DropShadow == other.DropShadow
+            && this.Vertical == other.Vertical
+            && this.RightToLeft == other.RightToLeft;
+
+        /// <summary>
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.Text?.GetHashCode() ?? 0;
-                hashCode = (hashCode * 397) ^ this.DropShadow.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.FontFamily?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ (int)this.Style;
-                hashCode = (hashCode * 397) ^ this.FontColor.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Opacity;
-                hashCode = (hashCode * 397) ^ this.FontSize;
-                hashCode = (hashCode * 397) ^ this.Position.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.Vertical.GetHashCode();
-                return (hashCode * 397) ^ this.RightToLeft.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => (this.Text, this.FontColor, this.FontFamily, this.FontSize, this.Style, this.Opacity, this.Position, this.DropShadow, this.Vertical, this.RightToLeft).GetHashCode();
 
         /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.
