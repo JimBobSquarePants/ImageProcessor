@@ -2,16 +2,15 @@
   <caches>
     <cache name="AzureBlobCache" type="ImageProcessor.Web.Plugins.AzureBlobCache.AzureBlobCache, ImageProcessor.Web.Plugins.AzureBlobCache" maxDays="365">
       <settings>
-        <setting key="CachedStorageAccount" value="DefaultEndpointsProtocol=https;AccountName=[CacheAccountName];AccountKey=[CacheAccountKey]"/>
-        <setting key="CachedBlobContainer" value="cache"/>
-        <setting key="UseCachedContainerInUrl" value="true"/>
-        <setting key="CachedCDNRoot" value="[CdnRootUrl]"/>
-        <setting key="CachedCDNTimeout" value="1000"/>
-        <setting key="SourceStorageAccount" value=""/>
-        <setting key="SourceBlobContainer" value=""/>
-        <setting key="StreamCachedImage" value="false"/>
+        <setting key="CachedStorageAccount" value="DefaultEndpointsProtocol=https;AccountName=[CacheAccountName];AccountKey=[CacheAccountKey]" />
+        <setting key="CachedBlobContainer" value="cache" />
+        <setting key="UseCachedContainerInUrl" value="true" />
+        <setting key="CachedCDNRoot" value="[CdnRootUrl]" />
+        <setting key="CachedCDNTimeout" value="1000" />
+        <setting key="SourceStorageAccount" value="" />
+        <setting key="SourceBlobContainer" value="" />
+        <setting key="StreamCachedImage" value="false" />
       </settings>
     </cache>
   </caches>
 </caching>
-

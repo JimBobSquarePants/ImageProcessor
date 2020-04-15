@@ -4,7 +4,7 @@
       <settings>
         <setting key="AwsAccessKey" value="" />
         <setting key="AwsSecretKey" value="" />
-        <setting key="AwsBucketName" value="[BucketName]"/>
+        <setting key="AwsBucketName" value="[BucketName]" />
         <setting key="AwsCacheKeyPrefix" value="cache" />
         <setting key="RegionEndpoint" value="[RegionEndPoint]" />
         <setting key="SourceRegionEndpoint" value="" />
@@ -16,4 +16,3 @@
     </cache>
   </caches>
 </caching>
-
