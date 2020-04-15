@@ -8,7 +8,7 @@ $nugetOutput = Join-Path $binPath "NuGets";
 # Projects (NuGet dependencies are handled in the nuspec files themselves)
 $imageprocessor = @{
     name    = "ImageProcessor"
-    version = "2.8.0"
+    version = "2.9.0"
     folder  = Join-Path $buildPath "src\ImageProcessor"
     output  = Join-Path $binPath "ImageProcessor\lib\net452"
     csproj  = "ImageProcessor.csproj"
@@ -17,7 +17,7 @@ $imageprocessor = @{
 
 $imageProcessorPluginsCair = @{
     name    = "ImageProcessor.Plugins.Cair"
-    version = "1.3.0"
+    version = "1.3.1"
     folder  = Join-Path $buildPath "src\ImageProcessor.Plugins.Cair"
     output  = Join-Path $binPath "ImageProcessor.Plugins.Cair\lib\net452"
     csproj  = "ImageProcessor.Plugins.Cair.csproj"
@@ -35,7 +35,7 @@ $imageProcessorPluginsWebP = @{
 
 $imageprocessorWeb = @{
     name    = "ImageProcessor.Web"
-    version = "4.11.0"
+    version = "4.12.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web"
     output  = Join-Path $binPath "ImageProcessor.Web\lib\net452"
     csproj  = "ImageProcessor.Web.csproj"
@@ -49,7 +49,7 @@ $imageprocessorWebConfig = @{
 
 $imageProcessorWebPluginsAzureBlobCache = @{
     name    = "ImageProcessor.Web.Plugins.AzureBlobCache"
-    version = "1.6.1"
+    version = "1.7.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.AzureBlobCache"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.AzureBlobCache\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.AzureBlobCache.csproj"
@@ -58,7 +58,7 @@ $imageProcessorWebPluginsAzureBlobCache = @{
 
 $imageProcessorWebPluginsAmazonS3Cache = @{
     name    = "ImageProcessor.Web.Plugins.AmazonS3Cache"
-    version = "1.1.1"
+    version = "1.7.0"
     folder  = Join-Path $buildPath "src\ImageProcessor.Web.Plugins.AmazonS3Cache"
     output  = Join-Path $binPath "ImageProcessor.Web.Plugins.AmazonS3Cache\lib\net452"
     csproj  = "ImageProcessor.Web.Plugins.AmazonS3Cache.csproj"
