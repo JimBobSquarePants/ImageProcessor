@@ -22,7 +22,7 @@
     <language>en-GB</language>
     <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff ASP Cache EXIF</tags>
     <dependencies>
-      <group targetFramework=".NETFramework4.5">
+      <group targetFramework=".NETFramework4.5.2">
         <dependency id="ImageProcessor.Web" version="4.11.0" />
       </group>
     </dependencies>
