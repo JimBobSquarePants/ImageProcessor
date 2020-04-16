@@ -75,7 +75,7 @@ namespace ImageProcessor
         /// Whether to preserve exif metadata. Defaults to false.
         /// </param>
         public ImageFactory(bool preserveExifData = false)
-            : this(preserveExifData, true)
+            : this(preserveExifData, false)
         {
         }
 
@@ -119,7 +119,7 @@ namespace ImageProcessor
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="ImageFactory">ImageFactory</see> class.
+        /// Finalizes an instance of the <see cref="ImageFactory"/> class.
         /// </summary>
         /// <remarks>
         /// Use C# destructor syntax for finalization code.

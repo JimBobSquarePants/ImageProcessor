@@ -151,6 +151,7 @@
     <Compile Include="Common\Exceptions\QuantizationException.cs" />
     <Compile Include="Imaging\Quantizers\WuQuantizer\WuQuantizer.cs" />
     <Compile Include="Imaging\Quantizers\WuQuantizer\WuQuantizerBase.cs" />
+    <Compile Include="Imaging\ResizeHelper.cs" />
     <Compile Include="Imaging\ResizeLayer.cs" />
     <Compile Include="Imaging\Filters\Photo\BlackWhiteMatrixFilter.cs" />
     <Compile Include="Imaging\Filters\Photo\ColorMatrixes.cs" />

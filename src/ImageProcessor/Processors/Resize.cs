@@ -77,7 +77,7 @@ namespace ImageProcessor.Processors
 
                 // Augment the layer with the extra information.
                 resizeLayer.RestrictedSizes = this.RestrictedSizes;
-                var maxSize = new Size();
+                Size maxSize = default;
                 int.TryParse(this.Settings["MaxWidth"], NumberStyles.Any, CultureInfo.InvariantCulture, out int maxWidth);
                 int.TryParse(this.Settings["MaxHeight"], NumberStyles.Any, CultureInfo.InvariantCulture, out int maxHeight);
 

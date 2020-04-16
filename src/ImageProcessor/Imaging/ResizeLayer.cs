@@ -22,34 +22,16 @@ namespace ImageProcessor.Imaging
     public class ResizeLayer : IEquatable<ResizeLayer>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResizeLayer"/> class.
+        /// Initializes a new instance of the <see cref="ResizeLayer" /> class.
         /// </summary>
-        /// <param name="size">
-        /// The <see cref="T:System.Drawing.Size"/> containing the width and height to set the image to.
-        /// </param>
-        /// <param name="resizeMode">
-        /// The resize mode to apply to resized image. (Default ResizeMode.Pad)
-        /// </param>
-        /// <param name="anchorPosition">
-        /// The <see cref="AnchorPosition"/> to apply to resized image. (Default AnchorPosition.Center)
-        /// </param>
-        /// <param name="upscale">
-        /// Whether to allow up-scaling of images. (Default true)
-        /// </param>
-        /// <param name="centerCoordinates">
-        /// The center coordinates (Default null)
-        /// </param>
-        /// <param name="maxSize">
-        /// The maximum size to resize an image to. 
-        /// Used to restrict resizing based on calculated resizing
-        /// </param>
-        /// <param name="restrictedSizes">
-        /// The range of sizes to restrict resizing an image to. 
-        /// Used to restrict resizing based on calculated resizing
-        /// </param>
-        /// <param name="anchorPoint">
-        /// The anchor point (Default null)
-        /// </param>
+        /// <param name="size">The <see cref="T:System.Drawing.Size" /> containing the width and height to resize the image to.</param>
+        /// <param name="resizeMode">The resize mode to apply to the resized image.</param>
+        /// <param name="anchorPosition">The anchor position to apply to the resized image.</param>
+        /// <param name="upscale">Whether to allow up-scaling of images.</param>
+        /// <param name="centerCoordinates">The center coordinates (Y,X).</param>
+        /// <param name="maxSize">The maximum size to resize an image to. Used to restrict resizing based on calculated resizing.</param>
+        /// <param name="restrictedSizes">The range of sizes to restrict resizing an image to. Used to restrict resizing based on calculated resizing.</param>
+        /// <param name="anchorPoint">The anchor point.</param>
         public ResizeLayer(
             Size size,
             ResizeMode resizeMode = ResizeMode.Pad,
@@ -64,51 +46,104 @@ namespace ImageProcessor.Imaging
             this.Upscale = upscale;
             this.ResizeMode = resizeMode;
             this.AnchorPosition = anchorPosition;
-            this.CenterCoordinates = centerCoordinates ?? new float[] { };
+            if (centerCoordinates != null && centerCoordinates.Length == 2)
+            {
+                this.Center = new PointF(centerCoordinates[1], centerCoordinates[0]);
+            }
             this.MaxSize = maxSize;
-            this.RestrictedSizes = restrictedSizes ?? new List<Size>();
+            this.RestrictedSizes = restrictedSizes;
             this.AnchorPoint = anchorPoint;
         }
 
         /// <summary>
         /// Gets or sets the size.
         /// </summary>
+        /// <value>
+        /// The size.
+        /// </value>
         public Size Size { get; set; }
 
         /// <summary>
-        /// Gets or sets the max size.
+        /// Gets or sets the maximum size.
         /// </summary>
+        /// <value>
+        /// The maximum size.
+        /// </value>
         public Size? MaxSize { get; set; }
 
         /// <summary>
-        /// Gets or sets the restricted range of sizes. to restrict resizing methods to.
+        /// Gets or sets the restricted range of sizes to restrict resizing methods to.
         /// </summary>
+        /// <value>
+        /// The restricted sizes.
+        /// </value>
         public List<Size> RestrictedSizes { get; set; }
 
         /// <summary>
         /// Gets or sets the resize mode.
         /// </summary>
+        /// <value>
+        /// The resize mode.
+        /// </value>
         public ResizeMode ResizeMode { get; set; }
 
         /// <summary>
         /// Gets or sets the anchor position.
         /// </summary>
+        /// <value>
+        /// The anchor position.
+        /// </value>
         public AnchorPosition AnchorPosition { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to allow up-scaling of images.
-        /// For <see cref="T:ResizeMode.BoxPad"/> this is always true.
+        /// For <see cref="T:ResizeMode.BoxPad" /> this is always true.
         /// </summary>
+        /// <value>
+        ///   <c>true</c> if up-scaling is allowed; otherwise, <c>false</c>.
+        /// </value>
         public bool Upscale { get; set; }
 
         /// <summary>
-        /// Gets or sets the center coordinates.
+        /// Gets or sets the center coordinates (Y,X).
         /// </summary>
-        public float[] CenterCoordinates { get; set; }
+        /// <value>
+        /// The center coordinates (Y,X).
+        /// </value>
+        [Obsolete("Use the Center property instead.")]
+        public float[] CenterCoordinates
+        {
+            get
+            {
+                return this.Center is PointF center ? new float[] { center.Y, center.X } : null;
+            }
+            set
+            {
+                if (value != null && value.Length == 2)
+                {
+                    this.Center = new PointF(value[1], value[0]);
+                }
+                else
+                {
+                    this.Center = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the center coordinates as <see cref="Nullable{PointF}" />.
+        /// </summary>
+        /// <value>
+        /// The center coordinates as <see cref="Nullable{PointF}" />.
+        /// </value>
+        public PointF? Center { get; set; }
 
         /// <summary>
         /// Gets or sets the anchor point.
         /// </summary>
+        /// <value>
+        /// The anchor point.
+        /// </value>
         public Point? AnchorPoint { get; set; }
 
         /// <summary>
@@ -134,7 +169,7 @@ namespace ImageProcessor.Imaging
             && this.ResizeMode == other.ResizeMode
             && this.AnchorPosition == other.AnchorPosition
             && this.Upscale == other.Upscale
-            && (this.CenterCoordinates == null || other.CenterCoordinates == null ? this.CenterCoordinates == other.CenterCoordinates : this.CenterCoordinates.SequenceEqual(other.CenterCoordinates))
+            && this.Center == other.Center
             && this.AnchorPoint == other.AnchorPoint;
 
         /// <summary>
@@ -143,6 +178,6 @@ namespace ImageProcessor.Imaging
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode() => (this.Size, this.MaxSize, this.ResizeMode, this.AnchorPosition, this.Upscale, this.AnchorPoint).GetHashCode();
+        public override int GetHashCode() => (this.Size, this.MaxSize, this.ResizeMode, this.AnchorPosition, this.Upscale, this.Center, this.AnchorPoint).GetHashCode();
     }
 }

@@ -15,9 +15,9 @@ namespace ImageProcessor.Web.Helpers
     using System.Globalization;
 
     /// <summary>
-    /// The point converter.
+    /// The PointF converter.
     /// </summary>
-    public class PointConverter : GenericArrayTypeConverter<int>
+    public class PointFConverter : GenericArrayTypeConverter<float>
     {
         /// <summary>
         /// Converts the given object to the type of this converter, using the specified context and culture 
@@ -36,7 +36,7 @@ namespace ImageProcessor.Web.Helpers
         {
             object result = base.ConvertFrom(culture, value, propertyType);
 
-            return result is int[] list && list.Length == 2 ? new Point(list[0], list[1]) : result;
+            return result is float[] list && list.Length == 2 ? new PointF(list[0], list[1]) : result;
         }
     }
 }
