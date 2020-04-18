@@ -19,7 +19,7 @@ namespace ImageProcessor
         /// The percentage by which to alter the images opacity. Range 0..100.
         /// </param>
         /// <returns>The <see cref="ImageFactory"/>.</returns>
-        public ImageFactory Alpha(int percentage)
+        public ImageFactory Alpha(float percentage)
         {
             this.CheckLoaded();
 
@@ -66,7 +66,7 @@ namespace ImageProcessor
         /// The percentage by which to alter the images brightness. Range -100..100.
         /// </param>
         /// <returns>The <see cref="ImageFactory"/>.</returns>
-        public ImageFactory Brightness(int percentage)
+        public ImageFactory Brightness(float percentage)
         {
             this.CheckLoaded();
 
@@ -83,7 +83,7 @@ namespace ImageProcessor
         /// The percentage by which to alter the images contrast. Range -100..100.
         /// </param>
         /// <returns>The <see cref="ImageFactory"/>.</returns>
-        public ImageFactory Contrast(int percentage)
+        public ImageFactory Contrast(float percentage)
         {
             this.CheckLoaded();
 
@@ -265,7 +265,7 @@ namespace ImageProcessor
         /// The percentage by which to alter the images saturation. Range -100..100.
         /// </param>
         /// <returns>The <see cref="ImageFactory"/>.</returns>
-        public ImageFactory Saturation(int percentage)
+        public ImageFactory Saturation(float percentage)
         {
             this.CheckLoaded();
 
