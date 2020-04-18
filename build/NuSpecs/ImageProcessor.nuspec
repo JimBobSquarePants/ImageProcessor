@@ -23,6 +23,11 @@
     <copyright>James Jackson-South</copyright>
     <language>en-GB</language>
     <tags>Image Resize Crop Rotate Quality Watermark Gif Jpg Jpeg Bitmap Png Tiff Fluent  Animated EXIF</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.2">
+        <dependency id="System.ValueTuple" version="4.5.0" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
     <file src="..\_BuildOutput\ImageProcessor\lib\net452\ImageProcessor.dll" target="lib\net452" />
