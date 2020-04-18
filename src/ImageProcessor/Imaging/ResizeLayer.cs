@@ -10,6 +10,7 @@
 
 namespace ImageProcessor.Imaging
 {
+    using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
@@ -17,37 +18,20 @@ namespace ImageProcessor.Imaging
     /// <summary>
     /// Encapsulates the properties required to resize an image.
     /// </summary>
-    public class ResizeLayer
+    /// <seealso cref="T:System.IEquatable{ImageProcessor.Imaging.ResizeLayer}" />
+    public class ResizeLayer : IEquatable<ResizeLayer>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResizeLayer"/> class.
+        /// Initializes a new instance of the <see cref="ResizeLayer" /> class.
         /// </summary>
-        /// <param name="size">
-        /// The <see cref="T:System.Drawing.Size"/> containing the width and height to set the image to.
-        /// </param>
-        /// <param name="resizeMode">
-        /// The resize mode to apply to resized image. (Default ResizeMode.Pad)
-        /// </param>
-        /// <param name="anchorPosition">
-        /// The <see cref="AnchorPosition"/> to apply to resized image. (Default AnchorPosition.Center)
-        /// </param>
-        /// <param name="upscale">
-        /// Whether to allow up-scaling of images. (Default true)
-        /// </param>
-        /// <param name="centerCoordinates">
-        /// The center coordinates (Default null)
-        /// </param>
-        /// <param name="maxSize">
-        /// The maximum size to resize an image to. 
-        /// Used to restrict resizing based on calculated resizing
-        /// </param>
-        /// <param name="restrictedSizes">
-        /// The range of sizes to restrict resizing an image to. 
-        /// Used to restrict resizing based on calculated resizing
-        /// </param>
-        /// <param name="anchorPoint">
-        /// The anchor point (Default null)
-        /// </param>
+        /// <param name="size">The <see cref="T:System.Drawing.Size" /> containing the width and height to resize the image to.</param>
+        /// <param name="resizeMode">The resize mode to apply to the resized image.</param>
+        /// <param name="anchorPosition">The anchor position to apply to the resized image.</param>
+        /// <param name="upscale">Whether to allow up-scaling of images.</param>
+        /// <param name="centerCoordinates">The center coordinates (Y,X).</param>
+        /// <param name="maxSize">The maximum size to resize an image to. Used to restrict resizing based on calculated resizing.</param>
+        /// <param name="restrictedSizes">The range of sizes to restrict resizing an image to. Used to restrict resizing based on calculated resizing.</param>
+        /// <param name="anchorPoint">The anchor point.</param>
         public ResizeLayer(
             Size size,
             ResizeMode resizeMode = ResizeMode.Pad,
@@ -62,107 +46,138 @@ namespace ImageProcessor.Imaging
             this.Upscale = upscale;
             this.ResizeMode = resizeMode;
             this.AnchorPosition = anchorPosition;
-            this.CenterCoordinates = centerCoordinates ?? new float[] { };
+            if (centerCoordinates != null && centerCoordinates.Length == 2)
+            {
+                this.Center = new PointF(centerCoordinates[1], centerCoordinates[0]);
+            }
             this.MaxSize = maxSize;
-            this.RestrictedSizes = restrictedSizes ?? new List<Size>();
+            this.RestrictedSizes = restrictedSizes;
             this.AnchorPoint = anchorPoint;
         }
 
         /// <summary>
         /// Gets or sets the size.
         /// </summary>
+        /// <value>
+        /// The size.
+        /// </value>
         public Size Size { get; set; }
 
         /// <summary>
-        /// Gets or sets the max size.
+        /// Gets or sets the maximum size.
         /// </summary>
+        /// <value>
+        /// The maximum size.
+        /// </value>
         public Size? MaxSize { get; set; }
 
         /// <summary>
-        /// Gets or sets the restricted range of sizes. to restrict resizing methods to.
+        /// Gets or sets the restricted range of sizes to restrict resizing methods to.
         /// </summary>
+        /// <value>
+        /// The restricted sizes.
+        /// </value>
         public List<Size> RestrictedSizes { get; set; }
 
         /// <summary>
         /// Gets or sets the resize mode.
         /// </summary>
+        /// <value>
+        /// The resize mode.
+        /// </value>
         public ResizeMode ResizeMode { get; set; }
 
         /// <summary>
         /// Gets or sets the anchor position.
         /// </summary>
+        /// <value>
+        /// The anchor position.
+        /// </value>
         public AnchorPosition AnchorPosition { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to allow up-scaling of images.
-        /// For <see cref="T:ResizeMode.BoxPad"/> this is always true.
+        /// For <see cref="T:ResizeMode.BoxPad" /> this is always true.
         /// </summary>
+        /// <value>
+        ///   <c>true</c> if up-scaling is allowed; otherwise, <c>false</c>.
+        /// </value>
         public bool Upscale { get; set; }
 
         /// <summary>
-        /// Gets or sets the center coordinates.
+        /// Gets or sets the center coordinates (Y,X).
         /// </summary>
-        public float[] CenterCoordinates { get; set; }
+        /// <value>
+        /// The center coordinates (Y,X).
+        /// </value>
+        [Obsolete("Use the Center property instead.")]
+        public float[] CenterCoordinates
+        {
+            get
+            {
+                return this.Center is PointF center ? new float[] { center.Y, center.X } : null;
+            }
+            set
+            {
+                if (value != null && value.Length == 2)
+                {
+                    this.Center = new PointF(value[1], value[0]);
+                }
+                else
+                {
+                    this.Center = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the center coordinates as <see cref="Nullable{PointF}" />.
+        /// </summary>
+        /// <value>
+        /// The center coordinates as <see cref="Nullable{PointF}" />.
+        /// </value>
+        public PointF? Center { get; set; }
 
         /// <summary>
         /// Gets or sets the anchor point.
         /// </summary>
+        /// <value>
+        /// The anchor point.
+        /// </value>
         public Point? AnchorPoint { get; set; }
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="ResizeLayer"/> object that is equivalent to 
-        /// this <see cref="ResizeLayer"/> object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The object to test.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// True if the given object  is an <see cref="ResizeLayer"/> object that is equivalent to 
-        /// this <see cref="ResizeLayer"/> object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is ResizeLayer resizeLayer))
-            {
-                return false;
-            }
-
-            return this.Size == resizeLayer.Size
-                && this.ResizeMode == resizeLayer.ResizeMode
-                && this.AnchorPosition == resizeLayer.AnchorPosition
-                && this.Upscale == resizeLayer.Upscale
-                && ((this.CenterCoordinates != null
-                    && resizeLayer.CenterCoordinates != null
-                    && this.CenterCoordinates.SequenceEqual(resizeLayer.CenterCoordinates))
-                    || (this.CenterCoordinates == resizeLayer.CenterCoordinates))
-                && this.MaxSize == resizeLayer.MaxSize
-                && ((this.RestrictedSizes != null
-                    && resizeLayer.RestrictedSizes != null
-                    && this.RestrictedSizes.SequenceEqual(resizeLayer.RestrictedSizes))
-                    || (this.RestrictedSizes == resizeLayer.RestrictedSizes))
-                && this.AnchorPoint == resizeLayer.AnchorPoint;
-        }
+        public override bool Equals(object obj) => obj is ResizeLayer resizeLayer && this.Equals(resizeLayer);
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(ResizeLayer other) => other != null
+            && this.Size == other.Size
+            && this.MaxSize == other.MaxSize
+            && (this.RestrictedSizes == null || other.RestrictedSizes == null ? this.RestrictedSizes == other.RestrictedSizes : this.RestrictedSizes.SequenceEqual(other.RestrictedSizes))
+            && this.ResizeMode == other.ResizeMode
+            && this.AnchorPosition == other.AnchorPosition
+            && this.Upscale == other.Upscale
+            && this.Center == other.Center
+            && this.AnchorPoint == other.AnchorPoint;
+
+        /// <summary>
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = this.Size.GetHashCode();
-                hashCode = (hashCode * 397) ^ this.MaxSize.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.RestrictedSizes?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ (int)this.ResizeMode;
-                hashCode = (hashCode * 397) ^ (int)this.AnchorPosition;
-                hashCode = (hashCode * 397) ^ this.Upscale.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.CenterCoordinates?.GetHashCode() ?? 0);
-                return (hashCode * 397) ^ this.AnchorPoint.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => (this.Size, this.MaxSize, this.ResizeMode, this.AnchorPosition, this.Upscale, this.Center, this.AnchorPoint).GetHashCode();
     }
 }

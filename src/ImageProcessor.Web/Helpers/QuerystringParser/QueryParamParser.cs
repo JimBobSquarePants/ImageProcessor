@@ -22,13 +22,13 @@ namespace ImageProcessor.Web.Helpers
     public sealed class QueryParamParser
     {
         /// <summary>
-        /// A new instance of the <see cref="QueryParamParser"/> class.
+        /// A new instance of the <see cref="QueryParamParser" /> class.
         /// with lazy initialization.
         /// </summary>
         private static readonly Lazy<QueryParamParser> Lazy = new Lazy<QueryParamParser>(() => new QueryParamParser());
 
         /// <summary>
-        /// Prevents a default instance of the <see cref="QueryParamParser"/> class from being created.
+        /// Prevents a default instance of the <see cref="QueryParamParser" /> class from being created.
         /// </summary>
         private QueryParamParser()
         {
@@ -42,25 +42,22 @@ namespace ImageProcessor.Web.Helpers
         }
 
         /// <summary>
-        /// Gets the current <see cref="QueryParamParser"/> instance.
+        /// Gets the current <see cref="QueryParamParser" /> instance.
         /// </summary>
+        /// <value>
+        /// The <see cref="QueryParamParser" /> instance.
+        /// </value>
         public static QueryParamParser Instance => Lazy.Value;
 
         /// <summary>
         /// Parses the given string value converting it to the given type.
         /// </summary>
-        /// <param name="value">
-        /// The <see cref="string"/> value to parse.
-        /// </param>
-        /// <param name="culture">
-        /// The <see cref="CultureInfo"/> to use as the current culture.
-        /// <remarks>If not set will parse using <see cref="CultureInfo.InvariantCulture"/></remarks>
-        /// </param>
-        /// <typeparam name="T">
-        /// The <see cref="Type"/> to convert the string to.
-        /// </typeparam>
+        /// <typeparam name="T">The <see cref="Type" /> to convert the string to.</typeparam>
+        /// <param name="value">The <see cref="string" /> value to parse.</param>
+        /// <param name="culture">The <see cref="CultureInfo" /> to use as the current culture.
+        /// <remarks>If not set will parse using <see cref="CultureInfo.InvariantCulture" /></remarks></param>
         /// <returns>
-        /// The <typeparamref name="T"/>.
+        /// The <typeparamref name="T" />.
         /// </returns>
         public T ParseValue<T>(string value, CultureInfo culture = null)
         {
@@ -72,6 +69,12 @@ namespace ImageProcessor.Web.Helpers
             Type type = typeof(T);
 
             IQueryParamConverter converter = QueryTypeDescriptor.GetConverter(type);
+            if (converter == null && Nullable.GetUnderlyingType(type) is Type underlyingType)
+            {
+                type = underlyingType;
+                converter = QueryTypeDescriptor.GetConverter(type);
+            }
+
             try
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
@@ -87,12 +90,8 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Adds a type converter to the parser.
         /// </summary>
-        /// <param name="type">
-        /// The <see cref="Type"/> to add a converter for.
-        /// </param>
-        /// <param name="converterType">
-        /// The type of <see cref="IQueryParamConverter"/> to add.
-        /// </param>
+        /// <param name="type">The <see cref="Type" /> to add a converter for.</param>
+        /// <param name="converterType">The type of <see cref="IQueryParamConverter" /> to add.</param>
         public void AddTypeConverter(Type type, Type converterType) => QueryTypeDescriptor.AddConverter(type, converterType);
 
         /// <summary>
@@ -108,15 +107,19 @@ namespace ImageProcessor.Web.Helpers
         /// <summary>
         /// Adds point converters.
         /// </summary>
-        private void AddPointConverters() => this.AddTypeConverter(typeof(Point), typeof(PointConverter));
+        private void AddPointConverters()
+        {
+            this.AddTypeConverter(typeof(Point), typeof(PointConverter));
+            this.AddTypeConverter(typeof(PointF), typeof(PointFConverter));
+        }
 
         /// <summary>
-        /// Adds point converters.
+        /// Adds size converters.
         /// </summary>
         private void AddSizeConverters() => this.AddTypeConverter(typeof(Size), typeof(SizeConverter));
 
         /// <summary>
-        /// Add the generic converters
+        /// Add the generic converters.
         /// </summary>
         private void AddGenericConverters()
         {

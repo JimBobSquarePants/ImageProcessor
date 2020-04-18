@@ -28,15 +28,15 @@ namespace ImageProcessor.Imaging.Helpers
         {
             // Highest quality resampling algorithm.
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-
-            // Ensure pixel offset is set.
-            graphics.PixelOffsetMode = PixelOffsetMode.Half;
+            graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            graphics.CompositingQuality = CompositingQuality.HighQuality;
 
             if (smoothing)
             {
                 // We want smooth edges when drawing.
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
             }
+
             if (blending || smoothing)
             {
                 // Best combination for blending pixels.

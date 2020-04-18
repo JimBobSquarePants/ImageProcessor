@@ -2,7 +2,7 @@
 <configuration>
   <system.webServer>
     <staticContent>
-      <remove fileExtension=".webp"/>
+      <remove fileExtension=".webp" />
       <mimeMap fileExtension=".webp" mimeType="image/webp" />
     </staticContent>
   </system.webServer>

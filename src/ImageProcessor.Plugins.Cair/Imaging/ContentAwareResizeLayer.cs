@@ -10,18 +10,14 @@
 
 namespace ImageProcessor.Plugins.Cair.Imaging
 {
+    using System;
     using System.Drawing;
 
     /// <summary>
     /// Encapsulates the properties required to resize an image using content aware resizing.
     /// </summary>
-    public class ContentAwareResizeLayer
+    public class ContentAwareResizeLayer : IEquatable<ContentAwareResizeLayer>
     {
-        /// <summary>
-        /// The expected output type.
-        /// </summary>
-        private OutputType outputType = OutputType.Cair;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ContentAwareResizeLayer"/> class.
         /// </summary>
@@ -32,6 +28,11 @@ namespace ImageProcessor.Plugins.Cair.Imaging
         {
             this.Size = size;
         }
+
+        /// <summary>
+        /// Gets or sets the size.
+        /// </summary>
+        public Size Size { get; set; }
 
         /// <summary>
         /// Gets or sets the content aware resize convolution type (Default ContentAwareResizeConvolutionType.Prewitt).
@@ -46,23 +47,7 @@ namespace ImageProcessor.Plugins.Cair.Imaging
         /// <summary>
         /// Gets or sets the expected output type.
         /// </summary>
-        public OutputType OutputType
-        {
-            get
-            {
-                return this.outputType;
-            }
-
-            set
-            {
-                this.outputType = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the size.
-        /// </summary>
-        public Size Size { get; set; }
+        public OutputType OutputType { get; set; } = OutputType.Cair;
 
         /// <summary>
         /// Gets or sets the the file path to a bitmap file that provides weight indicators specified using
@@ -88,54 +73,36 @@ namespace ImageProcessor.Plugins.Cair.Imaging
         public int Timeout { get; set; } = 60000;
 
         /// <summary>
-        /// Returns a value that indicates whether the specified object is an 
-        /// <see cref="ContentAwareResizeLayer"/> object that is equivalent to 
-        /// this <see cref="ContentAwareResizeLayer"/> object.
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">
-        /// The object to test.
-        /// </param>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
         /// <returns>
-        /// True if the given object  is an <see cref="ContentAwareResizeLayer"/> object that is equivalent to 
-        /// this <see cref="ContentAwareResizeLayer"/> object; otherwise, false.
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
-            ContentAwareResizeLayer resizeLayer = obj as ContentAwareResizeLayer;
-
-            if (resizeLayer == null)
-            {
-                return false;
-            }
-
-            return this.Size == resizeLayer.Size
-                && this.ConvolutionType == resizeLayer.ConvolutionType
-                && this.EnergyFunction == resizeLayer.EnergyFunction
-                && this.OutputType == resizeLayer.OutputType
-                && this.Parallelize == resizeLayer.Parallelize
-                && this.Timeout == resizeLayer.Timeout
-                && this.WeightPath == resizeLayer.WeightPath;
-        }
+        public override bool Equals(object obj) => obj is ContentAwareResizeLayer contentAwareResizeLayer && this.Equals(contentAwareResizeLayer);
 
         /// <summary>
-        /// Returns the hash code for this instance.
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(ContentAwareResizeLayer other) => other != null
+            && this.Size == other.Size
+            && this.ConvolutionType == other.ConvolutionType
+            && this.EnergyFunction == other.EnergyFunction
+            && this.OutputType == other.OutputType
+            && this.WeightPath == other.WeightPath
+            && this.Parallelize == other.Parallelize
+            && this.Timeout == other.Timeout;
+
+        /// <summary>
+        /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A 32-bit signed integer that is the hash code for this instance.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hashCode = (int)this.ConvolutionType;
-                hashCode = (hashCode * 397) ^ (int)this.EnergyFunction;
-                hashCode = (hashCode * 397) ^ this.Parallelize.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int)this.OutputType;
-                hashCode = (hashCode * 397) ^ this.Timeout;
-                hashCode = (hashCode * 397) ^ this.Size.GetHashCode();
-                hashCode = (hashCode * 397) ^ (this.WeightPath != null ? this.WeightPath.GetHashCode() : 0);
-                return hashCode;
-            }
-        }
+        public override int GetHashCode() => (this.Size, this.ConvolutionType, this.EnergyFunction, this.OutputType, this.WeightPath, this.Parallelize, this.Timeout).GetHashCode();
     }
 }

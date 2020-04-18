@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AssemblyInfo.cs" company="James Jackson-South">
 //   Copyright (c) James Jackson-South.
 //   Licensed under the Apache License, Version 2.0.
@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ImageProcessor.Web.Plugins.AmazonS3Cache")]
-[assembly: AssemblyCopyright("Copyright © James Jackson-South")]
+[assembly: AssemblyCopyright("Copyright � James Jackson-South")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -39,6 +39,6 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+// [assembly: AssemblyVersion("1.7.0.00000")]
+[assembly: AssemblyVersion("1.7.0.00000")]
+[assembly: AssemblyFileVersion("1.7.0.00000")]

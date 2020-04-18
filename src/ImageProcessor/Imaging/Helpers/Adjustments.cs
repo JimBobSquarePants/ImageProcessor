@@ -13,6 +13,7 @@ namespace ImageProcessor.Imaging.Helpers
     using System;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
 
     using ImageProcessor.Common.Extensions;
@@ -329,7 +330,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                ramp[x] = (255f * SRGBToLinear(x / 255f)).ToByte();
+                ramp[x] = ((255 * SRGBToLinear(x / 255D)) + .5).ToByte();
             }
 
             return ramp;
@@ -347,7 +348,7 @@ namespace ImageProcessor.Imaging.Helpers
             byte[] ramp = new byte[256];
             for (int x = 0; x < 256; ++x)
             {
-                ramp[x] = (255f * LinearToSRGB(x / 255f)).ToByte();
+                ramp[x] = ((255 * LinearToSRGB(x / 255D)) + .5).ToByte();
             }
 
             return ramp;
@@ -362,16 +363,15 @@ namespace ImageProcessor.Imaging.Helpers
         /// <returns>
         /// The <see cref="float"/>.
         /// </returns>
-        private static float SRGBToLinear(float signal)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double SRGBToLinear(double signal)
         {
-            const float a = 0.055f;
-
             if (signal <= 0.04045)
             {
-                return signal / 12.92f;
+                return signal / 12.92;
             }
 
-            return (float)Math.Pow((signal + a) / (1 + a), 2.4);
+            return Math.Pow((signal + 0.055) / 1.055, 2.4);
         }
 
         /// <summary>
@@ -381,18 +381,17 @@ namespace ImageProcessor.Imaging.Helpers
         /// </summary>
         /// <param name="signal">The signal value to convert.</param>
         /// <returns>
-        /// The <see cref="float"/>.
+        /// The <see cref="double"/>.
         /// </returns>
-        private static float LinearToSRGB(float signal)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double LinearToSRGB(double signal)
         {
-            const float a = 0.055f;
-
-            if (signal <= 0.0031308)
+            if (signal <= (0.04045 / 12.92))
             {
-                return signal * 12.92f;
+                return signal * 12.92;
             }
 
-            return ((float)((1 + a) * Math.Pow(signal, 0.4166667F))) - a;
+            return (1.055 * Math.Pow(signal, 1.0 / 2.4)) - 0.055;
         }
     }
 }
