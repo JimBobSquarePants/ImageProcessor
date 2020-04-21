@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net472;net452</TargetFrameworks>
     <LangVersion>7.3</LangVersion>
 
     <IsPackable>false</IsPackable>
