@@ -255,15 +255,19 @@ namespace ImageProcessor.Web.Caching
                                     ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached file: {fileInfo.FullName}, {ex.Message}");
                                 }
                             }
+
+                            // If the directory is empty, delete it to remove the FCN
+                            if (Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly).Length == 0
+                                && Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly).Length == 0)
+                            {
+                                Directory.Delete(directory);
+                            }
                         }
                         catch (Exception ex)
                         {
                             // Log it but skip to the next directory
                             ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory}, {ex.Message}");
                         }
-
-                        // If the directory is empty of files delete it to remove the FCN
-                        this.RecursivelyDeleteEmptyDirectories(directory, validatedAbsoluteCachePath, token);
                     }
                 }
 
@@ -555,42 +559,6 @@ namespace ImageProcessor.Web.Caching
         }
 
         /// <summary>
-        /// Recursively delete the directories in the folder.
-        /// </summary>
-        /// <param name="directory">The current directory.</param>
-        /// <param name="root">The root path.</param>
-        /// <param name="token">The cancellation token.</param>
-        private void RecursivelyDeleteEmptyDirectories(string directory, string root, CancellationToken token)
-        {
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
-
-            try
-            {
-                if (directory == root)
-                {
-                    return;
-                }
-
-                // If the directory is empty of files delete it to remove the FCN.
-                if (Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly).Length == 0
-                    && Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly).Length == 0)
-                {
-                    Directory.Delete(directory);
-                }
-
-                this.RecursivelyDeleteEmptyDirectories(Directory.GetParent(directory).FullName, root, token);
-            }
-            catch (Exception ex)
-            {
-                // Log it but skip to the next directory.
-                ImageProcessorBootstrapper.Instance.Logger.Log<DiskCache>($"Unable to clean cached directory: {directory}, {ex.Message}");
-            }
-        }
-
-        /// <summary>
         /// Sets the ETag Header
         /// </summary>
         /// <param name="context"></param>
@@ -621,6 +589,7 @@ namespace ImageProcessor.Web.Caching
 
                 return "\"" + hexFileTime + "\"";
             }
+
             return null;
         }
     }
