@@ -257,7 +257,7 @@ namespace ImageProcessor.Web.Caching
                             }
 
                             // If the directory is empty, delete it to remove the FCN
-                            if (Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly).Length == 0
+                            if (count == 0
                                 && Directory.GetDirectories(directory, "*", SearchOption.TopDirectoryOnly).Length == 0)
                             {
                                 Directory.Delete(directory);
