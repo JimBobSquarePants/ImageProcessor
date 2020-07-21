@@ -16,6 +16,7 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Web;
@@ -357,18 +358,25 @@ namespace ImageProcessor.Web.Plugins.AzureBlobCache
                         catch (StorageException ex)
                         {
                             // A 304 is not a true error, we still need to feed back.
-                            var webException = ex.InnerException as WebException;
-                            if (!(webException is null))
+                            if (ex.RequestInformation?.HttpStatusCode == (int)HttpStatusCode.NotModified)
                             {
-                                if (webException.Response != null && (((HttpWebResponse)webException.Response).StatusCode == HttpStatusCode.NotModified))
-                                {
-                                    is304 = true;
-                                }
-                                else
-                                {
-                                    ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>("Unable to stream cached path: " + this.cachedRewritePath);
-                                    return;
-                                }
+                                is304 = true;
+                            }
+                            else if (ex.InnerException is WebException webException
+                                && webException.Response is HttpWebResponse httpWebResponse
+                                && httpWebResponse.StatusCode == HttpStatusCode.NotModified)
+                            {
+                                is304 = true;
+                            }
+                            else
+                            {
+                                var sb = new StringBuilder();
+                                sb.AppendFormat("Unable to stream cached path: {0}", this.cachedRewritePath);
+                                sb.AppendLine();
+                                sb.AppendFormat("Exception: {0}", ex.ToString());
+
+                                ImageProcessorBootstrapper.Instance.Logger.Log<AzureBlobCache>(sb.ToString());
+                                return;
                             }
                         }
 
