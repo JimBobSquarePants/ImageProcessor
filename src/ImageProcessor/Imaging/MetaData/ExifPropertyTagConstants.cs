@@ -83,5 +83,10 @@ namespace ImageProcessor.Imaging.MetaData
         /// Gets all known property items
         /// </summary>
         public static readonly ExifPropertyTag[] All = (ExifPropertyTag[])Enum.GetValues(typeof(ExifPropertyTag));
+
+        /// <summary>
+        /// Gets the ids of all valid EXIF property items.
+        /// </summary>
+        public static readonly int[] Ids = Enum.GetValues(typeof(ExifPropertyTag)).Cast<int>().ToArray();
     }
 }
