@@ -11,10 +11,12 @@
 namespace ImageProcessor.Imaging.Formats
 {
     using System;
+    using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
     using System.Text;
+    using ImageProcessor.Imaging.MetaData;
 
     /// <summary>
     /// Provides the necessary information to support jpeg images.
@@ -66,6 +68,8 @@ namespace ImageProcessor.Imaging.Formats
         /// </returns>
         public override Image Save(Stream stream, Image image, long bitDepth)
         {
+            SantizeMetadata(image);
+
             // Jpegs can be saved with different settings to include a quality setting for the JPEG compression.
             // This improves output compression and quality.
             using (EncoderParameters encoderParameters = FormatUtilities.GetEncodingParameters(this.Quality))
@@ -97,6 +101,8 @@ namespace ImageProcessor.Imaging.Formats
         /// </returns>
         public override Image Save(string path, Image image, long bitDepth)
         {
+            SantizeMetadata(image);
+
             // Jpegs can be saved with different settings to include a quality setting for the JPEG compression.
             // This improves output compression and quality.
             using (EncoderParameters encoderParameters = FormatUtilities.GetEncodingParameters(this.Quality))
@@ -111,6 +117,19 @@ namespace ImageProcessor.Imaging.Formats
             }
 
             return image;
+        }
+
+        // System.Drawing's jpeg encoder throws when proprietary tags are included in the metadata
+        // https://github.com/JimBobSquarePants/ImageProcessor/issues/811
+        private static void SantizeMetadata(Image image)
+        {
+            foreach (int id in image.PropertyIdList)
+            {
+                if (Array.IndexOf(ExifPropertyTagConstants.Ids, id) == -1)
+                {
+                    image.RemovePropertyItem(id);
+                }
+            }
         }
     }
 }
