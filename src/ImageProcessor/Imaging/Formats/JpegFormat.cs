@@ -119,7 +119,7 @@ namespace ImageProcessor.Imaging.Formats
             return image;
         }
 
-        // System.Drawing's jpeg encoder throws when proprietory tags are included in the metadata
+        // System.Drawing's jpeg encoder throws when proprietary tags are included in the metadata
         // https://github.com/JimBobSquarePants/ImageProcessor/issues/811
         private static void SantizeMetadata(Image image)
         {
