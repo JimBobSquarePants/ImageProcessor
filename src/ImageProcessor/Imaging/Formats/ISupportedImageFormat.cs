@@ -78,6 +78,16 @@ namespace ImageProcessor.Imaging.Formats
         Image Load(Stream stream);
 
         /// <summary>
+        /// Decodes the image to process.
+        /// </summary>
+        /// <param name="stream">The <see cref="T:System.IO.Stream" /> containing the image information.</param>
+        /// <param name="imageFactory">The <see cref="T:ImageProcessor.ImageFactory" /> that loads the image.</param>
+        /// <returns>
+        /// The <see cref="T:System.Drawing.Image" />.
+        /// </returns>
+        Image Load(Stream stream, ImageFactory imageFactory);
+
+        /// <summary>
         /// Saves the current image to the specified output stream.
         /// </summary>
         /// <param name="stream">
