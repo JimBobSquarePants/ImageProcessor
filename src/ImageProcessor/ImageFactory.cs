@@ -244,7 +244,7 @@ namespace ImageProcessor
             }
 
             // Set our image as the memory stream value.
-            this.Image = format.Load(memoryStream);
+            this.Image = format.Load(memoryStream, this);
 
             // Save the bit depth
             this.CurrentBitDepth = Image.GetPixelFormatSize(this.Image.PixelFormat);
