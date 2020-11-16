@@ -230,19 +230,21 @@ namespace ImageProcessor.Web.Configuration
 
             foreach (ImageProcessingSection.PluginElement pluginConfig in pluginConfigs)
             {
-                var type = Type.GetType(pluginConfig.Type);
-
-                if (type == null)
+                try
                 {
+                    var type = Type.GetType(pluginConfig.Type, true);
+
+                    Dictionary<string, string> settings = this.GetPluginSettings(type.Name);
+
+                    // No reason for this to fail.
+                    this.AvailableWebGraphicsProcessors.TryAdd(type, settings);
+                }
+                catch (Exception ex)
+                { 
                     string message = "Couldn't load IWebGraphicsProcessor: " + pluginConfig.Type;
                     ImageProcessorBootstrapper.Instance.Logger.Log<ImageProcessorConfiguration>(message);
-                    throw new TypeLoadException(message);
+                    throw new TypeLoadException(message, ex);
                 }
-
-                Dictionary<string, string> settings = this.GetPluginSettings(type.Name);
-
-                // No reason for this to fail.
-                this.AvailableWebGraphicsProcessors.TryAdd(type, settings);
             }
         }
 
