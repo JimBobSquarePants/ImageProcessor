@@ -236,6 +236,13 @@ namespace ImageProcessor
                 throw new ImageFormatException("Input stream is not a supported format.");
             }
 
+            // Assign animation process mode before loading file
+            // Useful for file types where loading all frames would be wasteful (e.g. video, PDF)
+            if (format is IAnimatedImageFormat imageFormat)
+            {
+                imageFormat.AnimationProcessMode = this.AnimationProcessMode;
+            }
+
             // Set our image as the memory stream value.
             this.Image = format.Load(memoryStream);
 
@@ -257,11 +264,6 @@ namespace ImageProcessor
             foreach (int id in this.Image.PropertyIdList)
             {
                 this.ExifPropertyItems[id] = this.Image.GetPropertyItem(id);
-            }
-
-            if (this.CurrentImageFormat is IAnimatedImageFormat imageFormat)
-            {
-                imageFormat.AnimationProcessMode = this.AnimationProcessMode;
             }
 
             this.backupExifPropertyItems = new ConcurrentDictionary<int, PropertyItem>(this.ExifPropertyItems);
