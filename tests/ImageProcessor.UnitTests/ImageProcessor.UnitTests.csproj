@@ -85,6 +85,7 @@
     <Compile Include="Processors\FormatTests.cs" />
     <Compile Include="Processors\MetaTests.cs" />
     <Compile Include="Processors\QualityTests.cs" />
+    <Compile Include="Processors\ThresholdTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

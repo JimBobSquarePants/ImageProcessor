@@ -1367,6 +1367,24 @@ namespace ImageProcessor
         }
 
         /// <summary>
+        /// Converts the current image to black and white using the given threshold
+        /// </summary>
+        /// <param name="thresh">The threshold to use to seperate black and white values</param>
+        /// <returns>
+        /// The current instance of the <see cref="T:ImageProcessor.ImageFactory"/> class.
+        /// </returns>
+        public ImageFactory Threshold(int thresh)
+        {
+            if (this.ShouldProcess)
+            {
+                var threshold = new Threshold { DynamicParameter = thresh };
+                this.backupFormat.ApplyProcessor(threshold.ProcessImage, this);
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Adds a vignette image effect to the current image.
         /// </summary>
         /// <param name="color">
