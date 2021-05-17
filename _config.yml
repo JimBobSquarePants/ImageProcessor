@@ -1,4 +1,4 @@
-﻿# Allows the running of the site in a subdirectory on Github Pages
+# Allows the running of the site in a subdirectory on Github Pages
 # Note - if you enable this, and attempt to view your site locally you have to 
 # pass the  --baseurl parameter when serving as an empty string e.g jekyll serve --baseurl ''
 # http://jekyllrb.com/docs/github-pages/
@@ -24,11 +24,11 @@ description: "A C# library for the dynamic processing of image files with .NET. 
 # Your name, as you want it to appear underneath each post and in the footer
 author: "James South"
 
-version: "2.6.2"
-webversion: "4.9.3"
-configversion: "2.4.1"
+version: "2.9.1"
+webversion: "4.12.1"
+configversion: "2.6.0"
 
-dynamicimageroot: "http://jamessouth.me/images/imageprocessor/samples/"
+dynamicimageroot: "https://imageprocessor-docs-images.azurewebsites.net/images/imageprocessor/samples/"
 
 
 # Collections
