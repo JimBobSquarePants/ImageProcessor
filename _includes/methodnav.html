@@ -4,7 +4,7 @@
     <ul class="no-bullets">
         {% for page in sortedpages %}
         {% if page.methodof == {{include.param}} and page.layout == "method" %}
-        <li><a href="{{ relative_url }}{{ page.url }}">{{ page.title }}</a></li>
+        <li><a href="{{ baseurl }}{{ relative_url }}{{ page.url }}">{{ page.title }}</a></li>
         {% endif %}
         {% endfor %}
     </ul>
