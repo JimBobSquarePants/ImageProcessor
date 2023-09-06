@@ -4,14 +4,6 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script>
-        (function () {
-            // This is whack!
-            if (window.location.host === "jimbobsquarepants.github.io") {
-                document.location.href = "http://imageProcessor.org";
-            }
-        }());
-    </script>
     <title>{% if page.title %} {{ page.title }} :: {% endif %}{% if page.group == "imageprocessor-web" %}{{site.altname}} {% else %}{{site.name}}{% endif %}</title>
     <meta name="description" content="{% if page.subheading %} {{ page.subheading }} {% else %} {{ site.description }} {% endif %}" />
 
