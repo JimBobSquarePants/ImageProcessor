@@ -36,7 +36,7 @@ ImageProcessor has been retired. For modern platforms use [`ImageSharp`](https:/
 
 ## Documentation
 
-ImageProcessor's documentation, included in this repo in the gh-pages branch, is built with [Jekyll](http://jekyllrb.com) and publicly hosted on GitHub Pages at <http://imageprocessor.org>. The docs may also be run locally.
+ImageProcessor's documentation, included in this repo in the gh-pages branch, is built with [Jekyll](http://jekyllrb.com) and publicly hosted on GitHub Pages at For full documentation please see [https://jimbobsquarepants.github.io/ImageProcessor/](https://jimbobsquarepants.github.io/ImageProcessor/). The docs may also be run locally.
 
 ### Running documentation locally
 1. If necessary, [install Jekyll](http://jekyllrb.com/docs/installation) (requires v2.5.3x).
