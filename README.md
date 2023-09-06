@@ -20,7 +20,7 @@
 
 It's fast, extensible, easy to use, comes bundled with some great features and is fully open source.
 
-For full documentation please see [http://imageprocessor.org/](http://imageprocessor.org/)
+For full documentation please see [https://jimbobsquarepants.github.io/ImageProcessor/](https://jimbobsquarepants.github.io/ImageProcessor/)
 
 ## Roadmap
 <strike>Focus for the ImageProcessor libraries has switched to desktop only due to the [lack of support for System.Drawing on Windows Services and ASP.NET](https://docs.microsoft.com/en-us/dotnet/api/system.drawing?view=netframework-4.8#remarks). As such, the `ImageProcessor.Web`and accompanying libraries will not be further developed. For an alternative please use [`ImageSharp.Web`](https://github.com/SixLabors/ImageSharp.Web).</strike>
